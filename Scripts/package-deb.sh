@@ -141,18 +141,14 @@ require_false() {
     }
 }
 
-# The privilege-granting entitlements the app and its extensions must not
-# carry. Four of these remove or replace the data container, which silently
-# moves UserDefaults out to the shared ~/Library/Preferences; the rest either
-# weaken the sandbox or, in `platform-application`'s case, tighten it in ways
-# that then demand still more entitlements to undo. Absence is the assertion:
-# `container-required=false` *is* the switch, so checking for `false` would
-# pass the very thing it means to catch.
+# The privilege-granting entitlements an extension must never carry. Every one
+# of these either weakens the sandbox or moves the data container, and an appex
+# needs none of it: it draws a Live Activity from data ActivityKit hands it.
+# Absence is the assertion — `container-required=false` *is* the switch, so
+# checking for `false` would pass the very thing it means to catch.
 #
-# If a device test proves one of these is genuinely required (see the ladder in
-# Packaging/iGhostty.entitlements), remove it from this list in the same commit
-# that adds it to the entitlements — deliberately, and with the symptom that
-# forced it written down.
+# The app itself legitimately carries two of these; see the block below, and
+# the symptom that forced each one in Packaging/iGhostty.entitlements.
 require_unprivileged() {
     local plist="$1"
     local label="$2"
@@ -171,26 +167,34 @@ require_unprivileged() {
 }
 
 # The app reaches the daemon (the client marker the daemon authenticates
-# against, plus the mach-lookup exception for the service name) and drives the
-# GPU. Everything privileged happens in ighosttyd, so it asks for nothing else.
-#
-# The last two checks are what an ad-hoc signature has to state out loud, both
-# proven on device (iPad8,9, iOS 18.5 rootless, 2026-08-18):
-# `application-identifier` is the identity the sandbox matches against this
-# app's container — without it the kernel denies the app writes to its own
-# container, libghostty's config never lands on disk, and no terminal boots.
-# The iokit list is the render path — without it the kernel denies
-# AGXDeviceUserClient and Metal cannot create a device.
+# against, plus the mach-lookup exception for the service name) and carries
+# the three things an ad-hoc signed bundle needs to draw a terminal at all,
+# each measured on device (iPad8,9, iOS 18.5 rootless, 2026-08-18) and
+# explained in Packaging/iGhostty.entitlements: the GPU user-client list
+# (without it the kernel denies AGXDeviceUserClient and Metal cannot create a
+# device), `no-sandbox` (without it the kernel denies the app every write
+# inside its own container, so libghostty's config never lands on disk and no
+# terminal boots), and `storage.AppDataContainers` (so a no-sandbox bundle
+# keeps its container, and UserDefaults stay in it). Spawning is still the
+# daemon's alone — the app target has no process API at all.
 require_true "$app_signed_entitlements" wiki.qaq.ighostty.client
-require_unprivileged "$app_signed_entitlements" "the app"
-[[ "$(/usr/libexec/PlistBuddy -c 'Print :application-identifier' "$app_signed_entitlements" 2>/dev/null || true)" == "$bundle_identifier" ]] || {
-    echo "error: app is missing application-identifier=$bundle_identifier (its container identity)" >&2
-    exit 65
-}
+require_true "$app_signed_entitlements" com.apple.private.security.no-sandbox
+require_true "$app_signed_entitlements" com.apple.private.security.storage.AppDataContainers
 [[ -n "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.iokit-user-client-class:0' "$app_signed_entitlements" 2>/dev/null || true)" ]] || {
     echo "error: app is missing the GPU iokit-user-client-class list" >&2
     exit 65
 }
+# The container entitlements that would undo storage.AppDataContainers, plus
+# the two the app was measured not to need.
+for key in platform-application \
+    com.apple.private.security.no-container \
+    com.apple.private.security.container-required \
+    com.apple.private.skip-library-validation; do
+    [[ -z "$(/usr/libexec/PlistBuddy -c "Print :$key" "$app_signed_entitlements" 2>/dev/null || true)" ]] || {
+        echo "error: the app must not carry $key" >&2
+        exit 65
+    }
+done
 [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.exception.mach-lookup.global-name:0' "$app_signed_entitlements")" == wiki.qaq.ighostty.service ]] || {
     echo "error: app is missing the daemon mach lookup entitlement" >&2
     exit 65

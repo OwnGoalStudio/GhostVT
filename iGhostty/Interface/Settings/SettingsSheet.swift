@@ -103,13 +103,19 @@ struct SettingsSheet: View {
     private static let shellPlaceholder = "/bin/zsh"
 
     private var aboutSection: some View {
-        Section("About") {
+        Section {
             HStack {
                 Text("Version")
                 Spacer()
                 Text(Self.versionDescription)
                     .foregroundColor(.secondary)
             }
+        } header: {
+            Text("About")
+        } footer: {
+            Text(Self.ghosttyConfigPath)
+                .font(.caption.monospaced())
+                .textSelection(.enabled)
         }
     }
 
@@ -126,6 +132,41 @@ struct SettingsSheet: View {
         let version = info?["CFBundleShortVersionString"] as? String ?? "?"
         let build = info?["CFBundleVersion"] as? String ?? "?"
         return "\(version) (\(build))"
+    }
+
+    /// Where libghostty is reading its settings from.
+    ///
+    /// libghostty has no API to take configuration from memory —
+    /// `ghostty_config_load_file` is the only door — so the terminal's colors,
+    /// font, and keybinds reach it as a file rendered into the temporary
+    /// directory on every reconfigure. On a jailbroken install that write is
+    /// exactly what fails when the bundle is signed without the entitlements
+    /// its bootstrap demands, and the symptom (a terminal stuck on
+    /// "Starting…") says nothing about a path, so the path belongs on screen.
+    private static var ghosttyConfigPath: String {
+        let directory = FileManager.default.temporaryDirectory
+        let rendered = (try? FileManager.default.contentsOfDirectory(
+            at: directory,
+            includingPropertiesForKeys: [.contentModificationDateKey]
+        ))?
+            .filter { $0.lastPathComponent.hasPrefix("ghostty-config-") }
+            .max { left, right in
+                let leftDate = (try? left.resourceValues(forKeys: [.contentModificationDateKey]))?
+                    .contentModificationDate ?? .distantPast
+                let rightDate = (try? right.resourceValues(forKeys: [.contentModificationDateKey]))?
+                    .contentModificationDate ?? .distantPast
+                return leftDate < rightDate
+            }
+        guard let rendered else {
+            return String.localizedStringWithFormat(
+                NSLocalizedString(
+                    "No ghostty config written; would go to %@",
+                    comment: "Settings footer when the rendered ghostty config is missing; %@ is a directory path"
+                ),
+                directory.path
+            )
+        }
+        return rendered.path
     }
 
     private func slotRow(title: LocalizedStringKey, icon: String, name: String) -> some View {
