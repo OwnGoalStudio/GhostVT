@@ -142,13 +142,12 @@ require_false() {
 }
 
 # The privilege-granting entitlements the app and its extensions must not
-# carry. Three of these remove the data container, which silently moves
-# UserDefaults — preferences and the daemon session ledger — out to the shared
-# ~/Library/Preferences; the rest either weaken the sandbox or, in
-# `platform-application`'s case, tighten it in ways that then demand still more
-# entitlements to undo. Absence is the assertion: `container-required=false`
-# *is* the switch, so checking for `false` would pass the very thing it means
-# to catch.
+# carry. Four of these remove or replace the data container, which silently
+# moves UserDefaults out to the shared ~/Library/Preferences; the rest either
+# weaken the sandbox or, in `platform-application`'s case, tighten it in ways
+# that then demand still more entitlements to undo. Absence is the assertion:
+# `container-required=false` *is* the switch, so checking for `false` would
+# pass the very thing it means to catch.
 #
 # If a device test proves one of these is genuinely required (see the ladder in
 # Packaging/iGhostty.entitlements), remove it from this list in the same commit
@@ -163,8 +162,7 @@ require_unprivileged() {
         com.apple.private.security.no-container \
         com.apple.private.security.container-required \
         com.apple.private.security.storage.AppDataContainers \
-        com.apple.private.skip-library-validation \
-        com.apple.security.iokit-user-client-class; do
+        com.apple.private.skip-library-validation; do
         [[ -z "$(/usr/libexec/PlistBuddy -c "Print :$key" "$plist" 2>/dev/null || true)" ]] || {
             echo "error: $label must stay sandboxed and unprivileged: remove $key" >&2
             exit 65
@@ -172,12 +170,27 @@ require_unprivileged() {
     done
 }
 
-# The app's only capability is reaching the daemon: the client entitlement the
-# daemon authenticates against, and the mach-lookup exception for the service
-# name. Everything privileged happens in ighosttyd, so the app asks for nothing
-# else — and the check below is what keeps that true.
+# The app reaches the daemon (the client marker the daemon authenticates
+# against, plus the mach-lookup exception for the service name) and drives the
+# GPU. Everything privileged happens in ighosttyd, so it asks for nothing else.
+#
+# The last two checks are what an ad-hoc signature has to state out loud, both
+# proven on device (iPad8,9, iOS 18.5 rootless, 2026-08-18):
+# `application-identifier` is the identity the sandbox matches against this
+# app's container — without it the kernel denies the app writes to its own
+# container, libghostty's config never lands on disk, and no terminal boots.
+# The iokit list is the render path — without it the kernel denies
+# AGXDeviceUserClient and Metal cannot create a device.
 require_true "$app_signed_entitlements" wiki.qaq.ighostty.client
 require_unprivileged "$app_signed_entitlements" "the app"
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :application-identifier' "$app_signed_entitlements" 2>/dev/null || true)" == "$bundle_identifier" ]] || {
+    echo "error: app is missing application-identifier=$bundle_identifier (its container identity)" >&2
+    exit 65
+}
+[[ -n "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.iokit-user-client-class:0' "$app_signed_entitlements" 2>/dev/null || true)" ]] || {
+    echo "error: app is missing the GPU iokit-user-client-class list" >&2
+    exit 65
+}
 [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.exception.mach-lookup.global-name:0' "$app_signed_entitlements")" == wiki.qaq.ighostty.service ]] || {
     echo "error: app is missing the daemon mach lookup entitlement" >&2
     exit 65

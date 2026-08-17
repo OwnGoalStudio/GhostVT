@@ -2,49 +2,90 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <!--
 	The app runs sandboxed, in its own data container, with no privilege
-	beyond reaching the daemon.
+	beyond reaching the daemon and driving the GPU.
 
 	This is the architecture stated plainly in a signature: the app renders
 	and nothing else, and every privileged operation — spawning a shell,
 	owning a PTY, running as another user — happens in ighosttyd, which is
 	already root and already authenticates its peers. An app that cannot
 	spawn does not need the entitlements that make spawning possible, and an
-	app that keeps its container keeps its preferences and its session ledger
-	somewhere only it can write.
+	app that keeps its container keeps its preferences somewhere only it can
+	write.
 
-	So the whole list is: the marker the daemon authenticates against, and
-	permission to look up the daemon's mach service. Nothing else.
+	So the list is: the marker the daemon authenticates against, permission
+	to look up the daemon's mach service, the identity the sandbox matches
+	against this app's container, and the GPU user clients Metal opens.
+
+	The last two are what an ldid-signed install has to say out loud, both
+	proven on device (iPad8,9, iOS 18.5, rootless bootstrap, 2026-08-18):
+
+	- `application-identifier` — without it the process has no application
+	  identity, so the sandbox cannot match it to the container installd
+	  registered for this bundle id, and the kernel denies the app writes to
+	  its OWN container: `deny(1) file-write-create
+	  .../Containers/Data/Application/<uuid>/Library/…`, tmp, Caches, all of
+	  it. libghostty must write its config to a file to load it, so a
+	  terminal never boots: `ghostty_app_new` is never reached, every surface
+	  rebuild fails, and the interface sits on "Starting…" forever. A signed
+	  App Store build gets this entitlement from its provisioning profile as
+	  `TEAMID.bundle.id`; an ad-hoc signature has to carry the bare bundle id
+	  instead. This is the entitlement that keeps the app sandboxed — the
+	  alternative fix, `no-sandbox` plus `storage.AppDataContainers`, buys
+	  the same writes by giving up the boundary this project is built on.
+	- `com.apple.security.iokit-user-client-class` — the bootstrap withholds
+	  the GPU from a non-platform binary. The kernel says what to do about
+	  it in as many words: `deny(1) iokit-open-user-client
+	  AGXDeviceUserClient … This must be in your
+	  com.apple.security.iokit-user-client-class entitlement`. Without it
+	  Metal cannot create a device (`Failed to create an IOAccelDevice…
+	  IOServiceOpen returned kIOReturn(0xE00002E2)`), ghostty logs
+	  `error.MetalFailed`, and the terminal is a black square that never
+	  reports a viewport. The list is the render path only — Apple's GPU
+	  (AGX), its older IOAccel vocabulary, IOSurface, the framebuffer, JPEG
+	  decode, and the HID clients UIKit opens for input.
 
 	Entitlements deliberately NOT here, and what would bring each one back:
 
 	- `platform-application` — grants nothing the app needs and actively
-	  tightens its sandbox (it is what withholds IOKit user clients, and it
-	  is why the app previously needed an exception list for Metal). Add it
-	  back only if the bootstrap refuses to launch a non-platform binary,
-	  and expect `com.apple.security.iokit-user-client-class` to become
-	  necessary again in the same breath.
-	- `com.apple.security.iokit-user-client-class` — the standard container
-	  sandbox already permits the GPU user clients Metal opens; every App
-	  Store app renders that way. Needed only alongside
-	  `platform-application`. The symptom if it is missing is specific: a
-	  black terminal that never reports a viewport, ghostty logging
-	  `error.MetalFailed`, and the kernel logging
-	  `deny(1) iokit-open-user-client AGXDeviceUserClient`.
+	  tightens its sandbox. Add it back only if the bootstrap refuses to
+	  launch a non-platform binary.
 	- `com.apple.private.security.no-sandbox` and its container-removing
-	  siblings `no-container` / `container-required=false` — the sandbox is
-	  the point now. `storage.AppDataContainers` went with them: it exists to
-	  give a `no-sandbox` bundle its container back, and a sandboxed app
-	  already has one.
+	  siblings `no-container` / `container-required=false` /
+	  `storage.AppDataContainers` — the sandbox is the point. Everything
+	  they would fix, `application-identifier` fixes without giving it up.
 	- `com.apple.private.skip-library-validation` — add back only if the app
 	  fails to launch because a framework it loads is refused.
 -->
 <plist version="1.0">
 <dict>
+	<key>application-identifier</key>
+	<string>wiki.qaq.iGhostty</string>
 	<key>wiki.qaq.ighostty.client</key>
 	<true/>
 	<key>com.apple.security.exception.mach-lookup.global-name</key>
 	<array>
 		<string>wiki.qaq.ighostty.service</string>
+	</array>
+	<key>com.apple.security.iokit-user-client-class</key>
+	<array>
+		<string>AGXCommandQueue</string>
+		<string>AGXDevice</string>
+		<string>AGXDeviceUserClient</string>
+		<string>AGXSharedUserClient</string>
+		<string>AGXGLContext</string>
+		<string>IOAccelContext</string>
+		<string>IOAccelContext2</string>
+		<string>IOAccelDevice</string>
+		<string>IOAccelDevice2</string>
+		<string>IOAccelSharedUserClient</string>
+		<string>IOAccelSharedUserClient2</string>
+		<string>IOAccelSubmitter2</string>
+		<string>IOSurfaceRootUserClient</string>
+		<string>IOSurfaceAcceleratorClient</string>
+		<string>IOMobileFramebufferUserClient</string>
+		<string>AppleJPEGDriverUserClient</string>
+		<string>IOHIDLibUserClient</string>
+		<string>IOHIDEventServiceFastPathUserClient</string>
 	</array>
 </dict>
 </plist>
