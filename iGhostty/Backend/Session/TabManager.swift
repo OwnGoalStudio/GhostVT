@@ -4,12 +4,20 @@
 //
 
 import Foundation
+import SwiftUI
 
 /// The tabs of one window. Owned by that window's `SceneDelegate`; every
 /// interface component receives a reference and mutates tabs only through
 /// this type.
+///
+/// Tab insertions and removals are wrapped in `withAnimation` here, so every
+/// view of the tab list (panes, strip, sidebar, switcher grid) animates the
+/// same change together instead of each view guessing on its own.
 @MainActor
 final class TabManager: ObservableObject {
+    /// One curve for every tab mutation, so a close reads the same in the
+    /// strip, the sidebar, and the pane it removes.
+    static let tabTransition = Animation.spring(response: 0.35, dampingFraction: 0.85)
     @Published private(set) var tabs: [TerminalTab] = []
     @Published var activeTabID: UUID?
 
@@ -46,23 +54,32 @@ final class TabManager: ObservableObject {
     @discardableResult
     func newTab() -> TerminalTab {
         let tab = TerminalTab()
-        tabs.append(tab)
-        activeTabID = tab.id
+        withAnimation(Self.tabTransition) {
+            tabs.append(tab)
+            activeTabID = tab.id
+        }
         SessionActivityController.shared.refresh()
         return tab
     }
 
+    /// Closing the last tab leaves the window empty on purpose: the empty
+    /// state offers a fresh terminal, and only a user's tap opens one. The
+    /// old auto-replacement spawned its tab from inside the close (sometimes
+    /// underneath the tab switcher's full-screen cover, where no surface can
+    /// attach), which is exactly the kind of half-mounted terminal that gets
+    /// stuck on its connect.
     func close(_ tab: TerminalTab) {
         guard let index = tabs.firstIndex(where: { $0.id == tab.id }) else {
             return
         }
         tab.close()
-        tabs.remove(at: index)
-        if tabs.isEmpty {
-            newTab()
-        } else if activeTabID == tab.id {
-            activeTabID = tabs[min(index, tabs.count - 1)].id
+        withAnimation(Self.tabTransition) {
+            tabs.remove(at: index)
+            if activeTabID == tab.id {
+                activeTabID = tabs.isEmpty ? nil : tabs[min(index, tabs.count - 1)].id
+            }
         }
+        SessionActivityController.shared.refresh()
     }
 
     /// The path every close control takes: ask first when a live shell would

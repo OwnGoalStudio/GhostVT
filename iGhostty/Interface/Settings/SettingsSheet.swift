@@ -18,6 +18,7 @@ struct SettingsSheet: View {
         NavigationView {
             Form {
                 appearanceSection
+                keyboardSection
                 shellSection
                 aboutSection
             }
@@ -59,6 +60,20 @@ struct SettingsSheet: View {
             Text("Appearance")
         } footer: {
             Text("Themes come from the Ghostty theme catalog and apply to every tab in every window.")
+        }
+    }
+
+    private var keyboardSection: some View {
+        Section {
+            NavigationLink {
+                KeyboardBarSettingsView()
+            } label: {
+                Label("Accessory Keys", systemImage: "keyboard")
+            }
+        } header: {
+            Text("Keyboard")
+        } footer: {
+            Text("Choose and arrange the keys on the bar above the keyboard.")
         }
     }
 

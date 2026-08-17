@@ -24,6 +24,7 @@ struct RootView: View {
     @AppStorage("Sidebar.visible") private var showsSidebar = true
     @State private var showsSwitcher = false
     @State private var showsSettingsSheet = false
+    @State private var selectionRequest: TerminalSelectionRequestBox?
 
     private var isRegularWidth: Bool { horizontalSizeClass == .regular }
 
@@ -42,11 +43,23 @@ struct RootView: View {
             }
         }
         .background(shortcutButtons)
-        .onAppear(perform: refocus)
+        .onAppear {
+            refocus()
+            bindTabHooks()
+        }
         .onChange(of: tabManager.activeTabID) { _ in refocus() }
+        .onChange(of: tabManager.tabs.count) { _ in bindTabHooks() }
         .onChange(of: theme.selection) { _ in
             for tab in tabManager.tabs {
                 tab.terminal.controller.setTheme(theme.terminalTheme)
+            }
+        }
+        .onReceive(KeyboardBarStore.shared.$entries) { _ in
+            let items = KeyboardBarStore.shared.accessoryItems
+            for tab in tabManager.tabs {
+                if tab.terminal.inputAccessoryItems != items {
+                    tab.terminal.inputAccessoryItems = items
+                }
             }
         }
         .fullScreenCover(isPresented: $showsSwitcher, onDismiss: refocus) {
@@ -54,6 +67,12 @@ struct RootView: View {
         }
         .sheet(isPresented: $showsSettingsSheet, onDismiss: refocus) {
             SettingsSheet()
+        }
+        .sheet(item: $selectionRequest, onDismiss: refocus) { box in
+            TerminalSelectionSheet(
+                text: box.request.text,
+                anchorRange: box.request.anchorRange
+            )
         }
         // The switcher, a full-screen cover, presents its own copy of this
         // alert; a covered context cannot present, so this one stands down.
@@ -86,8 +105,14 @@ struct RootView: View {
 
     /// Every tab's surface stays mounted so background sessions keep their
     /// grid and connection; only the active one is visible and hit-testable.
+    /// Insertions and removals ride the `TabManager.tabTransition` animation;
+    /// switching tabs stays an instant opacity flip.
     private var panes: some View {
         ZStack {
+            if tabManager.tabs.isEmpty {
+                EmptyTabsView(onNewTab: { tabManager.newTab() })
+                    .transition(.opacity)
+            }
             ForEach(tabManager.tabs) { tab in
                 let isActive = tab.id == tabManager.activeTabID
                 TerminalSurfaceView(context: tab.terminal)
@@ -98,6 +123,21 @@ struct RootView: View {
                     .opacity(isActive ? 1 : 0)
                     .allowsHitTesting(isActive)
                     .accessibilityHidden(!isActive)
+                    .transition(.asymmetric(
+                        insertion: .opacity,
+                        removal: .scale(scale: 0.92).combined(with: .opacity)
+                    ))
+            }
+        }
+    }
+
+    /// Hooks that live on each tab's terminal state but present interface in
+    /// this window: re-bound whenever the tab set changes, so a tab created
+    /// anywhere (strip, switcher, shortcut) gets them.
+    private func bindTabHooks() {
+        for tab in tabManager.tabs {
+            tab.terminal.onTextSelectionRequest = { request in
+                selectionRequest = TerminalSelectionRequestBox(request: request)
             }
         }
     }

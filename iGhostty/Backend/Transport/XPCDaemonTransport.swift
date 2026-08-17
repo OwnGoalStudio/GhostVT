@@ -76,17 +76,35 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         self.resumeSessionID = resumeSessionID
     }
 
+    deinit {
+        // An activated XPC connection must be canceled before its last
+        // reference goes away. Normal teardown already did this; the deinit
+        // covers an owner that dropped the transport without disconnecting.
+        if let connection = lock.locked({ self.connection }) {
+            xpc_connection_cancel(connection)
+        }
+    }
+
+    // Queued one-shot operations below capture `self` strongly on purpose.
+    // The owner drops its reference immediately after asking for a close or
+    // detach (`TerminalSessionStore.disconnect` nils the relay's transport),
+    // and a `[weak self]` block then deallocates the transport before the
+    // message is ever sent: the daemon keeps the shell attached forever, and
+    // the still-activated XPC connection is released without a cancel. The
+    // strong capture keeps the transport alive exactly until its queued work
+    // — ending in `teardown`, which cancels the connection — has run.
+
     public func connect() {
         emit(.state(.connecting))
-        queue.async { [weak self] in
-            self?.establish()
+        queue.async {
+            self.establish()
         }
     }
 
     public func send(_ data: Data) {
         guard !data.isEmpty else { return }
-        queue.async { [weak self] in
-            guard let self, let link = self.attachedLink() else { return }
+        queue.async {
+            guard let link = self.attachedLink() else { return }
             let message = Self.makeMessage(.write, sessionID: link.sessionID)
             data.withUnsafeBytes { buffer in
                 if let base = buffer.baseAddress {
@@ -99,8 +117,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
 
     public func updateViewport(columns: Int, rows: Int) {
         guard columns > 0, rows > 0 else { return }
-        queue.async { [weak self] in
-            guard let self else { return }
+        queue.async {
             guard let link = self.attachedLink() else {
                 // Not open yet: remember it so openSession starts at the size
                 // the surface actually has.
@@ -116,8 +133,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
 
     /// Detach without killing: the shell keeps running in the daemon.
     public func disconnect() {
-        queue.async { [weak self] in
-            guard let self else { return }
+        queue.async {
             if let link = self.attachedLink() {
                 let message = Self.makeMessage(.detachSession, sessionID: link.sessionID)
                 xpc_connection_send_message(link.connection, message)
@@ -128,8 +144,8 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
 
     /// End the session for good — the daemon terminates the shell.
     public func closeSession() {
-        queue.async { [weak self] in
-            guard let self, let link = self.attachedLink() else { return }
+        queue.async {
+            guard let link = self.attachedLink() else { return }
             let message = Self.makeMessage(.closeSession, sessionID: link.sessionID)
             xpc_connection_send_message(link.connection, message)
             self.lock.locked { self.resumeSessionID = nil }

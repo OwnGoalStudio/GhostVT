@@ -52,6 +52,9 @@ final class TerminalTab: ObservableObject, Identifiable {
         terminal.configuration = TerminalSurfaceOptions(
             backend: .inMemory(store.session)
         )
+        // The user's arrangement of the keyboard accessory bar; later edits
+        // reach existing tabs through RootView's store subscription.
+        terminal.inputAccessoryItems = KeyboardBarStore.shared.accessoryItems
         TerminalSessionStore.logger.info(
             "tab created, resume id \(resumeDaemonSessionID.map(String.init) ?? "none"); waiting for the surface's first viewport"
         )
