@@ -41,6 +41,11 @@ struct RootView: View {
                 }
                 terminalColumn
             }
+            // The animation must hang off the container, keyed on the value:
+            // `showsSidebar` is `@AppStorage`, and a UserDefaults-backed write
+            // does not reliably land inside a `withAnimation` transaction, so
+            // wrapping the setter leaves the transition unanimated.
+            .animation(.easeInOut(duration: 0.25), value: showsSidebar)
         }
         .background(shortcutButtons)
         .onAppear {
@@ -85,7 +90,7 @@ struct RootView: View {
                 if isRegularWidth {
                     TabStripBar(
                         tabManager: tabManager,
-                        showsSidebar: sidebarBinding,
+                        showsSidebar: $showsSidebar,
                         onShowSettings: { showsSettingsSheet = true },
                         onShowSwitcher: { showsSwitcher = true }
                     )
@@ -146,17 +151,6 @@ struct RootView: View {
         }
     }
 
-    private var sidebarBinding: Binding<Bool> {
-        Binding(
-            get: { showsSidebar },
-            set: { newValue in
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    showsSidebar = newValue
-                }
-            }
-        )
-    }
-
     private func refocus() {
         focusedTabID = tabManager.activeTabID
     }
@@ -178,7 +172,7 @@ struct RootView: View {
                 .keyboardShortcut("]", modifiers: [.command, .shift])
             Button("Previous Tab") { tabManager.activateAdjacentTab(offset: -1) }
                 .keyboardShortcut("[", modifiers: [.command, .shift])
-            Button("Toggle Sidebar") { sidebarBinding.wrappedValue.toggle() }
+            Button("Toggle Sidebar") { showsSidebar.toggle() }
                 .keyboardShortcut("l", modifiers: [.command, .shift])
             Button("Show Tabs") { showsSwitcher.toggle() }
                 .keyboardShortcut("\\", modifiers: [.command, .shift])
