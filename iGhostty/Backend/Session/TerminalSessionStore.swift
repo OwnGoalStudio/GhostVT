@@ -27,12 +27,21 @@ final class TerminalSessionStore: ObservableObject {
 
     @Published private(set) var status: Status = .idle
 
+    /// Title guessed from the last command the user typed, used only while
+    /// the shell reports none of its own. Empty until a command is accepted.
+    ///
+    /// See ``CommandTitleTracker``: the tracker offers a line, this decides
+    /// whether it made it to the screen. An unechoed line — a password, a
+    /// key a full-screen program swallowed — never becomes a title.
+    @Published private(set) var inferredTitle: String = ""
+
     /// Latest grid size reported by the surface; forwarded to the transport,
     /// which decides whether it can carry it.
     private(set) var viewport: (columns: Int, rows: Int)?
 
     let session: InMemoryTerminalSession
     private let relay = TransportRelay()
+    private let titleTracker = CommandTitleTracker()
     private var hasAutoConnected = false
     private let makeTransport: () -> TerminalTransport
 
@@ -62,8 +71,12 @@ final class TerminalSessionStore: ObservableObject {
         self.makeTransport = makeTransport
 
         let relay = relay
+        let titleTracker = titleTracker
         session = InMemoryTerminalSession(
-            write: { data in relay.send(data) },
+            write: { data in
+                relay.send(data)
+                titleTracker.consume(data)
+            },
             resize: { viewport in
                 relay.updateViewport(
                     columns: Int(viewport.columns),
@@ -76,6 +89,25 @@ final class TerminalSessionStore: ObservableObject {
                 self?.handleViewportChange(columns: columns, rows: rows)
             }
         }
+        titleTracker.onCommand = { [weak self] command in
+            Task { @MainActor [weak self] in
+                self?.offerInferredTitle(command)
+            }
+        }
+    }
+
+    /// Accepts a typed line as this session's title, if it is one.
+    ///
+    /// The viewport check is the safety half: the line has to be visible on
+    /// screen at the moment Return was pressed. A prompt reading a password
+    /// echoes nothing, so nothing here matches and the old title stands.
+    private func offerInferredTitle(_ command: String) {
+        let command = command.trimmingCharacters(in: .whitespaces)
+        guard CommandTitleTracker.isPlausibleCommand(command),
+              let screen = session.readViewportText(),
+              screen.contains(command)
+        else { return }
+        inferredTitle = command
     }
 
     /// The first viewport report means the surface is attached and rendering,
@@ -92,6 +124,9 @@ final class TerminalSessionStore: ObservableObject {
 
     func connect() {
         reconnectGeneration &+= 1
+        // A half-typed line does not survive a reconnect: the shell's line
+        // editor never saw the bytes that the dropped link ate.
+        titleTracker.reset()
         let transport = makeTransport()
         Self.logger.info("connecting via \(transport.endpointDescription)")
         transport.onEvent = { [weak self] event in

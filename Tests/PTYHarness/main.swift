@@ -314,6 +314,37 @@ if let plan = ShellLaunch.plan(requestedShell: nil) {
     check(false, "a default plan is produced")
 }
 
+print("shell integration")
+// Nothing is injected when the scripts are not installed — the harness host
+// has no /usr/share/ighostty, which is also the state of a device where the
+// package predates them. A stray `--posix` here would start every bash
+// session in a mode its rc files are not written for.
+var integrationEnvironment: [String: String] = ["HOME": "/tmp"]
+check(
+    ShellIntegration.apply(
+        shell: "/bin/bash",
+        to: &integrationEnvironment,
+        canModifyArguments: true
+    ).isEmpty,
+    "no scripts on disk means no arguments are added"
+)
+check(
+    integrationEnvironment == ["HOME": "/tmp"],
+    "no scripts on disk means the environment is left alone"
+)
+// `sh` is not a shell anyone ships an integration for, and pointing it at
+// another shell's rc files is how a session ends up printing syntax errors
+// before its first prompt.
+var shEnvironment: [String: String] = [:]
+check(
+    ShellIntegration.apply(
+        shell: "/bin/sh",
+        to: &shEnvironment,
+        canModifyArguments: true
+    ).isEmpty && shEnvironment.isEmpty,
+    "sh is left untouched"
+)
+
 if let plan = ShellLaunch.plan(requestedShell: "/bin/sh") {
     check(plan.command == ["/bin/sh", "-il"], "an explicit shell is spawned as a login shell")
     let directories = (plan.environment["PATH"] ?? "").split(separator: ":").map(String.init)

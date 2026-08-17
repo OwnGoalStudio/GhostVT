@@ -37,6 +37,18 @@ persists session IDs so a cold launch reattaches (256 KiB replay).
 SSH later = another `TerminalTransport` implementation; don't collapse the
 seam.
 
+Tab titles have two sources, in this order. Ghostty's shell integration is
+the real one: the daemon injects it (`ShellIntegration`) and the .deb ships
+libghostty's own scripts to `/usr/share/ighostty/shell-integration`, so the
+shell reports OSC 2 (command), OSC 7 (cwd), OSC 133 (prompts) by itself.
+That injection only reaches zsh, fish, and a directly-spawned bash — bash
+needs `--posix` in argv, which the `login` route cannot carry, and a shell
+invoked as `sh` gets none. For those, `CommandTitleTracker` infers a title
+from the line the user typed, and only if it was echoed to the screen — the
+check that keeps a password out of the tab bar. `TerminalTab.displayTitle`
+picks between them; because both live on *other* observable objects, the tab
+has to republish their changes or no SwiftUI view redraws.
+
 ## Build & verify
 
 - `make check` — project/packaging validation

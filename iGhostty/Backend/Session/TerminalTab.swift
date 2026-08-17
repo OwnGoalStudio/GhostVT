@@ -27,6 +27,7 @@ final class TerminalTab: ObservableObject, Identifiable {
     private let daemonSession: DaemonSessionBox
     private var statusObservation: AnyCancellable?
     private var activityObservation: AnyCancellable?
+    private var titleObservation: AnyCancellable?
 
     init(resumeDaemonSessionID: UInt64? = nil) {
         let daemonSession = DaemonSessionBox(id: resumeDaemonSessionID)
@@ -59,6 +60,17 @@ final class TerminalTab: ObservableObject, Identifiable {
         TerminalSessionStore.logger.info(
             "tab created, resume id \(resumeDaemonSessionID.map(String.init) ?? "none"); waiting for the surface's first viewport"
         )
+        // `displayTitle` reads two other observable objects, and SwiftUI
+        // only watches the one a view holds — the tab. Without this the
+        // title capsule, the tab strip, and the sidebar keep rendering the
+        // title the surface had when the view was first built.
+        titleObservation = Publishers.Merge(
+            terminal.$title.removeDuplicates().map { _ in () },
+            store.$inferredTitle.removeDuplicates().map { _ in () }
+        )
+        .sink { [weak self] in
+            self?.objectWillChange.send()
+        }
         statusObservation = store.$status.sink { [weak self] status in
             guard status == .connected else { return }
             Task { @MainActor [weak self] in
@@ -69,8 +81,9 @@ final class TerminalTab: ObservableObject, Identifiable {
         // connection status; shells retitle and re-report OSC 7 on every
         // prompt, so dedupe each stream and debounce the merge before
         // spending ActivityKit update budget.
-        activityObservation = Publishers.Merge3(
+        activityObservation = Publishers.Merge4(
             terminal.$title.removeDuplicates().map { _ in () },
+            store.$inferredTitle.removeDuplicates().map { _ in () },
             terminal.$workingDirectory.removeDuplicates().map { _ in () },
             store.$status.removeDuplicates().map { _ in () }
         )
@@ -82,8 +95,20 @@ final class TerminalTab: ObservableObject, Identifiable {
         }
     }
 
+    /// What the tab calls itself, best source first: the title the shell
+    /// reported (OSC 2, which Ghostty's shell integration sends for every
+    /// command), then the last command the app watched the user type, then
+    /// the endpoint. The middle one only exists because a shell without that
+    /// integration reports nothing at all.
     var displayTitle: String {
-        terminal.title.isEmpty ? store.endpointDescription : terminal.title
+        reportedTitle.isEmpty ? store.endpointDescription : reportedTitle
+    }
+
+    /// The same title without the endpoint fallback, for the places that
+    /// have a better name of their own for a session that never reported one
+    /// — the Live Activity, whose widget labels it with the shell instead.
+    var reportedTitle: String {
+        terminal.title.isEmpty ? store.inferredTitle : terminal.title
     }
 
     /// Whether closing this tab would kill a real shell — the case the

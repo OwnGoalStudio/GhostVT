@@ -84,6 +84,24 @@ rm -f "$installed_app/embedded.mobileprovision"
 chmod 0755 "$installed_daemon"
 chmod 0644 "$installed_plist"
 
+# Ghostty's shell integration, which is what makes a session report its title,
+# its working directory, and its command boundaries. libghostty-spm already
+# ships the scripts inside the app's resource bundle; the package installs a
+# second copy the daemon owns, because the daemon is what points a new shell
+# at them and it should not have to know the app bundle's internal layout to
+# do it. Missing scripts are not fatal: the daemon checks before injecting,
+# and the app falls back to inferring a title from what the user types.
+installed_integration="$installed_root/usr/share/ighostty/shell-integration"
+integration_source="$(/usr/bin/find "$installed_app" -type d -name shell-integration -print -quit)"
+if [[ -n "$integration_source" ]]; then
+    mkdir -p "$(dirname "$installed_integration")"
+    /usr/bin/ditto "$integration_source" "$installed_integration"
+    # The session runs as mobile, so every script has to be readable by it.
+    chmod -R a+rX "$installed_integration"
+else
+    echo "warning: no shell-integration in the app bundle; sessions will report no title" >&2
+fi
+
 ldid -S"$app_entitlements" -Cadhoc "$installed_app/$app_executable"
 ldid -S"$daemon_entitlements" -Cadhoc "$installed_daemon"
 ldid -e "$installed_app/$app_executable" >"$app_signed_entitlements"
@@ -218,6 +236,7 @@ contents="$(dpkg-deb --contents "$temporary_deb")"
 grep -F ".$install_prefix/Applications/iGhostty.app/$app_executable" <<<"$contents" >/dev/null
 grep -F ".$install_prefix/usr/libexec/ighosttyd" <<<"$contents" >/dev/null
 grep -F ".$install_prefix/Library/LaunchDaemons/wiki.qaq.ighosttyd.plist" <<<"$contents" >/dev/null
+[[ -z "$integration_source" ]] || grep -F ".$install_prefix/usr/share/ighostty/shell-integration/zsh/.zshenv" <<<"$contents" >/dev/null
 
 mv -f "$temporary_deb" "$output_deb"
 echo "Packaged iGhostty: $output_deb"

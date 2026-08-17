@@ -67,7 +67,7 @@ final class SessionActivityController {
                 sessions.append(
                     TerminalSessionAttributes.Session(
                         id: tab.id.uuidString,
-                        title: tab.terminal.title,
+                        title: tab.reportedTitle,
                         directory: Self.displayPath(tab.terminal.workingDirectory),
                         shell: Self.configuredShellName,
                         number: number,

@@ -192,6 +192,15 @@ enum ShellLaunch {
         // it setuids to the named user itself, so this route hands it the name
         // and drops nothing here.
         if let login = firstExecutable(["/usr/bin/login"]), let user {
+            // `login` chooses the shell and its arguments from the login
+            // database, so the integration only gets the environment half
+            // here — enough for zsh, not enough for bash.
+            var environment = environment
+            _ = ShellIntegration.apply(
+                shell: user.shell,
+                to: &environment,
+                canModifyArguments: false
+            )
             // `command[0]` is both the executable and `argv[0]`, so the flags
             // start at index 1 — an extra "login" here would be read as the
             // username.
@@ -228,8 +237,15 @@ enum ShellLaunch {
         environment.merge(userEnvironment(for: user)) { current, _ in current }
         environment["PATH"] = fallbackPath
         environment["SHELL"] = shell
+        // After `HOME`: bash's integration moves the history file relative to
+        // it, and reads nothing this daemon sets afterwards.
+        let integrationArguments = ShellIntegration.apply(
+            shell: shell,
+            to: &environment,
+            canModifyArguments: true
+        )
         return Plan(
-            command: [JailbreakRoot.resolve(shell), "-il"],
+            command: [JailbreakRoot.resolve(shell)] + integrationArguments + ["-il"],
             environment: environment,
             credentials: credentials(for: user)
         )
