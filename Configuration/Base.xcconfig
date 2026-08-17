@@ -1,0 +1,7 @@
+#include "Version.xcconfig"
+
+// Optional DEVELOPMENT_TEAM / CODE_SIGN_STYLE live in the git-ignored
+// Developer*.xcconfig overlays. See Developer.xcconfig.example.
+//
+// Device packages from `make deb` override signing on the xcodebuild command
+// line; Scripts/package-deb.sh ad-hoc signs with ldid.

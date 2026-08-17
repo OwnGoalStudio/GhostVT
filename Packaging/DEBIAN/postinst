@@ -1,0 +1,20 @@
+#!/bin/sh
+
+# @PREFIX@ is empty for roothide, whose package is installed inside the jbroot
+# it picked this boot and whose tools resolve every path against it anyway, and
+# /var/jb for a rootless bootstrap, where the prefix has to be spelled out.
+launch_plist=@PREFIX@/Library/LaunchDaemons/wiki.qaq.ighosttyd.plist
+
+launchctl=@PREFIX@/usr/bin/launchctl
+[ -x "$launchctl" ] || launchctl=/bin/launchctl
+if [ -x "$launchctl" ]; then
+    "$launchctl" bootout system/wiki.qaq.ighosttyd 2>/dev/null || true
+    "$launchctl" bootstrap system "$launch_plist"
+fi
+
+uicache=@PREFIX@/usr/bin/uicache
+if [ -x "$uicache" ]; then
+    "$uicache" -p @PREFIX@/Applications/iGhostty.app || true
+fi
+
+exit 0

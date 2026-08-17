@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	The app runs sandboxed, in its own data container, with no privilege
+	beyond reaching the daemon.
+
+	This is the architecture stated plainly in a signature: the app renders
+	and nothing else, and every privileged operation — spawning a shell,
+	owning a PTY, running as another user — happens in ighosttyd, which is
+	already root and already authenticates its peers. An app that cannot
+	spawn does not need the entitlements that make spawning possible, and an
+	app that keeps its container keeps its preferences and its session ledger
+	somewhere only it can write.
+
+	So the whole list is: the marker the daemon authenticates against, and
+	permission to look up the daemon's mach service. Nothing else.
+
+	Entitlements deliberately NOT here, and what would bring each one back:
+
+	- `platform-application` — grants nothing the app needs and actively
+	  tightens its sandbox (it is what withholds IOKit user clients, and it
+	  is why the app previously needed an exception list for Metal). Add it
+	  back only if the bootstrap refuses to launch a non-platform binary,
+	  and expect `com.apple.security.iokit-user-client-class` to become
+	  necessary again in the same breath.
+	- `com.apple.security.iokit-user-client-class` — the standard container
+	  sandbox already permits the GPU user clients Metal opens; every App
+	  Store app renders that way. Needed only alongside
+	  `platform-application`. The symptom if it is missing is specific: a
+	  black terminal that never reports a viewport, ghostty logging
+	  `error.MetalFailed`, and the kernel logging
+	  `deny(1) iokit-open-user-client AGXDeviceUserClient`.
+	- `com.apple.private.security.no-sandbox` and its container-removing
+	  siblings `no-container` / `container-required=false` — the sandbox is
+	  the point now. `storage.AppDataContainers` went with them: it exists to
+	  give a `no-sandbox` bundle its container back, and a sandboxed app
+	  already has one.
+	- `com.apple.private.skip-library-validation` — add back only if the app
+	  fails to launch because a framework it loads is refused.
+-->
+<plist version="1.0">
+<dict>
+	<key>wiki.qaq.ighostty.client</key>
+	<true/>
+	<key>com.apple.security.exception.mach-lookup.global-name</key>
+	<array>
+		<string>wiki.qaq.ighostty.service</string>
+	</array>
+</dict>
+</plist>

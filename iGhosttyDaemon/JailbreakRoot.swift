@@ -1,0 +1,143 @@
+import Darwin
+import Foundation
+
+/// Where the bootstrap is installed, and how a path has to be spelled for
+/// whoever is going to read it.
+///
+/// Three environments ship this daemon and they disagree about what `/` means:
+///
+/// - **roothide** reinstalls the jailbreak into a randomly named directory (the
+///   jbroot) on every jailbreak, so nothing may hardcode a bootstrap path —
+///   there is no fixed prefix. Its binaries are linked against **libvroot**, a
+///   compile-time shim that rewrites their path syscalls so they already treat
+///   the jbroot as `/`. Their own paths are therefore written unprefixed, and
+///   the untouched iOS filesystem is reachable inside the jbroot at `/rootfs`.
+/// - **rootless** installs under a fixed `/var/jb`, and its binaries are built
+///   with that prefix compiled in: they speak the same real paths the kernel
+///   does. `/var/jb/bin/zsh` is what both `execve` and the bootstrap's own
+///   `login` expect, and iOS's own `/usr/bin` is just `/usr/bin`.
+/// - **rootful**, and the macOS harness, have no prefix at all.
+///
+/// The daemon works out which by stripping its own known install suffix off its
+/// own executable path — no libroothide dependency and no bridging header.
+///
+/// Mixing the vocabularies up is *the* classic jailbreak-path bug, so each
+/// direction has its own function and every call site names the one it means:
+///
+/// - `bootstrapPath(_:)` — a file the bootstrap installed, as its programs
+///   spell it.
+/// - `systemPath(_:)` — a file on the untouched iOS filesystem, as those same
+///   programs spell it.
+/// - `resolve(_:)` — either of those, converted to what a syscall wants.
+enum JailbreakRoot {
+    /// This daemon's install location, relative to the bootstrap's root.
+    private static let daemonInstallPath = "/usr/libexec/ighosttyd"
+
+    /// Rootless bootstraps all agree on this prefix, and their binaries carry
+    /// it compiled in — so this literal, not whatever it resolves to, is what
+    /// goes back into paths.
+    private static let rootlessPrefix = "/var/jb"
+
+    /// The jailbreak layout the daemon is running under.
+    enum Bootstrap: Equatable {
+        /// No prefix: a rootful jailbreak, or the harness on macOS. Every
+        /// mapping degrades to identity, matching the stub behaviour
+        /// roothide's own API has off-jailbreak.
+        case none
+        /// A fixed-prefix bootstrap whose programs speak real paths.
+        case rootless(prefix: String)
+        /// A randomly named jbroot whose programs are vroot-linked.
+        case roothide(jbroot: String)
+
+        /// The install root, or `nil` when there is no prefix.
+        var prefix: String? {
+            switch self {
+            case .none: return nil
+            case let .rootless(prefix): return prefix
+            case let .roothide(jbroot): return jbroot
+            }
+        }
+
+        /// How the bootstrap's own programs spell one of *its* files.
+        ///
+        /// Unprefixed under roothide — vroot resolves it against the jbroot
+        /// itself, and prefixing here would resolve the jbroot twice.
+        func bootstrapPath(_ path: String) -> String {
+            switch self {
+            case .none, .roothide: return path
+            case let .rootless(prefix): return prefix + path
+            }
+        }
+
+        /// How those same programs spell a file on the untouched iOS
+        /// filesystem, which roothide bridges back in at `/rootfs`.
+        func systemPath(_ path: String) -> String {
+            switch self {
+            case .none, .rootless: return path
+            case .roothide: return "/rootfs" + path
+            }
+        }
+
+        /// Convert a path in the bootstrap's vocabulary to the one the kernel
+        /// wants. This is roothide's `jbroot()`, and a no-op everywhere else.
+        func resolve(_ path: String) -> String {
+            switch self {
+            case .none, .rootless: return path
+            case let .roothide(jbroot): return path.hasPrefix("/") ? jbroot + path : path
+            }
+        }
+    }
+
+    static let bootstrap: Bootstrap = detect()
+
+    /// The install root, or `nil` when running without one.
+    static var path: String? { bootstrap.prefix }
+
+    static func bootstrapPath(_ path: String) -> String { bootstrap.bootstrapPath(path) }
+    static func systemPath(_ path: String) -> String { bootstrap.systemPath(path) }
+    static func resolve(_ path: String) -> String { bootstrap.resolve(path) }
+
+    /// True when a path in the bootstrap's vocabulary exists and is executable.
+    static func isExecutable(_ bootstrapPath: String) -> Bool {
+        var metadata = stat()
+        let resolved = resolve(bootstrapPath)
+        guard stat(resolved, &metadata) == 0 else { return false }
+        return metadata.st_mode & mode_t(S_IFMT) == mode_t(S_IFREG)
+            && access(resolved, X_OK) == 0
+    }
+
+    private static func detect() -> Bootstrap {
+        guard let executable = currentExecutablePath(),
+              executable.hasSuffix(daemonInstallPath)
+        else { return .none }
+        let root = String(executable.dropLast(daemonInstallPath.count))
+        guard !root.isEmpty else { return .none }
+        // A rootless bootstrap may keep its files in a randomly named directory
+        // and hang `/var/jb` off it as a symlink, and `currentExecutablePath`
+        // is canonical — so compare canonical against canonical, and keep the
+        // literal prefix, which is the one its binaries were built against.
+        if canonicalPath(rootlessPrefix) == root { return .rootless(prefix: rootlessPrefix) }
+        return .roothide(jbroot: root)
+    }
+
+    static func currentExecutablePath() -> String? {
+        executablePath(pid: getpid())
+    }
+
+    static func executablePath(pid: Int32) -> String? {
+        var buffer = [CChar](repeating: 0, count: Int(MAXPATHLEN))
+        let result = buffer.withUnsafeMutableBytes {
+            ighosttyProcPIDPath(pid, $0.baseAddress!, UInt32($0.count))
+        }
+        guard result > 0 else { return nil }
+        return canonicalPath(String(cString: buffer))
+    }
+
+    static func canonicalPath(_ path: String) -> String? {
+        var buffer = [CChar](repeating: 0, count: Int(MAXPATHLEN))
+        let result = path.withCString { source in
+            buffer.withUnsafeMutableBufferPointer { realpath(source, $0.baseAddress) }
+        }
+        return result.map { _ in String(cString: buffer) }
+    }
+}

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>wiki.qaq.ighosttyd</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>@PREFIX@/usr/libexec/ighosttyd</string>
+	</array>
+	<key>UserName</key>
+	<string>root</string>
+	<key>ProcessType</key>
+	<string>Interactive</string>
+	<!--
+		Resident, not demand-launched.
+
+		Demand launch does work here — a killed daemon comes back on the next
+		mach lookup, verified on device. But it makes every disappearance a
+		race the app can lose: the daemon can exit between launchd routing a
+		new connection and the daemon accepting it, and that client sees the
+		service vanish rather than a working session. KeepAlive also covers
+		the case demand launch cannot — a crash while the app sits idle, which
+		otherwise leaves the terminal dead until the user thinks to retry.
+
+		An idle ighosttyd is a few MB holding no sessions. That is the normal
+		shape for a jailbreak daemon, and it is worth far more than the memory.
+	-->
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Umask</key>
+	<integer>18</integer>
+	<key>MachServices</key>
+	<dict>
+		<key>wiki.qaq.ighostty.service</key>
+		<true/>
+	</dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>DISABLE_TWEAKS</key>
+		<string>1</string>
+	</dict>
+</dict>
+</plist>

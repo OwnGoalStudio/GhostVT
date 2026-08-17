@@ -1,0 +1,86 @@
+import Darwin
+import os
+import XPC
+
+/// Gate on the daemon's mach service.
+///
+/// The daemon spawns processes as root, so "who is asking" has to be settled
+/// from the kernel's audit token rather than anything the caller sends. A peer
+/// must carry the client entitlement, run as root or mobile, and *be* the
+/// installed, root-owned app binary — a copied or rewritten client fails the
+/// path and ownership checks.
+final class PeerAuthenticator {
+    private static let mobileUserID: UInt32 = 501
+    /// `platform-application` used to be required here too. It was never
+    /// load-bearing: it attests that a binary is signed as part of the
+    /// platform, not that it is *this* client, which is what the path and
+    /// ownership checks below establish. Requiring it forced the app to
+    /// carry an entitlement that tightens the app's own sandbox and buys
+    /// this side nothing, so the app dropped it and so did this list.
+    private static let requiredEntitlements = [
+        iGhosttyProtocol.clientEntitlement,
+    ]
+
+    private lazy var installedClientPaths = resolveInstalledClientPaths()
+
+    func authenticate(_ connection: xpc_connection_t) -> Int32? {
+        var token = audit_token_t()
+        ighosttyXPCConnectionGetAuditToken(connection, &token)
+        let pid = Int32(bitPattern: token.val.5)
+        let uid = token.val.1
+        guard pid > 1 else {
+            DaemonLog.server.error("peer denied: implausible pid \(pid)")
+            return nil
+        }
+        guard uid == 0 || uid == Self.mobileUserID else {
+            DaemonLog.server.error("peer \(pid) denied: uid \(uid)")
+            return nil
+        }
+        guard hasRequiredEntitlements(token: &token) else {
+            DaemonLog.server.error("peer \(pid) denied: missing client entitlement")
+            return nil
+        }
+        guard let clientPath = JailbreakRoot.executablePath(pid: pid) else {
+            DaemonLog.server.error("peer \(pid) denied: executable path unreadable")
+            return nil
+        }
+
+        for installedPath in installedClientPaths {
+            guard isRootOwnedExecutable(installedPath) else { continue }
+            if clientPath == installedPath { return pid }
+        }
+        DaemonLog.server.error(
+            "peer \(pid) denied: \(clientPath, privacy: .public) is not the installed client (expected \(self.installedClientPaths.joined(separator: ", "), privacy: .public))"
+        )
+        return nil
+    }
+
+    /// The app installs under the same bootstrap root as the daemon, so the
+    /// permitted client paths are written relative to that root and mapped
+    /// through the layout the daemon recovered from its own location.
+    private func resolveInstalledClientPaths() -> [String] {
+        iGhosttyProtocol.clientPaths.compactMap {
+            JailbreakRoot.canonicalPath(JailbreakRoot.resolve(JailbreakRoot.bootstrapPath($0)))
+        }
+    }
+
+    private func hasRequiredEntitlements(token: inout audit_token_t) -> Bool {
+        Self.requiredEntitlements.allSatisfy { entitlement in
+            let value = entitlement.withCString {
+                ighosttyXPCCopyEntitlement($0, &token)
+            }
+            return value.map {
+                xpc_get_type($0) == XPC_TYPE_BOOL && xpc_bool_get_value($0)
+            } ?? false
+        }
+    }
+
+    private func isRootOwnedExecutable(_ path: String) -> Bool {
+        var metadata = stat()
+        guard stat(path, &metadata) == 0 else { return false }
+        return metadata.st_uid == 0
+            && metadata.st_mode & mode_t(S_IFMT) == mode_t(S_IFREG)
+            && metadata.st_mode & mode_t(S_IXUSR) != 0
+            && metadata.st_mode & mode_t(S_IWGRP | S_IWOTH) == 0
+    }
+}

@@ -1,0 +1,92 @@
+# Tag vX.Y.Z → override Configuration/Version.xcconfig with the tag, build the
+# roothide and rootless debs, and attach both to a GitHub Release.
+#
+# The project depends on a SIBLING checkout of Lakr233/libghostty-spm (a local
+# path package), so both repos are checked out side by side and every make
+# invocation runs from the iGhostty/ subdirectory.
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]*.[0-9]*.[0-9]*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deb:
+    runs-on: macos-26
+    timeout-minutes: 60
+
+    defaults:
+      run:
+        working-directory: iGhostty
+
+    steps:
+      - name: Check out iGhostty
+        uses: actions/checkout@v4
+        with:
+          path: iGhostty
+
+      - name: Check out libghostty-spm (sibling path dependency)
+        uses: actions/checkout@v4
+        with:
+          repository: Lakr233/libghostty-spm
+          ref: main
+          path: libghostty-spm
+
+      - name: Select newest Xcode
+        run: |
+          latest="$(ls -d /Applications/Xcode*.app | sort -V | tail -n1)"
+          sudo xcode-select -s "$latest/Contents/Developer"
+          xcodebuild -version
+
+      - name: Install packaging tools
+        run: |
+          brew install ldid dpkg xcbeautify
+          ldid -h 2>&1 | head -n1 || true
+          dpkg-deb --version | head -n1
+
+      # apply-version.sh strips the leading "v" and rejects anything that is
+      # not X.Y.Z; the run number keeps CFBundleVersion increasing per build.
+      - name: Override version from tag
+        if: github.ref_type == 'tag'
+        run: make set-version VERSION="${GITHUB_REF_NAME}" BUILD="${{ github.run_number }}"
+
+      # deb → build → check + test (PTY harness), so validation and the test
+      # suite gate the packages. The second flavor reuses the incremental build
+      # — the binaries are identical, only layout and architecture label differ.
+      - name: Build roothide package (iphoneos-arm64e)
+        run: make deb-roothide
+
+      - name: Build rootless package (iphoneos-arm64)
+        run: make deb-rootless
+
+      - name: Checksums
+        run: |
+          cd build/Packages
+          shasum -a 256 *.deb | tee SHA256SUMS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ighostty-debs
+          path: |
+            iGhostty/build/Packages/*.deb
+            iGhostty/build/Packages/SHA256SUMS
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "iGhostty ${GITHUB_REF_NAME}" \
+            --generate-notes \
+            build/Packages/*.deb build/Packages/SHA256SUMS \
+          || gh release upload "${GITHUB_REF_NAME}" \
+            build/Packages/*.deb build/Packages/SHA256SUMS --clobber

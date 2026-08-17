@@ -1,0 +1,15 @@
+#!/bin/sh
+
+if [ "${1:-}" = remove ] || [ "${1:-}" = deconfigure ]; then
+    launchctl=@PREFIX@/usr/bin/launchctl
+    [ -x "$launchctl" ] || launchctl=/bin/launchctl
+    if [ -x "$launchctl" ]; then
+        "$launchctl" bootout system/wiki.qaq.ighosttyd 2>/dev/null || true
+    fi
+    uicache=@PREFIX@/usr/bin/uicache
+    if [ -x "$uicache" ]; then
+        "$uicache" -u wiki.qaq.iGhostty || true
+    fi
+fi
+
+exit 0

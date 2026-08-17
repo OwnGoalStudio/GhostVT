@@ -1,0 +1,17 @@
+Package: @PACKAGE_ID@
+Name: iGhostty
+Version: @VERSION@
+Architecture: @ARCHITECTURE@
+Description: Ghostty-powered terminal for jailbroken iOS
+ Terminal emulator built on libghostty's terminal core with a host-managed
+ I/O backend. Packaged for both roothide and rootless bootstraps; the
+ architecture field says which build this is.
+ .
+ Shells are spawned by the bundled ighosttyd daemon and survive app
+ relaunches; SSH transport is planned on the same transport interface.
+Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
+Section: Utilities
+Priority: optional
+Depends: firmware (>= 15.0), uikittools
+Installed-Size: @INSTALLED_SIZE@
