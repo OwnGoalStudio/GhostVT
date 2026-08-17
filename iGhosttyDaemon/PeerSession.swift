@@ -152,6 +152,7 @@ final class PeerSession {
         let columns = UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(message, iGhosttyWireKey.columns))
         let rows = UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(message, iGhosttyWireKey.rows))
 
+        DaemonFileLog.log("peer \(clientPID) openSession \(columns)x\(rows)")
         do {
             let session = try registry.open(
                 command: command,
@@ -171,6 +172,7 @@ final class PeerSession {
             DaemonLog.sessions.error(
                 "open for peer \(self.clientPID) failed: \(failure.message, privacy: .public)"
             )
+            DaemonFileLog.log("open for peer \(clientPID) failed: \(failure.message)")
             if let reply {
                 xpc_dictionary_set_string(reply, iGhosttyWireKey.errorMessage, failure.message)
             }
@@ -201,11 +203,13 @@ final class PeerSession {
                 }
             }
             DaemonLog.sessions.info("peer \(self.clientPID) attached session \(id)")
+            DaemonFileLog.log("peer \(clientPID) attached session \(id)")
             return .success
         } catch let code as iGhosttyReplyCode {
             DaemonLog.sessions.error(
                 "attach session \(id) for peer \(self.clientPID) failed: reply code \(code.rawValue)"
             )
+            DaemonFileLog.log("attach session \(id) for peer \(clientPID) failed: reply code \(code.rawValue)")
             return code
         } catch {
             return .operationFailed
@@ -258,6 +262,7 @@ final class PeerSession {
         // session through `listSessions`, so closing one it did not open is
         // no more privilege than it already had.
         let id = xpc_dictionary_get_uint64(message, iGhosttyWireKey.sessionID)
+        DaemonFileLog.log("peer \(clientPID) closeSession \(id)")
         do {
             try registry.close(id)
             attachedSessionIDs.remove(id)

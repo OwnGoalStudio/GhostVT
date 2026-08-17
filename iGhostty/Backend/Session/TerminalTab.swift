@@ -38,13 +38,14 @@ final class TerminalTab: ObservableObject, Identifiable {
                 resumeSessionID: daemonSession.id
             )
             // A real process exit (including one we asked for via
-            // closeSession) means the ID must never be reused: forget it
-            // in the ledger and in the box so the next connect opens a
-            // fresh shell instead of attempting a doomed reattach.
+            // closeSession) means the ID must never be reused: forget it in
+            // the box so the next connect opens a fresh shell instead of
+            // attempting a doomed reattach. The daemon's own registry is the
+            // only session record; just tell the directory to re-read it.
             transport.onSessionExit = { id, _ in
                 daemonSession.clear(ifMatches: id)
                 Task { @MainActor in
-                    DaemonSessionLedger.shared.remove(id)
+                    DaemonSessionDirectory.shared.refresh()
                 }
             }
             return transport
@@ -113,10 +114,8 @@ final class TerminalTab: ObservableObject, Identifiable {
         } else if let id = daemonSession.id {
             XPCDaemonTransport.killSession(id)
         }
-        if let id = daemonSession.id {
-            DaemonSessionLedger.shared.remove(id)
-        }
         store.disconnect()
+        DaemonSessionDirectory.shared.refresh()
     }
 
     /// The window is going away but the shell should live on in the daemon;
@@ -131,7 +130,7 @@ final class TerminalTab: ObservableObject, Identifiable {
             let id = transport.currentSessionID
         else { return }
         daemonSession.id = id
-        DaemonSessionLedger.shared.add(id)
+        DaemonSessionDirectory.shared.refresh()
     }
 }
 

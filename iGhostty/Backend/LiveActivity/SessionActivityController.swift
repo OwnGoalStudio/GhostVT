@@ -78,9 +78,12 @@ final class SessionActivityController {
             }
         }
 
-        // The ledger counts every daemon session this app opened and hasn't
-        // killed; the ones no tab is attached to are running detached.
-        let detached = max(0, DaemonSessionLedger.shared.count - attachedIDs.count)
+        // Sessions the daemon holds that no tab here is attached to are
+        // running detached. The directory is a cache of the daemon's own
+        // registry — the one source that actually knows.
+        let detached = DaemonSessionDirectory.shared.sessions
+            .filter { !attachedIDs.contains($0.id) }
+            .count
         return TerminalSessionAttributes.ContentState(
             sessions: Array(sessions.prefix(Self.listLimit)),
             overflowCount: max(0, sessions.count - Self.listLimit),

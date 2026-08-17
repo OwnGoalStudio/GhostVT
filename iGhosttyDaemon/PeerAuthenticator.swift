@@ -30,27 +30,37 @@ final class PeerAuthenticator {
         let uid = token.val.1
         guard pid > 1 else {
             DaemonLog.server.error("peer denied: implausible pid \(pid)")
+            DaemonFileLog.log("peer denied: implausible pid \(pid)")
             return nil
         }
         guard uid == 0 || uid == Self.mobileUserID else {
             DaemonLog.server.error("peer \(pid) denied: uid \(uid)")
+            DaemonFileLog.log("peer \(pid) denied: uid \(uid)")
             return nil
         }
         guard hasRequiredEntitlements(token: &token) else {
             DaemonLog.server.error("peer \(pid) denied: missing client entitlement")
+            DaemonFileLog.log("peer \(pid) denied: missing client entitlement")
             return nil
         }
         guard let clientPath = JailbreakRoot.executablePath(pid: pid) else {
             DaemonLog.server.error("peer \(pid) denied: executable path unreadable")
+            DaemonFileLog.log("peer \(pid) denied: executable path unreadable")
             return nil
         }
 
         for installedPath in installedClientPaths {
-            guard isRootOwnedExecutable(installedPath) else { continue }
+            guard isRootOwnedExecutable(installedPath) else {
+                DaemonFileLog.log("peer \(pid): candidate \(installedPath) failed the root-owned check")
+                continue
+            }
             if clientPath == installedPath { return pid }
         }
         DaemonLog.server.error(
             "peer \(pid) denied: \(clientPath, privacy: .public) is not the installed client (expected \(self.installedClientPaths.joined(separator: ", "), privacy: .public))"
+        )
+        DaemonFileLog.log(
+            "peer \(pid) denied: \(clientPath) is not the installed client (expected \(installedClientPaths.joined(separator: ", ")))"
         )
         return nil
     }

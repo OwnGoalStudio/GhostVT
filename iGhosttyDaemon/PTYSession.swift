@@ -314,11 +314,37 @@ final class PTYSession {
             // Reaped so the child does not linger as a zombie: the process
             // source is already cancelled, so nothing else ever will, and
             // leaked process-table entries are their own kind of growth.
-            // SIGKILL cannot be caught or blocked, so this returns at once.
-            var status: Int32 = 0
-            while waitpid(childPID, &status, 0) < 0, errno == EINTR {}
+            //
+            // Never with a blocking wait, though. This runs on the daemon's
+            // one control queue, and a blocking `waitpid` here once froze
+            // the entire daemon — listener and all — when the grace-kill
+            // path met a child the kernel was slow to end. WNOHANG polling
+            // keeps the queue alive no matter what the child does.
+            Self.reapWithoutBlocking(childPID, on: queue)
         }
         close(master)
+    }
+
+    /// WNOHANG-polls the killed child off the queue instead of blocking on
+    /// it. Gives up after ~5s; a zombie then is the kernel's problem, not a
+    /// deaf daemon.
+    private static func reapWithoutBlocking(
+        _ pid: pid_t,
+        on queue: DispatchQueue,
+        attempt: Int = 0
+    ) {
+        var status: Int32 = 0
+        let result = waitpid(pid, &status, WNOHANG)
+        if result == pid || (result < 0 && errno != EINTR) {
+            return
+        }
+        guard attempt < 25 else {
+            DaemonFileLog.log("child \(pid) not reapable after SIGKILL, leaving it")
+            return
+        }
+        queue.asyncAfter(deadline: .now() + 0.2) {
+            reapWithoutBlocking(pid, on: queue, attempt: attempt + 1)
+        }
     }
 
     // MARK: - Internals

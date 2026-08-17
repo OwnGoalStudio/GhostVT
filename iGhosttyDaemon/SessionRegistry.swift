@@ -67,6 +67,9 @@ final class SessionRegistry {
         DaemonLog.sessions.info(
             "session \(id) spawned \(plan.command.first ?? "?", privacy: .public), \(self.sessions.count)/\(iGhosttyProtocol.maximumSessions) held"
         )
+        DaemonFileLog.log(
+            "session \(id) spawned \(plan.command.first ?? "?"), \(sessions.count)/\(iGhosttyProtocol.maximumSessions) held"
+        )
         session.start(
             onOutput: { [weak self] sessionID, data in
                 self?.attachments[sessionID]?.deliverOutput(sessionID: sessionID, data: data)
@@ -132,6 +135,9 @@ final class SessionRegistry {
     private func handleExit(sessionID: UInt64, exitCode: Int32) {
         DaemonLog.sessions.info(
             "session \(sessionID) exited with status \(exitCode), \(self.sessions.count - 1) remain"
+        )
+        DaemonFileLog.log(
+            "session \(sessionID) exited with status \(exitCode), \(sessions.count - 1) remain"
         )
         attachments[sessionID]?.deliverExit(sessionID: sessionID, exitCode: exitCode)
         discard(sessionID)

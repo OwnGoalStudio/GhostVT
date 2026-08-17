@@ -27,16 +27,6 @@ final class TabManager: ObservableObject {
     @Published var closeRequest: TerminalTab?
 
     init() {
-        // The first window of a cold launch reattaches to the daemon
-        // sessions that survived the previous run; every other window starts
-        // with one fresh tab.
-        let resumable = DaemonSessionLedger.shared.claimPersisted()
-        if resumable.isEmpty {
-            newTab()
-        } else {
-            tabs = resumable.map { TerminalTab(resumeDaemonSessionID: $0) }
-            activeTabID = tabs.last?.id
-        }
         SessionActivityController.shared.register(self) { [weak self] in
             self.map {
                 SessionActivityController.WindowSnapshot(
@@ -44,6 +34,24 @@ final class TabManager: ObservableObject {
                     activeTabID: $0.activeTabID
                 )
             }
+        }
+        // The first window of a cold launch asks the daemon what survived the
+        // previous run and reattaches to it; every other window (and a launch
+        // with nothing to resume) starts with one fresh tab. The daemon is
+        // the only record — nothing about sessions is persisted app-side.
+        DaemonSessionDirectory.shared.claimResumable { [weak self] resumable in
+            guard let self else { return }
+            guard !resumable.isEmpty else {
+                if tabs.isEmpty { newTab() }
+                return
+            }
+            withAnimation(Self.tabTransition) {
+                self.tabs.append(
+                    contentsOf: resumable.map { TerminalTab(resumeDaemonSessionID: $0) }
+                )
+                self.activeTabID = self.tabs.last?.id
+            }
+            SessionActivityController.shared.refresh()
         }
     }
 

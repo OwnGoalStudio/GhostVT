@@ -152,6 +152,79 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         }
     }
 
+    /// One daemon-held session, as `listSessions` reports it. The daemon is
+    /// the only book of record — the app deliberately persists nothing.
+    public struct SessionSummary: Equatable, Sendable {
+        public let id: UInt64
+        public let title: String
+        public let columns: UInt16
+        public let rows: UInt16
+        public let isAttached: Bool
+    }
+
+    /// Ask the daemon what it is holding, over a one-shot connection of its
+    /// own. Completion fires exactly once, on an arbitrary queue: rows on
+    /// success, nil when the daemon is unreachable or does not answer within
+    /// the timeout (a hung daemon must not hang cold launch with it).
+    public static func listSessions(
+        timeout: TimeInterval = 6,
+        completion: @escaping @Sendable ([SessionSummary]?) -> Void
+    ) {
+        let queue = DispatchQueue(label: "wiki.qaq.ighostty.client.list", qos: .userInitiated)
+        let finished = FinishOnce(completion)
+        guard let rawConnection = iGhosttyProtocol.serviceName.withCString({
+            ighosttyCreateMachServiceConnection($0, queue, 0)
+        }) else {
+            finished.finish(nil)
+            return
+        }
+        // Boxed so the reply and timeout closures can carry it across the
+        // Sendable boundary; all use stays on the one serial `queue`.
+        let link = XPCConnectionBox(rawConnection)
+        xpc_connection_set_event_handler(link.connection) { _ in }
+        xpc_connection_activate(link.connection)
+        queue.asyncAfter(deadline: .now() + timeout) {
+            if finished.finish(nil) {
+                xpc_connection_cancel(link.connection)
+            }
+        }
+        xpc_connection_send_message_with_reply(link.connection, makeMessage(.hello), queue) { reply in
+            guard Self.replyCode(of: reply) == .success else {
+                if finished.finish(nil) {
+                    xpc_connection_cancel(link.connection)
+                }
+                return
+            }
+            xpc_connection_send_message_with_reply(
+                link.connection, makeMessage(.listSessions), queue
+            ) { reply in
+                defer { xpc_connection_cancel(link.connection) }
+                guard Self.replyCode(of: reply) == .success,
+                      let array = xpc_dictionary_get_value(reply, iGhosttyWireKey.sessions),
+                      xpc_get_type(array) == XPC_TYPE_ARRAY
+                else {
+                    finished.finish(nil)
+                    return
+                }
+                var rows: [SessionSummary] = []
+                for index in 0 ..< xpc_array_get_count(array) {
+                    let entry = xpc_array_get_value(array, index)
+                    guard xpc_get_type(entry) == XPC_TYPE_DICTIONARY else { continue }
+                    let title = xpc_dictionary_get_string(entry, iGhosttyWireKey.title)
+                        .map { String(cString: $0) } ?? ""
+                    rows.append(SessionSummary(
+                        id: xpc_dictionary_get_uint64(entry, iGhosttyWireKey.sessionID),
+                        title: title,
+                        columns: UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(entry, iGhosttyWireKey.columns)),
+                        rows: UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(entry, iGhosttyWireKey.rows)),
+                        isAttached: xpc_dictionary_get_bool(entry, iGhosttyWireKey.isAttached)
+                    ))
+                }
+                finished.finish(rows)
+            }
+        }
+    }
+
     /// Kill a session over a connection of its own, for when the tab's
     /// transport has none — a failed connect, a detach, a daemon restart.
     /// Without this the kill silently goes nowhere, the shell outlives its
@@ -354,6 +427,10 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     }
 
     private func replyCode(_ reply: xpc_object_t) -> iGhosttyReplyCode {
+        Self.replyCode(of: reply)
+    }
+
+    private static func replyCode(of reply: xpc_object_t) -> iGhosttyReplyCode {
         guard xpc_get_type(reply) == XPC_TYPE_DICTIONARY,
               xpc_dictionary_get_uint64(reply, iGhosttyWireKey.version) == iGhosttyProtocol.version,
               let code = iGhosttyReplyCode(
@@ -406,5 +483,36 @@ private extension NSLock {
         lock()
         defer { unlock() }
         return body()
+    }
+}
+
+/// Carries an xpc_connection_t across Sendable closure boundaries. XPC
+/// objects are thread-safe; the annotation is what the type system lacks.
+private final class XPCConnectionBox: @unchecked Sendable {
+    let connection: xpc_connection_t
+    init(_ connection: xpc_connection_t) {
+        self.connection = connection
+    }
+}
+
+/// Guarantees a completion fires exactly once across the reply, error, and
+/// timeout paths of a one-shot query. `finish` returns whether this call won.
+private final class FinishOnce<Value>: @unchecked Sendable {
+    private let lock = NSLock()
+    private var completion: (@Sendable (Value) -> Void)?
+
+    init(_ completion: @escaping @Sendable (Value) -> Void) {
+        self.completion = completion
+    }
+
+    @discardableResult
+    func finish(_ value: Value) -> Bool {
+        lock.lock()
+        let completion = completion
+        self.completion = nil
+        lock.unlock()
+        guard let completion else { return false }
+        completion(value)
+        return true
     }
 }

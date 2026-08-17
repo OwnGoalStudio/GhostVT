@@ -5,6 +5,8 @@ if [ "${1:-}" = remove ] || [ "${1:-}" = deconfigure ]; then
     [ -x "$launchctl" ] || launchctl=/bin/launchctl
     if [ -x "$launchctl" ]; then
         "$launchctl" bootout system/wiki.qaq.ighosttyd 2>/dev/null || true
+        "$launchctl" bootout user/501/wiki.qaq.ighosttyd 2>/dev/null || true
+        "$launchctl" bootout gui/501/wiki.qaq.ighosttyd 2>/dev/null || true
     fi
     uicache=@PREFIX@/usr/bin/uicache
     if [ -x "$uicache" ]; then

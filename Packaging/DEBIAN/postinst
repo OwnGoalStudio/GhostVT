@@ -8,7 +8,14 @@ launch_plist=@PREFIX@/Library/LaunchDaemons/wiki.qaq.ighosttyd.plist
 launchctl=@PREFIX@/usr/bin/launchctl
 [ -x "$launchctl" ] || launchctl=/bin/launchctl
 if [ -x "$launchctl" ]; then
+    # roothide's launchctl lands jbroot daemons in the per-user domain even
+    # when asked for system, so an upgrade that only boots out system/ leaves
+    # the old instance running and holding the mach service — the fresh one
+    # then crash-loops on a dead listener and the app sees nothing but
+    # "connection lost". Boot out every domain the service can live in.
     "$launchctl" bootout system/wiki.qaq.ighosttyd 2>/dev/null || true
+    "$launchctl" bootout user/501/wiki.qaq.ighosttyd 2>/dev/null || true
+    "$launchctl" bootout gui/501/wiki.qaq.ighosttyd 2>/dev/null || true
     "$launchctl" bootstrap system "$launch_plist"
 fi
 

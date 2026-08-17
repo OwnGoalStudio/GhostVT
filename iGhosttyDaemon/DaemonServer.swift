@@ -53,11 +53,15 @@ final class DaemonServer {
         DaemonLog.server.info(
             "listening on \(iGhosttyProtocol.serviceName, privacy: .public), pid \(getpid())"
         )
+        DaemonFileLog.log(
+            "listening on \(iGhosttyProtocol.serviceName), uid \(getuid()) euid \(geteuid())"
+        )
     }
 
     private func accept(_ event: xpc_object_t) {
         guard xpc_get_type(event) == XPC_TYPE_CONNECTION else { return }
         guard let clientPID = authenticator.authenticate(event) else {
+            DaemonFileLog.log("peer rejected, connection canceled")
             xpc_connection_cancel(event)
             return
         }
@@ -73,6 +77,7 @@ final class DaemonServer {
         peers[ObjectIdentifier(peer)] = peer
         peer.activate()
         DaemonLog.server.info("peer \(clientPID) connected, \(self.peers.count) peer(s)")
+        DaemonFileLog.log("peer \(clientPID) connected, \(peers.count) peer(s)")
     }
 
     /// The peer went away. Its sessions stay: detaching is not closing, and
@@ -80,5 +85,6 @@ final class DaemonServer {
     private func peerInvalidated(_ peer: PeerSession) {
         peers.removeValue(forKey: ObjectIdentifier(peer))
         DaemonLog.server.info("peer gone, \(self.peers.count) peer(s) remain")
+        DaemonFileLog.log("peer gone, \(peers.count) peer(s) remain")
     }
 }
