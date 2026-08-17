@@ -77,6 +77,10 @@ private struct LockScreenView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
+        // The tint below is dark no matter what the system looks like, so the
+        // semantic colors (.primary/.secondary/.tertiary) must resolve dark
+        // too — in light mode they'd come out black-on-black otherwise.
+        .environment(\.colorScheme, .dark)
         .activityBackgroundTint(Color.black.opacity(0.55))
         .activitySystemActionForegroundColor(Palette.accent)
     }
