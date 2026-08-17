@@ -7,6 +7,7 @@ struct TabSwitcherView: View {
     @ObservedObject private var theme = AppTheme.shared
     @Environment(\.colorScheme) private var colorScheme
     @State private var showsSettings = false
+    @State private var confirmsCloseAll = false
 
     private let columns = [
         GridItem(.adaptive(minimum: 170, maximum: 280), spacing: 14),
@@ -49,10 +50,21 @@ struct TabSwitcherView: View {
             SettingsSheet()
         }
         .closeTabConfirmation(tabManager)
+        .alert("Close All Tabs?", isPresented: $confirmsCloseAll) {
+            Button("Close All", role: .destructive) {
+                tabManager.closeAll()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This closes every terminal and stops everything running in them.")
+        }
     }
 
     private var tabCountLabel: String {
-        tabManager.tabs.count == 1 ? "1 Tab" : "\(tabManager.tabs.count) Tabs"
+        String.localizedStringWithFormat(
+            NSLocalizedString("%lld Tabs", comment: "Count of open tabs, as a heading"),
+            tabManager.tabs.count
+        )
     }
 
     private var newTabCard: some View {
@@ -91,7 +103,23 @@ struct TabSwitcherView: View {
                 .barGlass(in: Circle())
                 .accessibilityLabel("Settings")
 
-                Spacer()
+                Spacer(minLength: 8)
+
+                // Only with tabs to close: an empty window already says so in
+                // the grid, and a dead destructive control beside it reads as
+                // a bug.
+                if !tabManager.tabs.isEmpty {
+                    Button(action: { requestCloseAll() }) {
+                        Text("Close All")
+                            .font(.body.weight(.medium))
+                            .foregroundColor(.red)
+                            .padding(.horizontal, 16)
+                            .frame(height: 44)
+                    }
+                    .barGlass(in: Capsule())
+
+                    Spacer(minLength: 8)
+                }
 
                 Button(action: { dismiss() }) {
                     Text("Done")
@@ -105,6 +133,16 @@ struct TabSwitcherView: View {
             .padding(.vertical, 6)
         }
         .buttonStyle(.plain)
+    }
+
+    /// Same rule as a single tab's ×: ask first when live shells would die,
+    /// close straight away when there is nothing to lose.
+    private func requestCloseAll() {
+        if tabManager.hasLiveSessions {
+            confirmsCloseAll = true
+        } else {
+            tabManager.closeAll()
+        }
     }
 }
 

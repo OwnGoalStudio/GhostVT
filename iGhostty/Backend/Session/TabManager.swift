@@ -101,14 +101,35 @@ final class TabManager: ObservableObject {
     }
 
     /// Scene teardown: the window is gone, but its shells belong to the
-    /// daemon — detach so they survive for the next launch.
-    func closeAllTabs() {
+    /// daemon — detach so they survive for the next launch. Named apart from
+    /// `closeAll()` because the difference is the whole point: this one keeps
+    /// the shells running, that one kills them.
+    func detachAllTabs() {
         for tab in tabs {
             tab.detach()
         }
         tabs.removeAll()
         activeTabID = nil
         SessionActivityController.shared.refresh()
+    }
+
+    /// The user emptied the window from the tab switcher: every shell dies,
+    /// exactly as it would from its own ×. Confirmed by the caller.
+    func closeAll() {
+        for tab in tabs {
+            tab.close()
+        }
+        withAnimation(Self.tabTransition) {
+            tabs.removeAll()
+            activeTabID = nil
+        }
+        SessionActivityController.shared.refresh()
+    }
+
+    /// Whether closing everything would kill a live shell — the case worth a
+    /// confirmation, mirroring `requestClose(_:)` for a single tab.
+    var hasLiveSessions: Bool {
+        tabs.contains { $0.hasLiveSession }
     }
 
     func activateAdjacentTab(offset: Int) {

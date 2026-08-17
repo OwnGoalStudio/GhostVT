@@ -79,7 +79,9 @@ struct SettingsSheet: View {
 
     private var shellSection: some View {
         Section {
-            TextField("/bin/zsh", text: $shellPath)
+            // A literal example, not copy: the StringProtocol overload keeps
+            // it out of the string catalog.
+            TextField(Self.shellPlaceholder, text: $shellPath)
                 .keyboardType(.asciiCapable)
                 .textInputAutocapitalization(.never)
                 .disableAutocorrection(true)
@@ -89,13 +91,16 @@ struct SettingsSheet: View {
         } footer: {
             Text(
                 """
-                A path inside the jailbreak root, like /bin/zsh — not a \
-                jbroot-prefixed path, which would break on the next \
-                jailbreak. Leave empty to sign in through login.
+                The program every new terminal runs, for example /bin/zsh. \
+                Use a plain path inside the jailbreak root: a path that \
+                starts with jbroot stops working after the next jailbreak. \
+                Leave this empty to use the default login shell.
                 """
             )
         }
     }
+
+    private static let shellPlaceholder = "/bin/zsh"
 
     private var aboutSection: some View {
         Section("About") {
@@ -185,7 +190,7 @@ struct ThemeListView: View {
                     RoundedRectangle(cornerRadius: 6, style: .continuous)
                         .strokeBorder(Color.primary.opacity(0.15), lineWidth: 1)
                 }
-            Text("$_")
+            Text(verbatim: "$_")
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                 .foregroundColor(Color(hex: definition.foreground))
         }

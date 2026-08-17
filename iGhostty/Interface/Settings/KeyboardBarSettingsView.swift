@@ -49,7 +49,7 @@ struct KeyboardBarSettingsView: View {
         } header: {
             Text("Preview")
         } footer: {
-            Text("The bar above the keyboard shows these keys in this order and scrolls sideways when they don't fit.")
+            Text("The bar above the keyboard shows these keys in this order. If they do not all fit, you can scroll it sideways.")
         }
     }
 
@@ -77,7 +77,7 @@ struct KeyboardBarSettingsView: View {
         } header: {
             Text("On the Bar")
         } footer: {
-            Text("Drag to reorder. Removed dividers and custom keys disappear; standard keys move back to the list below.")
+            Text("Drag to reorder the keys. Removing a standard key returns it to the list below. Dividers and custom keys are deleted.")
         }
     }
 
@@ -118,7 +118,7 @@ struct KeyboardBarSettingsView: View {
         } header: {
             Text("More Keys")
         } footer: {
-            Text("A custom key types the characters you give it, with sticky modifiers applied.")
+            Text("A custom key types the characters you enter, together with any modifier keys that are switched on.")
         }
     }
 
@@ -193,6 +193,8 @@ private struct CustomKeySheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var text = ""
 
+    private static let placeholder = "|"
+
     private var trimmed: String {
         text.trimmingCharacters(in: .whitespacesAndNewlines)
     }
@@ -205,12 +207,14 @@ private struct CustomKeySheet: View {
         NavigationView {
             Form {
                 Section {
-                    TextField("|", text: $text)
+                    // A literal example, not copy: the StringProtocol
+                    // overload keeps it out of the string catalog.
+                    TextField(Self.placeholder, text: $text)
                         .font(.body.monospaced())
                         .textInputAutocapitalization(.never)
                         .disableAutocorrection(true)
                 } footer: {
-                    Text("Up to three characters, sent as typed. One letter with Control armed becomes the control sequence, like any typed key.")
+                    Text("Up to three characters, sent exactly as typed. A single letter works with Control just like a letter on the keyboard.")
                 }
             }
             .navigationTitle("Custom Key")

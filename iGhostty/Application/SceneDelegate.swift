@@ -29,6 +29,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidDisconnect(_: UIScene) {
-        tabManager.closeAllTabs()
+        tabManager.detachAllTabs()
     }
 }

@@ -92,7 +92,11 @@ struct RootView: View {
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                if !isRegularWidth, !keyboard.isVisible {
+                // An empty window hides the bar entirely: with no tab there is
+                // no title to show, and a lone new-tab button plus a switcher
+                // onto an empty grid only competes with the empty state's own
+                // call to action.
+                if !isRegularWidth, !keyboard.isVisible, !tabManager.tabs.isEmpty {
                     BottomBar(
                         tabManager: tabManager,
                         onShowSettings: { showsSettingsSheet = true },

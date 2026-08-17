@@ -236,15 +236,23 @@ private extension TerminalSessionAttributes.Session {
     var headline: String {
         if !title.isEmpty { return title }
         if !shell.isEmpty { return shell }
-        if let number { return "session \(number)" }
-        return "shell"
+        if let number {
+            return String.localizedStringWithFormat(
+                NSLocalizedString(
+                    "Session %lld",
+                    comment: "Name of a shell that has not set a title"
+                ),
+                Int(clamping: number)
+            )
+        }
+        return String(localized: "Terminal")
     }
 
     /// The right-hand column: where the shell is, or why it isn't there yet.
     var detail: String? {
         switch status {
-        case .starting: return "starting…"
-        case .failed: return "failed"
+        case .starting: return String(localized: "Starting…")
+        case .failed: return String(localized: "Failed")
         case .live: return directory.isEmpty ? nil : directory
         }
     }

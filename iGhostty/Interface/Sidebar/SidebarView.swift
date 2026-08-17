@@ -68,7 +68,10 @@ struct SidebarView: View {
     }
 
     private var countLabel: String {
-        tabManager.tabs.count == 1 ? "1 Tab" : "\(tabManager.tabs.count) Tabs"
+        String.localizedStringWithFormat(
+            NSLocalizedString("%lld Tabs", comment: "Count of open tabs, as a heading"),
+            tabManager.tabs.count
+        )
     }
 }
 

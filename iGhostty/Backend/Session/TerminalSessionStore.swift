@@ -52,7 +52,7 @@ final class TerminalSessionStore: ObservableObject {
 
     /// Where this session's bytes go, for titles and the sidebar subtitle.
     var endpointDescription: String {
-        relay.transport?.endpointDescription ?? "Terminal"
+        relay.transport?.endpointDescription ?? String(localized: "Terminal")
     }
 
     /// The transport factory is the backend seam: tabs hand in the daemon
@@ -156,7 +156,9 @@ final class TerminalSessionStore: ObservableObject {
     private func scheduleReconnect(lastReason: String?) {
         guard reconnectAttempt < Self.reconnectAttemptLimit else {
             reconnectAttempt = 0
-            let reason = lastReason ?? "the daemon connection could not be recovered"
+            let reason = lastReason ?? String(
+                localized: "The connection to the terminal daemon could not be restored."
+            )
             status = .failed(reason)
             printStatusLine("disconnected: \(reason)")
             return

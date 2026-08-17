@@ -59,9 +59,18 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         set { lock.locked { _onSessionExit = newValue } }
     }
 
+    /// Shown to the user — a tab's title before the shell sets one, and the
+    /// sidebar's subtitle — so it says "Session 7", not "ighosttyd session 7".
+    /// The daemon-side id is what makes two untitled tabs tell apart.
     public var endpointDescription: String {
         lock.locked {
-            sessionID.map { "ighosttyd session \($0)" } ?? "ighosttyd"
+            guard let sessionID else {
+                return String(localized: "Terminal")
+            }
+            return String.localizedStringWithFormat(
+                NSLocalizedString("Session %lld", comment: "Tab title for a shell that has not set one"),
+                Int(clamping: sessionID)
+            )
         }
     }
 
@@ -253,7 +262,9 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         guard let connection = iGhosttyProtocol.serviceName.withCString({
             ighosttyCreateMachServiceConnection($0, queue, 0)
         }) else {
-            emit(.state(.disconnected(reason: "terminal daemon is unavailable")))
+            emit(.state(.disconnected(
+                reason: String(localized: "The terminal daemon is not running.")
+            )))
             return
         }
 
@@ -269,7 +280,9 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         xpc_connection_send_message_with_reply(connection, hello, queue) { [weak self] reply in
             guard let self else { return }
             guard self.replyCode(reply) == .success else {
-                self.teardown(reason: "daemon rejected the connection")
+                self.teardown(
+                    reason: String(localized: "The terminal daemon refused the connection.")
+                )
                 return
             }
             self.openOrAttachSession()
@@ -348,7 +361,9 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             // the connection is already forgotten then, and it must not be
             // reported as an interruption.
             guard dropConnection() else { return }
-            emit(.state(.interrupted(reason: "daemon connection interrupted")))
+            emit(.state(.interrupted(
+                reason: String(localized: "The connection to the terminal daemon was interrupted.")
+            )))
             return
         }
         guard type == XPC_TYPE_DICTIONARY,
@@ -375,8 +390,14 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             onSessionExit?(eventSessionID, exitCode)
             teardown(
                 reason: exitCode == 0
-                    ? "shell exited"
-                    : "shell exited with status \(exitCode)"
+                    ? String(localized: "The shell exited.")
+                    : String.localizedStringWithFormat(
+                        NSLocalizedString(
+                            "The shell exited with status %lld.",
+                            comment: "Why a terminal stopped; %lld is the process exit status"
+                        ),
+                        Int(exitCode)
+                    )
             )
         }
     }
@@ -465,15 +486,18 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
 
     private static func describe(_ code: iGhosttyReplyCode) -> String {
         switch code {
-        case .success: "ok"
-        case .invalidRequest: "the daemon rejected the request"
-        case .unsupportedVersion: "app and daemon versions do not match"
-        case .handshakeRequired: "handshake missing"
-        case .sessionLimitReached: "too many open sessions"
-        case .unknownSession: "session no longer exists"
-        case .sessionBusy: "session is attached elsewhere"
-        case .spawnFailed: "no usable shell was found"
-        case .operationFailed: "the daemon could not complete the request"
+        // `.success` never reaches here — both callers describe a failure —
+        // so it takes the generic wording rather than inventing a sentence
+        // that would read as nonsense in an error card.
+        case .success, .operationFailed:
+            String(localized: "The terminal daemon could not complete the request.")
+        case .invalidRequest: String(localized: "The terminal daemon rejected the request.")
+        case .unsupportedVersion: String(localized: "The app and the terminal daemon are different versions. Reinstall iGhostty to update both.")
+        case .handshakeRequired: String(localized: "The connection to the terminal daemon was not set up.")
+        case .sessionLimitReached: String(localized: "Too many terminals are open. Close one and try again.")
+        case .unknownSession: String(localized: "This terminal no longer exists.")
+        case .sessionBusy: String(localized: "This terminal is already open in another window.")
+        case .spawnFailed: String(localized: "No usable shell was found. Check the default shell in Settings.")
         }
     }
 }

@@ -18,7 +18,7 @@ struct EmptyTabsView: View {
                 .foregroundColor(.secondary)
             Text("No Open Tabs")
                 .font(.headline)
-            Text("Closed shells are gone for good; a new tab starts a fresh one.")
+            Text("A closed terminal cannot be reopened. Start a new one whenever you need it.")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

@@ -31,7 +31,7 @@ struct CloseTabConfirmation: ViewModifier {
             }
             Button("Cancel", role: .cancel) {}
         } message: { _ in
-            Text("The shell and anything running in it will be terminated.")
+            Text("This closes the terminal and stops everything running in it.")
         }
     }
 }

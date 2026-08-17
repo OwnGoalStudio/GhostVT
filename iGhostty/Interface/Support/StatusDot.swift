@@ -21,7 +21,7 @@ struct StatusDot: View {
 
     private var accessibilityDescription: LocalizedStringKey {
         switch status {
-        case .idle: "Offline"
+        case .idle: "Not Connected"
         case .connecting: "Connecting…"
         case .connected: "Connected"
         case .failed: "Connection failed"

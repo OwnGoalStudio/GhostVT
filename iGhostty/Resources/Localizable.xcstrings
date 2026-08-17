@@ -1,9 +1,6 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "$_" : {
-      "shouldTranslate" : false
-    },
     "%@ (Default)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -72,135 +69,324 @@
     "%lld" : {
       "shouldTranslate" : false
     },
-    "/bin/zsh" : {
-      "shouldTranslate" : false
-    },
-    "A custom key types the characters you give it, with sticky modifiers applied." : {
+    "%lld Tabs" : {
+      "comment" : "Count of open tabs, as a heading",
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Eine eigene Taste tippt die angegebenen Zeichen, mit angewendeten Sticky-Modifikatoren."
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Tab"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Tabs"
+                }
+              }
+            }
+          }
+        },
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Tab"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld Tabs"
+                }
+              }
+            }
           }
         },
         "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Una tecla personalizada escribe los caracteres que le des, aplicando los modificadores fijados."
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pestaña"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld pestañas"
+                }
+              }
+            }
           }
         },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Une touche personnalisée saisit les caractères donnés, avec les modificateurs verrouillés appliqués."
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld onglet"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld onglets"
+                }
+              }
+            }
           }
         },
         "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un tasto personalizzato digita i caratteri indicati, applicando i modificatori fissati."
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld scheda"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld schede"
+                }
+              }
+            }
           }
         },
         "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "カスタムキーは指定した文字を入力し、固定した修飾キーが適用されます。"
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 個のタブ"
+                }
+              }
+            }
           }
         },
         "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "사용자 지정 키는 지정한 문자를 입력하며, 고정된 수정 키가 적용됩니다."
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "탭 %lld개"
+                }
+              }
+            }
           }
         },
         "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Uma tecla personalizada digita os caracteres definidos, com modificadores fixados aplicados."
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld aba"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld abas"
+                }
+              }
+            }
           }
         },
         "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Своя клавиша вводит заданные символы с учётом залипших модификаторов."
+          "variations" : {
+            "plural" : {
+              "few" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld вкладки"
+                }
+              },
+              "many" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld вкладок"
+                }
+              },
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld вкладка"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld вкладки"
+                }
+              }
+            }
           }
         },
         "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自定义按键会输入你设定的字符，并应用粘滞修饰键。"
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 个标签页"
+                }
+              }
+            }
           }
         },
         "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自訂按鍵會輸入你設定的字元，並套用相黏修飾鍵。"
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld 個分頁"
+                }
+              }
+            }
           }
         }
       }
     },
-    "A path inside the jailbreak root, like /bin/zsh — not a jbroot-prefixed path, which would break on the next jailbreak. Leave empty to sign in through login." : {
+    "A closed terminal cannot be reopened. Start a new one whenever you need it." : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ein Pfad innerhalb des Jailbreak-Roots, z. B. /bin/zsh – kein mit jbroot präfixierter Pfad, der beim nächsten Jailbreak nicht mehr funktioniert. Leer lassen, um sich über login anzumelden."
+            "value" : "Ein geschlossenes Terminal lässt sich nicht wieder öffnen. Starte jederzeit ein neues."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Una ruta dentro de la raíz del jailbreak, como /bin/zsh, no una ruta con el prefijo jbroot, que dejaría de funcionar en el próximo jailbreak. Déjalo vacío para iniciar sesión mediante login."
+            "value" : "Un terminal cerrado no se puede volver a abrir. Crea uno nuevo cuando lo necesites."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un chemin à l'intérieur de la racine du jailbreak, par exemple /bin/zsh — et non un chemin préfixé par jbroot, qui cesserait de fonctionner au prochain jailbreak. Laissez vide pour vous connecter via login."
+            "value" : "Un terminal fermé ne peut pas être rouvert. Démarrez-en un nouveau quand vous en avez besoin."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un percorso all'interno della root del jailbreak, ad esempio /bin/zsh — non un percorso con prefisso jbroot, che si romperebbe al prossimo jailbreak. Lascia vuoto per accedere tramite login."
+            "value" : "Un terminale chiuso non può essere riaperto. Avviane uno nuovo quando ti serve."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ジェイルブレイクルート内のパス（例: /bin/zsh）です。jbroot を前置したパスは次回のジェイルブレイクで壊れるため使用しないでください。空欄の場合は login 経由でサインインします。"
+            "value" : "閉じたターミナルは再び開けません。必要なときに新しく開いてください。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "탈옥 루트 안의 경로입니다(예: /bin/zsh). jbroot 접두어가 붙은 경로는 다음 탈옥 때 깨지므로 사용하지 마십시오. 비워 두면 login을 통해 로그인합니다."
+            "value" : "닫은 터미널은 다시 열 수 없습니다. 필요할 때 새로 시작하세요."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Um caminho dentro da raiz do jailbreak, como /bin/zsh — não um caminho com prefixo jbroot, que deixaria de funcionar no próximo jailbreak. Deixe vazio para entrar por meio do login."
+            "value" : "Um terminal fechado não pode ser reaberto. Crie um novo quando precisar."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Путь внутри корня джейлбрейка, например /bin/zsh, — не путь с префиксом jbroot, который перестанет работать после следующего джейлбрейка. Оставьте пустым, чтобы входить через login."
+            "value" : "Закрытый терминал нельзя открыть снова. Создайте новый, когда он понадобится."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "越狱根目录内的路径，例如 /bin/zsh —— 不要使用带 jbroot 前缀的路径，那会在下次越狱后失效。留空则通过 login 登录。"
+            "value" : "已关闭的终端无法重新打开。需要时新建一个即可。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "越獄根目錄內的路徑，例如 /bin/zsh —— 請勿使用帶 jbroot 前綴的路徑，那會在下次越獄後失效。留空則透過 login 登入。"
+            "value" : "已關閉的終端機無法重新開啟。需要時新增一個即可。"
+          }
+        }
+      }
+    },
+    "A custom key types the characters you enter, together with any modifier keys that are switched on." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eine eigene Taste tippt die von dir eingegebenen Zeichen, zusammen mit allen aktivierten Modifikatortasten."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una tecla personalizada escribe los caracteres que introduzcas, junto con las teclas modificadoras que estén activadas."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une touche personnalisée saisit les caractères que vous entrez, avec les touches de modification activées."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un tasto personalizzato digita i caratteri che inserisci, insieme ai tasti modificatori attivi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カスタムキーは、入力した文字を、オンになっている修飾キーとともに送信します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용자 지정 키는 입력한 문자를 켜져 있는 수정 키와 함께 입력합니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma tecla personalizada digita os caracteres que você inserir, junto com as teclas modificadoras que estiverem ativadas."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Своя клавиша вводит указанные символы вместе с включёнными клавишами-модификаторами."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义按键会输入你填写的字符，并同时应用已开启的修饰键。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自訂按鍵會輸入你填寫的字元，並同時套用已開啟的修飾鍵。"
           }
         }
       }
@@ -471,7 +657,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eigene Taste hinzufügen …"
+            "value" : "Eigene Taste hinzufügen…"
           }
         },
         "es" : {
@@ -789,71 +975,6 @@
         }
       }
     },
-    "Close Tab" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tab schließen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cerrar pestaña"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fermer l'onglet"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chiudi scheda"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "タブを閉じる"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "탭 닫기"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fechar aba"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Закрыть вкладку"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关闭标签页"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "關閉分頁"
-          }
-        }
-      }
-    },
     "Close “%@”?" : {
       "localizations" : {
         "de" : {
@@ -907,78 +1028,208 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "关闭“%@”?"
+            "value" : "关闭“%@”？"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "關閉「%@」?"
+            "value" : "關閉「%@」？"
           }
         }
       }
     },
-    "Closed shells are gone for good; a new tab starts a fresh one." : {
+    "Close All" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Geschlossene Shells sind endgültig weg; ein neuer Tab startet eine frische."
+            "value" : "Alle schließen"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Los shells cerrados desaparecen para siempre; una pestaña nueva inicia uno nuevo."
+            "value" : "Cerrar todo"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les shells fermés sont définitivement perdus ; un nouvel onglet en démarre un autre."
+            "value" : "Tout fermer"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le shell chiuse sono perse per sempre; una nuova scheda ne avvia una nuova."
+            "value" : "Chiudi tutto"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "閉じたシェルは元に戻せません。新しいタブで新しいシェルが起動します。"
+            "value" : "すべて閉じる"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "닫힌 셸은 되돌릴 수 없습니다. 새 탭은 새 셸을 시작합니다."
+            "value" : "모두 닫기"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shells fechados se vão para sempre; uma nova aba inicia um novo."
+            "value" : "Fechar tudo"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Закрытые оболочки исчезают навсегда; новая вкладка запускает новую."
+            "value" : "Закрыть все"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已关闭的 shell 无法恢复；新标签页会启动一个全新的 shell。"
+            "value" : "全部关闭"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已關閉的 shell 無法復原；新分頁會啟動全新的 shell。"
+            "value" : "全部關閉"
+          }
+        }
+      }
+    },
+    "Close All Tabs?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Tabs schließen?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cerrar todas las pestañas?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer tous les onglets ?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiudere tutte le schede?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてのタブを閉じますか?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 탭을 닫으시겠습니까?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechar todas as abas?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закрыть все вкладки?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭所有标签页？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關閉所有分頁？"
+          }
+        }
+      }
+    },
+    "Close Tab" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tab schließen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar pestaña"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer l’onglet"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiudi scheda"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タブを閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탭 닫기"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechar aba"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закрыть вкладку"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭标签页"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關閉分頁"
           }
         }
       }
@@ -1174,71 +1425,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在連線…"
-          }
-        }
-      }
-    },
-    "Connection failed" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verbindung fehlgeschlagen"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Error de conexión"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Échec de la connexion"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Connessione non riuscita"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "接続に失敗しました"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "연결 실패"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Falha na conexão"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не удалось подключиться"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "连接失败"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "連線失敗"
           }
         }
       }
@@ -1693,72 +1879,72 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "向下箭嘴"
+            "value" : "向下鍵"
           }
         }
       }
     },
-    "Drag to reorder. Removed dividers and custom keys disappear; standard keys move back to the list below." : {
+    "Drag to reorder the keys. Removing a standard key returns it to the list below. Dividers and custom keys are deleted." : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zum Umordnen ziehen. Entfernte Trenner und eigene Tasten verschwinden; Standardtasten wandern zurück in die Liste unten."
+            "value" : "Ziehe, um die Tasten neu anzuordnen. Eine entfernte Standardtaste kehrt in die Liste unten zurück. Trenner und eigene Tasten werden gelöscht."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arrastra para reordenar. Los separadores y teclas personalizadas eliminados desaparecen; las teclas estándar vuelven a la lista de abajo."
+            "value" : "Arrastra para reordenar las teclas. Al quitar una tecla estándar, vuelve a la lista de abajo. Los separadores y las teclas personalizadas se eliminan."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Faites glisser pour réorganiser. Les séparateurs et touches personnalisées supprimés disparaissent ; les touches standard retournent dans la liste ci-dessous."
+            "value" : "Faites glisser pour réorganiser les touches. Une touche standard retirée retourne dans la liste ci-dessous. Les séparateurs et les touches personnalisées sont supprimés."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trascina per riordinare. Divisori e tasti personalizzati rimossi scompaiono; i tasti standard tornano nell'elenco sotto."
+            "value" : "Trascina per riordinare i tasti. Un tasto standard rimosso torna nell’elenco qui sotto. I divisori e i tasti personalizzati vengono eliminati."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ドラッグで並べ替えます。削除した区切りとカスタムキーは消え、標準キーは下のリストに戻ります。"
+            "value" : "ドラッグしてキーを並べ替えます。標準キーを削除すると下のリストに戻ります。区切りとカスタムキーは削除されます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "드래그하여 순서를 바꿉니다. 제거한 구분선과 사용자 지정 키는 사라지고, 표준 키는 아래 목록으로 돌아갑니다."
+            "value" : "드래그하여 키 순서를 바꿉니다. 표준 키를 제거하면 아래 목록으로 돌아갑니다. 구분선과 사용자 지정 키는 삭제됩니다."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arraste para reordenar. Separadores e teclas personalizadas removidos desaparecem; teclas padrão voltam para a lista abaixo."
+            "value" : "Arraste para reordenar as teclas. Ao remover uma tecla padrão, ela volta para a lista abaixo. Separadores e teclas personalizadas são excluídos."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перетащите, чтобы изменить порядок. Удалённые разделители и свои клавиши исчезают; стандартные возвращаются в список ниже."
+            "value" : "Перетащите, чтобы изменить порядок клавиш. Удалённая стандартная клавиша вернётся в список ниже. Разделители и свои клавиши удаляются."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "拖动可调整顺序。移除的分隔点和自定义按键会直接消失；标准按键会回到下方列表。"
+            "value" : "拖动可调整按键顺序。移除标准按键后，它会回到下方列表；分隔点和自定义按键会被删除。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "拖曳可調整順序。移除的分隔點和自訂按鍵會直接消失；標準按鍵會回到下方列表。"
+            "value" : "拖曳可調整按鍵順序。移除標準按鍵後，它會回到下方列表；分隔點和自訂按鍵會被刪除。"
           }
         }
       }
@@ -2018,7 +2204,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "向左箭嘴"
+            "value" : "向左鍵"
           }
         }
       }
@@ -2478,13 +2664,78 @@
         }
       }
     },
-    "Offline" : {
+    "No usable shell was found. Check the default shell in Settings." : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Offline"
+            "value" : "Es wurde keine verwendbare Shell gefunden. Prüfe die Standard-Shell in den Einstellungen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró ningún shell utilizable. Revisa el shell predeterminado en Ajustes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun shell utilisable n’a été trouvé. Vérifiez le shell par défaut dans les Réglages."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stata trovata alcuna shell utilizzabile. Controlla la shell predefinita in Impostazioni."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用できるシェルが見つかりませんでした。設定でデフォルトのシェルを確認してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용할 수 있는 셸을 찾지 못했습니다. 설정에서 기본 셸을 확인하세요."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhum shell utilizável foi encontrado. Verifique o shell padrão nos Ajustes."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не найдена подходящая оболочка. Проверьте оболочку по умолчанию в настройках."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到可用的 Shell。请在“设置”中检查默认 Shell。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "找不到可用的 Shell。請在「設定」中檢查預設 Shell。"
+          }
+        }
+      }
+    },
+    "Not Connected" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht verbunden"
           }
         },
         "es" : {
@@ -2496,31 +2747,31 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hors ligne"
+            "value" : "Non connecté"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Offline"
+            "value" : "Non connesso"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "オフライン"
+            "value" : "未接続"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "오프라인"
+            "value" : "연결되지 않음"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Off-line"
+            "value" : "Não conectado"
           }
         },
         "ru" : {
@@ -2532,13 +2783,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "离线"
+            "value" : "未连接"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "離線"
+            "value" : "未連線"
           }
         }
       }
@@ -2750,7 +3001,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Previsualización"
+            "value" : "Vista previa"
           }
         },
         "fr" : {
@@ -3253,7 +3504,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "向右箭嘴"
+            "value" : "向右鍵"
           }
         }
       }
@@ -3319,6 +3570,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "選取文字"
+          }
+        }
+      }
+    },
+    "Session %lld" : {
+      "comment" : "Tab title for a shell that has not set one",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sitzung %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sesión %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session %lld"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessione %lld"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "セッション %lld"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "세션 %lld"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessão %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сеанс %lld"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会话 %lld"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "工作階段 %lld"
           }
         }
       }
@@ -3648,6 +3965,71 @@
         }
       }
     },
+    "Terminal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Терминал"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終端機"
+          }
+        }
+      }
+    },
     "Terminal Unavailable" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3713,131 +4095,783 @@
         }
       }
     },
-    "The bar above the keyboard shows these keys in this order and scrolls sideways when they don't fit." : {
+    "The app and the terminal daemon are different versions. Reinstall iGhostty to update both." : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Leiste über der Tastatur zeigt diese Tasten in dieser Reihenfolge und scrollt seitwärts, wenn sie nicht passen."
+            "value" : "App und Terminal-Daemon haben unterschiedliche Versionen. Installiere iGhostty neu, um beide zu aktualisieren."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La barra sobre el teclado muestra estas teclas en este orden y se desplaza lateralmente cuando no caben."
+            "value" : "La app y el daemon del terminal tienen versiones distintas. Reinstala iGhostty para actualizar ambos."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La barre au-dessus du clavier affiche ces touches dans cet ordre et défile latéralement quand elles ne tiennent pas."
+            "value" : "L’app et le démon du terminal n’ont pas la même version. Réinstallez iGhostty pour mettre à jour les deux."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La barra sopra la tastiera mostra questi tasti in quest'ordine e scorre lateralmente quando non entrano."
+            "value" : "L’app e il daemon del terminale hanno versioni diverse. Reinstalla iGhostty per aggiornare entrambi."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キーボード上部のバーにこの順番でキーが表示され、収まらない場合は横にスクロールします。"
+            "value" : "アプリとターミナルデーモンのバージョンが異なります。iGhostty を再インストールして、両方を更新してください。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "키보드 위 막대에 이 순서대로 키가 표시되며, 공간이 부족하면 옆으로 스크롤됩니다."
+            "value" : "앱과 터미널 데몬의 버전이 다릅니다. iGhostty를 다시 설치하여 둘 다 업데이트하세요."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A barra acima do teclado mostra estas teclas nesta ordem e rola para o lado quando não cabem."
+            "value" : "O app e o daemon do terminal estão em versões diferentes. Reinstale o iGhostty para atualizar os dois."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Панель над клавиатурой показывает эти клавиши в этом порядке и прокручивается вбок, когда они не помещаются."
+            "value" : "Версии приложения и службы терминала не совпадают. Переустановите iGhostty, чтобы обновить обе."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "键盘上方的按键条会按此顺序显示这些按键，放不下时可以左右滑动。"
+            "value" : "App 与终端守护进程的版本不一致。请重新安装 iGhostty 以同时更新两者。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "鍵盤上方的按鍵列會依此順序顯示這些按鍵，放不下時可左右捲動。"
+            "value" : "App 與終端機常駐程式的版本不一致。請重新安裝 iGhostty 以同時更新兩者。"
           }
         }
       }
     },
-    "The shell and anything running in it will be terminated." : {
+    "The bar above the keyboard shows these keys in this order. If they do not all fit, you can scroll it sideways." : {
+      "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Shell und alles, was darin läuft, werden beendet."
+            "value" : "Die Leiste über der Tastatur zeigt diese Tasten in dieser Reihenfolge. Passen nicht alle, kannst du sie seitwärts scrollen."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se terminará el shell y todo lo que se esté ejecutando en él."
+            "value" : "La barra sobre el teclado muestra estas teclas en este orden. Si no caben todas, puedes desplazarla lateralmente."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le shell et tout ce qui s’y exécute seront arrêtés."
+            "value" : "La barre au-dessus du clavier affiche ces touches dans cet ordre. Si elles ne tiennent pas toutes, vous pouvez la faire défiler latéralement."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La shell e tutto ciò che vi è in esecuzione verranno terminati."
+            "value" : "La barra sopra la tastiera mostra questi tasti in quest’ordine. Se non entrano tutti, puoi farla scorrere lateralmente."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "シェルと実行中のプログラムはすべて終了します。"
+            "value" : "キーボード上部のバーには、この順番でキーが表示されます。すべて収まらない場合は、横にスクロールできます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "셸과 그 안에서 실행 중인 모든 항목이 종료됩니다."
+            "value" : "키보드 위 막대에 이 순서대로 키가 표시됩니다. 모두 들어가지 않으면 옆으로 스크롤할 수 있습니다."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O shell e tudo o que estiver em execução nele serão encerrados."
+            "value" : "A barra acima do teclado mostra estas teclas nesta ordem. Se não couberem todas, você pode rolá-la para o lado."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Оболочка и всё, что в ней запущено, будут завершены."
+            "value" : "Панель над клавиатурой показывает эти клавиши в этом порядке. Если помещаются не все, её можно прокрутить вбок."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shell 及其中正在运行的所有程序都将被终止。"
+            "value" : "键盘上方的按键条会按此顺序显示这些按键。如果放不下，可以左右滑动。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Shell 及其中正在執行的所有程式都將被終止。"
+            "value" : "鍵盤上方的按鍵列會依此順序顯示這些按鍵。如果放不下，可以左右捲動。"
+          }
+        }
+      }
+    },
+    "The connection to the terminal daemon could not be restored." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Verbindung zum Terminal-Daemon konnte nicht wiederhergestellt werden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo restablecer la conexión con el daemon del terminal."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connexion au démon du terminal n’a pas pu être rétablie."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile ripristinare la connessione al daemon del terminale."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルデーモンとの接続を復旧できませんでした。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널 데몬과의 연결을 복구하지 못했습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível restabelecer a conexão com o daemon do terminal."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось восстановить подключение к службе терминала."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法恢复与终端守护进程的连接。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法復原與終端機常駐程式的連線。"
+          }
+        }
+      }
+    },
+    "The connection to the terminal daemon was interrupted." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Verbindung zum Terminal-Daemon wurde unterbrochen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se interrumpió la conexión con el daemon del terminal."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connexion au démon du terminal a été interrompue."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connessione al daemon del terminale è stata interrotta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルデーモンとの接続が中断されました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널 데몬과의 연결이 중단되었습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A conexão com o daemon do terminal foi interrompida."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключение к службе терминала прервано."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "与终端守护进程的连接已中断。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "與終端機常駐程式的連線已中斷。"
+          }
+        }
+      }
+    },
+    "The connection to the terminal daemon was not set up." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Verbindung zum Terminal-Daemon wurde nicht hergestellt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se estableció la conexión con el daemon del terminal."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connexion au démon du terminal n’a pas été établie."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La connessione al daemon del terminale non è stata stabilita."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルデーモンとの接続が確立されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널 데몬과의 연결이 설정되지 않았습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A conexão com o daemon do terminal não foi estabelecida."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Подключение к службе терминала не было установлено."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未与终端守护进程建立连接。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未與終端機常駐程式建立連線。"
+          }
+        }
+      }
+    },
+    "The program every new terminal runs, for example /bin/zsh. Use a plain path inside the jailbreak root: a path that starts with jbroot stops working after the next jailbreak. Leave this empty to use the default login shell." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Verwende einen einfachen Pfad innerhalb des Jailbreak-Roots: Ein Pfad, der mit jbroot beginnt, funktioniert nach dem nächsten Jailbreak nicht mehr. Leer lassen, um die Standard-Login-Shell zu verwenden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Usa una ruta simple dentro de la raíz del jailbreak: una ruta que empiece por jbroot dejará de funcionar tras el próximo jailbreak. Déjalo vacío para usar el shell de inicio de sesión predeterminado."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le programme que lance chaque nouveau terminal, par exemple /bin/zsh. Utilisez un chemin simple à l’intérieur de la racine du jailbreak : un chemin commençant par jbroot cessera de fonctionner après le prochain jailbreak. Laissez ce champ vide pour utiliser le shell de connexion par défaut."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il programma che ogni nuovo terminale esegue, ad esempio /bin/zsh. Usa un percorso semplice all’interno della root del jailbreak: un percorso che inizia con jbroot smette di funzionare dopo il prossimo jailbreak. Lascia vuoto per usare la shell di login predefinita."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新しいターミナルが実行するプログラムです（例: /bin/zsh）。ジェイルブレイクルート内の通常のパスを指定してください。jbroot で始まるパスは、次回のジェイルブレイク後に使えなくなります。空欄のままにすると、デフォルトのログインシェルを使用します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새 터미널이 실행할 프로그램입니다(예: /bin/zsh). 탈옥 루트 안의 일반 경로를 사용하세요. jbroot로 시작하는 경로는 다음 탈옥 후에 작동하지 않습니다. 비워 두면 기본 로그인 셸을 사용합니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O programa que cada novo terminal executa, por exemplo /bin/zsh. Use um caminho simples dentro da raiz do jailbreak: um caminho que começa com jbroot deixa de funcionar após o próximo jailbreak. Deixe vazio para usar o shell de login padrão."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Программа, которую запускает каждый новый терминал, например /bin/zsh. Укажите обычный путь внутри корня джейлбрейка: путь, начинающийся с jbroot, перестанет работать после следующего джейлбрейка. Оставьте поле пустым, чтобы использовать стандартную оболочку входа."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每个新终端运行的程序，例如 /bin/zsh。请使用越狱根目录内的普通路径：以 jbroot 开头的路径在下次越狱后会失效。留空则使用默认的登录 Shell。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每個新終端機執行的程式，例如 /bin/zsh。請使用越獄根目錄內的一般路徑：以 jbroot 開頭的路徑在下次越獄後會失效。留空則使用預設的登入 Shell。"
+          }
+        }
+      }
+    },
+    "The shell exited with status %lld." : {
+      "comment" : "Why a terminal stopped; %lld is the process exit status",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Shell wurde mit Status %lld beendet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El shell finalizó con el estado %lld."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le shell s’est terminé avec le statut %lld."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La shell è terminata con stato %lld."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シェルがステータス %lld で終了しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "셸이 상태 %lld(으)로 종료되었습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O shell foi encerrado com o status %lld."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оболочка завершила работу с кодом %lld."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell 已退出，状态码为 %lld。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell 已結束，狀態碼為 %lld。"
+          }
+        }
+      }
+    },
+    "The shell exited." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Shell wurde beendet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El shell finalizó."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le shell s’est terminé."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La shell è terminata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シェルが終了しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "셸이 종료되었습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O shell foi encerrado."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оболочка завершила работу."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell 已退出。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell 已結束。"
+          }
+        }
+      }
+    },
+    "The terminal daemon could not complete the request." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Terminal-Daemon konnte die Anfrage nicht ausführen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El daemon del terminal no pudo completar la solicitud."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le démon du terminal n’a pas pu traiter la demande."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il daemon del terminale non è riuscito a completare la richiesta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルデーモンがリクエストを完了できませんでした。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널 데몬이 요청을 완료하지 못했습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O daemon do terminal não conseguiu concluir a solicitação."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Службе терминала не удалось выполнить запрос."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端守护进程无法完成该请求。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終端機常駐程式無法完成該請求。"
+          }
+        }
+      }
+    },
+    "The terminal daemon is not running." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Terminal-Daemon läuft nicht."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El daemon del terminal no está en ejecución."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le démon du terminal n’est pas en cours d’exécution."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il daemon del terminale non è in esecuzione."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルデーモンが実行されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널 데몬이 실행되고 있지 않습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O daemon do terminal não está em execução."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Служба терминала не запущена."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端守护进程未在运行。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終端機常駐程式未在執行。"
+          }
+        }
+      }
+    },
+    "The terminal daemon refused the connection." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Terminal-Daemon hat die Verbindung abgelehnt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El daemon del terminal rechazó la conexión."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le démon du terminal a refusé la connexion."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il daemon del terminale ha rifiutato la connessione."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルデーモンが接続を拒否しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널 데몬이 연결을 거부했습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O daemon do terminal recusou a conexão."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Служба терминала отклонила подключение."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端守护进程拒绝了连接。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終端機常駐程式拒絕了連線。"
+          }
+        }
+      }
+    },
+    "The terminal daemon rejected the request." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Terminal-Daemon hat die Anfrage abgelehnt."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El daemon del terminal rechazó la solicitud."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le démon du terminal a rejeté la demande."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il daemon del terminale ha rifiutato la richiesta."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルデーモンがリクエストを拒否しました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널 데몬이 요청을 거부했습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O daemon do terminal rejeitou a solicitação."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Служба терминала отклонила запрос."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端守护进程拒绝了该请求。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終端機常駐程式拒絕了該請求。"
           }
         }
       }
@@ -3860,7 +4894,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les thèmes proviennent du catalogue de thèmes Ghostty et s'appliquent à tous les onglets de toutes les fenêtres."
+            "value" : "Les thèmes proviennent du catalogue de thèmes Ghostty et s’appliquent à tous les onglets de toutes les fenêtres."
           }
         },
         "it" : {
@@ -3903,6 +4937,266 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "主題來自 Ghostty 主題目錄，並套用於所有視窗中的所有分頁。"
+          }
+        }
+      }
+    },
+    "This closes every terminal and stops everything running in them." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Terminals werden geschlossen und alles beendet, was darin läuft."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se cerrarán todos los terminales y se detendrá todo lo que se esté ejecutando en ellos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tous les terminaux seront fermés et tout ce qui s’y exécute sera arrêté."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutti i terminali verranno chiusi e tutto ciò che vi è in esecuzione verrà interrotto."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてのターミナルを閉じ、実行中のプログラムをすべて終了します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 터미널을 닫고 그 안에서 실행 중인 모든 항목을 중단합니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todos os terminais serão fechados e tudo o que estiver em execução neles será interrompido."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все терминалы будут закрыты, а всё, что в них запущено, — остановлено."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这会关闭所有终端，并停止其中正在运行的所有程序。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這會關閉所有終端機，並停止其中正在執行的所有程式。"
+          }
+        }
+      }
+    },
+    "This closes the terminal and stops everything running in it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Terminal wird geschlossen und alles beendet, was darin läuft."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se cerrará el terminal y se detendrá todo lo que se esté ejecutando en él."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le terminal sera fermé et tout ce qui s’y exécute sera arrêté."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il terminale verrà chiuso e tutto ciò che vi è in esecuzione verrà interrotto."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルを閉じ、実行中のプログラムをすべて終了します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널을 닫고 그 안에서 실행 중인 모든 항목을 중단합니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O terminal será fechado e tudo o que estiver em execução nele será interrompido."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Терминал будет закрыт, а всё, что в нём запущено, — остановлено."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这会关闭该终端，并停止其中正在运行的所有程序。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這會關閉該終端機，並停止其中正在執行的所有程式。"
+          }
+        }
+      }
+    },
+    "This terminal is already open in another window." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Terminal ist bereits in einem anderen Fenster geöffnet."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este terminal ya está abierto en otra ventana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce terminal est déjà ouvert dans une autre fenêtre."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo terminale è già aperto in un’altra finestra."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このターミナルは別のウインドウで開かれています。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 터미널은 다른 윈도우에서 이미 열려 있습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este terminal já está aberto em outra janela."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот терминал уже открыт в другом окне."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该终端已在其他窗口中打开。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該終端機已在其他視窗中開啟。"
+          }
+        }
+      }
+    },
+    "This terminal no longer exists." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dieses Terminal existiert nicht mehr."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este terminal ya no existe."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce terminal n’existe plus."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questo terminale non esiste più."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このターミナルは存在しません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 터미널은 더 이상 존재하지 않습니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Este terminal não existe mais."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Этот терминал больше не существует."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该终端已不存在。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該終端機已不存在。"
           }
         }
       }
@@ -3972,6 +5266,71 @@
         }
       }
     },
+    "Too many terminals are open. Close one and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Es sind zu viele Terminals geöffnet. Schließe eines und versuche es erneut."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hay demasiados terminales abiertos. Cierra uno e inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop de terminaux sont ouverts. Fermez-en un, puis réessayez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ci sono troppi terminali aperti. Chiudine uno e riprova."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開いているターミナルが多すぎます。1 つ閉じてから、もう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "열려 있는 터미널이 너무 많습니다. 하나를 닫고 다시 시도하세요."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Há terminais demais abertos. Feche um e tente novamente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыто слишком много терминалов. Закройте один и повторите попытку."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开的终端过多。请关闭一个后重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟的終端機過多。請關閉一個後重試。"
+          }
+        }
+      }
+    },
     "Up Arrow" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4032,72 +5391,72 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "向上箭嘴"
+            "value" : "向上鍵"
           }
         }
       }
     },
-    "Up to three characters, sent as typed. One letter with Control armed becomes the control sequence, like any typed key." : {
+    "Up to three characters, sent exactly as typed. A single letter works with Control just like a letter on the keyboard." : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bis zu drei Zeichen, gesendet wie getippt. Ein Buchstabe mit aktivem Control wird zur Control-Sequenz, wie jede getippte Taste."
+            "value" : "Bis zu drei Zeichen, genau so gesendet, wie sie eingegeben werden. Ein einzelner Buchstabe funktioniert mit Control genau wie ein Buchstabe auf der Tastatur."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hasta tres caracteres, enviados tal cual. Una letra con Control activo se convierte en la secuencia de control, como cualquier tecla escrita."
+            "value" : "Hasta tres caracteres, enviados tal como se escriben. Una sola letra funciona con Control igual que una letra del teclado."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Jusqu'à trois caractères, envoyés tels quels. Une lettre avec Contrôle armé devient la séquence de contrôle, comme toute touche saisie."
+            "value" : "Jusqu’à trois caractères, envoyés tels qu’ils sont saisis. Une seule lettre fonctionne avec Contrôle comme une lettre du clavier."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fino a tre caratteri, inviati come digitati. Una lettera con Control attivo diventa la sequenza di controllo, come ogni tasto digitato."
+            "value" : "Fino a tre caratteri, inviati esattamente come vengono digitati. Una singola lettera funziona con Control proprio come una lettera della tastiera."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最大 3 文字を入力どおりに送信します。Control が有効な状態の 1 文字は、通常の入力と同様に制御シーケンスになります。"
+            "value" : "最大 3 文字を、入力したとおりに送信します。1 文字のときは、キーボードの文字と同じように Control と組み合わせて使えます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "최대 3자를 입력한 그대로 보냅니다. Control이 활성화된 상태의 한 글자는 일반 입력처럼 제어 시퀀스가 됩니다."
+            "value" : "최대 3자를 입력한 그대로 보냅니다. 한 글자일 때는 키보드의 글자와 똑같이 Control과 함께 사용할 수 있습니다."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Até três caracteres, enviados como digitados. Uma letra com Control ativo vira a sequência de controle, como qualquer tecla digitada."
+            "value" : "Até três caracteres, enviados exatamente como digitados. Uma única letra funciona com Control como qualquer letra do teclado."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "До трёх символов, отправляются как есть. Одна буква с зажатым Control становится управляющей последовательностью, как при обычном вводе."
+            "value" : "До трёх символов, отправляются ровно так, как введены. Одна буква работает с Control так же, как буква на клавиатуре."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最多三个字符，按原样发送。在 Control 处于待用状态时，单个字母会像普通输入一样变成控制序列。"
+            "value" : "最多三个字符，按输入的原样发送。只有一个字母时，它可以像键盘上的字母一样与 Control 组合使用。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最多三個字元，依原樣送出。在 Control 待用狀態下，單一字母會如一般輸入變成控制序列。"
+            "value" : "最多三個字元，依輸入的原樣送出。只有一個字母時，它可以像鍵盤上的字母一樣與 Control 組合使用。"
           }
         }
       }
@@ -4163,6 +5522,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "版本"
+          }
+        }
+      }
+    },
+    "Connection Failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbindung fehlgeschlagen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Error de conexión"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de la connexion"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connessione non riuscita"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "接続に失敗しました"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "연결 실패"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falha na conexão"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось подключиться"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连接失败"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "連線失敗"
           }
         }
       }
