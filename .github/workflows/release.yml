@@ -79,14 +79,26 @@ jobs:
             iGhostty/build/Packages/SHA256SUMS
           if-no-files-found: error
 
+      # Create-or-upload with retries: a transient API failure (v0.2.3 died to
+      # a 503 here) must not be mistaken for "the release already exists" —
+      # only `gh release view` decides which of the two verbs applies.
       - name: Create GitHub Release
         if: github.ref_type == 'tag'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" \
-            --title "iGhostty ${GITHUB_REF_NAME}" \
-            --generate-notes \
-            build/Packages/*.deb build/Packages/SHA256SUMS \
-          || gh release upload "${GITHUB_REF_NAME}" \
-            build/Packages/*.deb build/Packages/SHA256SUMS --clobber
+          assets=(build/Packages/*.deb build/Packages/SHA256SUMS)
+          for attempt in 1 2 3 4 5; do
+            if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+              gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber && exit 0
+            else
+              gh release create "${GITHUB_REF_NAME}" \
+                --title "iGhostty ${GITHUB_REF_NAME}" \
+                --generate-notes \
+                "${assets[@]}" && exit 0
+            fi
+            echo "publish attempt ${attempt} failed; retrying in 20s" >&2
+            sleep 20
+          done
+          echo "could not publish the release after 5 attempts" >&2
+          exit 1
