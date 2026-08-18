@@ -15,6 +15,7 @@ struct RootView: View {
     @StateObject private var keyboard = KeyboardState()
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.scenePhase) private var scenePhase
     @FocusState private var focusedTabID: UUID?
 
     /// Open by default at regular width, the way Safari shows its sidebar on
@@ -56,6 +57,13 @@ struct RootView: View {
             bindTabHooks()
         }
         .onChange(of: tabManager.activeTabID) { _ in refocus() }
+        // Backgrounding resigns the surface's first responder (which clears
+        // the FocusState through the bridge), so coming back needs the focus
+        // handed out again — typing should work the moment the app does.
+        .onChange(of: scenePhase) { phase in
+            guard phase == .active else { return }
+            refocus()
+        }
         .onChange(of: tabManager.tabs.count) { _ in bindTabHooks() }
         .onChange(of: theme.selection) { _ in
             for tab in tabManager.tabs {
