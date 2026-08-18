@@ -7,6 +7,18 @@ launch_plist=@PREFIX@/Library/LaunchDaemons/wiki.qaq.ighosttyd.plist
 
 launchctl=@PREFIX@/usr/bin/launchctl
 [ -x "$launchctl" ] || launchctl=/bin/launchctl
+killall=@PREFIX@/usr/bin/killall
+[ -x "$killall" ] || killall=/usr/bin/killall
+
+# A running app is executing the binary dpkg just replaced, attached to the
+# daemon this script is about to restart — kill it so the next launch runs
+# what was installed instead of a stale process on a dead XPC link. Sessions
+# survive: they live in the daemon, and the new daemon instance re-reads its
+# registry.
+if [ -x "$killall" ]; then
+    "$killall" -9 iGhostty 2>/dev/null || true
+fi
+
 if [ -x "$launchctl" ]; then
     # roothide's launchctl lands jbroot daemons in the per-user domain even
     # when asked for system, so an upgrade that only boots out system/ leaves
@@ -16,7 +28,19 @@ if [ -x "$launchctl" ]; then
     "$launchctl" bootout system/wiki.qaq.ighosttyd 2>/dev/null || true
     "$launchctl" bootout user/501/wiki.qaq.ighosttyd 2>/dev/null || true
     "$launchctl" bootout gui/501/wiki.qaq.ighosttyd 2>/dev/null || true
+    # A daemon disabled by an earlier bootout -w (or a failed remove) stays
+    # disabled across bootstrap and fails with EPERM; clear the override
+    # first.
+    "$launchctl" enable system/wiki.qaq.ighosttyd 2>/dev/null || true
     "$launchctl" bootstrap system "$launch_plist"
+    # The bootout above races the bootstrap on some launchd builds; confirm
+    # the service actually came up in one of its domains so a broken install
+    # is loud here instead of a silent "connection lost" in the app.
+    if ! "$launchctl" print system/wiki.qaq.ighosttyd >/dev/null 2>&1 &&
+        ! "$launchctl" print user/501/wiki.qaq.ighosttyd >/dev/null 2>&1 &&
+        ! "$launchctl" print gui/501/wiki.qaq.ighosttyd >/dev/null 2>&1; then
+        echo "warning: ighosttyd did not register with launchd; try a reboot" >&2
+    fi
 fi
 
 uicache=@PREFIX@/usr/bin/uicache

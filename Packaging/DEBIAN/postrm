@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Belt over prerm's braces: dpkg runs postrm even when prerm was skipped or
+# failed (--force-remove, a broken earlier state), so everything here has to
+# be safe to repeat and safe when nothing is left to clean.
+if [ "${1:-}" = remove ] || [ "${1:-}" = purge ]; then
+    launchctl=@PREFIX@/usr/bin/launchctl
+    [ -x "$launchctl" ] || launchctl=/bin/launchctl
+    killall=@PREFIX@/usr/bin/killall
+    [ -x "$killall" ] || killall=/usr/bin/killall
+
+    if [ -x "$launchctl" ]; then
+        "$launchctl" bootout system/wiki.qaq.ighosttyd 2>/dev/null || true
+        "$launchctl" bootout user/501/wiki.qaq.ighosttyd 2>/dev/null || true
+        "$launchctl" bootout gui/501/wiki.qaq.ighosttyd 2>/dev/null || true
+    fi
+
+    if [ -x "$killall" ]; then
+        "$killall" -9 iGhostty 2>/dev/null || true
+        "$killall" -9 ighosttyd 2>/dev/null || true
+    fi
+
+    # The bundle is gone; -u by its old path drops any registration prerm
+    # missed. If uikittools refuses the dead path, rebuilding the whole
+    # cache is the reliable way to make the icon disappear.
+    uicache=@PREFIX@/usr/bin/uicache
+    if [ -x "$uicache" ]; then
+        "$uicache" -u @PREFIX@/Applications/iGhostty.app 2>/dev/null ||
+            "$uicache" -a || true
+    fi
+fi
+
+exit 0
