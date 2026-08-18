@@ -365,9 +365,13 @@ final class PTYSession {
             if count < 0, errno == EINTR { continue }
             if count == 0 {
                 // EOF: the child closed the terminal. The process source
-                // reports the status.
+                // usually reports the status, but a fast child (/bin/echo)
+                // can slip past both it and the one-shot poll in `start` —
+                // seen on CI as an exit that never arrives. EOF is this
+                // session's own proof the child is going, so poll it reaped.
                 readSource?.cancel()
                 readSource = nil
+                pollUntilReaped()
             }
             return
         }
@@ -378,6 +382,19 @@ final class PTYSession {
         let excess = replayBuffer.count - iGhosttyProtocol.sessionReplayByteCount
         if excess > 0 {
             replayBuffer.removeFirst(excess)
+        }
+    }
+
+    /// WNOHANG-polls until the child is reaped, bounded at two seconds. Only
+    /// started once the PTY has hit EOF, so the child is already on its way
+    /// out; this covers the window where it is not yet reapable and the
+    /// process source never fires.
+    private func pollUntilReaped(attempt: Int = 0) {
+        guard isAlive else { return }
+        reapChild()
+        guard isAlive, attempt < 100 else { return }
+        queue.asyncAfter(deadline: .now() + .milliseconds(20)) { [weak self] in
+            self?.pollUntilReaped(attempt: attempt + 1)
         }
     }
 
