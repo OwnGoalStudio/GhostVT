@@ -134,10 +134,12 @@ final class TerminalTab: ObservableObject, Identifiable {
     /// ledger entry already gone, so nothing could ever kill it.
     func close() {
         if let transport = store.activeTransport as? XPCDaemonTransport,
-           transport.currentSessionID != nil {
+           let id = transport.currentSessionID {
             transport.closeSession()
+            DaemonSessionDirectory.shared.evict(id)
         } else if let id = daemonSession.id {
             XPCDaemonTransport.killSession(id)
+            DaemonSessionDirectory.shared.evict(id)
         }
         store.disconnect()
         DaemonSessionDirectory.shared.refresh()

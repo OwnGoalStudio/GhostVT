@@ -31,4 +31,12 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidDisconnect(_: UIScene) {
         tabManager.detachAllTabs()
     }
+
+    /// Nothing ends the Live Activity while the app isn't running, so a
+    /// return to the foreground re-reads the daemon's registry — if the
+    /// detached shells it was advertising died in the meantime, this is the
+    /// moment the activity finds out and folds.
+    func sceneWillEnterForeground(_: UIScene) {
+        DaemonSessionDirectory.shared.refresh()
+    }
 }
