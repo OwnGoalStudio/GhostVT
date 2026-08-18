@@ -5,6 +5,7 @@ import SwiftUI
 /// and switcher use.
 struct SidebarView: View {
     @ObservedObject var tabManager: TabManager
+    let onShowSettings: () -> Void
     @ObservedObject private var theme = AppTheme.shared
     @Environment(\.colorScheme) private var colorScheme
 
@@ -40,6 +41,7 @@ struct SidebarView: View {
             .padding(10)
         }
         .safeAreaInset(edge: .top, spacing: 0) { header }
+        .safeAreaInset(edge: .bottom, spacing: 0) { footer }
         .background(
             Color.primary.opacity(0.04)
                 .background(theme.background(for: colorScheme))
@@ -64,6 +66,25 @@ struct SidebarView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 14)
+        .padding(.bottom, 6)
+    }
+
+    /// Settings' home at regular width — the top bar carries no gear, so
+    /// this corner is the one visible entry (⌘, works regardless).
+    private var footer: some View {
+        HStack {
+            Button(action: onShowSettings) {
+                Image(systemName: "gearshape")
+                    .font(.body.weight(.medium))
+                    .foregroundColor(.secondary)
+                    .frame(width: 40, height: 40)
+                    .contentShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Settings")
+            Spacer()
+        }
+        .padding(.horizontal, 14)
         .padding(.bottom, 6)
     }
 

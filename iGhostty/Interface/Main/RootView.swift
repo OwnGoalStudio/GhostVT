@@ -35,9 +35,12 @@ struct RootView: View {
 
             HStack(spacing: 0) {
                 if isRegularWidth, showsSidebar {
-                    SidebarView(tabManager: tabManager)
-                        .frame(width: 300)
-                        .transition(.move(edge: .leading))
+                    SidebarView(
+                        tabManager: tabManager,
+                        onShowSettings: { showsSettingsSheet = true }
+                    )
+                    .frame(width: 300)
+                    .transition(.move(edge: .leading))
                 }
                 terminalColumn
             }
@@ -90,9 +93,7 @@ struct RootView: View {
                 if isRegularWidth {
                     TabStripBar(
                         tabManager: tabManager,
-                        showsSidebar: $showsSidebar,
-                        onShowSettings: { showsSettingsSheet = true },
-                        onShowSwitcher: { showsSwitcher = true }
+                        showsSidebar: $showsSidebar
                     )
                 }
             }

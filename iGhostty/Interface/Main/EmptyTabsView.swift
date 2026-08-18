@@ -33,5 +33,10 @@ struct EmptyTabsView: View {
         }
         .padding(32)
         .frame(maxWidth: 360)
+        // Greedy on purpose: with no tabs this view is the whole terminal
+        // column, and the top bar hangs off that column as a safe-area inset
+        // — its width is the column's width. Without this the column shrinks
+        // to the card's ideal size and drags the bar with it.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

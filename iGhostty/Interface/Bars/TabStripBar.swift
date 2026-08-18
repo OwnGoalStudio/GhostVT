@@ -11,8 +11,6 @@ import SwiftUI
 struct TabStripBar: View {
     @ObservedObject var tabManager: TabManager
     @Binding var showsSidebar: Bool
-    let onShowSettings: () -> Void
-    let onShowSwitcher: () -> Void
 
     var body: some View {
         GlassBarContainer(spacing: 10) {
@@ -31,30 +29,18 @@ struct TabStripBar: View {
                     chipStrip
                 }
 
+                // The bar's only trailing control: the sidebar owns settings
+                // and doubles as the tab overview at this width, so the strip
+                // carries neither entry. New Window rides the long-press,
+                // Safari-style.
                 Button(action: { tabManager.newTab() }) {
                     Image(systemName: "plus")
                         .font(.body.weight(.medium))
                         .frame(width: 40, height: 40)
                 }
                 .barGlass(in: Circle())
-                .accessibilityLabel("New Tab")
-
-                Button(action: onShowSettings) {
-                    Image(systemName: "gearshape")
-                        .font(.body.weight(.medium))
-                        .frame(width: 40, height: 40)
-                }
-                .barGlass(in: Circle())
-                .accessibilityLabel("Settings")
-
-                Button(action: onShowSwitcher) {
-                    Image(systemName: "square.on.square")
-                        .font(.body.weight(.medium))
-                        .frame(width: 40, height: 40)
-                }
-                .barGlass(in: Circle())
                 .contextMenu { windowMenu }
-                .accessibilityLabel("Show Tabs")
+                .accessibilityLabel("New Tab")
             }
             .padding(.horizontal, 16)
             .padding(.top, 6)
