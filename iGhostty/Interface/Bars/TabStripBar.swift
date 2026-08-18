@@ -72,22 +72,31 @@ struct TabStripBar: View {
         }
     }
 
+    /// With no tabs there is nothing to strip: an empty capsule collapses to
+    /// its padding — an 8pt line squashed across the bar — so the empty
+    /// state yields the space instead, mirroring `activeTitleCapsule`.
     private var chipStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 4) {
-                ForEach(tabManager.tabs) { tab in
-                    TabChip(
-                        tab: tab,
-                        isActive: tab.id == tabManager.activeTabID,
-                        onSelect: { tabManager.activeTabID = tab.id },
-                        onClose: { tabManager.requestClose(tab) }
-                    )
+        Group {
+            if tabManager.tabs.isEmpty {
+                Spacer()
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 4) {
+                        ForEach(tabManager.tabs) { tab in
+                            TabChip(
+                                tab: tab,
+                                isActive: tab.id == tabManager.activeTabID,
+                                onSelect: { tabManager.activeTabID = tab.id },
+                                onClose: { tabManager.requestClose(tab) }
+                            )
+                        }
+                    }
+                    .padding(4)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .barGlass(in: Capsule(), interactive: false)
             }
-            .padding(4)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .barGlass(in: Capsule(), interactive: false)
     }
 }
 
