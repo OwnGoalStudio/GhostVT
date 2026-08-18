@@ -41,9 +41,9 @@ Tab titles have two sources, in this order. Ghostty's shell integration is
 the real one: the daemon injects it (`ShellIntegration`) and the .deb ships
 libghostty's own scripts to `/usr/share/ighostty/shell-integration`, so the
 shell reports OSC 2 (command), OSC 7 (cwd), OSC 133 (prompts) by itself.
-That injection only reaches zsh, fish, and a directly-spawned bash — bash
-needs `--posix` in argv, which the `login` route cannot carry, and a shell
-invoked as `sh` gets none. For those, `CommandTitleTracker` infers a title
+That injection reaches zsh, fish, and bash (which gets `--posix` in argv —
+the daemon always spawns the shell directly, see the pam_launchd gotcha
+below); a shell invoked as `sh` gets none. For it, `CommandTitleTracker` infers a title
 from the line the user typed, and only if it was echoed to the screen — the
 check that keeps a password out of the tab bar. `TerminalTab.displayTitle`
 picks between them; because both live on *other* observable objects, the tab
@@ -62,6 +62,14 @@ has to republish their changes or no SwiftUI view redraws.
 
 Gotchas that bit us:
 
+- **Never spawn sessions through the bootstrap's `login`.** Procursus's
+  `/etc/pam.d/login` runs `pam_launchd.so`, which moves the session into a
+  per-user bootstrap namespace that cannot reach `com.apple.dnssd.service`;
+  iOS has no `/etc/resolv.conf` fallback, so the session keeps TCP but loses
+  DNS entirely — `curl` says "Could not resolve host" while
+  `curl --dns-servers 8.8.8.8` works. Procursus comments that module out of
+  `pam.d/sshd`, which is why ssh sessions resolve. The daemon spawns shells
+  directly (no PAM) and supplies the env/uid `login` would have.
 - Never redeclare C-variadic functions (e.g. `ioctl`) via `@_silgen_name`
   with fixed arity — arm64 puts variadic args on the stack and the call
   silently misbehaves. Use the Darwin overlay.

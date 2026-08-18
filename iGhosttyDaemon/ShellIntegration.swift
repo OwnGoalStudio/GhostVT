@@ -62,8 +62,8 @@ enum ShellIntegration {
         case "bash":
             // bash only reads $ENV in POSIX mode, so the integration has to
             // start it there and undo it from inside the script — which
-            // means an extra argument, which the `login` route cannot carry
-            // (login picks the shell and its arguments itself).
+            // means an extra argument, so a caller that cannot shape argv
+            // (a verbatim user command) gets no bash integration.
             guard canModifyArguments else { return [] }
             let script = resources + "/shell-integration/bash/ghostty.bash"
             guard fileExists(script) else { return [] }

@@ -160,7 +160,7 @@ final class SessionRegistry {
             guard let plan = ShellLaunch.plan(requestedShell: nil) else {
                 throw iGhosttyFailure(
                     .spawnFailed,
-                    "no usable shell: neither /usr/bin/login nor a shell from the bootstrap's passwd is executable"
+                    "no usable shell: neither the bootstrap's passwd shell nor a fallback shell is executable"
                 )
             }
             return plan

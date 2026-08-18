@@ -21,9 +21,8 @@ enum ShellLaunch {
     struct Plan {
         var command: [String]
         var environment: [String: String]
-        /// Who the shell should run as, when the daemon has to drop privileges
-        /// itself. `nil` on the `login` route, because `login` does it — and
-        /// would fail if it were handed an already-unprivileged process.
+        /// Who the shell should run as; the daemon drops privileges itself in
+        /// the forked child. `nil` when there is nothing to drop (harness).
         var credentials: Credentials?
 
         init(
@@ -69,8 +68,8 @@ enum ShellLaunch {
         "/bin",
     ]
 
-    /// Only consulted when `login` is unavailable — otherwise `login` derives
-    /// `PATH` itself from the login database, which is what it is for.
+    /// The `PATH` every session gets — the daemon establishes it because it
+    /// spawns the shell itself (see `plan` for why `login` is off the table).
     ///
     /// The bootstrap's tools come first, iOS's own after: without the second
     /// half a shell reaches everything the jailbreak installed and nothing the
@@ -173,9 +172,7 @@ enum ShellLaunch {
 
         let user = sessionUser
 
-        // An explicit choice from the app's settings wins, and is spawned
-        // directly: `login` would ignore it in favour of the passwd shell.
-        // Dropping to `mobile` is then this daemon's job.
+        // An explicit choice from the app's settings wins.
         if let requestedShell, !requestedShell.isEmpty {
             guard requestedShell.hasPrefix("/"),
                   let shell = locate(requestedShell)
@@ -183,39 +180,22 @@ enum ShellLaunch {
             return directShellPlan(shell: shell, user: user, environment: environment)
         }
 
-        // Preferred: hand the session to `login`, which establishes the utmp
-        // entry, the login class, `PATH`, `HOME`, and `SHELL` the way every
-        // other terminal on the device gets them. `-f` skips authentication
-        // (the daemon is already root), `-p` preserves the environment above,
-        // `-q` suppresses the banner.
-        // `login` is also what switches the session to `mobile`: run as root
-        // it setuids to the named user itself, so this route hands it the name
-        // and drops nothing here.
-        if let login = firstExecutable(["/usr/bin/login"]), let user {
-            // `login` chooses the shell and its arguments from the login
-            // database, so the integration only gets the environment half
-            // here — enough for zsh, not enough for bash.
-            var environment = environment
-            _ = ShellIntegration.apply(
-                shell: user.shell,
-                to: &environment,
-                canModifyArguments: false
-            )
-            // `command[0]` is both the executable and `argv[0]`, so the flags
-            // start at index 1 — an extra "login" here would be read as the
-            // username.
-            return Plan(
-                command: [
-                    JailbreakRoot.resolve(login),
-                    "-fpq",
-                    user.name,
-                ],
-                environment: environment
-            )
-        }
-
-        // No `login`: run the passwd shell, and supply both the environment
-        // and the identity that `login` would have established.
+        // Every session is spawned directly — never through the bootstrap's
+        // `login`, tempting as its utmp entry and login class are. Procursus's
+        // `/etc/pam.d/login` runs `pam_launchd.so`, which moves the session
+        // into a per-user bootstrap namespace; on jailbroken iOS that
+        // namespace cannot reach `com.apple.dnssd.service`, and iOS has no
+        // `/etc/resolv.conf` to fall back on, so every `login`-spawned process
+        // keeps TCP but loses DNS entirely ("Could not resolve host" from a
+        // shell whose `curl --dns-servers 8.8.8.8` works fine). Procursus
+        // ships `pam.d/sshd` with that very module commented out — which is
+        // why ssh sessions resolve and `login` sessions do not. Spawning the
+        // shell ourselves involves no PAM, so the session keeps the daemon's
+        // namespace and its DNS; it also lets bash carry `--posix` for shell
+        // integration, which `login` (choosing argv itself) never could.
+        //
+        // Run the passwd shell, and supply both the environment and the
+        // identity that `login` would have established.
         var shell = firstExecutable(fallbackShells)
         if let passwdShell = user?.shell, JailbreakRoot.isExecutable(passwdShell) {
             shell = passwdShell

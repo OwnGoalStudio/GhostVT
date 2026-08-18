@@ -296,20 +296,16 @@ if let plan = ShellLaunch.plan(requestedShell: nil) {
     // data, so either of them fails and takes the whole process back to C.
     check(plan.environment["LANG"] == nil, "LANG is left alone — it would set every category")
     check(plan.environment["LC_ALL"] == nil, "LC_ALL is left alone for the same reason")
-    // When `login` drives the session it derives PATH itself; only the
-    // fallback path sets one.
-    if plan.command.first?.hasSuffix("/login") == true {
-        check(plan.environment["PATH"] == nil, "login is left to establish PATH")
-        check(plan.command.count == 3 && plan.command[1] == "-fpq", "login gets -fpq <user>")
-        check(
-            plan.credentials == nil,
-            "the login route drops no privileges itself — login setuids to the named user"
-        )
-    } else {
-        check(plan.environment["PATH"] != nil, "a directly spawned shell is given a PATH")
-        check(plan.environment["USER"] != nil, "a directly spawned shell is told who it is")
-        check(plan.environment["HOME"] != nil, "a directly spawned shell is given a HOME")
-    }
+    // Sessions are always spawned directly — `login` is off the table because
+    // Procursus's pam_launchd.so moves the session into a bootstrap namespace
+    // that cannot reach mDNSResponder, killing DNS (see ShellLaunch.plan).
+    check(
+        plan.command.first?.hasSuffix("/login") != true,
+        "the default plan never routes through login — pam_launchd would cost the session its DNS"
+    )
+    check(plan.environment["PATH"] != nil, "a directly spawned shell is given a PATH")
+    check(plan.environment["USER"] != nil, "a directly spawned shell is told who it is")
+    check(plan.environment["HOME"] != nil, "a directly spawned shell is given a HOME")
 } else {
     check(false, "a default plan is produced")
 }
