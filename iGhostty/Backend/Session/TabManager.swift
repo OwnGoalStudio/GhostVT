@@ -19,7 +19,9 @@ final class TabManager: ObservableObject {
     /// strip, the sidebar, and the pane it removes.
     static let tabTransition = DS.Motion.structure
     @Published private(set) var tabs: [TerminalTab] = []
-    @Published var activeTabID: UUID?
+    @Published var activeTabID: UUID? {
+        didSet { syncSurfaceVisibility() }
+    }
 
     /// A close awaiting the user's confirmation; presented as one alert by
     /// whichever context owns the screen (see `CloseTabConfirmation`), so
@@ -62,6 +64,20 @@ final class TabManager: ObservableObject {
 
     var activeTab: TerminalTab? {
         tabs.first { $0.id == activeTabID }
+    }
+
+    /// Only the active tab's surface draws. The panes keep every tab mounted
+    /// behind an opacity flip, and without this the hidden ones keep a live
+    /// display link, rendering frames nobody sees; marking them invisible
+    /// keeps grid, scrollback, and session while rendering stops
+    /// (`TerminalViewState.isSurfaceVisible`).
+    private func syncSurfaceVisibility() {
+        for tab in tabs {
+            let visible = tab.id == activeTabID
+            if tab.terminal.isSurfaceVisible != visible {
+                tab.terminal.isSurfaceVisible = visible
+            }
+        }
     }
 
     /// Whether the owning scene has reached foreground-active. Sessions
