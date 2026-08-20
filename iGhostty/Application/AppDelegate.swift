@@ -22,6 +22,13 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
             ghosttyLog.info("\(message, privacy: .public)")
         }
         TerminalDebugLog.enable([.lifecycle, .metrics])
+        // Full tracing (input, IME, output) is opt-in because it logs
+        // keystrokes. On a jailbroken device:
+        //   defaults write wiki.qaq.iGhostty Debug.verboseTerminalLog -bool true
+        // then relaunch and watch with `idevicesyslog` / `log stream`.
+        if UserDefaults.standard.bool(forKey: "Debug.verboseTerminalLog") {
+            TerminalDebugLog.enable(.standard)
+        }
         return true
     }
 }
