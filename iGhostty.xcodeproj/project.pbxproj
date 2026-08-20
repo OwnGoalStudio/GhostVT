@@ -261,7 +261,7 @@
 			mainGroup = AA0000000000000000000801;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				AA0000000000000000000A01 /* XCLocalSwiftPackageReference "../libghostty-spm" */,
+				AA0000000000000000000A01 /* XCRemoteSwiftPackageReference "libghostty-spm" */,
 				AA0000000000000000000A02 /* XCLocalSwiftPackageReference "Packages/iGhosttyKit" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -590,15 +590,22 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		AA0000000000000000000A01 /* XCLocalSwiftPackageReference "../libghostty-spm" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = "../libghostty-spm";
-		};
 		AA0000000000000000000A02 /* XCLocalSwiftPackageReference "Packages/iGhosttyKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/iGhosttyKit;
 		};
 /* End XCLocalSwiftPackageReference section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA0000000000000000000A01 /* XCRemoteSwiftPackageReference "libghostty-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Lakr233/libghostty-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		AA0000000000000000000201 /* GhosttyTerminal */ = {

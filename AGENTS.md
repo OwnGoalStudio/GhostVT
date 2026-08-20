@@ -18,9 +18,13 @@ every spawned process.
 - **The app never spawns processes.** Only `ighosttyd` forks
   (`forkpty`+`execve`), gated by kernel audit-token peer authentication.
   Keep that boundary; don't add process APIs to the app target.
-- Depends on a **sibling checkout** of
-  [libghostty-spm](https://github.com/Lakr233/libghostty-spm) at
-  `../libghostty-spm` (local path package).
+- Depends on the **released**
+  [libghostty-spm](https://github.com/Lakr233/libghostty-spm) package
+  (`upToNextMajor` from 1.4.0). Since 1.4.0 the package's bare-semver
+  tags are its own release sequence, decoupled from ghostty's; the
+  `upstream.X.Y.Z` tags hold the XCFramework binaries. Terminal-library
+  changes land in that repo and ship via a new package release — don't
+  reintroduce a local path reference to a sibling checkout.
 
 ## Layout
 
