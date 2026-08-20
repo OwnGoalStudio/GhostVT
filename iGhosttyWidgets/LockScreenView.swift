@@ -6,12 +6,14 @@
 import SwiftUI
 import WidgetKit
 
-/// The Live Activity's lock screen card, shaped like Tesla's charging card:
-/// one big number, a status bar under it, a couple of label/value pairs,
-/// and the ghost where the car goes. Session titles and paths are the
-/// user's shell's data — arbitrarily ugly — so this card shows only what
-/// the app controls: counts, statuses, and the frontmost shell's name.
-struct LockScreenView: View {
+/// The summary card, shaped like Tesla's charging card: one big number, a
+/// status bar under it, a couple of label/value pairs, and the ghost where
+/// the car goes. Session titles and paths are the user's shell's data —
+/// arbitrarily ugly — so the card shows only what the app controls: counts,
+/// statuses, and the frontmost shell's name.
+///
+/// The lock screen and the expanded island both render this, identically.
+struct SessionSummaryCard: View {
     let state: TerminalSessionAttributes.ContentState
 
     var body: some View {
@@ -65,17 +67,26 @@ struct LockScreenView: View {
         .padding(Spacing.card)
         .fontDesign(.rounded)
         .animation(.easeInOut(duration: 0.35), value: state)
-        // .clear ≠ nil here: nil asks for the system's default ground, which
-        // is a near-opaque white/black — .clear is what makes the system
-        // fall back to its translucent frosted material.
-        .activityBackgroundTint(.clear)
-        .activitySystemActionForegroundColor(Palette.accent)
+    }
+}
+
+/// The card in its lock screen dress.
+struct LockScreenView: View {
+    let state: TerminalSessionAttributes.ContentState
+
+    var body: some View {
+        SessionSummaryCard(state: state)
+            // .clear ≠ nil here: nil asks for the system's default ground,
+            // which is a near-opaque white/black — .clear is what makes the
+            // system fall back to its translucent frosted material.
+            .activityBackgroundTint(.clear)
+            .activitySystemActionForegroundColor(Palette.accent)
     }
 }
 
 /// Tesla's charge bar, repurposed: one segment per status, sized by its
 /// share of the listed sessions. All green means all live.
-private struct StatusBar: View {
+struct StatusBar: View {
     let live: Int
     let starting: Int
     let failed: Int
@@ -127,9 +138,10 @@ private struct InfoPair: View {
     }
 }
 
-private extension TerminalSessionAttributes.ContentState {
-    // The bar and the summaries describe the listed sessions — the payload
-    // carries no status for overflowed or detached ones.
+/// What the card and the island's status ring derive from the payload.
+/// The counts describe the listed sessions — the payload carries no status
+/// for overflowed or detached ones.
+extension TerminalSessionAttributes.ContentState {
     var liveCount: Int { sessions.filter { $0.status == .live }.count }
     var startingCount: Int { sessions.filter { $0.status == .starting }.count }
     var failedCount: Int { sessions.filter { $0.status == .failed }.count }
@@ -161,6 +173,20 @@ private extension TerminalSessionAttributes.ContentState {
             parts.append(String(
                 localized: "\(failedCount) failed",
                 comment: "Sessions whose transport gave up"
+            ))
+        }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    /// The one-line rendition for the island: the running summary with the
+    /// detached count folded in, since there's no room for label pairs.
+    var summaryLine: String? {
+        var parts: [String] = []
+        if let runningSummary { parts.append(runningSummary) }
+        if detachedCount > 0 {
+            parts.append(String(
+                localized: "\(detachedCount) detached",
+                comment: "Sessions running with no tab attached"
             ))
         }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")

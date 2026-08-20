@@ -7,50 +7,122 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 
-/// Dynamic Island + Lock Screen presentation of the running terminal sessions.
-///
-/// The expanded island puts every word in the bottom region: it is the only
-/// one wide enough for a path, and the center region sits under whatever else
-/// the system (or a tweak) draws beside the camera, where text collides.
+/// Dynamic Island + Lock Screen presentation of the running terminal
+/// sessions. Expanded, the island shows a trimmed rendition of the lock
+/// screen's summary card; closed, it wears the bare ghost with the count
+/// in the status ring — the ghost alone when minimal.
 struct TerminalSessionActivityWidget: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: TerminalSessionAttributes.self) { context in
             LockScreenView(state: context.state)
         } dynamicIsland: { context in
             DynamicIsland {
-                // Icon left, count right — the expanded island is the
-                // compact one opened up, so the corners keep their roles.
-                // The per-row dots below carry the status; a second dot
-                // summary up here said the same thing, uglier.
                 DynamicIslandExpandedRegion(.leading) {
-                    AppIconMark(size: 26)
-                        .padding(.leading, Spacing.tight)
+                    // Same inset as IslandSummary's, so the name sits flush
+                    // over the number below it.
+                    Text("iGhostty")
+                        .font(.subheadline.weight(.bold))
+                        .fontDesign(.rounded)
+                        .padding(.leading, Spacing.line)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(context.state.countLabel)
-                        .font(.title3.weight(.semibold).monospacedDigit())
-                        .fontDesign(.rounded)
-                        .foregroundStyle(Palette.accent)
-                        .contentTransition(.numericText())
-                        .padding(.trailing, Spacing.tight)
+                    Image("GhostGlyph")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 22, height: 22)
+                        .padding(.trailing, Spacing.line)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    SessionList(state: context.state, font: .footnote)
-                        .fontDesign(.rounded)
-                        .padding(.horizontal, Spacing.tight)
-                        .padding(.top, Spacing.tight)
+                    IslandSummary(state: context.state)
                 }
             } compactLeading: {
-                AppIconMark(size: 23)
+                Image("GhostGlyph")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 18, height: 18)
             } compactTrailing: {
-                Text(context.state.countLabel)
-                    .font(.body.weight(.semibold).monospacedDigit())
-                    .fontDesign(.rounded)
-                    .foregroundStyle(Palette.accent)
+                Text("\(context.state.totalCount)")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundStyle(.white)
                     .contentTransition(.numericText())
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             } minimal: {
-                AppIconMark(size: 23)
+                Image("GhostGlyph")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
             }
         }
     }
 }
+
+/// The summary card cut down to what the expanded island's height and
+/// corner radii leave room for: the big count with the frontmost shell
+/// beside it, the status bar, and the counts folded into one dim line.
+/// The name and the ghost stay off — the island's closed states already
+/// carry both.
+private struct IslandSummary: View {
+    let state: TerminalSessionAttributes.ContentState
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: Spacing.line) {
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.line) {
+                Text("\(state.totalCount)")
+                    .font(.system(size: 36, weight: .bold, design: .rounded).monospacedDigit())
+                    .contentTransition(.numericText())
+                Text("sessions")
+                    .font(.subheadline)
+                    .opacity(0.5)
+                Spacer(minLength: Spacing.line)
+                if let shell = state.activeShell {
+                    Text(shell)
+                        .font(.subheadline)
+                        .opacity(0.5)
+                }
+            }
+            StatusBar(
+                live: state.liveCount,
+                starting: state.startingCount,
+                failed: state.failedCount
+            )
+            if let summary = state.summaryLine {
+                Text(summary)
+                    .font(.subheadline)
+                    .opacity(0.5)
+                    .lineLimit(1)
+            }
+        }
+        .padding(Spacing.line)
+        .fontDesign(.rounded)
+        .animation(.easeInOut(duration: 0.35), value: state)
+    }
+}
+
+#if DEBUG
+
+import ActivityKit
+import SwiftUI
+import WidgetKit
+
+#Preview("Island Expanded", as: .dynamicIsland(.expanded), using: TerminalSessionAttributes.preview) {
+    TerminalSessionActivityWidget()
+} contentStates: {
+    TerminalSessionAttributes.ContentState.typical
+    TerminalSessionAttributes.ContentState.crowded
+}
+
+#Preview("Island Compact", as: .dynamicIsland(.compact), using: TerminalSessionAttributes.preview) {
+    TerminalSessionActivityWidget()
+} contentStates: {
+    TerminalSessionAttributes.ContentState.typical
+    TerminalSessionAttributes.ContentState.crowded
+}
+
+#Preview("Island Minimal", as: .dynamicIsland(.minimal), using: TerminalSessionAttributes.preview) {
+    TerminalSessionActivityWidget()
+} contentStates: {
+    TerminalSessionAttributes.ContentState.typical
+    TerminalSessionAttributes.ContentState.crowded
+}
+
+#endif
