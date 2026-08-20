@@ -3,6 +3,7 @@
 //  iGhostty
 //
 
+import GhosttyTerminal
 import GhosttyTheme
 import SwiftUI
 
@@ -14,12 +15,16 @@ struct SettingsSheet: View {
     /// pick", which hands the session to `login`.
     @AppStorage("Shell.path") private var shellPath = ""
 
+    /// Mirrored by AppDelegate at launch; toggling applies immediately.
+    @AppStorage("Debug.verboseTerminalLog") private var verboseTerminalLog = false
+
     var body: some View {
         NavigationView {
             Form {
                 appearanceSection
                 keyboardSection
                 shellSection
+                debugSection
                 aboutSection
             }
             .navigationTitle("Settings")
@@ -101,6 +106,29 @@ struct SettingsSheet: View {
     }
 
     private static let shellPlaceholder = "/bin/zsh"
+
+    private var debugSection: some View {
+        Section {
+            Toggle("Verbose Terminal Log", isOn: $verboseTerminalLog)
+                .onChange(of: verboseTerminalLog) { enabled in
+                    if enabled {
+                        TerminalDebugLog.enable(.standard)
+                    } else {
+                        TerminalDebugLog.enable([.lifecycle, .metrics])
+                    }
+                }
+        } header: {
+            Text("Debugging")
+        } footer: {
+            Text(
+                """
+                Writes key routing, IME, and terminal output traces to the \
+                system log (idevicesyslog or Console.app). Keystrokes appear \
+                in the log while this is on.
+                """
+            )
+        }
+    }
 
     private var aboutSection: some View {
         Section {
