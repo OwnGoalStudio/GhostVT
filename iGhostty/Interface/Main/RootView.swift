@@ -97,9 +97,10 @@ struct RootView: View {
                 anchorRange: box.request.anchorRange
             )
         }
-        // The switcher, a full-screen cover, presents its own copy of this
-        // alert; a covered context cannot present, so this one stands down.
-        .closeTabConfirmation(tabManager, isActive: !showsSwitcher)
+        // One copy for the whole window: the confirmation presents as an
+        // `AlertViewController` on the front-most context, so it lands above
+        // the switcher's cover too.
+        .closeTabConfirmation(tabManager)
     }
 
     private var terminalColumn: some View {

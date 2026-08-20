@@ -10,11 +10,11 @@ import UIKit
 /// the surface starts up or the daemon connection opens, and an alert card
 /// once the session ended or the connection failed. Connected shows nothing.
 ///
-/// The card is a SwiftUI rendition of Lakr233/AlertController's design —
-/// dimmed pane, centered material card, app-icon header, and a two-button
-/// row whose right action carries the accent. An exited session's card is
-/// dismissable (Done): the dead terminal stays on screen with its scrollback
-/// selectable, and only Close actually takes the tab down.
+/// The card is the shared `AlertCardView` — the same design
+/// `AlertViewController` presents — drawn inline over the pane rather than
+/// presented, because it must persist while the dead terminal stays on
+/// screen. An exited session's card is dismissable (Done): the scrollback
+/// stays selectable, and only Close actually takes the tab down.
 struct SessionStatusOverlay: View {
     @ObservedObject var store: TerminalSessionStore
 
@@ -68,80 +68,23 @@ struct SessionStatusOverlay: View {
     }
 
     private func alertCard(reason: String) -> some View {
-        VStack(spacing: 16) {
-            Image("AlertIcon")
-                .resizable()
-                .scaledToFill()
-                .frame(width: 64, height: 64)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-
-            Text(processExited ? "Session Ended" : "Terminal Unavailable")
-                .font(.body.weight(.semibold))
-                .multilineTextAlignment(.center)
-
-            Text(reason)
-                .font(.footnote)
-                .multilineTextAlignment(.center)
-                .lineLimit(6)
-
-            HStack(spacing: 8) {
-                alertButton("Close", style: .normal) {
+        AlertCardView(
+            title: processExited
+                ? String(localized: "Session Ended")
+                : String(localized: "Terminal Unavailable"),
+            message: reason,
+            actions: [
+                AlertAction("Close") {
                     onCloseTab()
-                }
-                if processExited {
-                    alertButton("Done", style: .accent) {
+                },
+                processExited
+                    ? AlertAction("Done", kind: .accent, handler: {
                         acknowledged = store.status
-                    }
-                } else {
-                    alertButton("Retry", style: .accent) {
+                    })
+                    : AlertAction("Retry", kind: .accent, handler: {
                         store.connect()
-                    }
-                }
-            }
-        }
-        .padding(16)
-        .frame(maxWidth: 350)
-        .background(.regularMaterial)
-        .background(Color(UIColor.systemBackground).opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .fixedSize(horizontal: false, vertical: true)
-    }
-
-    private func alertButton(
-        _ title: LocalizedStringKey,
-        style: AlertButtonStyle.Kind,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            Text(title)
-        }
-        .buttonStyle(AlertButtonStyle(kind: style))
-    }
-}
-
-/// AlertController's button, translated: full-width rounded rectangle with a
-/// 1pt accent border; the accent action fills with the accent color and
-/// speaks semibold, the normal one stays clear with accent-colored text.
-struct AlertButtonStyle: ButtonStyle {
-    enum Kind {
-        case normal
-        case accent
-    }
-
-    let kind: Kind
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .font(kind == .accent ? .body.weight(.semibold) : .body)
-            .foregroundColor(kind == .accent ? .white : .accentColor)
-            .padding(8)
-            .frame(maxWidth: .infinity)
-            .background(kind == .accent ? Color.accentColor : Color.clear)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .strokeBorder(Color.accentColor, lineWidth: 1)
-            )
-            .opacity(configuration.isPressed ? 0.75 : 1)
+                    }),
+            ]
+        )
     }
 }

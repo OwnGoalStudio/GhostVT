@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Safari-style tab overview: a grid of live snapshot cards.
 struct TabSwitcherView: View {
@@ -7,7 +8,7 @@ struct TabSwitcherView: View {
     @ObservedObject private var theme = AppTheme.shared
     @Environment(\.colorScheme) private var colorScheme
     @State private var showsSettings = false
-    @State private var confirmsCloseAll = false
+    @State private var window: UIWindow?
 
     private let columns = [
         GridItem(.adaptive(minimum: 170, maximum: 280), spacing: 14),
@@ -49,15 +50,9 @@ struct TabSwitcherView: View {
         .sheet(isPresented: $showsSettings) {
             SettingsSheet()
         }
-        .closeTabConfirmation(tabManager)
-        .alert("Close All Tabs?", isPresented: $confirmsCloseAll) {
-            Button("Close All", role: .destructive) {
-                tabManager.closeAll()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This closes every terminal and stops everything running in them.")
-        }
+        // Close-tab confirmations need no copy here: the root's presents on
+        // the front-most context, which is this cover while it is up.
+        .background(WindowReader(window: $window))
     }
 
     private var tabCountLabel: String {
@@ -138,11 +133,20 @@ struct TabSwitcherView: View {
     /// Same rule as a single tab's ×: ask first when live shells would die,
     /// close straight away when there is nothing to lose.
     private func requestCloseAll() {
-        if tabManager.hasLiveSessions {
-            confirmsCloseAll = true
-        } else {
+        guard tabManager.hasLiveSessions else {
             tabManager.closeAll()
+            return
         }
+        AlertViewController(
+            title: "Close All Tabs?",
+            message: "This closes every terminal and stops everything running in them.",
+            actions: [
+                AlertAction("Cancel"),
+                AlertAction("Close All", kind: .destructive) {
+                    tabManager.closeAll()
+                },
+            ]
+        ).present(in: window)
     }
 }
 
