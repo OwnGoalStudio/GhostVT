@@ -67,6 +67,14 @@ struct SidebarView: View {
         .padding(.horizontal, 20)
         .padding(.top, 14)
         .padding(.bottom, 6)
+        .frame(maxWidth: .infinity)
+        .background {
+            // Rows scroll under the safe-area inset; without a material the
+            // title floats over live list content.
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
+        }
     }
 
     /// Settings' home at regular width — the top bar carries no gear, so
@@ -85,7 +93,21 @@ struct SidebarView: View {
             Spacer()
         }
         .padding(.horizontal, 14)
-        .padding(.bottom, 6)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity)
+        .background {
+            // A long tab list scrolls beneath the gear; the material blurs
+            // it out the way the app's other bars do, and reaches through
+            // the bottom safe area so the blur runs to the screen edge.
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
+        }
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(theme.hairline(for: colorScheme))
+                .frame(height: 1)
+        }
     }
 
     private var countLabel: String {

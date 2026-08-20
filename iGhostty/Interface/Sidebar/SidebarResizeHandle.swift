@@ -28,7 +28,6 @@ struct SidebarResizeHandle: View {
             .frame(width: 20)
             .frame(maxHeight: .infinity)
             .contentShape(Rectangle())
-            .hoverEffect(.highlight)
             .gesture(
                 // Global coordinate space: the handle rides the sidebar's
                 // trailing edge, so its local space moves with every width
