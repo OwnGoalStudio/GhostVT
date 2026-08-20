@@ -93,8 +93,8 @@ private struct StatusBar: View {
                     (Palette.starting, starting),
                     (Palette.failed, failed),
                 ].filter { $0.1 > 0 }
-                let gaps = CGFloat(groups.count - 1) * 2
-                HStack(spacing: 2) {
+                let gaps = CGFloat(groups.count - 1) * Spacing.line
+                HStack(spacing: Spacing.line) {
                     ForEach(Array(groups.enumerated()), id: \.offset) { _, group in
                         Capsule()
                             .fill(group.color)
