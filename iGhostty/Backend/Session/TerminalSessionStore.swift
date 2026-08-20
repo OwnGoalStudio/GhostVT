@@ -126,7 +126,15 @@ final class TerminalSessionStore: ObservableObject {
         viewport = (columns, rows)
         guard !hasAutoConnected else { return }
         hasAutoConnected = true
-        connect()
+        // The first report lands mid launch-transition — a pane still
+        // animating in briefly measures ~49×16 — and connecting right then
+        // spawns (or resizes) the daemon-side PTY at that size. One short
+        // beat lets layout settle; `connect()` primes the transport with
+        // whatever the viewport is by then.
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: 150_000_000)
+            self?.connect()
+        }
     }
 
     func noteProcessExit(status: Int32) {
@@ -179,13 +187,15 @@ final class TerminalSessionStore: ObservableObject {
     private func apply(_ state: TerminalTransportState) {
         switch state {
         case .connecting:
+            // No status line: the pill overlay already says connecting, and
+            // a clean launch should open on the shell's own first line.
+            // Only trouble (interruptions, failures) gets written into the
+            // terminal.
             status = .connecting
-            printStatusLine("connecting to \(endpointDescription) …")
         case .connected:
             Self.logger.info("connected to \(self.endpointDescription)")
             status = .connected
             reconnectAttempt = 0
-            printStatusLine("connected to \(endpointDescription)")
             if let viewport {
                 relay.updateViewport(columns: viewport.columns, rows: viewport.rows)
             }
