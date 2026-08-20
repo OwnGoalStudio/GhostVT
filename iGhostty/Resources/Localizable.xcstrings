@@ -315,13 +315,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "关闭后的终端无法恢复，随时可以新建一个。"
+            "value" : "已关闭的终端无法重新打开。可随时新建终端。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "關閉後的終端機無法復原，隨時可以新建一個。"
+            "value" : "已關閉的終端機無法重新開啟。可隨時新增終端機。"
           }
         }
       }
@@ -380,13 +380,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自定义按键会输入你设置的字符，并带上当前开启的修饰键。"
+            "value" : "自定义按键将输入所设定的字符，并结合当前已启用的修饰键。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自訂按鍵會輸入你設定的字元，並帶上目前開啟的修飾鍵。"
+            "value" : "自訂按鍵將輸入所設定的字元，並結合目前啟用的修飾鍵。"
           }
         }
       }
@@ -510,13 +510,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "快捷键条"
+            "value" : "键盘辅助键"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "快捷鍵列"
+            "value" : "鍵盤輔助鍵"
           }
         }
       }
@@ -770,13 +770,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "添加分隔点"
+            "value" : "添加分隔符"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "加入分隔點"
+            "value" : "加入分隔符號"
           }
         }
       }
@@ -964,13 +964,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选择并排列键盘上方快捷键条中的按键。"
+            "value" : "选择并排列键盘上方快捷栏中的按键。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "選擇並排列鍵盤上方快捷鍵列中的按鍵。"
+            "value" : "選擇並排列鍵盤上方快捷列中的按鍵。"
           }
         }
       }
@@ -1938,13 +1938,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "分隔点"
+            "value" : "分隔符"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "分隔點"
+            "value" : "分隔符號"
           }
         }
       }
@@ -2068,7 +2068,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "下箭头"
+            "value" : "向下键"
           }
         },
         "zh-Hant" : {
@@ -2133,13 +2133,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "拖动可调整顺序。移除的标准按键会回到下方列表；分隔点和自定义按键则会直接删除。"
+            "value" : "拖动可调整按键顺序。移除标准按键会将其放回下方列表；分隔符与自定义按键将直接删除。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "拖移可調整順序。移除的標準按鍵會回到下方列表；分隔點與自訂按鍵則會直接刪除。"
+            "value" : "拖移可調整按鍵順序。移除標準按鍵會將其放回下方列表；分隔符號與自訂按鍵將直接刪除。"
           }
         }
       }
@@ -2393,7 +2393,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "左箭头"
+            "value" : "向左键"
           }
         },
         "zh-Hant" : {
@@ -2848,13 +2848,79 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "没有打开的标签页"
+            "value" : "无打开的标签页"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "沒有開啟的分頁"
+            "value" : "無開啟的分頁"
+          }
+        }
+      }
+    },
+    "No ghostty config written; would go to %@" : {
+      "comment" : "Settings footer when the rendered ghostty config is missing; %@ is a directory path",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keine Ghostty-Konfiguration geschrieben; würde nach %@ gehen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se ha escrito la configuración de Ghostty; se guardaría en %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune configuration Ghostty écrite ; irait dans %@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nessuna configurazione Ghostty scritta; andrebbe in %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ghostty 設定ファイルは書き込まれていません。出力先: %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ghostty 설정 파일이 작성되지 않았습니다. 대상 경로: %@"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nenhuma configuração do Ghostty gravada; iria para %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Конфигурация Ghostty не записана; путь: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未写入 Ghostty 配置文件；预定路径：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未寫入 Ghostty 設定檔；預定路徑：%@"
           }
         }
       }
@@ -3043,13 +3109,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "包含的按键"
+            "value" : "已包含的按键"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "包含的按鍵"
+            "value" : "已包含的按鍵"
           }
         }
       }
@@ -3504,7 +3570,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "重設主題為預設值"
+            "value" : "重設為預設主題"
           }
         }
       }
@@ -3570,6 +3636,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重設為預設排列"
+          }
+        }
+      }
+    },
+    "Resize Sidebar" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seitenleistengröße anpassen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redimensionar barra lateral"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redimensionner la barre latérale"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ridimensiona barra laterale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サイドバーのサイズを変更"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사이드바 크기 조절"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redimensionar barra lateral"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Изменить размер боковой панели"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "调整边栏大小"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "調整側邊欄大小"
           }
         }
       }
@@ -3693,7 +3824,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "右箭头"
+            "value" : "向右键"
           }
         },
         "zh-Hant" : {
@@ -4409,13 +4540,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App 与终端守护进程的版本不一致。请重新安装 iGhostty 以同时更新两者。"
+            "value" : "App 与终端守护进程版本不一致。请重新安装 iGhostty 以同时更新两者。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App 與終端機常駐程式的版本不一致。請重新安裝 iGhostty 以同時更新兩者。"
+            "value" : "App 與終端機常駐程式版本不一致。請重新安裝 iGhostty 以同時更新兩者。"
           }
         }
       }
@@ -4474,13 +4605,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "快捷键条会按此顺序显示这些按键；放不下时可以左右滑动。"
+            "value" : "键盘上方的快捷栏将按此顺序显示按键。若无法全部显示，可左右滑动查看。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "快捷鍵列會按此順序顯示這些按鍵；放不下時可以左右滑動。"
+            "value" : "鍵盤上方的快捷列將按此順序顯示按鍵。若無法完全顯示，可左右滑動查看。"
           }
         }
       }
@@ -4734,13 +4865,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "每个新终端要运行的程序，例如 /bin/zsh。请使用越狱根目录内的普通路径——以 jbroot 开头的路径会在下次越狱后失效。留空则使用默认的登录 Shell。"
+            "value" : "新建终端时运行的程序，例如 /bin/zsh。请使用越狱根目录内的常规路径；以 jbroot 开头的路径在重新越狱后将失效。若留空，则使用默认登录 Shell。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "每個新終端機要執行的程式，例如 /bin/zsh。請使用越獄根目錄內的一般路徑——以 jbroot 開頭的路徑會在下次越獄後失效。留空則使用預設的登入 Shell。"
+            "value" : "新增終端機時執行的程式，例如 /bin/zsh。請使用越獄根目錄內的一般路徑；以 jbroot 開頭的路徑在重新越獄後將失效。若留空，則使用預設登入 Shell。"
           }
         }
       }
@@ -4995,13 +5126,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "终端守护进程未在运行。"
+            "value" : "终端守护进程未运行。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "終端機常駐程式未在執行。"
+            "value" : "終端機常駐程式未執行。"
           }
         }
       }
@@ -5060,13 +5191,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "终端守护进程拒绝了连接。"
+            "value" : "终端守护进程拒绝连接。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "終端機常駐程式拒絕了連線。"
+            "value" : "終端機常駐程式拒絕連線。"
           }
         }
       }
@@ -5190,13 +5321,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "主题来自 Ghostty 主题库，对所有窗口的所有标签页生效。"
+            "value" : "主题来自 Ghostty 主题库，将应用于所有窗口和标签页。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "主題來自 Ghostty 主題庫，對所有視窗的所有標籤頁生效。"
+            "value" : "主題來自 Ghostty 主題庫，將套用至所有視窗與分頁。"
           }
         }
       }
@@ -5255,13 +5386,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "这会关闭所有终端，并停止其中运行的所有程序。"
+            "value" : "这将关闭所有终端，并终止其中运行的所有程序。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "這會關閉所有終端機，並停止其中執行的所有程式。"
+            "value" : "這將關閉所有終端機，並終止其中正在執行的所有程式。"
           }
         }
       }
@@ -5320,13 +5451,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "这会关闭该终端，并停止其中运行的所有程序。"
+            "value" : "这将关闭该终端，并终止其中运行的所有程序。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "這會關閉該終端機，並停止其中執行的所有程式。"
+            "value" : "這將關閉此終端機，並終止其中正在執行的所有程式。"
           }
         }
       }
@@ -5580,13 +5711,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打开的终端过多。请关闭一个后重试。"
+            "value" : "打开的终端数量已达上限。请关闭一个终端后再试。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "開啟的終端機過多。請關閉一個後重試。"
+            "value" : "開啟的終端機數量已達上限。請關閉一個終端機後再試。"
           }
         }
       }
@@ -5645,7 +5776,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "上箭头"
+            "value" : "向上键"
           }
         },
         "zh-Hant" : {
@@ -5710,13 +5841,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最多三个字符，按原样发送。单个字母可与 Control 组合，效果与键盘上的字母相同。"
+            "value" : "最多输入 3 个字符，按原样发送。单个字母可与 Control 键组合使用，效果与键盘上的字母键相同。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最多三個字元，按原樣送出。單一字母可與 Control 組合，效果與鍵盤上的字母相同。"
+            "value" : "最多輸入 3 個字元，並將按原樣送出。單一字母可與 Control 鍵組合使用，效果與鍵盤上的字母按鍵相同。"
           }
         }
       }
@@ -5905,13 +6036,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将按键路由、输入法与终端输出的跟踪记录写入系统日志（idevicesyslog 或“控制台”）。开启期间，日志中会包含你的按键内容。"
+            "value" : "将按键路由、输入法及终端输出的追踪记录写入系统日志（idevicesyslog 或“控制台”）。开启后，日志中将包含按键输入内容。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "將按鍵路由、輸入法與終端機輸出的追蹤記錄寫入系統日誌（idevicesyslog 或「主控台」）。開啟期間，日誌中會包含你的按鍵內容。"
+            "value" : "將按鍵路由、輸入法及終端機輸出的追蹤記錄寫入系統日誌（idevicesyslog 或「主控台」）。開啟後，日誌中將包含按鍵輸入內容。"
           }
         }
       }
