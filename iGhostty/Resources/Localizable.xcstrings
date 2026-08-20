@@ -291,7 +291,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "閉じたターミナルは再び開けません。必要なときに新しく開いてください。"
+            "value" : "閉じたターミナルは元に戻せません。必要になったら新しく開いてください。"
           }
         },
         "ko" : {
@@ -315,13 +315,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已关闭的终端无法重新打开。需要时新建一个即可。"
+            "value" : "关闭后的终端无法恢复，随时可以新建一个。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "已關閉的終端機無法重新開啟。需要時新增一個即可。"
+            "value" : "關閉後的終端機無法復原，隨時可以新建一個。"
           }
         }
       }
@@ -380,13 +380,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自定义按键会输入你填写的字符，并同时应用已开启的修饰键。"
+            "value" : "自定义按键会输入你设置的字符，并带上当前开启的修饰键。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "自訂按鍵會輸入你填寫的字元，並同時套用已開啟的修飾鍵。"
+            "value" : "自訂按鍵會輸入你設定的字元，並帶上目前開啟的修飾鍵。"
           }
         }
       }
@@ -486,7 +486,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "アクセサリキー"
+            "value" : "ショートカットバー"
           }
         },
         "ko" : {
@@ -510,13 +510,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "辅助按键"
+            "value" : "快捷键条"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "輔助按鍵"
+            "value" : "快捷鍵列"
           }
         }
       }
@@ -640,13 +640,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "添加%@"
+            "value" : "添加 %@"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "加入%@"
+            "value" : "加入 %@"
           }
         }
       }
@@ -940,7 +940,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キーボード上部のバーに表示するキーと並び順を設定します。"
+            "value" : "キーボード上部のショートカットバーに表示するキーと並び順を設定します。"
           }
         },
         "ko" : {
@@ -964,13 +964,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "选择并排列键盘上方按键条中的按键。"
+            "value" : "选择并排列键盘上方快捷键条中的按键。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "選擇並排列鍵盤上方按鍵列中的按鍵。"
+            "value" : "選擇並排列鍵盤上方快捷鍵列中的按鍵。"
           }
         }
       }
@@ -2133,13 +2133,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "拖动可调整按键顺序。移除标准按键后，它会回到下方列表；分隔点和自定义按键会被删除。"
+            "value" : "拖动可调整顺序。移除的标准按键会回到下方列表；分隔点和自定义按键则会直接删除。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "拖曳可調整按鍵順序。移除標準按鍵後，它會回到下方列表；分隔點和自訂按鍵會被刪除。"
+            "value" : "拖移可調整順序。移除的標準按鍵會回到下方列表；分隔點與自訂按鍵則會直接刪除。"
           }
         }
       }
@@ -3368,13 +3368,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "移除%@"
+            "value" : "移除 %@"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "移除%@"
+            "value" : "移除 %@"
           }
         }
       }
@@ -4450,7 +4450,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キーボード上部のバーには、この順番でキーが表示されます。すべて収まらない場合は、横にスクロールできます。"
+            "value" : "ショートカットバーには、この順番でキーが表示されます。収まらない場合は横にスクロールできます。"
           }
         },
         "ko" : {
@@ -4474,13 +4474,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "键盘上方的按键条会按此顺序显示这些按键。如果放不下，可以左右滑动。"
+            "value" : "快捷键条会按此顺序显示这些按键；放不下时可以左右滑动。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "鍵盤上方的按鍵列會依此順序顯示這些按鍵。如果放不下，可以左右捲動。"
+            "value" : "快捷鍵列會按此順序顯示這些按鍵；放不下時可以左右滑動。"
           }
         }
       }
@@ -4734,13 +4734,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "每个新终端运行的程序，例如 /bin/zsh。请使用越狱根目录内的普通路径：以 jbroot 开头的路径在下次越狱后会失效。留空则使用默认的登录 Shell。"
+            "value" : "每个新终端要运行的程序，例如 /bin/zsh。请使用越狱根目录内的普通路径——以 jbroot 开头的路径会在下次越狱后失效。留空则使用默认的登录 Shell。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "每個新終端機執行的程式，例如 /bin/zsh。請使用越獄根目錄內的一般路徑：以 jbroot 開頭的路徑在下次越獄後會失效。留空則使用預設的登入 Shell。"
+            "value" : "每個新終端機要執行的程式，例如 /bin/zsh。請使用越獄根目錄內的一般路徑——以 jbroot 開頭的路徑會在下次越獄後失效。留空則使用預設的登入 Shell。"
           }
         }
       }
@@ -5190,13 +5190,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "主题来自 Ghostty 主题库，并应用于所有窗口中的所有标签页。"
+            "value" : "主题来自 Ghostty 主题库，对所有窗口的所有标签页生效。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "主題來自 Ghostty 主題目錄，並套用於所有視窗中的所有分頁。"
+            "value" : "主題來自 Ghostty 主題庫，對所有視窗的所有標籤頁生效。"
           }
         }
       }
@@ -5255,13 +5255,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "这会关闭所有终端，并停止其中正在运行的所有程序。"
+            "value" : "这会关闭所有终端，并停止其中运行的所有程序。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "這會關閉所有終端機，並停止其中正在執行的所有程式。"
+            "value" : "這會關閉所有終端機，並停止其中執行的所有程式。"
           }
         }
       }
@@ -5320,13 +5320,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "这会关闭该终端，并停止其中正在运行的所有程序。"
+            "value" : "这会关闭该终端，并停止其中运行的所有程序。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "這會關閉該終端機，並停止其中正在執行的所有程式。"
+            "value" : "這會關閉該終端機，並停止其中執行的所有程式。"
           }
         }
       }
@@ -5710,13 +5710,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最多三个字符，按输入的原样发送。只有一个字母时，它可以像键盘上的字母一样与 Control 组合使用。"
+            "value" : "最多三个字符，按原样发送。单个字母可与 Control 组合，效果与键盘上的字母相同。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最多三個字元，依輸入的原樣送出。只有一個字母時，它可以像鍵盤上的字母一樣與 Control 組合使用。"
+            "value" : "最多三個字元，按原樣送出。單一字母可與 Control 組合，效果與鍵盤上的字母相同。"
           }
         }
       }
@@ -5881,7 +5881,7 @@
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "キールーティング、IME、ターミナル出力のトレースをシステムログ(idevicesyslog または Console.app)に書き込みます。オンの間、キー入力がログに記録されます。"
+            "value" : "キールーティング、IME、ターミナル出力のトレースをシステムログ（idevicesyslog または Console.app）に書き込みます。オンの間、キー入力がログに記録されます。"
           }
         },
         "ko" : {
@@ -5905,13 +5905,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "将按键路由、输入法和终端输出的跟踪写入系统日志(idevicesyslog 或控制台)。开启期间按键内容会出现在日志中。"
+            "value" : "将按键路由、输入法与终端输出的跟踪记录写入系统日志（idevicesyslog 或“控制台”）。开启期间，日志中会包含你的按键内容。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "將按鍵路由、輸入法與終端機輸出的追蹤寫入系統日誌(idevicesyslog 或主控台)。開啟期間按鍵內容會出現在日誌中。"
+            "value" : "將按鍵路由、輸入法與終端機輸出的追蹤記錄寫入系統日誌（idevicesyslog 或「主控台」）。開啟期間，日誌中會包含你的按鍵內容。"
           }
         }
       }
