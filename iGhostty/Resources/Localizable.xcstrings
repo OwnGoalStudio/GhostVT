@@ -1494,9 +1494,6 @@
         }
       }
     },
-    "Connection failed" : {
-
-    },
     "Connection Failed" : {
       "extractionState" : "manual",
       "localizations" : {

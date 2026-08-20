@@ -24,7 +24,7 @@ struct StatusDot: View {
         case .idle: "Not Connected"
         case .connecting: "Connecting…"
         case .connected: "Connected"
-        case .failed: "Connection failed"
+        case .failed: "Connection Failed"
         }
     }
 }
