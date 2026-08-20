@@ -50,6 +50,7 @@ final class TerminalSessionStore: ObservableObject {
     private let relay = TransportRelay()
     private let titleTracker = CommandTitleTracker()
     private var hasAutoConnected = false
+    private var isSceneActive = false
     private let makeTransport: () -> TerminalTransport
 
     /// Reconnect-after-interruption state. The daemon may still hold the
@@ -124,17 +125,28 @@ final class TerminalSessionStore: ObservableObject {
     private func handleViewportChange(columns: Int, rows: Int) {
         Self.logger.info("surface reported viewport \(columns)x\(rows)")
         viewport = (columns, rows)
-        guard !hasAutoConnected else { return }
+        connectWhenReady()
+    }
+
+    /// The scene reached foreground-active; the second half of the
+    /// auto-connect gate. Signalled by the scene delegate through the
+    /// `TabManager`, and again for tabs created while already active.
+    func noteSceneActive() {
+        guard !isSceneActive else { return }
+        isSceneActive = true
+        connectWhenReady()
+    }
+
+    /// Auto-connect fires once, when both halves are true: the surface has
+    /// reported a grid (bytes fed earlier would be dropped), and the scene
+    /// is active. Waiting for activation keeps daemon work out of the
+    /// launch transition — the first viewport reported mid-transition
+    /// measures ~49×16, and connecting right then spawned the shell at that
+    /// size.
+    private func connectWhenReady() {
+        guard !hasAutoConnected, isSceneActive, viewport != nil else { return }
         hasAutoConnected = true
-        // The first report lands mid launch-transition — a pane still
-        // animating in briefly measures ~49×16 — and connecting right then
-        // spawns (or resizes) the daemon-side PTY at that size. One short
-        // beat lets layout settle; `connect()` primes the transport with
-        // whatever the viewport is by then.
-        Task { @MainActor [weak self] in
-            try? await Task.sleep(nanoseconds: 150_000_000)
-            self?.connect()
-        }
+        connect()
     }
 
     func noteProcessExit(status: Int32) {

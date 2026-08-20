@@ -51,6 +51,11 @@ final class TabManager: ObservableObject {
                 )
                 self.activeTabID = self.tabs.last?.id
             }
+            if self.isSceneActive {
+                for tab in self.tabs {
+                    tab.store.noteSceneActive()
+                }
+            }
             SessionActivityController.shared.refresh()
         }
     }
@@ -59,12 +64,29 @@ final class TabManager: ObservableObject {
         tabs.first { $0.id == activeTabID }
     }
 
+    /// Whether the owning scene has reached foreground-active. Sessions
+    /// auto-connect only after it: daemon work stays out of the launch
+    /// transition, whose transient layout otherwise sizes the first shell.
+    private var isSceneActive = false
+
+    /// Scene-delegate signal; also replayed onto tabs created before the
+    /// scene came up (the cold-launch resume batch).
+    func noteSceneActive() {
+        isSceneActive = true
+        for tab in tabs {
+            tab.store.noteSceneActive()
+        }
+    }
+
     @discardableResult
     func newTab() -> TerminalTab {
         let tab = TerminalTab()
         withAnimation(Self.tabTransition) {
             tabs.append(tab)
             activeTabID = tab.id
+        }
+        if isSceneActive {
+            tab.store.noteSceneActive()
         }
         SessionActivityController.shared.refresh()
         return tab

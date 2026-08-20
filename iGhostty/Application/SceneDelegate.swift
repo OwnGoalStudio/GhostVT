@@ -32,6 +32,13 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         tabManager.detachAllTabs()
     }
 
+    /// Sessions auto-connect only from here on: the launch transition is
+    /// over, layout has settled, and surfaces render unoccluded — the
+    /// viewport a shell spawns with is the one the user actually sees.
+    func sceneDidBecomeActive(_: UIScene) {
+        tabManager.noteSceneActive()
+    }
+
     /// Nothing ends the Live Activity while the app isn't running, so a
     /// return to the foreground re-reads the daemon's registry — if the
     /// detached shells it was advertising died in the meantime, this is the
