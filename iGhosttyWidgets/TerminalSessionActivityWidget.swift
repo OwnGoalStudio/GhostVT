@@ -40,17 +40,17 @@ struct TerminalSessionActivityWidget: Widget {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 18, height: 18)
+                    .padding(10)
             } compactTrailing: {
                 Text("\(context.state.totalCount)")
                     .font(.system(size: 18, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                     .contentTransition(.numericText())
-                    .frame(maxWidth: .infinity, alignment: .trailing)
             } minimal: {
                 Image("GhostGlyph")
                     .resizable()
                     .scaledToFit()
-                    .frame(width: 24, height: 24)
+                    .frame(width: 44, height: 44)
             }
         }
     }
