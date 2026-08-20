@@ -33,6 +33,10 @@ final class TerminalTab: ObservableObject, Identifiable {
         let daemonSession = DaemonSessionBox(id: resumeDaemonSessionID)
         self.daemonSession = daemonSession
         terminal = TerminalViewState(theme: AppTheme.shared.terminalTheme)
+        // Built before the store exists (the factory closure cannot capture
+        // `self` mid-init), armed right after: the exit the transport
+        // observes must reach the store that presents it.
+        let exitRelay = ProcessExitRelay()
         store = TerminalSessionStore(makeTransport: {
             let transport = XPCDaemonTransport(
                 shellPath: UserDefaults.standard.string(forKey: "Shell.path"),
@@ -43,14 +47,20 @@ final class TerminalTab: ObservableObject, Identifiable {
             // the box so the next connect opens a fresh shell instead of
             // attempting a doomed reattach. The daemon's own registry is the
             // only session record; just tell the directory to re-read it.
-            transport.onSessionExit = { id, _ in
+            transport.onSessionExit = { id, status in
                 daemonSession.clear(ifMatches: id)
+                exitRelay.fire(status)
                 Task { @MainActor in
                     DaemonSessionDirectory.shared.refresh()
                 }
             }
             return transport
         })
+        exitRelay.handler = { [weak self] status in
+            Task { @MainActor [weak self] in
+                self?.store.noteProcessExit(status: status)
+            }
+        }
         terminal.configuration = TerminalSurfaceOptions(
             backend: .inMemory(store.session)
         )
@@ -158,6 +168,31 @@ final class TerminalTab: ObservableObject, Identifiable {
         else { return }
         daemonSession.id = id
         DaemonSessionDirectory.shared.refresh()
+    }
+}
+
+/// Post-init bridge between the transport's exit callback (transport queue,
+/// wired inside a factory closure that predates the store) and the store the
+/// exit must reach.
+final class ProcessExitRelay: @unchecked Sendable {
+    private let lock = NSLock()
+    private var _handler: (@Sendable (Int32) -> Void)?
+
+    var handler: (@Sendable (Int32) -> Void)? {
+        get {
+            lock.lock()
+            defer { lock.unlock() }
+            return _handler
+        }
+        set {
+            lock.lock()
+            _handler = newValue
+            lock.unlock()
+        }
+    }
+
+    func fire(_ status: Int32) {
+        handler?(status)
     }
 }
 

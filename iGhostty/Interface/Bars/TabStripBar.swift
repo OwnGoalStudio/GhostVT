@@ -126,7 +126,10 @@ private struct TabChip: View {
                     .font(.subheadline)
                     .lineLimit(1)
                     .truncationMode(.middle)
-                    .frame(maxWidth: 180)
+                    // The floor keeps a short-titled chip around 100pt, so
+                    // the close button never crowds the status dot — a tap
+                    // near the dot must select, not close.
+                    .frame(minWidth: 44, maxWidth: 180, alignment: .leading)
                 Button(action: onClose) {
                     Image(systemName: "xmark")
                         .font(.caption2.weight(.semibold))

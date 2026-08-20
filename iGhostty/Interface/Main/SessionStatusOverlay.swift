@@ -4,12 +4,27 @@
 //
 
 import SwiftUI
+import UIKit
 
 /// Covers the terminal while its session is not usable: a quiet pill while
-/// the surface starts up or the daemon connection opens, and a retryable
-/// error card once a connection has failed. Connected shows nothing.
+/// the surface starts up or the daemon connection opens, and an alert card
+/// once the session ended or the connection failed. Connected shows nothing.
+///
+/// The card is the shared `AlertCardView` — the same design
+/// `AlertViewController` presents — drawn inline over the pane rather than
+/// presented, because it must persist while the dead terminal stays on
+/// screen. An exited session's card is dismissable (Done): the scrollback
+/// stays selectable, and only Close actually takes the tab down.
 struct SessionStatusOverlay: View {
     @ObservedObject var store: TerminalSessionStore
+
+    /// Closes the tab this session belongs to; provided by the pane's owner.
+    var onCloseTab: () -> Void
+
+    /// The failure the user dismissed with Done. Stored as the dismissed
+    /// status so a later, different failure (or a reconnect cycle) presents
+    /// its own card again.
+    @State private var acknowledged: TerminalSessionStore.Status?
 
     var body: some View {
         content
@@ -34,32 +49,42 @@ struct SessionStatusOverlay: View {
             .transition(.opacity)
 
         case let .failed(reason):
-            VStack(spacing: 14) {
-                Image(systemName: "bolt.horizontal.circle")
-                    .font(.system(size: 42, weight: .light))
-                    .foregroundColor(.secondary)
-                Text("Terminal Unavailable")
-                    .font(.headline)
-                Text(reason)
-                    .font(.caption.monospaced())
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(4)
-                Button("Retry") {
-                    store.connect()
+            if acknowledged != store.status {
+                ZStack {
+                    Color.black.opacity(0.25)
+                    alertCard(reason: reason)
+                        .padding(16)
                 }
-                .buttonStyle(.borderedProminent)
+                .transition(.opacity)
             }
-            .padding(28)
-            .frame(maxWidth: 320)
-            .barGlass(
-                in: RoundedRectangle(cornerRadius: 20, style: .continuous)
-            )
-            .padding(24)
-            .transition(.opacity)
 
         case .connected:
             EmptyView()
         }
+    }
+
+    private var processExited: Bool {
+        store.processExitStatus != nil
+    }
+
+    private func alertCard(reason: String) -> some View {
+        AlertCardView(
+            title: processExited
+                ? String(localized: "Session Ended")
+                : String(localized: "Terminal Unavailable"),
+            message: reason,
+            actions: [
+                AlertAction("Close") {
+                    onCloseTab()
+                },
+                processExited
+                    ? AlertAction("Done", kind: .accent, handler: {
+                        acknowledged = store.status
+                    })
+                    : AlertAction("Retry", kind: .accent, handler: {
+                        store.connect()
+                    }),
+            ]
+        )
     }
 }

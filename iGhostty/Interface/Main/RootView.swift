@@ -23,6 +23,10 @@ struct RootView: View {
     /// shows a sidebar, so the preference only ever describes iPad-sized
     /// layouts.
     @AppStorage("Sidebar.visible") private var showsSidebar = true
+
+    /// User-dragged sidebar width, remembered like the visibility. The
+    /// resize handle clamps it, so a stored value is always presentable.
+    @AppStorage("Sidebar.width") private var sidebarWidth = 300.0
     @State private var showsSwitcher = false
     @State private var showsSettingsSheet = false
     @State private var selectionRequest: TerminalSelectionRequestBox?
@@ -40,7 +44,10 @@ struct RootView: View {
                         tabManager: tabManager,
                         onShowSettings: { showsSettingsSheet = true }
                     )
-                    .frame(width: 300)
+                    .frame(width: sidebarWidth)
+                    .overlay(alignment: .trailing) {
+                        SidebarResizeHandle(width: $sidebarWidth)
+                    }
                     .transition(.move(edge: .leading))
                 }
                 terminalColumn
@@ -90,9 +97,10 @@ struct RootView: View {
                 anchorRange: box.request.anchorRange
             )
         }
-        // The switcher, a full-screen cover, presents its own copy of this
-        // alert; a covered context cannot present, so this one stands down.
-        .closeTabConfirmation(tabManager, isActive: !showsSwitcher)
+        // One copy for the whole window: the confirmation presents as an
+        // `AlertViewController` on the front-most context, so it lands above
+        // the switcher's cover too.
+        .closeTabConfirmation(tabManager)
     }
 
     private var terminalColumn: some View {
@@ -136,7 +144,10 @@ struct RootView: View {
                 TerminalSurfaceView(context: tab.terminal)
                     .terminalFocused($focusedTabID, equals: tab.id)
                     .overlay {
-                        SessionStatusOverlay(store: tab.store)
+                        SessionStatusOverlay(
+                            store: tab.store,
+                            onCloseTab: { tabManager.requestClose(tab) }
+                        )
                     }
                     .opacity(isActive ? 1 : 0)
                     .allowsHitTesting(isActive)
@@ -162,6 +173,11 @@ struct RootView: View {
 
     private func refocus() {
         focusedTabID = tabManager.activeTabID
+        // FocusState alone is best-effort — SwiftUI can reset it to nil
+        // before the bridge acts, leaving the previous tab's surface holding
+        // first responder and eating every hardware key. Hand focus over
+        // imperatively so a tab switch always lands on the active terminal.
+        tabManager.activeTab?.terminal.requestFocus()
     }
 
     /// Hardware keyboard shortcuts (iPad with a keyboard, mainly).
