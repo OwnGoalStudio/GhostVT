@@ -2,54 +2,12 @@
   "sourceLanguage" : "en",
   "strings" : {
     "%lld" : {
-      "shouldTranslate" : false
+
     },
     "%lld detached" : {
       "comment" : "Sessions with no tab attached",
       "extractionState" : "manual",
       "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 个已分离"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 個已分離"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 件デタッチ中"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld개 분리됨"
-          }
-        },
-        "fr" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld détachée"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld détachées"
-                }
-              }
-            }
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
@@ -72,6 +30,54 @@
                 }
               }
             }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld détachée"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld détachées"
+                }
+              }
+            }
+          }
+        },
+        "it" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld scollegata"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld scollegate"
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 件デタッチ中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld개 분리됨"
           }
         },
         "pt-BR" : {
@@ -98,40 +104,58 @@
             "value" : "%lld отключено"
           }
         },
-        "it" : {
-          "variations" : {
-            "plural" : {
-              "one" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld scollegata"
-                }
-              },
-              "other" : {
-                "stringUnit" : {
-                  "state" : "translated",
-                  "value" : "%lld scollegate"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "+%lld more" : {
-      "comment" : "Sessions that did not fit the list",
-      "extractionState" : "manual",
-      "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "另有 %lld 个"
+            "value" : "%lld 个已分离"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "另有 %lld 個"
+            "value" : "%lld 個已分離"
+          }
+        }
+      }
+    },
+    "%lld failed" : {
+      "comment" : "Sessions whose transport gave up"
+    },
+    "%lld in background" : {
+      "comment" : "Sessions running with no tab attached"
+    },
+    "%lld live" : {
+      "comment" : "Sessions with a running shell"
+    },
+    "%lld starting" : {
+      "comment" : "Sessions still spawning"
+    },
+    "+%lld more" : {
+      "comment" : "Sessions that did not fit the list",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld weitere"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld más"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld en plus"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld in più"
           }
         },
         "ja" : {
@@ -146,24 +170,6 @@
             "value" : "%lld개 더"
           }
         },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld en plus"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld weitere"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "+%lld más"
-          }
-        },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
@@ -176,13 +182,22 @@
             "value" : "ещё %lld"
           }
         },
-        "it" : {
+        "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "+%lld in più"
+            "value" : "另有 %lld 个"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "另有 %lld 個"
           }
         }
       }
+    },
+    "Detached" : {
+
     },
     "Failed" : {
       "extractionState" : "manual",
@@ -249,6 +264,12 @@
         }
       }
     },
+    "iGhostty" : {
+      "shouldTranslate" : false
+    },
+    "Running" : {
+
+    },
     "Session %lld" : {
       "comment" : "Name of a shell that has not set a title",
       "extractionState" : "manual",
@@ -314,6 +335,9 @@
           }
         }
       }
+    },
+    "sessions" : {
+
     },
     "Starting…" : {
       "extractionState" : "manual",
@@ -444,9 +468,6 @@
           }
         }
       }
-    },
-    "iGhostty" : {
-      "shouldTranslate" : false
     }
   },
   "version" : "1.3"

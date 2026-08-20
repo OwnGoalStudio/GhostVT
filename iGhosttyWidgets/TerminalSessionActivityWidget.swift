@@ -18,31 +18,36 @@ struct TerminalSessionActivityWidget: Widget {
             LockScreenView(state: context.state)
         } dynamicIsland: { context in
             DynamicIsland {
+                // Icon left, count right — the expanded island is the
+                // compact one opened up, so the corners keep their roles.
+                // The per-row dots below carry the status; a second dot
+                // summary up here said the same thing, uglier.
                 DynamicIslandExpandedRegion(.leading) {
-                    HStack(spacing: 6) {
-                        AppIconMark(size: 22)
-                        Text("\(context.state.totalCount)")
-                            .font(.callout.weight(.semibold).monospacedDigit())
-                            .foregroundStyle(Palette.accent)
-                    }
-                    .padding(.leading, 4)
+                    AppIconMark(size: 26)
+                        .padding(.leading, Spacing.tight)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    StatusDots(sessions: context.state.sessions)
-                        .padding(.trailing, 4)
+                    Text(context.state.countLabel)
+                        .font(.title3.weight(.semibold).monospacedDigit())
+                        .fontDesign(.rounded)
+                        .foregroundStyle(Palette.accent)
+                        .contentTransition(.numericText())
+                        .padding(.trailing, Spacing.tight)
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-                    SessionList(state: context.state, limit: 3, font: .footnote)
-                        .padding(.horizontal, 6)
-                        .padding(.top, 4)
-                        .padding(.bottom, 2)
+                    SessionList(state: context.state, font: .footnote)
+                        .fontDesign(.rounded)
+                        .padding(.horizontal, Spacing.tight)
+                        .padding(.top, Spacing.tight)
                 }
             } compactLeading: {
                 AppIconMark(size: 23)
             } compactTrailing: {
-                Text("\(context.state.totalCount)")
+                Text(context.state.countLabel)
                     .font(.body.weight(.semibold).monospacedDigit())
+                    .fontDesign(.rounded)
                     .foregroundStyle(Palette.accent)
+                    .contentTransition(.numericText())
             } minimal: {
                 AppIconMark(size: 23)
             }

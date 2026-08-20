@@ -5,47 +5,40 @@
 
 import SwiftUI
 
+/// Rows past this are only counted, not listed; more than this stops reading
+/// as a glanceable card in either presentation.
+private let maxRows = 3
+
 /// The session rows both presentations share — the lock screen card is the
 /// roomier rendition of the island's bottom region, not a different design.
 struct SessionList: View {
     let state: TerminalSessionAttributes.ContentState
-    let limit: Int
     /// Every line in the list wears this one font at this one size; bold vs
     /// regular and opacity are the only distinctions, notification-style.
     let font: Font
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            ForEach(state.sessions.prefix(limit)) { session in
+        VStack(alignment: .leading, spacing: Spacing.line) {
+            // The ForEach is keyed by session id, so an update moves the
+            // rows that survived and transitions only the ones that didn't —
+            // without the explicit animation the whole card just snaps.
+            ForEach(state.sessions.prefix(maxRows)) { session in
                 SessionRow(session: session, font: font)
-            }
-            if let footer {
-                Text(footer)
-                    .font(font)
-                    .opacity(0.4)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .animation(.easeInOut(duration: 0.35), value: state)
     }
+}
 
-    /// What didn't fit, plus what has no tab at all. Both are worth a line:
-    /// a detached session is still burning a shell in the daemon.
-    private var footer: String? {
-        var parts: [String] = []
-        let hidden = max(0, state.sessions.count - limit) + state.overflowCount
-        if hidden > 0 {
-            parts.append(String.localizedStringWithFormat(
-                NSLocalizedString("+%lld more", comment: "Sessions that did not fit the list"),
-                hidden
-            ))
-        }
-        if state.detachedCount > 0 {
-            parts.append(String.localizedStringWithFormat(
-                NSLocalizedString("%lld detached", comment: "Sessions with no tab attached"),
-                state.detachedCount
-            ))
-        }
-        return parts.isEmpty ? nil : parts.joined(separator: "  ·  ")
+extension TerminalSessionAttributes.ContentState {
+    /// What the corner count reads: the plain total while every session is
+    /// listed, "shown/total" once any are only counted — the list itself
+    /// never says what it dropped.
+    var countLabel: String {
+        let shown = min(sessions.count, maxRows)
+        return totalCount > shown ? "\(shown)/\(totalCount)" : "\(totalCount)"
     }
 }
 
@@ -54,18 +47,14 @@ private struct SessionRow: View {
     let font: Font
 
     var body: some View {
-        HStack(spacing: 8) {
-            StatusDot(
-                status: session.status,
-                isActive: session.isActive,
-                diameter: 6
-            )
+        HStack(spacing: Spacing.line) {
+            StatusDot(status: session.status)
             Text(session.headline)
                 .font(font)
                 .fontWeight(session.isActive ? .bold : .regular)
                 .lineLimit(1)
                 .truncationMode(.tail)
-            Spacer(minLength: 10)
+            Spacer(minLength: Spacing.line)
             if let detail = session.detail {
                 Text(detail)
                     // Truncating the head keeps the leaf directory visible,
@@ -86,12 +75,9 @@ private extension TerminalSessionAttributes.Session {
         if !title.isEmpty { return title }
         if !shell.isEmpty { return shell }
         if let number {
-            return String.localizedStringWithFormat(
-                NSLocalizedString(
-                    "Session %lld",
-                    comment: "Name of a shell that has not set a title"
-                ),
-                Int(clamping: number)
+            return String(
+                localized: "Session \(Int(clamping: number))",
+                comment: "Name of a shell that has not set a title"
             )
         }
         return String(localized: "Terminal")
