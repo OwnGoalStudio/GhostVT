@@ -304,8 +304,16 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                     self.lock.locked { self.sessionID = resumeSessionID }
                     self.emit(.state(.connected))
                     // Replayed scrollback so the surface rebuilds its screen.
+                    // Repainted from a clean slate: on an in-app reconnect the
+                    // surface still shows the session's last frame, and
+                    // appending the whole replay below it reprints history the
+                    // screen already has. Home + erase-display gives the
+                    // replay the blank canvas a cold launch gets, and is a
+                    // no-op on one.
                     if let replay = Self.data(iGhosttyWireKey.data, in: reply), !replay.isEmpty {
-                        self.emit(.received(replay))
+                        var payload = Data("\u{1B}[H\u{1B}[2J".utf8)
+                        payload.append(replay)
+                        self.emit(.received(payload))
                     }
                     self.updateViewport(columns: Int(columns), rows: Int(rows))
                 } else {

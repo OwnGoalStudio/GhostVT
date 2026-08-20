@@ -27,6 +27,13 @@ final class TerminalSessionStore: ObservableObject {
 
     @Published private(set) var status: Status = .idle
 
+    /// Exit status of the session's process once it has ended, nil while it
+    /// lives (or before it ever ran). Branches the failure card: an exited
+    /// shell is an outcome to acknowledge, a lost daemon is an error to
+    /// retry. Set through the tab's transport wiring — the transport's exit
+    /// event is the only trustworthy signal, reason strings are for humans.
+    @Published private(set) var processExitStatus: Int32?
+
     /// Title guessed from the last command the user typed, used only while
     /// the shell reports none of its own. Empty until a command is accepted.
     ///
@@ -122,8 +129,15 @@ final class TerminalSessionStore: ObservableObject {
         connect()
     }
 
+    func noteProcessExit(status: Int32) {
+        processExitStatus = status
+    }
+
     func connect() {
         reconnectGeneration &+= 1
+        // A new connection means a new (or resumed) process; the old exit
+        // verdict no longer describes this session.
+        processExitStatus = nil
         // A half-typed line does not survive a reconnect: the shell's line
         // editor never saw the bytes that the dropped link ate.
         titleTracker.reset()
@@ -135,6 +149,13 @@ final class TerminalSessionStore: ObservableObject {
             }
         }
         relay.transport = transport
+        // A reconnect's transport starts with no viewport of its own, and an
+        // attach sizes the PTY before this store hears `.connected` — without
+        // priming, the daemon briefly gets the 80×24 protocol default and the
+        // shell redraws for a grid nobody has.
+        if let viewport {
+            transport.updateViewport(columns: viewport.columns, rows: viewport.rows)
+        }
         transport.connect()
     }
 
