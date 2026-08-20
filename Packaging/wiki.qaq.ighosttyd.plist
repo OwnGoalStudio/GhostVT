@@ -13,6 +13,17 @@
 	<key>ProcessType</key>
 	<string>Interactive</string>
 	<!--
+		The shell and every command it starts inherit the daemon's resource
+		limits. launchd's default soft file-descriptor limit is too small for
+		tools that scan many files concurrently, while the daemon itself can
+		also own one PTY master per live session.
+	-->
+	<key>SoftResourceLimits</key>
+	<dict>
+		<key>NumberOfFiles</key>
+		<integer>10240</integer>
+	</dict>
+	<!--
 		Resident, not demand-launched.
 
 		Demand launch does work here — a killed daemon comes back on the next

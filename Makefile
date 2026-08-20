@@ -115,6 +115,7 @@ check:
 	@[[ "$(BUILD_NUMBER)" =~ ^[0-9]+$$ ]] || { echo "error: CURRENT_PROJECT_VERSION must be an integer, got '$(BUILD_NUMBER)'" >&2; exit 65; }
 	@plutil -lint "$(ENTITLEMENTS)"
 	@plutil -lint "$(DAEMON_ENTITLEMENTS)" "$(APPEX_ENTITLEMENTS)" "$(LAUNCH_DAEMON)"
+	@[[ "$$(/usr/libexec/PlistBuddy -c 'Print :SoftResourceLimits:NumberOfFiles' "$(LAUNCH_DAEMON)")" == "10240" ]] || { echo "error: the daemon and its shells require a 10240 soft file-descriptor limit" >&2; exit 65; }
 	@targets="$$(xcodebuild -project "$(PROJECT)" -list)"; \
 		grep -F "ighosttyd" <<<"$$targets" >/dev/null || { echo "error: the ighosttyd target is missing from the project" >&2; exit 65; }
 

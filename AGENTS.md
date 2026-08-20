@@ -66,6 +66,11 @@ has to republish their changes or no SwiftUI view redraws.
 
 Gotchas that bit us:
 
+- A shell inherits both the daemon's resource limits and every descriptor
+  that survives `execve`. Keep an explicit launchd `NumberOfFiles` soft limit
+  sized for user workloads, and mark every daemon-owned session descriptor
+  `FD_CLOEXEC` as soon as it is acquired; otherwise later shells retain older
+  PTYs and lose capacity from their own per-process fd limit.
 - **Never spawn sessions through the bootstrap's `login`.** Procursus's
   `/etc/pam.d/login` runs `pam_launchd.so`, which moves the session into a
   per-user bootstrap namespace that cannot reach `com.apple.dnssd.service`;

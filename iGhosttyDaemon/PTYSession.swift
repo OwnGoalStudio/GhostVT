@@ -224,6 +224,10 @@ final class PTYSession {
 
         master = masterDescriptor
         childPID = pid
+        // A later fork inherits every descriptor the daemon still owns.
+        // Closing this master on that child's exec keeps sessions independent:
+        // one shell must not retain another session's PTY or spend its fd limit.
+        _ = fcntl(master, F_SETFD, FD_CLOEXEC)
         _ = fcntl(master, F_SETFL, fcntl(master, F_GETFL, 0) | O_NONBLOCK)
     }
 
