@@ -78,23 +78,11 @@ enum KeyboardBarKey: Hashable {
         }
     }
 
-    /// SF Symbol shown on the bar button, matching the accessory view's own
-    /// mapping; `nil` means the button shows the symbol text itself.
+    /// SF Symbol shown on the bar button, straight from the library's own
+    /// mapping so the editor can never drift from what the bar renders;
+    /// `nil` means the button shows the symbol text itself.
     var systemImage: String? {
-        switch self {
-        case .esc: "escape"
-        case .tab: "arrow.right.to.line"
-        case .ctrl: "control"
-        case .alt: "option"
-        case .command: "command"
-        case .arrowLeft: "arrowtriangle.left.fill"
-        case .arrowUp: "arrowtriangle.up.fill"
-        case .arrowDown: "arrowtriangle.down.fill"
-        case .arrowRight: "arrowtriangle.right.fill"
-        case .paste: "doc.on.clipboard"
-        case .divider: nil
-        case .symbol: nil
-        }
+        accessoryItem.systemImage
     }
 
     var displayName: String {
