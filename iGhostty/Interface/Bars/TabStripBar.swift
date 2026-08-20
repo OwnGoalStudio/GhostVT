@@ -13,11 +13,11 @@ struct TabStripBar: View {
     @Binding var showsSidebar: Bool
 
     var body: some View {
-        GlassBarContainer(spacing: 10) {
-            HStack(spacing: 10) {
+        GlassBarContainer(spacing: DS.Padding.s) {
+            HStack(spacing: DS.Padding.s) {
                 Button(action: { showsSidebar.toggle() }) {
                     Image(systemName: "sidebar.leading")
-                        .font(.body.weight(.medium))
+                        .font(DS.Font.control)
                         .frame(width: 40, height: 40)
                 }
                 .barGlass(in: Circle())
@@ -35,16 +35,16 @@ struct TabStripBar: View {
                 // Safari-style.
                 Button(action: { tabManager.newTab() }) {
                     Image(systemName: "plus")
-                        .font(.body.weight(.medium))
+                        .font(DS.Font.control)
                         .frame(width: 40, height: 40)
                 }
                 .barGlass(in: Circle())
                 .contextMenu { windowMenu }
                 .accessibilityLabel("New Tab")
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 6)
-            .padding(.bottom, 8)
+            .padding(.horizontal, DS.Padding.l)
+            .padding(.top, DS.Padding.s)
+            .padding(.bottom, DS.Padding.s)
         }
         .buttonStyle(.plain)
     }
@@ -59,11 +59,11 @@ struct TabStripBar: View {
     private var activeTitleCapsule: some View {
         Group {
             if let tab = tabManager.activeTab {
-                HStack(spacing: 8) {
+                HStack(spacing: DS.Padding.s) {
                     ObservedStatusDot(store: tab.store)
                     ObservedTabTitle(tab: tab)
                 }
-                .padding(.horizontal, 16)
+                .padding(.horizontal, DS.Padding.l)
                 .frame(maxWidth: .infinity, minHeight: 40)
                 .barGlass(in: Capsule(), interactive: false)
             } else {
@@ -81,7 +81,7 @@ struct TabStripBar: View {
                 Spacer()
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: DS.Padding.xs) {
                         ForEach(tabManager.tabs) { tab in
                             TabChip(
                                 tab: tab,
@@ -91,7 +91,7 @@ struct TabStripBar: View {
                             )
                         }
                     }
-                    .padding(4)
+                    .padding(DS.Padding.xs)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .barGlass(in: Capsule(), interactive: false)
@@ -106,7 +106,7 @@ struct ObservedTabTitle: View {
 
     var body: some View {
         Text(tab.displayTitle)
-            .font(.subheadline.weight(.medium))
+            .font(DS.Font.labelEmphasis)
             .lineLimit(1)
             .truncationMode(.middle)
     }
@@ -120,10 +120,10 @@ private struct TabChip: View {
 
     var body: some View {
         Button(action: onSelect) {
-            HStack(spacing: 6) {
+            HStack(spacing: DS.Padding.xs) {
                 ObservedStatusDot(store: tab.store)
                 Text(tab.displayTitle)
-                    .font(.subheadline)
+                    .font(DS.Font.label)
                     .lineLimit(1)
                     .truncationMode(.middle)
                     // The floor keeps a short-titled chip around 100pt, so
@@ -132,14 +132,14 @@ private struct TabChip: View {
                     .frame(minWidth: 44, maxWidth: 180, alignment: .leading)
                 Button(action: onClose) {
                     Image(systemName: "xmark")
-                        .font(.caption2.weight(.semibold))
+                        .font(DS.Font.captionEmphasis)
                         .foregroundColor(.secondary)
                         .frame(width: 20, height: 20)
                         .contentShape(Circle())
                 }
                 .accessibilityLabel("Close Tab")
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, DS.Padding.m)
             .frame(height: 32)
             .background(
                 Capsule().fill(

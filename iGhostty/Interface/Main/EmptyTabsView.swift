@@ -12,26 +12,26 @@ struct EmptyTabsView: View {
     let onNewTab: () -> Void
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: DS.Padding.l) {
             Image(systemName: "terminal")
-                .font(.system(size: 52, weight: .light))
+                .font(DS.Font.heroSymbol)
                 .foregroundColor(.secondary)
             Text("No Open Tabs")
-                .font(.headline)
+                .font(DS.Font.title)
             Text("A closed terminal cannot be reopened. Start a new one whenever you need it.")
-                .font(.subheadline)
+                .font(DS.Font.label)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
             Button(action: onNewTab) {
                 Label("New Terminal", systemImage: "plus")
-                    .font(.body.weight(.semibold))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
+                    .font(DS.Font.controlEmphasis)
+                    .padding(.horizontal, DS.Padding.s)
+                    .padding(.vertical, DS.Padding.xs)
             }
             .buttonStyle(.borderedProminent)
-            .padding(.top, 8)
+            .padding(.top, DS.Padding.s)
         }
-        .padding(32)
+        .padding(DS.Padding.xl)
         .frame(maxWidth: 360)
         // Greedy on purpose: with no tabs this view is the whole terminal
         // column, and the top bar hangs off that column as a safe-area inset

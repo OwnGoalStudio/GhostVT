@@ -24,7 +24,7 @@ final class KeyboardState: ObservableObject {
             .sink { [weak self] notification in
                 let visible = Self.isSoftwareKeyboard(notification)
                 guard self?.isVisible != visible else { return }
-                withAnimation(.easeOut(duration: 0.2)) {
+                withAnimation(DS.Motion.smooth) {
                     self?.isVisible = visible
                 }
             }
@@ -32,7 +32,7 @@ final class KeyboardState: ObservableObject {
         center.publisher(for: UIResponder.keyboardWillHideNotification)
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                withAnimation(.easeOut(duration: 0.2)) {
+                withAnimation(DS.Motion.smooth) {
                     self?.isVisible = false
                 }
             }

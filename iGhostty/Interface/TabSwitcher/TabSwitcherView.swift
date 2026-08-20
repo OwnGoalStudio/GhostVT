@@ -21,10 +21,10 @@ struct TabSwitcherView: View {
 
             ScrollView {
                 Text(tabCountLabel)
-                    .font(.headline)
-                    .padding(.top, 12)
+                    .font(DS.Font.title)
+                    .padding(.top, DS.Padding.m)
 
-                LazyVGrid(columns: columns, spacing: 14) {
+                LazyVGrid(columns: columns, spacing: DS.Padding.m) {
                     ForEach(tabManager.tabs) { tab in
                         TabCard(
                             tab: tab,
@@ -38,7 +38,7 @@ struct TabSwitcherView: View {
                     }
                     newTabCard
                 }
-                .padding(16)
+                .padding(DS.Padding.l)
             }
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
@@ -67,7 +67,7 @@ struct TabSwitcherView: View {
             tabManager.newTab()
             dismiss()
         }) {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous)
                 .strokeBorder(
                     theme.hairline(for: colorScheme),
                     style: StrokeStyle(lineWidth: 1, dash: [6, 4])
@@ -75,24 +75,24 @@ struct TabSwitcherView: View {
                 .frame(height: 190)
                 .overlay {
                     Image(systemName: "plus")
-                        .font(.title2.weight(.medium))
+                        .font(DS.Font.symbol)
                         .foregroundColor(.secondary)
                 }
-                .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                .contentShape(RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous))
         }
         .buttonStyle(.plain)
         .accessibilityLabel("New Tab")
     }
 
     private var bottomBar: some View {
-        GlassBarContainer(spacing: 12) {
+        GlassBarContainer(spacing: DS.Padding.m) {
             HStack {
                 // App-level chrome gets the app-level control: the grid's
                 // dashed card is already the one `+`, and settings needs a
                 // visible home on iPhone beyond the title's long-press.
                 Button(action: { showsSettings = true }) {
                     Image(systemName: "gearshape")
-                        .font(.body.weight(.medium))
+                        .font(DS.Font.control)
                         .frame(width: 44, height: 44)
                 }
                 .barGlass(in: Circle())
@@ -106,9 +106,9 @@ struct TabSwitcherView: View {
                 if !tabManager.tabs.isEmpty {
                     Button(action: { requestCloseAll() }) {
                         Text("Close All")
-                            .font(.body.weight(.medium))
+                            .font(DS.Font.control)
                             .foregroundColor(.red)
-                            .padding(.horizontal, 16)
+                            .padding(.horizontal, DS.Padding.l)
                             .frame(height: 44)
                     }
                     .barGlass(in: Capsule())
@@ -118,14 +118,14 @@ struct TabSwitcherView: View {
 
                 Button(action: { dismiss() }) {
                     Text("Done")
-                        .font(.body.weight(.semibold))
-                        .padding(.horizontal, 20)
+                        .font(DS.Font.controlEmphasis)
+                        .padding(.horizontal, DS.Padding.l)
                         .frame(height: 44)
                 }
                 .barGlass(in: Capsule())
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 6)
+            .padding(.horizontal, DS.Padding.l)
+            .padding(.vertical, DS.Padding.s)
         }
         .buttonStyle(.plain)
     }
@@ -165,31 +165,31 @@ private struct TabCard: View {
             previewBody
         }
         .background(theme.background(for: colorScheme))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous)
                 .strokeBorder(
                     isActive ? Color.accentColor : theme.hairline(for: colorScheme),
                     lineWidth: isActive ? 2 : 1
                 )
         }
         .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
-        .contentShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .contentShape(RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous))
         .onTapGesture(perform: onSelect)
         .onAppear { preview = tab.snapshotPreview() }
     }
 
     private var header: some View {
-        HStack(spacing: 6) {
+        HStack(spacing: DS.Padding.xs) {
             ObservedStatusDot(store: tab.store)
             Text(tab.displayTitle)
-                .font(.caption.weight(.semibold))
+                .font(DS.Font.captionEmphasis)
                 .lineLimit(1)
                 .truncationMode(.middle)
             Spacer(minLength: 4)
             Button(action: onClose) {
                 Image(systemName: "xmark")
-                    .font(.caption2.weight(.bold))
+                    .font(DS.Font.captionEmphasis)
                     .foregroundColor(.secondary)
                     .frame(width: 24, height: 24)
                     .contentShape(Circle())
@@ -197,8 +197,8 @@ private struct TabCard: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Close Tab")
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
+        .padding(.horizontal, DS.Padding.m)
+        .padding(.vertical, DS.Padding.s)
         .background(Color.primary.opacity(0.06))
     }
 
@@ -207,7 +207,7 @@ private struct TabCard: View {
             .font(.system(size: 7, design: .monospaced))
             .lineSpacing(1)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(8)
+            .padding(DS.Padding.s)
             .clipped()
             .frame(height: 156)
             .accessibilityHidden(true)

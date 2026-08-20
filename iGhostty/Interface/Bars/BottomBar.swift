@@ -10,8 +10,8 @@ struct BottomBar: View {
     let onShowSwitcher: () -> Void
 
     var body: some View {
-        GlassBarContainer(spacing: 12) {
-            HStack(spacing: 12) {
+        GlassBarContainer(spacing: DS.Padding.m) {
+            HStack(spacing: DS.Padding.m) {
                 if let tab = tabManager.activeTab {
                     // A long press opens settings directly: a context menu
                     // here loses the long press to the high-priority drag,
@@ -28,7 +28,7 @@ struct BottomBar: View {
 
                 Button(action: { tabManager.newTab() }) {
                     Image(systemName: "plus")
-                        .font(.body.weight(.medium))
+                        .font(DS.Font.control)
                         .frame(width: 44, height: 44)
                 }
                 .barGlass(in: Circle())
@@ -36,13 +36,13 @@ struct BottomBar: View {
 
                 Button(action: onShowSwitcher) {
                     Image(systemName: "square.on.square")
-                        .font(.body.weight(.medium))
+                        .font(DS.Font.control)
                         .frame(width: 44, height: 44)
                         .overlay(alignment: .topTrailing) {
                             if tabManager.tabs.count > 1 {
                                 Text("\(tabManager.tabs.count)")
-                                    .font(.caption2.weight(.bold))
-                                    .padding(4)
+                                    .font(DS.Font.captionEmphasis)
+                                    .padding(DS.Padding.xs)
                                     .background(Color.accentColor, in: Circle())
                                     .foregroundColor(.white)
                                     .offset(x: 2, y: 2)
@@ -52,9 +52,9 @@ struct BottomBar: View {
                 .barGlass(in: Circle())
                 .accessibilityLabel("Show Tabs")
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 6)
-            .padding(.bottom, 4)
+            .padding(.horizontal, DS.Padding.l)
+            .padding(.top, DS.Padding.s)
+            .padding(.bottom, DS.Padding.xs)
         }
         .buttonStyle(.plain)
     }
@@ -65,7 +65,7 @@ struct BottomBar: View {
                 guard abs(value.translation.width) > abs(value.translation.height) else {
                     return
                 }
-                withAnimation(.easeInOut(duration: 0.15)) {
+                withAnimation(DS.Motion.snappy) {
                     tabManager.activateAdjacentTab(
                         offset: value.translation.width < 0 ? 1 : -1
                     )
@@ -78,14 +78,14 @@ private struct TitleCapsule: View {
     @ObservedObject var tab: TerminalTab
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: DS.Padding.s) {
             ObservedStatusDot(store: tab.store)
             Text(tab.displayTitle)
-                .font(.subheadline.weight(.medium))
+                .font(DS.Font.labelEmphasis)
                 .lineLimit(1)
                 .truncationMode(.middle)
         }
-        .padding(.horizontal, 16)
+        .padding(.horizontal, DS.Padding.l)
         .frame(maxWidth: .infinity, minHeight: 44)
         .contentShape(Capsule())
         .barGlass(in: Capsule())

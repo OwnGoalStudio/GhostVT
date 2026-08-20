@@ -17,7 +17,7 @@ import SwiftUI
 final class TabManager: ObservableObject {
     /// One curve for every tab mutation, so a close reads the same in the
     /// strip, the sidebar, and the pane it removes.
-    static let tabTransition = Animation.spring(response: 0.35, dampingFraction: 0.85)
+    static let tabTransition = DS.Motion.structure
     @Published private(set) var tabs: [TerminalTab] = []
     @Published var activeTabID: UUID?
 

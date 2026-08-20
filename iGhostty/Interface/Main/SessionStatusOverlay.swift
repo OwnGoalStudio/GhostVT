@@ -28,7 +28,7 @@ struct SessionStatusOverlay: View {
 
     var body: some View {
         content
-            .animation(.easeInOut(duration: 0.2), value: store.status)
+            .animation(DS.Motion.smooth, value: store.status)
     }
 
     @ViewBuilder
@@ -38,13 +38,13 @@ struct SessionStatusOverlay: View {
             // Idle means the surface hasn't reported its grid yet — normally
             // milliseconds, but if it sticks the pill is the only sign the
             // window isn't just an empty terminal.
-            HStack(spacing: 10) {
+            HStack(spacing: DS.Padding.s) {
                 ProgressView()
                 Text(store.status == .idle ? "Starting…" : "Connecting…")
-                    .font(.subheadline.weight(.medium))
+                    .font(DS.Font.labelEmphasis)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
+            .padding(.horizontal, DS.Padding.l)
+            .padding(.vertical, DS.Padding.m)
             .barGlass(in: Capsule(), interactive: false)
             .transition(.opacity)
 
@@ -53,7 +53,7 @@ struct SessionStatusOverlay: View {
                 ZStack {
                     Color.black.opacity(0.25)
                     alertCard(reason: reason)
-                        .padding(16)
+                        .padding(DS.Padding.l)
                 }
                 .transition(.opacity)
             }

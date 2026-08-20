@@ -22,23 +22,23 @@ struct SidebarView: View {
                 }
 
                 Button(action: { tabManager.newTab() }) {
-                    HStack(spacing: 10) {
+                    HStack(spacing: DS.Padding.s) {
                         Image(systemName: "plus")
-                            .font(.subheadline.weight(.medium))
+                            .font(DS.Font.labelEmphasis)
                             .frame(width: 16)
                         Text("New Tab")
-                            .font(.subheadline)
+                            .font(DS.Font.label)
                         Spacer()
                     }
                     .foregroundColor(.secondary)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 10)
-                    .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    .padding(.horizontal, DS.Padding.m)
+                    .padding(.vertical, DS.Padding.m)
+                    .contentShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("New Tab")
             }
-            .padding(10)
+            .padding(DS.Padding.m)
         }
         .safeAreaInset(edge: .top, spacing: 0) { header }
         .safeAreaInset(edge: .bottom, spacing: 0) { footer }
@@ -58,15 +58,15 @@ struct SidebarView: View {
     private var header: some View {
         HStack {
             Text("Tabs")
-                .font(.headline)
+                .font(DS.Font.title)
             Spacer()
             Text(countLabel)
-                .font(.caption)
+                .font(DS.Font.caption)
                 .foregroundColor(.secondary)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 14)
-        .padding(.bottom, 6)
+        .padding(.horizontal, DS.Padding.l)
+        .padding(.top, DS.Padding.m)
+        .padding(.bottom, DS.Padding.s)
         .frame(maxWidth: .infinity)
         .background {
             // Rows scroll under the safe-area inset; without a material the
@@ -83,7 +83,7 @@ struct SidebarView: View {
         HStack {
             Button(action: onShowSettings) {
                 Image(systemName: "gearshape")
-                    .font(.body.weight(.medium))
+                    .font(DS.Font.control)
                     .foregroundColor(.secondary)
                     .frame(width: 40, height: 40)
                     .contentShape(Circle())
@@ -92,8 +92,8 @@ struct SidebarView: View {
             .accessibilityLabel("Settings")
             Spacer()
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 6)
+        .padding(.horizontal, DS.Padding.m)
+        .padding(.vertical, DS.Padding.s)
         .frame(maxWidth: .infinity)
         .background {
             // A long tab list scrolls beneath the gear; the material blurs
@@ -126,22 +126,22 @@ private struct SidebarRow: View {
 
     var body: some View {
         Button(action: onSelect) {
-            HStack(spacing: 10) {
+            HStack(spacing: DS.Padding.s) {
                 ObservedStatusDot(store: tab.store)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(tab.displayTitle)
-                        .font(.subheadline.weight(isActive ? .semibold : .regular))
+                        .font(isActive ? DS.Font.labelEmphasis : DS.Font.label)
                         .lineLimit(1)
                         .truncationMode(.middle)
                     Text(tab.store.endpointDescription)
-                        .font(.caption2)
+                        .font(DS.Font.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
                 }
                 Spacer(minLength: 8)
                 Button(action: onClose) {
                     Image(systemName: "xmark")
-                        .font(.caption2.weight(.semibold))
+                        .font(DS.Font.captionEmphasis)
                         .foregroundColor(.secondary)
                         .frame(width: 24, height: 24)
                         .contentShape(Circle())
@@ -149,13 +149,13 @@ private struct SidebarRow: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Close Tab")
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
+            .padding(.horizontal, DS.Padding.m)
+            .padding(.vertical, DS.Padding.s)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
                     .fill(isActive ? Color.accentColor.opacity(0.18) : Color.clear)
             )
-            .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .contentShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
         }
         .buttonStyle(.plain)
     }

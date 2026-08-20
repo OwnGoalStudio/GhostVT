@@ -90,7 +90,7 @@ struct SettingsSheet: View {
                 .keyboardType(.asciiCapable)
                 .textInputAutocapitalization(.never)
                 .disableAutocorrection(true)
-                .font(.body.monospaced())
+                .font(DS.Font.mono)
         } header: {
             Text("Default Shell")
         } footer: {
@@ -142,7 +142,7 @@ struct SettingsSheet: View {
             Text("About")
         } footer: {
             Text(Self.ghosttyConfigPath)
-                .font(.caption.monospaced())
+                .font(DS.Font.monoCaption)
                 .textSelection(.enabled)
         }
     }
@@ -233,7 +233,7 @@ struct ThemeListView: View {
     var body: some View {
         List(themes) { definition in
             Button(action: { select(definition) }) {
-                HStack(spacing: 12) {
+                HStack(spacing: DS.Padding.m) {
                     swatch(for: definition)
                     Text(definition.name)
                         .foregroundColor(.primary)
@@ -252,11 +252,11 @@ struct ThemeListView: View {
 
     private func swatch(for definition: GhosttyThemeDefinition) -> some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
+            RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous)
                 .fill(Color(hex: definition.background))
                 .frame(width: 34, height: 24)
                 .overlay {
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous)
                         .strokeBorder(Color.primary.opacity(0.15), lineWidth: 1)
                 }
             Text(verbatim: "$_")

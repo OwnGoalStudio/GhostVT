@@ -51,25 +51,25 @@ struct AlertCardView: View {
     let actions: [AlertAction]
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: DS.Padding.l) {
             Image("AlertIcon")
                 .resizable()
                 .scaledToFill()
                 .frame(width: 64, height: 64)
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
 
             Text(title)
-                .font(.body.weight(.semibold))
+                .font(DS.Font.title)
                 .multilineTextAlignment(.center)
 
             if !message.isEmpty {
                 Text(message)
-                    .font(.footnote)
+                    .font(DS.Font.detail)
                     .multilineTextAlignment(.center)
                     .lineLimit(6)
             }
 
-            HStack(spacing: 8) {
+            HStack(spacing: DS.Padding.s) {
                 ForEach(actions) { action in
                     Button(action: action.handler) {
                         Text(action.title)
@@ -78,11 +78,11 @@ struct AlertCardView: View {
                 }
             }
         }
-        .padding(16)
+        .padding(DS.Padding.l)
         .frame(maxWidth: 350)
         .background(.regularMaterial)
         .background(Color(UIColor.systemBackground).opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous))
         .fixedSize(horizontal: false, vertical: true)
     }
 }
@@ -110,14 +110,14 @@ struct AlertButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(isFilled ? .body.weight(.semibold) : .body)
+            .font(isFilled ? DS.Font.controlEmphasis : DS.Font.body)
             .foregroundColor(isFilled ? .white : .accentColor)
-            .padding(8)
+            .padding(DS.Padding.s)
             .frame(maxWidth: .infinity)
             .background(isFilled ? tint : Color.clear)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
             .overlay(
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
                     .strokeBorder(tint, lineWidth: 1)
             )
             .opacity(configuration.isPressed ? 0.75 : 1)

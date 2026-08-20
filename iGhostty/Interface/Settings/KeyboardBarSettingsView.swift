@@ -37,12 +37,12 @@ struct KeyboardBarSettingsView: View {
     private var previewSection: some View {
         Section {
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
+                HStack(spacing: DS.Padding.s) {
                     ForEach(store.entries) { entry in
                         KeyboardBarKeyGlyph(key: entry.key)
                     }
                 }
-                .padding(.horizontal, 4)
+                .padding(.horizontal, DS.Padding.xs)
                 .frame(minHeight: 52)
             }
             .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
@@ -58,10 +58,10 @@ struct KeyboardBarSettingsView: View {
     private var includedSection: some View {
         Section {
             ForEach(store.entries) { entry in
-                HStack(spacing: 12) {
+                HStack(spacing: DS.Padding.m) {
                     Button(action: { remove(entry) }) {
                         Image(systemName: "minus.circle.fill")
-                            .font(.title3)
+                            .font(DS.Font.symbol)
                             .foregroundColor(.red)
                     }
                     .buttonStyle(.borderless)
@@ -86,7 +86,7 @@ struct KeyboardBarSettingsView: View {
     private var moreKeysSection: some View {
         Section {
             ForEach(store.availableKeys, id: \.self) { key in
-                HStack(spacing: 12) {
+                HStack(spacing: DS.Padding.m) {
                     addButton { store.add(key) }
                         .accessibilityLabel(Text("Add \(key.displayName)"))
                     KeyboardBarKeyGlyph(key: key, size: 28)
@@ -94,21 +94,21 @@ struct KeyboardBarSettingsView: View {
                 }
             }
 
-            HStack(spacing: 12) {
+            HStack(spacing: DS.Padding.m) {
                 addButton { store.add(.divider) }
                     .accessibilityLabel(Text("Add Divider"))
                 KeyboardBarKeyGlyph(key: .divider, size: 28)
                 Text("Divider")
                 Spacer()
                 Text("Repeatable")
-                    .font(.footnote)
+                    .font(DS.Font.detail)
                     .foregroundColor(.secondary)
             }
 
             Button(action: { showsCustomKeySheet = true }) {
-                HStack(spacing: 12) {
+                HStack(spacing: DS.Padding.m) {
                     Image(systemName: "plus.circle.fill")
-                        .font(.title3)
+                        .font(DS.Font.symbol)
                         .foregroundColor(.green)
                     Text("Add Custom Key…")
                         .foregroundColor(.primary)
@@ -134,7 +134,7 @@ struct KeyboardBarSettingsView: View {
     private func addButton(action: @escaping () -> Void) -> some View {
         Button(action: { withAnimation { action() } }) {
             Image(systemName: "plus.circle.fill")
-                .font(.title3)
+                .font(DS.Font.symbol)
                 .foregroundColor(.green)
         }
         .buttonStyle(.borderless)
@@ -210,7 +210,7 @@ private struct CustomKeySheet: View {
                     // A literal example, not copy: the StringProtocol
                     // overload keeps it out of the string catalog.
                     TextField(Self.placeholder, text: $text)
-                        .font(.body.monospaced())
+                        .font(DS.Font.mono)
                         .textInputAutocapitalization(.never)
                         .disableAutocorrection(true)
                 } footer: {

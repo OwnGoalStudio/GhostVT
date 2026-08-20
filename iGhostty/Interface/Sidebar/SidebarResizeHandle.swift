@@ -46,7 +46,7 @@ struct SidebarResizeHandle: View {
                         isDragging = false
                     }
             )
-            .animation(.easeInOut(duration: 0.15), value: isDragging)
+            .animation(DS.Motion.snappy, value: isDragging)
             .accessibilityLabel("Resize Sidebar")
             .accessibilityAdjustableAction { direction in
                 switch direction {

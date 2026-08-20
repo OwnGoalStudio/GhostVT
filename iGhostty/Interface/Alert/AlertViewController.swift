@@ -90,7 +90,7 @@ private struct AlertPane: View {
             Color.black.opacity(0.25)
                 .ignoresSafeArea()
             AlertCardView(title: title, message: message, actions: actions)
-                .padding(16)
+                .padding(DS.Padding.l)
         }
     }
 }

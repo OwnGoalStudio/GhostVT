@@ -56,7 +56,7 @@ struct RootView: View {
             // `showsSidebar` is `@AppStorage`, and a UserDefaults-backed write
             // does not reliably land inside a `withAnimation` transaction, so
             // wrapping the setter leaves the transition unanimated.
-            .animation(.easeInOut(duration: 0.25), value: showsSidebar)
+            .animation(DS.Motion.smooth, value: showsSidebar)
         }
         .background(shortcutButtons)
         .onAppear {
