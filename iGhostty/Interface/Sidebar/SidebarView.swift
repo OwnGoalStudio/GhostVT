@@ -10,43 +10,50 @@ struct SidebarView: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 2) {
-                ForEach(tabManager.tabs) { tab in
-                    SidebarRow(
-                        tab: tab,
-                        isActive: tab.id == tabManager.activeTabID,
-                        onSelect: { tabManager.activeTabID = tab.id },
-                        onClose: { tabManager.requestClose(tab) }
-                    )
-                }
+        VStack(spacing: 0) {
+            header
 
-                Button(action: { tabManager.newTab() }) {
-                    HStack(spacing: DS.Padding.s) {
-                        Image(systemName: "plus")
-                            .font(DS.Font.labelEmphasis)
-                            .frame(width: 16)
-                        Text("New Tab")
-                            .font(DS.Font.label)
-                        Spacer()
+            ScrollView {
+                LazyVStack(spacing: 2) {
+                    ForEach(tabManager.tabs) { tab in
+                        SidebarRow(
+                            tab: tab,
+                            isActive: tab.id == tabManager.activeTabID,
+                            onSelect: { tabManager.activeTabID = tab.id },
+                            onClose: { tabManager.requestClose(tab) }
+                        )
                     }
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, DS.Padding.m)
-                    .padding(.vertical, DS.Padding.m)
-                    .contentShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
+
+                    Button(action: { tabManager.newTab() }) {
+                        HStack(spacing: DS.Padding.s) {
+                            Image(systemName: "plus")
+                                .font(DS.Font.labelEmphasis)
+                                .frame(width: 16)
+                            Text("New Tab")
+                                .font(DS.Font.label)
+                            Spacer()
+                        }
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, DS.Padding.m)
+                        .padding(.vertical, DS.Padding.m)
+                        .contentShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("New Tab")
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("New Tab")
+                .padding(DS.Padding.m)
             }
-            .padding(DS.Padding.m)
+
+            footer
         }
-        .safeAreaInset(edge: .top, spacing: 0) { header }
-        .safeAreaInset(edge: .bottom, spacing: 0) { footer }
-        .background(
-            Color.primary.opacity(0.04)
-                .background(theme.background(for: colorScheme))
+        // One standard blur spans the complete sidebar. Keeping it in a
+        // single layer avoids the different tints produced when separate
+        // materials sample the header, list, and footer independently.
+        .background {
+            Rectangle()
+                .fill(.regularMaterial)
                 .ignoresSafeArea()
-        )
+        }
         .overlay(alignment: .trailing) {
             Rectangle()
                 .fill(theme.hairline(for: colorScheme))
@@ -68,13 +75,6 @@ struct SidebarView: View {
         .padding(.top, DS.Padding.m)
         .padding(.bottom, DS.Padding.s)
         .frame(maxWidth: .infinity)
-        .background {
-            // Rows scroll under the safe-area inset; without a material the
-            // title floats over live list content.
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea()
-        }
     }
 
     /// Settings' home at regular width — the top bar carries no gear, so
@@ -95,14 +95,6 @@ struct SidebarView: View {
         .padding(.horizontal, DS.Padding.m)
         .padding(.vertical, DS.Padding.s)
         .frame(maxWidth: .infinity)
-        .background {
-            // A long tab list scrolls beneath the gear; the material blurs
-            // it out the way the app's other bars do, and reaches through
-            // the bottom safe area so the blur runs to the screen edge.
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea()
-        }
         .overlay(alignment: .top) {
             Rectangle()
                 .fill(theme.hairline(for: colorScheme))
