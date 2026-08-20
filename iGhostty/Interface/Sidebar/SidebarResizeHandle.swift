@@ -30,7 +30,11 @@ struct SidebarResizeHandle: View {
             .contentShape(Rectangle())
             .hoverEffect(.highlight)
             .gesture(
-                DragGesture(minimumDistance: 1)
+                // Global coordinate space: the handle rides the sidebar's
+                // trailing edge, so its local space moves with every width
+                // change — translations measured there oscillate against the
+                // finger and the drag jitters.
+                DragGesture(minimumDistance: 1, coordinateSpace: .global)
                     .onChanged { value in
                         let base = dragBaseWidth ?? width
                         dragBaseWidth = base
