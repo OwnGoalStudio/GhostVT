@@ -9,7 +9,7 @@ Description: Ghostty-powered terminal for jailbroken iOS
  .
  Shells are spawned by the bundled ighosttyd daemon and survive app
  relaunches; SSH transport is planned on the same transport interface.
-Icon: https://raw.githubusercontent.com/OwnGoalStudio/iGhostty/HEAD/docs/icon.png
+Icon: https://owngoalstudio.github.io/iGhostty/icon.png
 Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Section: Utilities
