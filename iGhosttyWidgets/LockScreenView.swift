@@ -72,14 +72,13 @@ struct SessionSummaryCard: View {
 
 /// The card in its lock screen dress.
 struct LockScreenView: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let state: TerminalSessionAttributes.ContentState
 
     var body: some View {
         SessionSummaryCard(state: state)
-            // .clear ≠ nil here: nil asks for the system's default ground,
-            // which is a near-opaque white/black — .clear is what makes the
-            // system fall back to its translucent frosted material.
-            .activityBackgroundTint(.clear)
+            .activityBackgroundTint(colorScheme == .dark ? .black : .white)
             .activitySystemActionForegroundColor(Palette.accent)
     }
 }
