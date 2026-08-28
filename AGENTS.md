@@ -20,7 +20,7 @@ every spawned process.
   Keep that boundary; don't add process APIs to the app target.
 - Depends on the **released**
   [libghostty-spm](https://github.com/Lakr233/libghostty-spm) package
-  (`upToNextMajor` from 1.4.3). Since 1.4.0 the package's bare-semver
+  (`upToNextMajor` from 1.4.7). Since 1.4.0 the package's bare-semver
   tags are its own release sequence, decoupled from ghostty's; the
   `upstream.X.Y.Z` tags hold the XCFramework binaries. Terminal-library
   changes land in that repo and ship via a new package release — don't
@@ -41,17 +41,36 @@ persists session IDs so a cold launch reattaches (256 KiB replay).
 SSH later = another `TerminalTransport` implementation; don't collapse the
 seam.
 
-Tab titles have two sources, in this order. Ghostty's shell integration is
-the real one: the daemon injects it (`ShellIntegration`) and the .deb ships
+Tab titles have three sources, in this order. The daemon is the primary: each
+session polls `tcgetpgrp` on its PTY (and re-checks as output drains, rate
+limited — the drain sees one check per 64 KiB otherwise),
+resolves the foreground process group leader's `proc_name`, and pushes it as
+event 102 — also stated in every open/attach reply — so
+`TerminalTab.displayTitle` is a short stable name ("zsh", "vim", "grok") no
+matter how often the program retitles. Ghostty's shell integration is the
+second: the daemon injects it (`ShellIntegration`) and the .deb ships
 libghostty's own scripts to `/usr/share/ighostvt/shell-integration`, so the
 shell reports OSC 2 (command), OSC 7 (cwd), OSC 133 (prompts) by itself.
 That injection reaches zsh, fish, and bash (which gets `--posix` in argv —
 the daemon always spawns the shell directly, see the pam_launchd gotcha
 below); a shell invoked as `sh` gets none. For it, `CommandTitleTracker` infers a title
 from the line the user typed, and only if it was echoed to the screen — the
-check that keeps a password out of the tab bar. `TerminalTab.displayTitle`
-picks between them; because both live on *other* observable objects, the tab
-has to republish their changes or no SwiftUI view redraws.
+check that keeps a password out of the tab bar. The reported (or inferred)
+title, trailing whitespace trimmed, is the *secondary* line
+(`TerminalTab.secondaryTitle`) under the process name. Because all of these
+live on *other* observable objects, the tab has to republish their changes
+or no SwiftUI view redraws.
+
+Every presentation of a tab — strip chip, title capsule, sidebar row, switcher
+card — carries the same `TabContextMenu` (copy the page as text or image,
+export it, lock, close). The two locks freeze the *user*, never the program:
+output keeps flowing and the surface keeps rendering. Both live on
+`LockableTerminalView`, the app's `TerminalView` subclass installed through
+the library's `makePlatformView` seam — refusing `hitTest` and first responder
+closes every input path at once, which SwiftUI modifiers could not. That
+factory closure reads the tab, because a view is made whenever the surface
+mounts and one born after the user locked the tab would otherwise come up
+unlocked.
 
 ## Build & verify
 

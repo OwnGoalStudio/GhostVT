@@ -63,6 +63,11 @@ enum iGhostVTOperation: UInt64, Sendable {
 enum iGhostVTEvent: UInt64, Sendable {
     case output = 100
     case sessionExit = 101
+    /// The foreground process on the session's terminal changed; carries
+    /// its name (`processName`). Also stated once in every open/attach
+    /// reply, so a client knows the current name without waiting for a
+    /// change.
+    case processName = 102
 }
 
 enum iGhostVTReplyCode: Int64, Sendable {
@@ -91,6 +96,7 @@ enum iGhostVTWireKey {
     static let environment = "env"
     static let title = "title"
     static let isAttached = "attached"
+    static let processName = "proc"
     static let exitCode = "exit"
     static let reason = "reason"
     /// Why a request failed, in words, when the reply code alone would lose

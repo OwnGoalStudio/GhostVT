@@ -84,6 +84,7 @@ private struct TitleCapsule: View {
                 .font(DS.Font.labelEmphasis)
                 .lineLimit(1)
                 .truncationMode(.middle)
+            ObservedTabSubtitle(tab: tab)
         }
         .padding(.horizontal, DS.Padding.l)
         .frame(maxWidth: .infinity, minHeight: 44)

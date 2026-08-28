@@ -92,6 +92,9 @@ final class SessionRegistry {
             },
             onExit: { [weak self] sessionID, exitCode in
                 self?.handleExit(sessionID: sessionID, exitCode: exitCode)
+            },
+            onProcessName: { [weak self] sessionID, name in
+                self?.attachments[sessionID]?.deliverProcessName(sessionID: sessionID, name: name)
             }
         )
         return session

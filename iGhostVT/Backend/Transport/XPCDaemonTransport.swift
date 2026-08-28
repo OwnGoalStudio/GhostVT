@@ -344,6 +344,9 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                 if self.replyCode(reply) == .success {
                     self.lock.locked { self.sessionID = resumeSessionID }
                     self.emit(.state(.connected))
+                    if let name = Self.string(iGhostVTWireKey.processName, in: reply) {
+                        self.emit(.processName(name))
+                    }
                     // Replayed scrollback so the surface rebuilds its screen.
                     // Repainted from a clean slate: on an in-app reconnect the
                     // surface still shows the session's last frame, and
@@ -397,6 +400,9 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                 self.resumeSessionID = sessionID
             }
             self.emit(.state(.connected))
+            if let name = Self.string(iGhostVTWireKey.processName, in: reply) {
+                self.emit(.processName(name))
+            }
         }
     }
 
@@ -429,6 +435,10 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         case .output:
             if let data = Self.data(iGhostVTWireKey.data, in: event), !data.isEmpty {
                 emit(.received(data))
+            }
+        case .processName:
+            if let name = Self.string(iGhostVTWireKey.processName, in: event) {
+                emit(.processName(name))
             }
         case .sessionExit:
             let exitCode = Int32(
@@ -512,6 +522,13 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
 
     private func emit(_ event: TerminalTransportEvent) {
         onEvent?(event)
+    }
+
+    private static func string(_ key: String, in dictionary: xpc_object_t) -> String? {
+        guard xpc_get_type(dictionary) == XPC_TYPE_DICTIONARY,
+              let value = xpc_dictionary_get_string(dictionary, key)
+        else { return nil }
+        return String(cString: value)
     }
 
     private static func data(_ key: String, in dictionary: xpc_object_t) -> Data? {

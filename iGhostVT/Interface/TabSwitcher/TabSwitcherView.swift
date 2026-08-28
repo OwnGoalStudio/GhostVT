@@ -33,7 +33,9 @@ struct TabSwitcherView: View {
                                 tabManager.activeTabID = tab.id
                                 dismiss()
                             },
-                            onClose: { tabManager.requestClose(tab) }
+                            onClose: { tabManager.requestClose(tab) },
+                            tabManager: tabManager,
+                            window: window
                         )
                     }
                     newTabCard
@@ -155,6 +157,8 @@ private struct TabCard: View {
     let isActive: Bool
     let onSelect: () -> Void
     let onClose: () -> Void
+    let tabManager: TabManager
+    let window: UIWindow?
     @ObservedObject private var theme = AppTheme.shared
     @Environment(\.colorScheme) private var colorScheme
     @State private var preview = ""
@@ -175,6 +179,9 @@ private struct TabCard: View {
         }
         .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
         .contentShape(RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous))
+        .contextMenu {
+            TabContextMenu(tab: tab, tabManager: tabManager, window: window)
+        }
         .onTapGesture(perform: onSelect)
         .onAppear { preview = tab.snapshotPreview() }
     }
@@ -182,11 +189,23 @@ private struct TabCard: View {
     private var header: some View {
         HStack(spacing: DS.Padding.xs) {
             ObservedStatusDot(store: tab.store)
-            Text(tab.displayTitle)
-                .font(DS.Font.captionEmphasis)
-                .lineLimit(1)
-                .truncationMode(.middle)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(tab.displayTitle)
+                    .font(DS.Font.captionEmphasis)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Text(tab.secondaryTitle)
+                    .font(DS.Font.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
             Spacer(minLength: 4)
+            if tab.isLocked {
+                Image(systemName: "lock.fill")
+                    .font(DS.Font.captionEmphasis)
+                    .foregroundColor(.secondary)
+            }
             Button(action: onClose) {
                 Image(systemName: "xmark")
                     .font(DS.Font.captionEmphasis)

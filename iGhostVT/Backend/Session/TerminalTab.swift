@@ -22,6 +22,27 @@ final class TerminalTab: ObservableObject, Identifiable {
     let terminal: TerminalViewState
     let store: TerminalSessionStore
 
+    /// Interaction lock: the surface's view refuses touches and keyboard
+    /// focus (`LockableTerminalView`) while the session keeps running,
+    /// output keeps flowing, and the surface keeps rendering. The tab's
+    /// context menu is the way in and out.
+    @Published var isLocked = false {
+        didSet {
+            (terminal.attachedPlatformView as? LockableTerminalView)?
+                .isInteractionLocked = isLocked
+        }
+    }
+
+    /// Keyboard lock: a tap no longer summons or dismisses the software
+    /// keyboard (`LockableTerminalView.isKeyboardTapLocked`); touches,
+    /// scrolling, and hardware keys still work.
+    @Published var isKeyboardLocked = false {
+        didSet {
+            (terminal.attachedPlatformView as? LockableTerminalView)?
+                .isKeyboardTapLocked = isKeyboardLocked
+        }
+    }
+
     /// Mutable so a reconnect after an in-app detach reattaches to the same
     /// shell instead of spawning a fresh one. Shared with the transport
     /// factory, which reads it at every connect.
@@ -78,9 +99,10 @@ final class TerminalTab: ObservableObject, Identifiable {
         // inside an animation so a retitle — which changes a chip's width,
         // and so every chip after it — moves instead of jumping, in every
         // view at once.
-        titleObservation = Publishers.Merge(
+        titleObservation = Publishers.Merge3(
             terminal.$title.removeDuplicates().map { _ in () },
-            store.$inferredTitle.removeDuplicates().map { _ in () }
+            store.$inferredTitle.removeDuplicates().map { _ in () },
+            store.$processName.removeDuplicates().map { _ in () }
         )
         .sink { [weak self] in
             withAnimation(DS.Motion.smooth) {
@@ -103,28 +125,55 @@ final class TerminalTab: ObservableObject, Identifiable {
             terminal.$workingDirectory.removeDuplicates().map { _ in () },
             store.$status.removeDuplicates().map { _ in () }
         )
+        .merge(with: store.$processName.removeDuplicates().map { _ in () })
         .debounce(for: .seconds(2), scheduler: DispatchQueue.main)
         .sink { _ in
             Task { @MainActor in
                 SessionActivityController.shared.refresh()
             }
         }
+        // The app's view subclass carries the interaction-lock policy; the
+        // package only provides the seam. Set last, so the closure can read
+        // the tab: a view is made whenever the surface mounts — a background
+        // tab appearing, SwiftUI rebuilding the representable — and one born
+        // after the user locked the tab must come up locked, or the lock
+        // lapses the first time the view is rebuilt.
+        terminal.makePlatformView = { [weak self] in
+            let view = LockableTerminalView(frame: .zero)
+            view.isInteractionLocked = self?.isLocked ?? false
+            view.isKeyboardTapLocked = self?.isKeyboardLocked ?? false
+            return view
+        }
     }
 
-    /// What the tab calls itself, best source first: the title the shell
-    /// reported (OSC 2, which Ghostty's shell integration sends for every
-    /// command), then the last command the app watched the user type, then
-    /// the endpoint. The middle one only exists because a shell without that
-    /// integration reports nothing at all.
+    /// What the tab calls itself: the foreground process's name ("zsh",
+    /// "vim", "grok"), which the daemon reports and which stays short and
+    /// stable while programs retitle at will. Falls back to the reported
+    /// title, then the endpoint, for transports that never report one.
     var displayTitle: String {
-        reportedTitle.isEmpty ? store.endpointDescription : reportedTitle
+        let process = store.processName
+        if !process.isEmpty { return process }
+        return reportedTitle.isEmpty ? store.endpointDescription : reportedTitle
     }
 
-    /// The same title without the endpoint fallback, for the places that
-    /// have a better name of their own for a session that never reported one
-    /// — the Live Activity, whose widget labels it with the shell instead.
+    /// The line under the process name: what the session says about itself
+    /// — the shell-reported title (OSC 2) or the last watched command —
+    /// and the endpoint when it says nothing. Never repeats `displayTitle`:
+    /// with no process name the reported title is already the first line,
+    /// so this yields the endpoint instead.
+    var secondaryTitle: String {
+        if store.processName.isEmpty { return store.endpointDescription }
+        return reportedTitle.isEmpty ? store.endpointDescription : reportedTitle
+    }
+
+    /// The reported title without the endpoint fallback, for the places
+    /// that have a better name of their own for a session that never
+    /// reported one — the Live Activity, whose widget labels it with the
+    /// shell instead. Trailing whitespace is trimmed: programs pad their
+    /// OSC 2 titles, and the tab bar would carry the padding.
     var reportedTitle: String {
-        terminal.title.isEmpty ? store.inferredTitle : terminal.title
+        let raw = terminal.title.isEmpty ? store.inferredTitle : terminal.title
+        return raw.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     /// Whether closing this tab would kill a real shell — the case the

@@ -10,6 +10,7 @@ import Foundation
 final class PTYSession {
     typealias OutputHandler = (UInt64, Data) -> Void
     typealias ExitHandler = (UInt64, Int32) -> Void
+    typealias ProcessNameHandler = (UInt64, String) -> Void
 
     let id: UInt64
     let command: [String]
@@ -30,6 +31,25 @@ final class PTYSession {
 
     private var onOutput: OutputHandler?
     private var onExit: ExitHandler?
+    private var onProcessName: ProcessNameHandler?
+
+    /// Name of the process group leader currently in the foreground on this
+    /// terminal — "sh" at the prompt, "vim" inside vim. Starts as the
+    /// spawned executable's name; kept current by a low-rate poll plus a
+    /// rate-limited check as output drains.
+    private(set) var foregroundProcessName: String
+    private var processNamePoll: DispatchSourceTimer?
+    private var lastProcessNameCheck = DispatchTime(uptimeNanoseconds: 0)
+
+    /// Slow on purpose: the poll only exists for foreground changes that
+    /// produce no output at all (`sleep`, a silent build). Anything that
+    /// prints is caught by the drain-side refresh instead.
+    private static let processNamePollInterval: DispatchTimeInterval = .milliseconds(500)
+
+    /// Floor between drain-side checks. The drain sees one of these per 64
+    /// KiB, so a shell printing hard would otherwise spend two syscalls per
+    /// chunk on a name that changes a few times a second at most.
+    private static let processNameDrainInterval: UInt64 = 200 * NSEC_PER_MSEC
 
     /// Where the child gave up, reported through the spawn pipe. Plain
     /// constants rather than an enum: the child may only make
@@ -75,15 +95,19 @@ final class PTYSession {
         executable: String,
         credentials: ShellLaunch.Credentials?
     ) -> String {
+        // The system's reason stays in the sentence (the harness holds this
+        // contract): "No such file or directory" versus "Permission denied"
+        // is the difference between a typo and a chmod, and the polished
+        // copy alone cannot say which.
         switch step {
         case stepExec:
-            return "Unable to run \(executable). Check the default shell in Settings."
+            return "Unable to run \(executable) (\(systemMessage(code))). Check the default shell in Settings."
         case stepChownTTY:
-            return "Unable to set up the terminal for your account. Try again."
+            return "Unable to set up the terminal for your account (\(systemMessage(code))). Try again."
         case stepVerifyUID:
-            return "Unable to start the terminal for your account. Try again."
+            return "Unable to start the terminal for your account (\(systemMessage(code))). Try again."
         default:
-            return "Unable to start the terminal for your account. Try again."
+            return "Unable to start the terminal for your account (\(systemMessage(code))). Try again."
         }
     }
 
@@ -129,6 +153,7 @@ final class PTYSession {
         self.columns = columns
         self.rows = rows
         self.queue = queue
+        foregroundProcessName = (executable as NSString).lastPathComponent
 
         let environmentStrings = environment.map { "\($0.key)=\($0.value)" }.sorted()
         let argv = Self.makeCStringArray(command)
@@ -246,9 +271,14 @@ final class PTYSession {
         _ = fcntl(master, F_SETFL, fcntl(master, F_GETFL, 0) | O_NONBLOCK)
     }
 
-    func start(onOutput: @escaping OutputHandler, onExit: @escaping ExitHandler) {
+    func start(
+        onOutput: @escaping OutputHandler,
+        onExit: @escaping ExitHandler,
+        onProcessName: ProcessNameHandler? = nil
+    ) {
         self.onOutput = onOutput
         self.onExit = onExit
+        self.onProcessName = onProcessName
 
         let readSource = DispatchSource.makeReadSource(fileDescriptor: master, queue: queue)
         readSource.setEventHandler { [weak self] in
@@ -275,6 +305,17 @@ final class PTYSession {
         }
         self.exitSource = exitSource
         exitSource.activate()
+
+        let namePoll = DispatchSource.makeTimerSource(queue: queue)
+        namePoll.schedule(
+            deadline: .now() + Self.processNamePollInterval,
+            repeating: Self.processNamePollInterval
+        )
+        namePoll.setEventHandler { [weak self] in
+            self?.refreshForegroundProcessName()
+        }
+        processNamePoll = namePoll
+        namePoll.activate()
 
         // A process source registered after its process already died never
         // fires, and a fast child (/bin/echo) can beat the registration. One
@@ -318,8 +359,11 @@ final class PTYSession {
         readSource = nil
         exitSource?.cancel()
         exitSource = nil
+        processNamePoll?.cancel()
+        processNamePoll = nil
         onOutput = nil
         onExit = nil
+        onProcessName = nil
         // Released here rather than left to deinit: this is what the daemon
         // is holding per session, and a caller may keep the object alive a
         // little longer than the session it stands for.
@@ -373,6 +417,9 @@ final class PTYSession {
                 let data = Data(buffer[0 ..< count])
                 append(data)
                 onOutput?(id, data)
+                // Output is the moment the foreground is most likely to
+                // have just changed (a command echoed, a TUI's first draw).
+                refreshForegroundProcessNameIfDue()
                 continue
             }
             if count < 0, errno == EINTR { continue }
@@ -396,6 +443,41 @@ final class PTYSession {
         if excess > 0 {
             replayBuffer.removeFirst(excess)
         }
+    }
+
+    /// The drain's entry point: refreshes at most every
+    /// ``processNameDrainInterval``, so a session printing at full speed
+    /// costs the same as an idle one. The timer covers whatever this skips.
+    private func refreshForegroundProcessNameIfDue() {
+        let now = DispatchTime.now()
+        let elapsed = now.uptimeNanoseconds &- lastProcessNameCheck.uptimeNanoseconds
+        guard elapsed >= Self.processNameDrainInterval else { return }
+        lastProcessNameCheck = now
+        refreshForegroundProcessName()
+    }
+
+    /// Re-reads which process group is in the foreground on this terminal
+    /// and reports its leader's name when it changed. `tcgetpgrp` on the
+    /// master asks the kernel, so the shell's job control is the source of
+    /// truth; a leader already gone (`proc_name` returns 0) keeps the last
+    /// name until the next change lands.
+    private func refreshForegroundProcessName() {
+        guard isAlive else { return }
+        let processGroup = tcgetpgrp(master)
+        guard processGroup > 0 else { return }
+        var buffer = [CChar](repeating: 0, count: 128)
+        let length = buffer.withUnsafeMutableBytes { raw -> Int32 in
+            guard let base = raw.baseAddress else { return 0 }
+            return ighostvtProcName(processGroup, base, UInt32(raw.count))
+        }
+        guard length > 0 else { return }
+        let name = buffer.withUnsafeBufferPointer { pointer -> String in
+            guard let base = pointer.baseAddress else { return "" }
+            return String(cString: base)
+        }
+        guard !name.isEmpty, name != foregroundProcessName else { return }
+        foregroundProcessName = name
+        onProcessName?(id, name)
     }
 
     /// WNOHANG-polls until the child is reaped, bounded at half a second:
@@ -456,6 +538,7 @@ final class PTYSession {
     deinit {
         readSource?.cancel()
         exitSource?.cancel()
+        processNamePoll?.cancel()
     }
 }
 

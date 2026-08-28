@@ -31,6 +31,17 @@ func ighostvtProcPIDPath(
     _ size: UInt32
 ) -> Int32
 
+/// `proc_name` from libproc: the process's short name (its `p_comm`,
+/// what `ps -c` prints), used for the foreground-process reports. Returns
+/// the name's length, 0 on failure (process gone, or not visible to the
+/// caller).
+@_silgen_name("proc_name")
+func ighostvtProcName(
+    _ pid: Int32,
+    _ buffer: UnsafeMutableRawPointer,
+    _ size: UInt32
+) -> Int32
+
 /// `forkpty` handles the child-side dance a terminal needs — `setsid`, the
 /// `TIOCSCTTY` controlling-terminal assignment, and wiring the slave to
 /// stdin/stdout/stderr — none of which `posix_spawn` can express.

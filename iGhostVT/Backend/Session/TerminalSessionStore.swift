@@ -42,6 +42,11 @@ final class TerminalSessionStore: ObservableObject {
     /// key a full-screen program swallowed — never becomes a title.
     @Published private(set) var inferredTitle: String = ""
 
+    /// Name of the process in the foreground on the session's terminal, as
+    /// the daemon reports it ("zsh", "vim", "grok"). Empty until the first
+    /// report — a transport that cannot know never sends one.
+    @Published private(set) var processName: String = ""
+
     /// Latest grid size reported by the surface; forwarded to the transport,
     /// which decides whether it can carry it.
     private(set) var viewport: (columns: Int, rows: Int)?
@@ -191,6 +196,8 @@ final class TerminalSessionStore: ObservableObject {
         switch event {
         case let .received(data):
             session.receive(data)
+        case let .processName(name):
+            processName = name
         case let .state(state):
             apply(state)
         }

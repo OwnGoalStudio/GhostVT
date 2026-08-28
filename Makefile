@@ -180,11 +180,19 @@ deb-rootless:
 	@$(MAKE) --no-print-directory PACKAGE_FLAVOR=rootless deb
 
 # Mac Catalyst development harness: the whole stack off-device (AGENTS.md,
-# "make mac-run"). The app is ad-hoc signed with *no* entitlements — a
-# Catalyst app cannot carry the client one — so the daemon authenticates it
-# by uid and bundle path, which only a Debug macOS daemon does; that is why
-# the configuration is not a knob.
+# "make mac-run"). The app is signed with *no* entitlements — a Catalyst app
+# cannot carry the client one — so the daemon authenticates it by uid and
+# bundle path, which only a Debug macOS daemon does; that is why the
+# configuration is not a knob.
+#
+# Ad-hoc by default, since that is what every checkout can do. To sign as
+# yourself, pass a Developer ID identity — it needs no provisioning profile,
+# which an iOS-family binary would otherwise demand before macOS will launch
+# it:
+#
+#   make mac-run MAC_SIGN_IDENTITY="Developer ID Application: NAME (TEAMID)"
 MAC_CONFIGURATION   := Debug
+MAC_SIGN_IDENTITY   ?= -
 MAC_APP_BUNDLE      := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)-maccatalyst/iGhostVT.app
 MAC_DAEMON_BINARY   := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighostvtd
 MAC_LAUNCH_AGENT    := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighostvtd.plist
@@ -198,8 +206,8 @@ mac-app:
 	@test -d "$(MAC_APP_BUNDLE)" || { echo "error: $(MAC_APP_BUNDLE) was not built" >&2; exit 66; }
 	@# Nested code first (any embedded framework or bundle), then the app.
 	@find "$(MAC_APP_BUNDLE)/Contents" -type d \( -name '*.framework' -o -name '*.appex' \) -print0 2>/dev/null \
-		| xargs -0 -n1 -I{} codesign --force --sign - "{}"
-	codesign --force --sign - "$(MAC_APP_BUNDLE)"
+		| xargs -0 -n1 -I{} codesign --force --sign "$(MAC_SIGN_IDENTITY)" --timestamp=none "{}"
+	codesign --force --sign "$(MAC_SIGN_IDENTITY)" --timestamp=none "$(MAC_APP_BUNDLE)"
 	@# A bundle rebuilt and re-signed in place can leave LaunchServices with
 	@# a stale registration, and `open` then fails with "Launchd job spawn
 	@# failed" while running the executable directly works. Re-register it.

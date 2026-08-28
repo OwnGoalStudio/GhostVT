@@ -11,6 +11,7 @@ import SwiftUI
 struct TabStripBar: View {
     @ObservedObject var tabManager: TabManager
     @Binding var showsSidebar: Bool
+    @State private var window: UIWindow?
 
     var body: some View {
         GlassBarContainer(spacing: DS.Padding.s) {
@@ -51,6 +52,8 @@ struct TabStripBar: View {
             .padding(.bottom, DS.Padding.s)
         }
         .buttonStyle(.plain)
+        // For the context menu's share sheet, which presents via UIKit.
+        .background(WindowReader(window: $window))
     }
 
     @ViewBuilder
@@ -65,14 +68,21 @@ struct TabStripBar: View {
     /// between them — a blob that shrinks to a pill and regrows while the
     /// sidebar slides. The shape stays mounted; only its content crossfades.
     private var centerCapsule: some View {
-        ZStack {
+        // Leading, like the chips: a program that retitles on every prompt
+        // (a status line, an agent reporting progress) would otherwise
+        // re-centre the text at each change, and the dot with it.
+        ZStack(alignment: .leading) {
             if showsSidebar {
                 if let tab = tabManager.activeTab {
                     HStack(spacing: DS.Padding.s) {
                         ObservedStatusDot(store: tab.store)
                         ObservedTabTitle(tab: tab)
+                        ObservedTabSubtitle(tab: tab)
                     }
                     .padding(.horizontal, DS.Padding.l)
+                    .contextMenu {
+                        TabContextMenu(tab: tab, tabManager: tabManager, window: window)
+                    }
                     // Keyed on the tab: switching tabs (a new one included)
                     // crossfades one title for another. Without the key
                     // SwiftUI reads it as the same text changing and morphs
@@ -86,25 +96,40 @@ struct TabStripBar: View {
                     .transition(.opacity)
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 40)
+        .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
         .barGlass(in: Capsule(), interactive: false)
     }
 
+    /// Chips share the bar Safari-style: equal widths, the bar divided by
+    /// the tab count and clamped to ``TabChip/widthRange``, so a title that
+    /// keeps changing never resizes its chip or shoves its neighbours, and
+    /// the strip scrolls only once the minimums no longer fit.
     private var chipStrip: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: DS.Padding.xs) {
-                ForEach(tabManager.tabs) { tab in
-                    TabChip(
-                        tab: tab,
-                        isActive: tab.id == tabManager.activeTabID,
-                        onSelect: { tabManager.activeTabID = tab.id },
-                        onClose: { tabManager.requestClose(tab) }
-                    )
+        GeometryReader { proxy in
+            let count = CGFloat(max(tabManager.tabs.count, 1))
+            let available = proxy.size.width - DS.Padding.xs * 2 - DS.Padding.xs * (count - 1)
+            let width = min(TabChip.widthRange.upperBound, max(TabChip.widthRange.lowerBound, available / count))
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: DS.Padding.xs) {
+                    ForEach(tabManager.tabs) { tab in
+                        TabChip(
+                            tab: tab,
+                            isActive: tab.id == tabManager.activeTabID,
+                            onSelect: { tabManager.activeTabID = tab.id },
+                            onClose: { tabManager.requestClose(tab) }
+                        )
+                        .frame(width: width)
+                        .contextMenu {
+                            TabContextMenu(tab: tab, tabManager: tabManager, window: window)
+                        }
+                    }
                 }
+                .padding(DS.Padding.xs)
             }
-            .padding(DS.Padding.xs)
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        // A GeometryReader fills whatever it is given, in both axes; the
+        // bar's height is the capsule's, not the window's.
+        .frame(maxWidth: .infinity, maxHeight: 40, alignment: .leading)
     }
 }
 
@@ -119,6 +144,22 @@ struct ObservedTabTitle: View {
             .truncationMode(.middle)
             .retitleTransition()
             .animation(DS.Motion.smooth, value: tab.displayTitle)
+    }
+}
+
+/// The dim line beside the title: what the session reports about itself
+/// while the title itself stays the stable process name.
+struct ObservedTabSubtitle: View {
+    @ObservedObject var tab: TerminalTab
+
+    var body: some View {
+        Text(tab.secondaryTitle)
+            .font(DS.Font.caption)
+            .foregroundColor(.secondary)
+            .lineLimit(1)
+            .truncationMode(.middle)
+            .retitleTransition()
+            .animation(DS.Motion.smooth, value: tab.secondaryTitle)
     }
 }
 
@@ -143,6 +184,11 @@ private struct TabChip: View {
     let onSelect: () -> Void
     let onClose: () -> Void
 
+    /// The floor keeps the close button clear of the status dot — a tap
+    /// near the dot must select, not close; the ceiling keeps one long
+    /// title from owning the bar.
+    static let widthRange: ClosedRange<CGFloat> = 120 ... 240
+
     var body: some View {
         Button(action: onSelect) {
             HStack(spacing: DS.Padding.xs) {
@@ -152,10 +198,12 @@ private struct TabChip: View {
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .retitleTransition()
-                    // The floor keeps a short-titled chip around 100pt, so
-                    // the close button never crowds the status dot — a tap
-                    // near the dot must select, not close.
-                    .frame(minWidth: 44, maxWidth: 180, alignment: .leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                if tab.isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(DS.Font.captionEmphasis)
+                        .foregroundColor(.secondary)
+                }
                 Button(action: onClose) {
                     Image(systemName: "xmark")
                         .font(DS.Font.captionEmphasis)

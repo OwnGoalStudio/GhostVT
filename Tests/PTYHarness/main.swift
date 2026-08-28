@@ -492,6 +492,51 @@ if getuid() == 0 {
     )
 }
 
+print("foreground process name")
+do {
+    let session = try PTYSession(
+        id: 99,
+        command: ["/bin/sh", "-i"],
+        environment: ["TERM": "xterm-256color", "PATH": "/usr/bin:/bin"],
+        columns: 80,
+        rows: 24,
+        queue: harnessQueue
+    )
+    check(
+        session.foregroundProcessName == "sh",
+        "the initial foreground name is the spawned executable"
+    )
+    let namesLock = NSLock()
+    var reportedNames: [String] = []
+    session.start(
+        onOutput: { _, _ in },
+        onExit: { _, _ in },
+        onProcessName: { _, name in
+            namesLock.lock()
+            reportedNames.append(name)
+            namesLock.unlock()
+        }
+    )
+    // An interactive sh has job control, so the sleep runs in its own
+    // foreground process group; the poll must notice within a second or so.
+    session.write(Data("sleep 3\n".utf8))
+    let deadline = Date().addingTimeInterval(5)
+    var sawSleep = false
+    while Date() < deadline, !sawSleep {
+        namesLock.lock()
+        sawSleep = reportedNames.contains("sleep")
+        namesLock.unlock()
+        usleep(100_000)
+    }
+    namesLock.lock()
+    let names = reportedNames
+    namesLock.unlock()
+    check(sawSleep, "a foreground command is reported by name (saw: \(names))")
+    session.invalidate()
+} catch {
+    check(false, "a process-name session spawns")
+}
+
 if failures.isEmpty {
     print("\nPTY harness passed")
     exit(EXIT_SUCCESS)

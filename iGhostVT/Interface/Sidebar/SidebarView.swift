@@ -8,6 +8,7 @@ struct SidebarView: View {
     let onShowSettings: () -> Void
     @ObservedObject private var theme = AppTheme.shared
     @Environment(\.colorScheme) private var colorScheme
+    @State private var window: UIWindow?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,7 +21,9 @@ struct SidebarView: View {
                             tab: tab,
                             isActive: tab.id == tabManager.activeTabID,
                             onSelect: { tabManager.activeTabID = tab.id },
-                            onClose: { tabManager.requestClose(tab) }
+                            onClose: { tabManager.requestClose(tab) },
+                            tabManager: tabManager,
+                            window: window
                         )
                     }
 
@@ -54,6 +57,8 @@ struct SidebarView: View {
                 .fill(.regularMaterial)
                 .ignoresSafeArea()
         }
+        // For the context menu's share sheet, which presents via UIKit.
+        .background(WindowReader(window: $window))
         .overlay(alignment: .trailing) {
             Rectangle()
                 .fill(theme.hairline(for: colorScheme))
@@ -115,6 +120,8 @@ private struct SidebarRow: View {
     let isActive: Bool
     let onSelect: () -> Void
     let onClose: () -> Void
+    let tabManager: TabManager
+    let window: UIWindow?
 
     var body: some View {
         Button(action: onSelect) {
@@ -125,12 +132,18 @@ private struct SidebarRow: View {
                         .font(isActive ? DS.Font.labelEmphasis : DS.Font.label)
                         .lineLimit(1)
                         .truncationMode(.middle)
-                    Text(tab.store.endpointDescription)
+                    Text(tab.secondaryTitle)
                         .font(DS.Font.caption)
                         .foregroundColor(.secondary)
                         .lineLimit(1)
+                        .truncationMode(.middle)
                 }
                 Spacer(minLength: 8)
+                if tab.isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(DS.Font.captionEmphasis)
+                        .foregroundColor(.secondary)
+                }
                 Button(action: onClose) {
                     Image(systemName: "xmark")
                         .font(DS.Font.captionEmphasis)
@@ -150,5 +163,8 @@ private struct SidebarRow: View {
             .contentShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            TabContextMenu(tab: tab, tabManager: tabManager, window: window)
+        }
     }
 }

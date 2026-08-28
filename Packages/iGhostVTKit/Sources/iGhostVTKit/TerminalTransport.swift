@@ -29,6 +29,10 @@ public protocol TerminalTransport: AnyObject {
 public enum TerminalTransportEvent: Sendable {
     case state(TerminalTransportState)
     case received(Data)
+    /// The endpoint reports which process is in the foreground on the
+    /// terminal ("zsh", "vim"). A backend that cannot know simply never
+    /// sends it.
+    case processName(String)
 }
 
 public enum TerminalTransportState: Sendable, Equatable {

@@ -133,33 +133,35 @@ struct RootView: View {
                     .transition(.opacity)
             }
             ForEach(tabManager.tabs) { tab in
-                let isActive = tab.id == tabManager.activeTabID
-                TerminalSurfaceView(context: tab.terminal)
-                    .terminalFocused($focusedTabID, equals: tab.id)
-                    .overlay {
-                        SessionStatusOverlay(
-                            store: tab.store,
-                            onCloseTab: { tabManager.requestClose(tab) }
-                        )
-                    }
-                    .opacity(isActive ? 1 : 0)
-                    .allowsHitTesting(isActive)
-                    .accessibilityHidden(!isActive)
-                    .transition(.asymmetric(
-                        insertion: .opacity,
-                        removal: .scale(scale: 0.92).combined(with: .opacity)
-                    ))
+                TerminalPane(
+                    tab: tab,
+                    isActive: tab.id == tabManager.activeTabID,
+                    focusedTabID: $focusedTabID,
+                    onCloseTab: { tabManager.requestClose(tab) },
+                    onLockChange: refocus
+                )
+                .transition(.asymmetric(
+                    insertion: .opacity,
+                    removal: .scale(scale: 0.92).combined(with: .opacity)
+                ))
             }
         }
     }
 
     private func refocus() {
-        focusedTabID = tabManager.activeTabID
+        // A locked tab must not hold keyboard focus: its surface ignores
+        // touches, and hardware keys reaching it anyway would defeat the
+        // lock.
+        guard let tab = tabManager.activeTab, !tab.isLocked else {
+            focusedTabID = nil
+            return
+        }
+        focusedTabID = tab.id
         // FocusState alone is best-effort — SwiftUI can reset it to nil
         // before the bridge acts, leaving the previous tab's surface holding
         // first responder and eating every hardware key. Hand focus over
         // imperatively so a tab switch always lands on the active terminal.
-        tabManager.activeTab?.terminal.requestFocus()
+        tab.terminal.requestFocus()
     }
 
     /// Hardware keyboard shortcuts (iPad with a keyboard, mainly).
@@ -201,5 +203,44 @@ struct RootView: View {
             options: nil,
             errorHandler: nil
         )
+    }
+}
+
+/// One tab's surface with its per-tab chrome. A separate view so the lock
+/// state is actually observed: the `ForEach` in `RootView` does not watch
+/// individual tabs, and a lock toggled from a context menu would otherwise
+/// change nothing until an unrelated redraw.
+private struct TerminalPane: View {
+    @ObservedObject var tab: TerminalTab
+    let isActive: Bool
+    let focusedTabID: FocusState<UUID?>.Binding
+    let onCloseTab: () -> Void
+    let onLockChange: () -> Void
+
+    var body: some View {
+        TerminalSurfaceView(context: tab.terminal)
+            .terminalFocused(focusedTabID, equals: tab.id)
+            .overlay {
+                SessionStatusOverlay(store: tab.store, onCloseTab: onCloseTab)
+            }
+            .overlay(alignment: .topTrailing) {
+                if tab.isLocked {
+                    Label("Locked", systemImage: "lock.fill")
+                        .font(DS.Font.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, DS.Padding.m)
+                        .padding(.vertical, DS.Padding.xs)
+                        .background(.thinMaterial, in: Capsule())
+                        .padding(DS.Padding.m)
+                        .transition(.opacity)
+                }
+            }
+            .opacity(isActive ? 1 : 0)
+            // The lock itself is not modeled here: `LockableTerminalView`
+            // refuses hit testing and first responder at the view, so every
+            // input path closes in one place while output keeps rendering.
+            .allowsHitTesting(isActive)
+            .accessibilityHidden(!isActive)
+            .onChange(of: tab.isLocked) { _ in onLockChange() }
     }
 }
