@@ -10,6 +10,12 @@
             "value" : "%@ (Standard)"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ (Default)"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -335,6 +341,12 @@
             "value" : "Eine eigene Taste tippt die von dir eingegebenen Zeichen, zusammen mit allen aktivierten Modifikatortasten."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A custom key types the characters you enter, together with any modifier keys that are switched on."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -391,6 +403,40 @@
         }
       }
     },
+    "A program in this terminal wants to read the clipboard: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A program in this terminal wants to read the clipboard: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此终端中的程序想要读取剪贴板：%@"
+          }
+        }
+      }
+    },
+    "A program in this terminal wants to replace the clipboard with: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A program in this terminal wants to replace the clipboard with: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此终端中的程序想要将剪贴板内容替换为：%@"
+          }
+        }
+      }
+    },
     "About" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -398,6 +444,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Über"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "About"
           }
         },
         "es" : {
@@ -465,6 +517,12 @@
             "value" : "Zusatztasten"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accessory Keys"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -528,6 +586,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hinzufügen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add"
           }
         },
         "es" : {
@@ -595,6 +659,12 @@
             "value" : "%@ hinzufügen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add %@"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -658,6 +728,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eigene Taste hinzufügen…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Custom Key…"
           }
         },
         "es" : {
@@ -725,6 +801,12 @@
             "value" : "Trenner hinzufügen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add Divider"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -781,6 +863,57 @@
         }
       }
     },
+    "Allow" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许"
+          }
+        }
+      }
+    },
+    "Allow Clipboard Access?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow Clipboard Access?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许读取剪贴板？"
+          }
+        }
+      }
+    },
+    "Allow Clipboard Change?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow Clipboard Change?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "允许修改剪贴板？"
+          }
+        }
+      }
+    },
     "Appearance" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -788,6 +921,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Erscheinungsbild"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
           }
         },
         "es" : {
@@ -854,6 +993,12 @@
             "value" : "Abbrechen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -917,6 +1062,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wähle und ordne die Tasten der Leiste über der Tastatur."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose and arrange the keys on the bar above the keyboard."
           }
         },
         "es" : {
@@ -1048,6 +1199,12 @@
             "value" : "„%@“ schließen?"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close “%@”?"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1111,6 +1268,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alle schließen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close All"
           }
         },
         "es" : {
@@ -1178,6 +1341,12 @@
             "value" : "Alle Tabs schließen?"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close All Tabs?"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1243,6 +1412,12 @@
             "value" : "Tab schließen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close Tab"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1303,6 +1478,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Command"
+          }
+        },
+        "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Command"
@@ -1373,6 +1554,12 @@
             "value" : "Verbunden"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connected"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1436,6 +1623,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verbindung wird hergestellt…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecting…"
           }
         },
         "es" : {
@@ -1503,6 +1696,12 @@
             "value" : "Verbindung fehlgeschlagen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connection Failed"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1563,6 +1762,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control"
+          }
+        },
+        "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Control"
@@ -1633,6 +1838,12 @@
             "value" : "Eigene Taste"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom Key"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1696,6 +1907,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dunkles Thema"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dark Theme"
           }
         },
         "es" : {
@@ -1763,6 +1980,12 @@
             "value" : "Fehlerbehebung"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Debugging"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1828,6 +2051,12 @@
             "value" : "Standard-Shell"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default Shell"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1884,6 +2113,23 @@
         }
       }
     },
+    "Deny" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deny"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拒绝"
+          }
+        }
+      }
+    },
     "Divider" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1891,6 +2137,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trenner"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Divider"
           }
         },
         "es" : {
@@ -1958,6 +2210,12 @@
             "value" : "Fertig"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2021,6 +2279,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pfeil unten"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Down Arrow"
           }
         },
         "es" : {
@@ -2144,10 +2408,33 @@
         }
       }
     },
+    "Drag to reorder. Removing a standard key returns it to More Keys; dividers and custom keys are deleted." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag to reorder. Removing a standard key returns it to More Keys; dividers and custom keys are deleted."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拖动可调整顺序。移除标准按键会将其放回“更多按键”；分隔符与自定义按键将被删除。"
+          }
+        }
+      }
+    },
     "Escape" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escape"
+          }
+        },
+        "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Escape"
@@ -2218,6 +2505,12 @@
             "value" : "Taste „%@“"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Key “%@”"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2281,6 +2574,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tastatur"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keyboard"
           }
         },
         "es" : {
@@ -2348,6 +2647,12 @@
             "value" : "Pfeil links"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Left Arrow"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2411,6 +2716,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Helles Thema"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Light Theme"
           }
         },
         "es" : {
@@ -2478,6 +2789,12 @@
             "value" : "Weitere Tasten"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "More Keys"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2541,6 +2858,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Neuer Tab"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Tab"
           }
         },
         "es" : {
@@ -2673,6 +2996,12 @@
             "value" : "Neues Fenster"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Window"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2738,6 +3067,12 @@
             "value" : "Nächster Tab"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next Tab"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2790,6 +3125,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "下一個分頁"
+          }
+        }
+      }
+    },
+    "No configuration file written yet. It would go to %@." : {
+      "comment" : "Settings footer when the rendered ghostty config is missing; %@ is a directory path",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No configuration file written yet. It would go to %@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚未写入配置文件。预定写入位置：%@。"
           }
         }
       }
@@ -2869,6 +3222,12 @@
             "value" : "Keine offenen Tabs"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Open Tabs"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -2932,6 +3291,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Es wurde keine verwendbare Shell gefunden. Prüfe die Standard-Shell in den Einstellungen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No usable shell was found. Check the default shell in Settings."
           }
         },
         "es" : {
@@ -2999,6 +3364,12 @@
             "value" : "Nicht verbunden"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not Connected"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3064,6 +3435,12 @@
             "value" : "Auf der Leiste"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On the Bar"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3124,6 +3501,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Option"
+          }
+        },
+        "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Option"
@@ -3194,6 +3577,12 @@
             "value" : "Einsetzen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paste"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3250,6 +3639,23 @@
         }
       }
     },
+    "Paste Multiple Lines?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paste Multiple Lines?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "粘贴多行内容？"
+          }
+        }
+      }
+    },
     "Preview" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3257,6 +3663,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vorschau"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Preview"
           }
         },
         "es" : {
@@ -3324,6 +3736,12 @@
             "value" : "Vorheriger Tab"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previous Tab"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3387,6 +3805,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ entfernen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@"
           }
         },
         "es" : {
@@ -3454,6 +3878,12 @@
             "value" : "Mehrfach möglich"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeatable"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3506,6 +3936,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "可重複加入"
+          }
+        }
+      }
+    },
+    "Reset Themes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset Themes"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重置主题"
           }
         }
       }
@@ -3584,6 +4031,12 @@
             "value" : "Auf Standard zurücksetzen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset to Defaults"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3647,6 +4100,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seitenleistengröße anpassen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resize Sidebar"
           }
         },
         "es" : {
@@ -3714,6 +4173,12 @@
             "value" : "Wiederholen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3779,6 +4244,12 @@
             "value" : "Pfeil rechts"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Right Arrow"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3842,6 +4313,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Text auswählen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select Text"
           }
         },
         "es" : {
@@ -3910,6 +4387,12 @@
             "value" : "Sitzung %lld"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session %lld"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3973,6 +4456,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sitzung beendet"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session Ended"
           }
         },
         "es" : {
@@ -4040,6 +4529,12 @@
             "value" : "Einstellungen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4105,6 +4600,12 @@
             "value" : "Tabs anzeigen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Tabs"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4161,6 +4662,23 @@
         }
       }
     },
+    "Start a new tab to keep working." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a new tab to keep working."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新建标签页以继续工作。"
+          }
+        }
+      }
+    },
     "Starting…" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4168,6 +4686,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wird gestartet…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting…"
           }
         },
         "es" : {
@@ -4235,6 +4759,12 @@
             "value" : "Tabulator"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tab"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4295,6 +4825,12 @@
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tabs"
+          }
+        },
+        "en" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tabs"
@@ -4365,6 +4901,12 @@
             "value" : "Terminal"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4430,6 +4972,12 @@
             "value" : "Terminal nicht verfügbar"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal Unavailable"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4493,6 +5041,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "App und Terminal-Daemon haben unterschiedliche Versionen. Installiere iGhostty neu, um beide zu aktualisieren."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The app and the terminal daemon are different versions. Reinstall iGhostty to update both."
           }
         },
         "es" : {
@@ -4616,6 +5170,23 @@
         }
       }
     },
+    "The bar above the keyboard shows these keys in this order. Scroll sideways if they do not all fit." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The bar above the keyboard shows these keys in this order. Scroll sideways if they do not all fit."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "键盘上方的快捷栏将按此顺序显示这些按键。若无法全部显示，可左右滑动查看。"
+          }
+        }
+      }
+    },
     "The connection to the terminal daemon could not be restored." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4623,6 +5194,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die Verbindung zum Terminal-Daemon konnte nicht wiederhergestellt werden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The connection to the terminal daemon could not be restored."
           }
         },
         "es" : {
@@ -4690,6 +5267,12 @@
             "value" : "Die Verbindung zum Terminal-Daemon wurde unterbrochen."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The connection to the terminal daemon was interrupted."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4753,6 +5336,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die Verbindung zum Terminal-Daemon wurde nicht hergestellt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The connection to the terminal daemon was not set up."
           }
         },
         "es" : {
@@ -4876,6 +5465,23 @@
         }
       }
     },
+    "The program every new terminal runs, for example /bin/zsh. Use a plain path; one that includes the jailbreak root stops working after the next jailbreak. Leave this empty to use the default login shell." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The program every new terminal runs, for example /bin/zsh. Use a plain path; one that includes the jailbreak root stops working after the next jailbreak. Leave this empty to use the default login shell."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每个新终端运行的程序，例如 /bin/zsh。请使用常规路径；包含越狱根目录的路径在下次越狱后将失效。留空则使用默认登录 Shell。"
+          }
+        }
+      }
+    },
     "The shell exited with status %lld." : {
       "comment" : "Why a terminal stopped; %lld is the process exit status",
       "extractionState" : "manual",
@@ -4884,6 +5490,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Die Shell wurde mit Status %lld beendet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The shell exited with status %lld."
           }
         },
         "es" : {
@@ -4951,6 +5563,12 @@
             "value" : "Die Shell wurde beendet."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The shell exited."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5014,6 +5632,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Der Terminal-Daemon konnte die Anfrage nicht ausführen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The terminal daemon could not complete the request."
           }
         },
         "es" : {
@@ -5081,6 +5705,12 @@
             "value" : "Der Terminal-Daemon läuft nicht."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The terminal daemon is not running."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5144,6 +5774,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Der Terminal-Daemon hat die Verbindung abgelehnt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The terminal daemon refused the connection."
           }
         },
         "es" : {
@@ -5211,6 +5847,12 @@
             "value" : "Der Terminal-Daemon hat die Anfrage abgelehnt."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The terminal daemon rejected the request."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5276,6 +5918,12 @@
             "value" : "Die Themes stammen aus dem Ghostty-Theme-Katalog und gelten für jeden Tab in jedem Fenster."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Themes come from the Ghostty theme catalog and apply to every tab in every window."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5328,6 +5976,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "主題來自 Ghostty 主題庫，將套用至所有視窗與分頁。"
+          }
+        }
+      }
+    },
+    "This closes all terminals and stops everything running in them." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This closes all terminals and stops everything running in them."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这将关闭所有终端，并终止其中运行的所有程序。"
           }
         }
       }
@@ -5393,6 +6058,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "這將關閉所有終端機，並終止其中正在執行的所有程式。"
+          }
+        }
+      }
+    },
+    "This closes the tab and stops everything running in it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This closes the tab and stops everything running in it."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这将关闭该标签页，并终止其中运行的所有程序。"
           }
         }
       }
@@ -5471,6 +6153,12 @@
             "value" : "Dieses Terminal ist bereits in einem anderen Fenster geöffnet."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This terminal is already open in another window."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5536,6 +6224,12 @@
             "value" : "Dieses Terminal existiert nicht mehr."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This terminal no longer exists."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5592,6 +6286,23 @@
         }
       }
     },
+    "This text contains line breaks or control characters the program may run as commands: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This text contains line breaks or control characters the program may run as commands: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此文本包含换行符或控制字符，程序可能会将其作为命令执行：%@"
+          }
+        }
+      }
+    },
     "Toggle Sidebar" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5599,6 +6310,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Seitenleiste ein-/ausblenden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toggle Sidebar"
           }
         },
         "es" : {
@@ -5666,6 +6383,12 @@
             "value" : "Es sind zu viele Terminals geöffnet. Schließe eines und versuche es erneut."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too many terminals are open. Close one and try again."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5731,6 +6454,12 @@
             "value" : "Pfeil oben"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up Arrow"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5783,6 +6512,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "向上鍵"
+          }
+        }
+      }
+    },
+    "Up to three characters, sent exactly as typed. A single letter also works with Control." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to three characters, sent exactly as typed. A single letter also works with Control."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最多 3 个字符，按原样发送。单个字母也可与 Control 键组合使用。"
           }
         }
       }
@@ -5861,6 +6607,12 @@
             "value" : "Ausführliches Terminalprotokoll"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verbose Terminal Log"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5926,6 +6678,12 @@
             "value" : "Version"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Version"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5978,6 +6736,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "版本"
+          }
+        }
+      }
+    },
+    "Writes detailed terminal activity to the system log, including every keystroke, while this is on." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Writes detailed terminal activity to the system log, including every keystroke, while this is on."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启后，会将详细的终端活动（包括每次按键）写入系统日志。"
           }
         }
       }

@@ -58,7 +58,7 @@ struct SettingsSheet: View {
                     name: theme.selection.darkName ?? Self.defaultLabel("Afterglow")
                 )
             }
-            Button("Reset Themes to Defaults") {
+            Button("Reset Themes") {
                 theme.selection = AppTheme.Selection(lightName: nil, darkName: nil)
             }
         } header: {
@@ -101,9 +101,9 @@ struct SettingsSheet: View {
             Text(
                 """
                 The program every new terminal runs, for example /bin/zsh. \
-                Use a plain path inside the jailbreak root: a path that \
-                starts with jbroot stops working after the next jailbreak. \
-                Leave this empty to use the default login shell.
+                Use a plain path; one that includes the jailbreak root stops \
+                working after the next jailbreak. Leave this empty to use the \
+                default login shell.
                 """
             )
         }
@@ -126,9 +126,8 @@ struct SettingsSheet: View {
         } footer: {
             Text(
                 """
-                Writes key routing, IME, and terminal output traces to the \
-                system log (idevicesyslog or Console.app). Keystrokes appear \
-                in the log while this is on.
+                Writes detailed terminal activity to the system log, \
+                including every keystroke, while this is on.
                 """
             )
         }
@@ -192,7 +191,7 @@ struct SettingsSheet: View {
         guard let rendered else {
             return String.localizedStringWithFormat(
                 NSLocalizedString(
-                    "No ghostty config written; would go to %@",
+                    "No configuration file written yet. It would go to %@.",
                     comment: "Settings footer when the rendered ghostty config is missing; %@ is a directory path"
                 ),
                 directory.path

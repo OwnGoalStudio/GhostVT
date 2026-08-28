@@ -14,6 +14,12 @@
             "value" : "%lld getrennt"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld detached"
+          }
+        },
         "es" : {
           "variations" : {
             "plural" : {
@@ -119,16 +125,72 @@
       }
     },
     "%lld failed" : {
-      "comment" : "Sessions whose transport gave up"
+      "comment" : "Sessions whose transport gave up",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld failed"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个失败"
+          }
+        }
+      }
     },
     "%lld in background" : {
-      "comment" : "Sessions running with no tab attached"
+      "comment" : "Sessions running with no tab attached",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld in background"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个在后台"
+          }
+        }
+      }
     },
     "%lld live" : {
-      "comment" : "Sessions with a running shell"
+      "comment" : "Sessions with a running shell",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld live"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个运行中"
+          }
+        }
+      }
     },
     "%lld starting" : {
-      "comment" : "Sessions still spawning"
+      "comment" : "Sessions still spawning",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld starting"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个启动中"
+          }
+        }
+      }
     },
     "+%lld more" : {
       "comment" : "Sessions that did not fit the list",
@@ -197,7 +259,20 @@
       }
     },
     "Detached" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detached"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已分离"
+          }
+        }
+      }
     },
     "Failed" : {
       "extractionState" : "manual",
@@ -268,7 +343,20 @@
       "shouldTranslate" : false
     },
     "Running" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Running"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "运行中"
+          }
+        }
+      }
     },
     "Session %lld" : {
       "comment" : "Name of a shell that has not set a title",
@@ -337,7 +425,20 @@
       }
     },
     "sessions" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sessions"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个会话"
+          }
+        }
+      }
     },
     "Starting…" : {
       "extractionState" : "manual",

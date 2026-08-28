@@ -12,7 +12,7 @@ extension View {
             makeAlert: { tab, finish in
                 AlertViewController(
                     title: "Close “\(tab.displayTitle)”?",
-                    message: "This closes the terminal and stops everything running in it.",
+                    message: "This closes the tab and stops everything running in it.",
                     actions: [
                         AlertAction("Cancel") {
                             finish()

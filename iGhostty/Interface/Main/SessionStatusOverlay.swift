@@ -84,7 +84,7 @@ struct SessionStatusOverlay: View {
                     },
                 ]
                 : [
-                    AlertAction("Close") {
+                    AlertAction("Close Tab") {
                         onCloseTab()
                     },
                     AlertAction("Retry", kind: .accent) {

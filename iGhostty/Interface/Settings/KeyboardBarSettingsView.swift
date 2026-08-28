@@ -53,7 +53,7 @@ struct KeyboardBarSettingsView: View {
         } header: {
             Text("Preview")
         } footer: {
-            Text("The bar above the keyboard shows these keys in this order. If they do not all fit, you can scroll it sideways.")
+            Text("The bar above the keyboard shows these keys in this order. Scroll sideways if they do not all fit.")
         }
     }
 
@@ -81,7 +81,7 @@ struct KeyboardBarSettingsView: View {
         } header: {
             Text("On the Bar")
         } footer: {
-            Text("Drag to reorder the keys. Removing a standard key returns it to the list below. Dividers and custom keys are deleted.")
+            Text("Drag to reorder. Removing a standard key returns it to More Keys; dividers and custom keys are deleted.")
         }
     }
 
@@ -218,7 +218,7 @@ private struct CustomKeySheet: View {
                         .textInputAutocapitalization(.never)
                         .disableAutocorrection(true)
                 } footer: {
-                    Text("Up to three characters, sent exactly as typed. A single letter works with Control just like a letter on the keyboard.")
+                    Text("Up to three characters, sent exactly as typed. A single letter also works with Control.")
                 }
             }
             .navigationTitle("Custom Key")
