@@ -10,8 +10,14 @@ import Foundation
 /// in mobile's Logs so it is writable whether the daemon runs as root or as
 /// mobile, and readable over ssh without elevation.
 enum DaemonFileLog {
-    private static let path = "/var/mobile/Library/Logs/ighosttyd.log"
-    private static let rotatedPath = "/var/mobile/Library/Logs/ighosttyd.log.1"
+    #if os(macOS)
+        // The Mac Catalyst harness runs the daemon as the user; mobile's
+        // home does not exist there.
+        private static let path = NSHomeDirectory() + "/Library/Logs/ighosttyd.log"
+    #else
+        private static let path = "/var/mobile/Library/Logs/ighosttyd.log"
+    #endif
+    private static let rotatedPath = path + ".1"
     private static let rotateAtBytes = 512 * 1024
     private static let queue = DispatchQueue(
         label: "wiki.qaq.ighostty.daemon.filelog",

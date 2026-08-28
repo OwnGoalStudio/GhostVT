@@ -67,7 +67,7 @@ ifeq ($(BUILD_NUMBER),)
 $(error CURRENT_PROJECT_VERSION is missing from Configuration/Version.xcconfig)
 endif
 
-.PHONY: all help print-version print-build-number print-deb-path set-version check test harness build deb deb-roothide deb-rootless clean
+.PHONY: all help print-version print-build-number print-deb-path set-version check test harness build deb deb-roothide deb-rootless mac-app mac-daemon mac-daemon-uninstall mac-run clean
 
 all: deb
 
@@ -80,6 +80,10 @@ help:
 	@echo "  test        Run the PTY harness"
 	@echo "  harness     Run the daemon's PTY spawn tests on macOS"
 	@echo "  check       Validate the project and packaging inputs"
+	@echo "  mac-run     Build the Mac Catalyst app, load ighosttyd as a LaunchAgent, open the app"
+	@echo "  mac-app     Build the Mac Catalyst app only"
+	@echo "  mac-daemon  Build ighosttyd for macOS and (re)load it as a per-user LaunchAgent"
+	@echo "  mac-daemon-uninstall  Unload and remove the macOS LaunchAgent"
 	@echo "  set-version Write VERSION=x.y.z [BUILD=n] into Configuration/Version.xcconfig"
 	@echo "  clean       Remove derived data and generated packages"
 
@@ -170,6 +174,61 @@ deb-roothide:
 
 deb-rootless:
 	@$(MAKE) --no-print-directory PACKAGE_FLAVOR=rootless deb
+
+# Mac Catalyst development harness. The device has no simulator loop (the
+# Simulator has no daemon), so this is the only way to run the whole stack —
+# app, transport, daemon, shells — off-device. Debug configuration; the app
+# is built unsigned and ad-hoc signed with *no* entitlements: a Catalyst app
+# is an iOS-family binary, and macOS will not launch one carrying an
+# entitlement no provisioning profile granted (RunningBoard reports "Launchd
+# job spawn failed"). The daemon built for macOS therefore authenticates the
+# development peer by uid and bundle path instead of the client entitlement
+# (PeerAuthenticator's macOS branch). It runs as a per-user LaunchAgent in
+# the gui domain, where the Catalyst app looks the service up.
+MAC_CONFIGURATION   ?= Debug
+MAC_APP_BUNDLE      := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)-maccatalyst/iGhostty.app
+MAC_DAEMON_BINARY   := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighosttyd
+MAC_LAUNCH_AGENT    := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighosttyd.plist
+MAC_AGENT_INSTALL   := $(HOME)/Library/LaunchAgents/wiki.qaq.ighosttyd.plist
+MAC_AGENT_DOMAIN     = gui/$(shell id -u)
+
+mac-app:
+	XCBUILD_LABEL=build-mac-app $(XCODEBUILD) \
+		CODE_SIGNING_ALLOWED=NO \
+		CODE_SIGNING_REQUIRED=NO \
+		CODE_SIGN_IDENTITY="" \
+		-configuration "$(MAC_CONFIGURATION)" \
+		-scheme "$(SCHEME)" \
+		-destination "platform=macOS,variant=Mac Catalyst" \
+		build
+	@test -d "$(MAC_APP_BUNDLE)" || { echo "error: $(MAC_APP_BUNDLE) was not built" >&2; exit 66; }
+	@# Nested code first (any embedded framework or bundle), then the app.
+	@find "$(MAC_APP_BUNDLE)/Contents" -type d \( -name '*.framework' -o -name '*.appex' \) -print0 2>/dev/null \
+		| xargs -0 -n1 -I{} codesign --force --sign - "{}"
+	codesign --force --sign - "$(MAC_APP_BUNDLE)"
+	@echo "Built and signed $(MAC_APP_BUNDLE)"
+
+mac-daemon:
+	XCBUILD_LABEL=build-mac-daemon $(XCODEBUILD) \
+		-configuration "$(MAC_CONFIGURATION)" \
+		-scheme "$(DAEMON_SCHEME)" \
+		-destination "platform=macOS" \
+		build
+	@test -x "$(MAC_DAEMON_BINARY)" || { echo "error: $(MAC_DAEMON_BINARY) was not built" >&2; exit 66; }
+	@mkdir -p "$(dir $(MAC_AGENT_INSTALL))"
+	@launchctl bootout "$(MAC_AGENT_DOMAIN)/wiki.qaq.ighosttyd" 2>/dev/null || true
+	@sed -e "s|@DAEMON@|$(MAC_DAEMON_BINARY)|g" "$(MAC_LAUNCH_AGENT)" >"$(MAC_AGENT_INSTALL)"
+	@plutil -lint "$(MAC_AGENT_INSTALL)" >/dev/null
+	launchctl bootstrap "$(MAC_AGENT_DOMAIN)" "$(MAC_AGENT_INSTALL)"
+	@echo "ighosttyd loaded as $(MAC_AGENT_DOMAIN)/wiki.qaq.ighosttyd; log: ~/Library/Logs/ighosttyd.log"
+
+mac-daemon-uninstall:
+	@launchctl bootout "$(MAC_AGENT_DOMAIN)/wiki.qaq.ighosttyd" 2>/dev/null || true
+	@rm -f "$(MAC_AGENT_INSTALL)"
+	@echo "ighosttyd LaunchAgent removed"
+
+mac-run: mac-daemon mac-app
+	open "$(MAC_APP_BUNDLE)"
 
 clean:
 	rm -rf "$(DERIVED_DATA)"

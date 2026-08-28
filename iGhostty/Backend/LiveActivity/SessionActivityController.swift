@@ -43,9 +43,13 @@ final class SessionActivityController {
     }
 
     func refresh() {
-        guard #available(iOS 16.2, *) else { return }
-        let state = currentState()
-        Task { await Self.apply(state) }
+        // Live Activities do not exist on the Mac; the Catalyst development
+        // build keeps the callers and drops the payload here.
+        #if !targetEnvironment(macCatalyst)
+            guard #available(iOS 16.2, *) else { return }
+            let state = currentState()
+            Task { await Self.apply(state) }
+        #endif
     }
 
     @available(iOS 16.2, *)
@@ -122,26 +126,28 @@ final class SessionActivityController {
         return path
     }
 
-    @available(iOS 16.2, *)
-    private static func apply(_ state: TerminalSessionAttributes.ContentState) async {
-        let existing = Activity<TerminalSessionAttributes>.activities
+    #if !targetEnvironment(macCatalyst)
+        @available(iOS 16.2, *)
+        private static func apply(_ state: TerminalSessionAttributes.ContentState) async {
+            let existing = Activity<TerminalSessionAttributes>.activities
 
-        guard state.totalCount > 0 else {
-            for activity in existing {
-                await activity.end(nil, dismissalPolicy: .immediate)
+            guard state.totalCount > 0 else {
+                for activity in existing {
+                    await activity.end(nil, dismissalPolicy: .immediate)
+                }
+                return
             }
-            return
-        }
 
-        let content = ActivityContent(state: state, staleDate: nil)
-        if let activity = existing.first {
-            await activity.update(content)
-            return
+            let content = ActivityContent(state: state, staleDate: nil)
+            if let activity = existing.first {
+                await activity.update(content)
+                return
+            }
+            guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
+            _ = try? Activity.request(
+                attributes: TerminalSessionAttributes(),
+                content: content
+            )
         }
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-        _ = try? Activity.request(
-            attributes: TerminalSessionAttributes(),
-            content: content
-        )
-    }
+    #endif
 }

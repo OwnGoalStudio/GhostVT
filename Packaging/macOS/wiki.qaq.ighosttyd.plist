@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	ighosttyd as a per-user LaunchAgent on macOS, for the Mac Catalyst
+	development build (`make mac-daemon` installs it into
+	~/Library/LaunchAgents, `make mac-daemon-uninstall` removes it).
+
+	On the device the daemon is a root LaunchDaemon in the system domain;
+	here it runs as the logged-in user in the gui domain, which is where the
+	Catalyst app looks the service up. Sessions therefore run as the user
+	with no privilege drop, and the peer check accepts the same user's app
+	bundle (see PeerAuthenticator's macOS branch).
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>wiki.qaq.ighosttyd</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>@DAEMON@</string>
+	</array>
+	<key>ProcessType</key>
+	<string>Interactive</string>
+	<key>SoftResourceLimits</key>
+	<dict>
+		<key>NumberOfFiles</key>
+		<integer>10240</integer>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>MachServices</key>
+	<dict>
+		<key>wiki.qaq.ighostty.service</key>
+		<true/>
+	</dict>
+</dict>
+</plist>

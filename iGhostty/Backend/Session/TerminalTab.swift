@@ -65,8 +65,11 @@ final class TerminalTab: ObservableObject, Identifiable {
             backend: .inMemory(store.session)
         )
         // The user's arrangement of the keyboard accessory bar; later edits
-        // reach existing tabs through RootView's store subscription.
-        terminal.inputAccessoryItems = KeyboardBarStore.shared.accessoryItems
+        // reach existing tabs through RootView's store subscription. A Mac
+        // has no software keyboard to hang the bar on.
+        #if !targetEnvironment(macCatalyst)
+            terminal.inputAccessoryItems = KeyboardBarStore.shared.accessoryItems
+        #endif
         TerminalSessionStore.logger.info(
             "tab created, resume id \(resumeDaemonSessionID.map(String.init) ?? "none"); waiting for the surface's first viewport"
         )

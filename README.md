@@ -50,8 +50,13 @@ declares `iphoneos-arm64` and installs the same three paths under `/var/jb`.
 ```sh
 make test          # the PTY harness
 make harness       # just the daemon's spawn path, on macOS
+make mac-run       # the whole stack on a Mac: daemon as a LaunchAgent + Mac Catalyst app
 ```
 
 The harness covers what a device test is worst at debugging: `forkpty`/`execve`,
-the read loop, exit-status decoding, `TIOCSWINSZ`, and the path resolution of
-each jailbreak layout. Everything else is debugged on device: `make deb` and install.
+the read loop, exit-status decoding, `TIOCSWINSZ`, descriptor hygiene, and the
+path resolution of each jailbreak layout. `make mac-run` builds `ighosttyd` for
+macOS, loads it as a per-user LaunchAgent (`make mac-daemon-uninstall` removes
+it), and opens the app built as Mac Catalyst against it — every part of the
+product except what only the device has (GPU entitlement, bootstrap layouts,
+Live Activities). Those are debugged on device: `make deb` and install.

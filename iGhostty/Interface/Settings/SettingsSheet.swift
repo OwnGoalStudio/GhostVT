@@ -22,7 +22,9 @@ struct SettingsSheet: View {
         NavigationView {
             Form {
                 appearanceSection
-                keyboardSection
+                #if !targetEnvironment(macCatalyst)
+                    keyboardSection
+                #endif
                 shellSection
                 debugSection
                 aboutSection
@@ -68,19 +70,21 @@ struct SettingsSheet: View {
         }
     }
 
-    private var keyboardSection: some View {
-        Section {
-            NavigationLink {
-                KeyboardBarSettingsView()
-            } label: {
-                Label("Accessory Keys", systemImage: "keyboard")
+    #if !targetEnvironment(macCatalyst)
+        private var keyboardSection: some View {
+            Section {
+                NavigationLink {
+                    KeyboardBarSettingsView()
+                } label: {
+                    Label("Accessory Keys", systemImage: "keyboard")
+                }
+            } header: {
+                Text("Keyboard")
+            } footer: {
+                Text("Choose and arrange the keys on the bar above the keyboard.")
             }
-        } header: {
-            Text("Keyboard")
-        } footer: {
-            Text("Choose and arrange the keys on the bar above the keyboard.")
         }
-    }
+    #endif
 
     private var shellSection: some View {
         Section {

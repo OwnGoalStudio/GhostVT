@@ -4,4 +4,5 @@
 // Developer*.xcconfig overlays. See Developer.xcconfig.example.
 //
 // Device packages from `make deb` override signing on the xcodebuild command
-// line; Scripts/package-deb.sh ad-hoc signs with ldid.
+// line; Scripts/package-deb.sh ad-hoc signs with ldid. The Mac Catalyst
+// development build (`make mac-run`) does the same with codesign.

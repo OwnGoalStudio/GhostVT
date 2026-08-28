@@ -5,6 +5,10 @@
 
 import SwiftUI
 
+// The bar it edits is a software-keyboard fixture the library defines only
+// off Catalyst.
+#if !targetEnvironment(macCatalyst)
+
 /// Old-Control-Center-style editor for the keyboard accessory bar: the keys
 /// on the bar sit in one reorderable list with red remove buttons, everything
 /// else waits below behind green add buttons, and a live preview mirrors the
@@ -235,3 +239,5 @@ private struct CustomKeySheet: View {
         .navigationViewStyle(.stack)
     }
 }
+
+#endif

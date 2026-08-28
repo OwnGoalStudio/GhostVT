@@ -13,8 +13,9 @@ import UIKit
 /// The card is the shared `AlertCardView` — the same design
 /// `AlertViewController` presents — drawn inline over the pane rather than
 /// presented, because it must persist while the dead terminal stays on
-/// screen. An exited session's card is dismissable (Done): the scrollback
-/// stays selectable, and only Close actually takes the tab down.
+/// screen. An exited session's card offers Close Tab as the emphasized
+/// default — a finished shell is nearly always a finished tab — and Done
+/// as the quieter way to keep the scrollback around and selectable.
 struct SessionStatusOverlay: View {
     @ObservedObject var store: TerminalSessionStore
 
@@ -73,18 +74,23 @@ struct SessionStatusOverlay: View {
                 ? String(localized: "Session Ended")
                 : String(localized: "Terminal Unavailable"),
             message: reason,
-            actions: [
-                AlertAction("Close") {
-                    onCloseTab()
-                },
-                processExited
-                    ? AlertAction("Done", kind: .accent, handler: {
+            actions: processExited
+                ? [
+                    AlertAction("Done") {
                         acknowledged = store.status
-                    })
-                    : AlertAction("Retry", kind: .accent, handler: {
+                    },
+                    AlertAction("Close Tab", kind: .accent) {
+                        onCloseTab()
+                    },
+                ]
+                : [
+                    AlertAction("Close") {
+                        onCloseTab()
+                    },
+                    AlertAction("Retry", kind: .accent) {
                         store.connect()
-                    }),
-            ]
+                    },
+                ]
         )
     }
 }

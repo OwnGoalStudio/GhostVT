@@ -20,7 +20,7 @@ every spawned process.
   Keep that boundary; don't add process APIs to the app target.
 - Depends on the **released**
   [libghostty-spm](https://github.com/Lakr233/libghostty-spm) package
-  (`upToNextMajor` from 1.4.0). Since 1.4.0 the package's bare-semver
+  (`upToNextMajor` from 1.4.2). Since 1.4.0 the package's bare-semver
   tags are its own release sequence, decoupled from ghostty's; the
   `upstream.X.Y.Z` tags hold the XCFramework binaries. Terminal-library
   changes land in that repo and ship via a new package release — don't
@@ -61,8 +61,14 @@ has to republish their changes or no SwiftUI view redraws.
 - `make deb` — unsigned iphoneos build, ldid ad-hoc sign, roothide
   `iphoneos-arm64e` package; `make deb-rootless` packages the same binaries
   under `/var/jb` as `iphoneos-arm64` (`PACKAGE_FLAVOR` picks the layout)
-- Debugging happens on the jailbroken device (install the deb); there is no
-  simulator loop — the Simulator has no daemon, so nothing connects there.
+- `make mac-run` — the whole stack on a Mac: builds `ighosttyd` for macOS and
+  loads it as a per-user LaunchAgent (`make mac-daemon`, undone by
+  `make mac-daemon-uninstall`; log in `~/Library/Logs/ighosttyd.log`), builds
+  the app as Mac Catalyst (`make mac-app`), opens it. This is the off-device
+  loop: the Simulator has no daemon, so nothing connects there. Device-only
+  behaviour (the GPU entitlement, the bootstrap layouts, privilege drop,
+  Live Activities, the software keyboard's accessory bar) is still debugged
+  on the jailbroken device with the installed deb.
 
 Gotchas that bit us:
 
@@ -70,7 +76,29 @@ Gotchas that bit us:
   that survives `execve`. Keep an explicit launchd `NumberOfFiles` soft limit
   sized for user workloads, and mark every daemon-owned session descriptor
   `FD_CLOEXEC` as soon as it is acquired; otherwise later shells retain older
-  PTYs and lose capacity from their own per-process fd limit.
+  PTYs and lose capacity from their own per-process fd limit. The harness
+  proves it with `lsof` on a spawned shell.
+- **XNU posts `NOTE_EXIT` before the child is waitable.** `proc_exit` fires
+  the kqueue note, *then* marks the process `SZOMB` and signals `SIGCHLD`. A
+  process dispatch source that reaps exactly once can therefore see
+  `waitpid(WNOHANG) == 0` and never try again — a zombie shell and a tab
+  that never learns it died. `PTYSession` polls until reaped on every exit
+  signal (the note and the PTY's EOF), and `SessionRegistry` sweeps every
+  session on `SIGCHLD`, the one notice sent after `SZOMB`. `SIGCHLD` stays
+  `SIG_DFL`: `SIG_IGN` auto-reaps and a `waitpid` racing that can block.
+- **A Catalyst app cannot carry the client entitlement.** It is an
+  iOS-family binary, and macOS refuses to launch one with an entitlement no
+  provisioning profile granted ("Launchd job spawn failed"), ad-hoc signed
+  or not. The Mac build is signed with no entitlements and the macOS daemon
+  authenticates it by uid and `iGhostty.app/Contents/MacOS/iGhostty` path
+  instead (`PeerAuthenticator`, `#if os(macOS)` only — the device policy is
+  untouched).
+- libghostty asks the host before a protected clipboard operation (an OSC 52
+  read, a write under `clipboard-write = ask`, a paste that paste protection
+  flagged) and **denies it silently when nobody answers**. `RootView` attaches
+  `ClipboardConfirmation`, which presents each request as an alert; do not
+  remove it or programs' clipboard reads and multi-line pastes into
+  non-bracketed programs vanish without a trace.
 - **Never spawn sessions through the bootstrap's `login`.** Procursus's
   `/etc/pam.d/login` runs `pam_launchd.so`, which moves the session into a
   per-user bootstrap namespace that cannot reach `com.apple.dnssd.service`;

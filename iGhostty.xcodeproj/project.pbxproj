@@ -10,7 +10,7 @@
 		AA0000000000000000000101 /* GhosttyTerminal in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000201 /* GhosttyTerminal */; };
 		AA0000000000000000000102 /* GhosttyTheme in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000202 /* GhosttyTheme */; };
 		AA0000000000000000000103 /* iGhosttyKit in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000203 /* iGhosttyKit */; };
-		AA0000000000000000000104 /* iGhosttyWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000307 /* iGhosttyWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AA0000000000000000000104 /* iGhosttyWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000307 /* iGhosttyWidgets.appex */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -320,6 +320,9 @@
 /* Begin PBXTargetDependency section */
 		AA0000000000000000000D01 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilters = (
+				ios,
+			);
 			target = AA0000000000000000000603 /* iGhosttyWidgets */;
 			targetProxy = AA0000000000000000000C01 /* PBXContainerItemProxy */;
 		};
@@ -451,7 +454,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = wiki.qaq.iGhostty;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -473,7 +476,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = wiki.qaq.iGhostty;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -484,7 +487,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = ighosttyd;
+				SUPPORTED_PLATFORMS = "iphoneos macosx";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -495,7 +500,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				PRODUCT_NAME = ighosttyd;
+				SUPPORTED_PLATFORMS = "iphoneos macosx";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -602,7 +609,7 @@
 			repositoryURL = "https://github.com/Lakr233/libghostty-spm";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.4.0;
+				minimumVersion = 1.4.2;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

@@ -61,29 +61,34 @@ enum KeyboardBarKey: Hashable {
         }
     }
 
-    var accessoryItem: TerminalInputAccessoryItem {
-        switch self {
-        case .esc: .esc
-        case .tab: .tab
-        case .ctrl: .ctrl
-        case .alt: .alt
-        case .command: .command
-        case .arrowLeft: .arrowLeft
-        case .arrowUp: .arrowUp
-        case .arrowDown: .arrowDown
-        case .arrowRight: .arrowRight
-        case .paste: .paste
-        case .divider: .divider
-        case let .symbol(symbol): .symbol(symbol)
+    // The accessory bar itself is a software-keyboard fixture, and the
+    // library only defines it off Catalyst; the arrangement store above
+    // still compiles everywhere so settings stay portable.
+    #if !targetEnvironment(macCatalyst)
+        var accessoryItem: TerminalInputAccessoryItem {
+            switch self {
+            case .esc: .esc
+            case .tab: .tab
+            case .ctrl: .ctrl
+            case .alt: .alt
+            case .command: .command
+            case .arrowLeft: .arrowLeft
+            case .arrowUp: .arrowUp
+            case .arrowDown: .arrowDown
+            case .arrowRight: .arrowRight
+            case .paste: .paste
+            case .divider: .divider
+            case let .symbol(symbol): .symbol(symbol)
+            }
         }
-    }
 
-    /// SF Symbol shown on the bar button, straight from the library's own
-    /// mapping so the editor can never drift from what the bar renders;
-    /// `nil` means the button shows the symbol text itself.
-    var systemImage: String? {
-        accessoryItem.systemImage
-    }
+        /// SF Symbol shown on the bar button, straight from the library's own
+        /// mapping so the editor can never drift from what the bar renders;
+        /// `nil` means the button shows the symbol text itself.
+        var systemImage: String? {
+            accessoryItem.systemImage
+        }
+    #endif
 
     var displayName: String {
         switch self {
@@ -152,9 +157,11 @@ final class KeyboardBarStore: ObservableObject {
         entries = codes.compactMap(KeyboardBarKey.init(code:)).map(Entry.init(key:))
     }
 
-    var accessoryItems: [TerminalInputAccessoryItem] {
-        entries.map(\.key.accessoryItem)
-    }
+    #if !targetEnvironment(macCatalyst)
+        var accessoryItems: [TerminalInputAccessoryItem] {
+            entries.map(\.key.accessoryItem)
+        }
+    #endif
 
     /// Catalog keys not currently on the bar. Dividers and free-form custom
     /// keys are not listed — they are added through their own controls and

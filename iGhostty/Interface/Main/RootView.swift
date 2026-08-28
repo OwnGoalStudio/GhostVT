@@ -78,12 +78,14 @@ struct RootView: View {
             }
         }
         .onReceive(KeyboardBarStore.shared.$entries) { _ in
-            let items = KeyboardBarStore.shared.accessoryItems
-            for tab in tabManager.tabs {
-                if tab.terminal.inputAccessoryItems != items {
-                    tab.terminal.inputAccessoryItems = items
+            #if !targetEnvironment(macCatalyst)
+                let items = KeyboardBarStore.shared.accessoryItems
+                for tab in tabManager.tabs {
+                    if tab.terminal.inputAccessoryItems != items {
+                        tab.terminal.inputAccessoryItems = items
+                    }
                 }
-            }
+            #endif
         }
         .fullScreenCover(isPresented: $showsSwitcher, onDismiss: refocus) {
             TabSwitcherView(tabManager: tabManager)
@@ -97,10 +99,11 @@ struct RootView: View {
                 anchorRange: box.request.anchorRange
             )
         }
-        // One copy for the whole window: the confirmation presents as an
+        // One copy for the whole window: each confirmation presents as an
         // `AlertViewController` on the front-most context, so it lands above
         // the switcher's cover too.
         .closeTabConfirmation(tabManager)
+        .clipboardConfirmation(tabManager)
     }
 
     private var terminalColumn: some View {
