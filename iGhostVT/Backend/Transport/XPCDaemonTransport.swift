@@ -539,10 +539,10 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         // so it takes the generic wording rather than inventing a sentence
         // that would read as nonsense in an error card.
         case .success, .operationFailed:
-            String(localized: "The terminal daemon could not complete the request.")
-        case .invalidRequest: String(localized: "The terminal daemon rejected the request.")
+            String(localized: "The terminal daemon could not complete this action. Try again.")
+        case .invalidRequest: String(localized: "The terminal daemon rejected this action.")
         case .unsupportedVersion: String(localized: "The app and the terminal daemon are different versions. Reinstall iGhostVT to update both.")
-        case .handshakeRequired: String(localized: "The connection to the terminal daemon was not set up.")
+        case .handshakeRequired: String(localized: "The connection to the terminal daemon is not ready. Try again.")
         case .sessionLimitReached: String(localized: "Too many terminals are open. Close one and try again.")
         case .unknownSession: String(localized: "This terminal no longer exists.")
         case .sessionBusy: String(localized: "This terminal is already open in another window.")

@@ -117,14 +117,14 @@ struct SettingsSheet: View {
 
     private var sessionsSection: some View {
         Section {
-            Toggle("Keep Alive", isOn: $keepAlive)
+            Toggle("Keep Sessions Running", isOn: $keepAlive)
         } header: {
             Text("Sessions")
         } footer: {
             Text(
                 """
-                Shells keep running after the app quits and come back on the \
-                next launch. Turn this off to close every shell when the app \
+                Sessions keep running after the app quits and come back on the \
+                next launch. Turn this off to close every session when the app \
                 quits.
                 """
             )
@@ -211,7 +211,7 @@ struct SettingsSheet: View {
         guard let rendered else {
             return String.localizedStringWithFormat(
                 NSLocalizedString(
-                    "No configuration file written yet. It would go to %@.",
+                    "No configuration file yet. It will be saved to %@.",
                     comment: "Settings footer when the rendered ghostty config is missing; %@ is a directory path"
                 ),
                 directory.path

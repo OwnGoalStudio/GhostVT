@@ -14,7 +14,7 @@ import UIKit
 /// `AlertViewController` presents — drawn inline over the pane rather than
 /// presented, because it must persist while the dead terminal stays on
 /// screen. An exited session's card offers Close Tab as the emphasized
-/// default — a finished shell is nearly always a finished tab — and Done
+/// default — a finished shell is nearly always a finished tab — and Keep Tab
 /// as the quieter way to keep the scrollback around and selectable.
 struct SessionStatusOverlay: View {
     @ObservedObject var store: TerminalSessionStore
@@ -22,7 +22,7 @@ struct SessionStatusOverlay: View {
     /// Closes the tab this session belongs to; provided by the pane's owner.
     var onCloseTab: () -> Void
 
-    /// The failure the user dismissed with Done. Stored as the dismissed
+    /// The failure the user dismissed with Keep Tab. Stored as the dismissed
     /// status so a later, different failure (or a reconnect cycle) presents
     /// its own card again.
     @State private var acknowledged: TerminalSessionStore.Status?
@@ -76,7 +76,7 @@ struct SessionStatusOverlay: View {
             message: reason,
             actions: processExited
                 ? [
-                    AlertAction("Done") {
+                    AlertAction("Keep Tab") {
                         acknowledged = store.status
                     },
                     AlertAction("Close Tab", kind: .accent) {

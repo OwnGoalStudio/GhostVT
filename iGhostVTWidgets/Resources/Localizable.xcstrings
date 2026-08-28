@@ -2,7 +2,20 @@
   "sourceLanguage" : "en",
   "strings" : {
     "%lld" : {
-
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      }
     },
     "%lld detached" : {
       "comment" : "Sessions with no tab attached",
@@ -202,6 +215,12 @@
             "value" : "+%lld weitere"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld more"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -283,6 +302,12 @@
             "value" : "Fehlgeschlagen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Failed"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -340,6 +365,20 @@
       }
     },
     "iGhostVT" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT"
+          }
+        }
+      },
       "shouldTranslate" : false
     },
     "Running" : {
@@ -366,6 +405,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sitzung %lld"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session %lld"
           }
         },
         "es" : {
@@ -449,6 +494,12 @@
             "value" : "Wird gestartet…"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting…"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -514,6 +565,12 @@
             "value" : "Terminal"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -566,6 +623,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "終端機"
+          }
+        }
+      }
+    },
+    "total" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "total"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "个会话"
           }
         }
       }

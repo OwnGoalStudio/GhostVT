@@ -73,6 +73,20 @@
       }
     },
     "%lld" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        }
+      },
       "shouldTranslate" : false
     },
     "%lld Tabs" : {
@@ -274,6 +288,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ein geschlossenes Terminal lässt sich nicht wieder öffnen. Starte jederzeit ein neues."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A closed terminal cannot be reopened. Start a new one whenever you need it."
           }
         },
         "es" : {
@@ -1135,6 +1155,12 @@
             "value" : "Schließen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -1758,6 +1784,23 @@
         }
       }
     },
+    "Connection lost. Reconnecting…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connection lost. Reconnecting…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连接已断开，正在重新连接…"
+          }
+        }
+      }
+    },
     "Control" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2130,6 +2173,23 @@
         }
       }
     },
+    "Disconnected." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disconnected."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连接已断开。"
+          }
+        }
+      }
+    },
     "Divider" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2350,6 +2410,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ziehe, um die Tasten neu anzuordnen. Eine entfernte Standardtaste kehrt in die Liste unten zurück. Trenner und eigene Tasten werden gelöscht."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drag to reorder the keys. Removing a standard key returns it to the list below. Dividers and custom keys are deleted."
           }
         },
         "es" : {
@@ -2580,6 +2646,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "保持运行"
+          }
+        }
+      }
+    },
+    "Keep Sessions Running" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep Sessions Running"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保持会话运行"
+          }
+        }
+      }
+    },
+    "Keep Tab" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep Tab"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保留标签页"
           }
         }
       }
@@ -2948,6 +3048,12 @@
             "value" : "Neues Terminal"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Terminal"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -3164,6 +3270,24 @@
         }
       }
     },
+    "No configuration file yet. It will be saved to %@." : {
+      "comment" : "Settings footer when the rendered ghostty config is missing; %@ is a directory path",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No configuration file yet. It will be saved to %@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚无配置文件。它将保存到 %@。"
+          }
+        }
+      }
+    },
     "No ghostty config written; would go to %@" : {
       "comment" : "Settings footer when the rendered ghostty config is missing; %@ is a directory path",
       "extractionState" : "manual",
@@ -3172,6 +3296,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Keine Ghostty-Konfiguration geschrieben; würde nach %@ gehen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No ghostty config written; would go to %@"
           }
         },
         "es" : {
@@ -3983,6 +4113,12 @@
             "value" : "Themes auf Standard zurücksetzen"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reset Themes to Defaults"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -4550,6 +4686,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "会话"
+          }
+        }
+      }
+    },
+    "Sessions keep running after the app quits and come back on the next launch. Turn this off to close every session when the app quits." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessions keep running after the app quits and come back on the next launch. Turn this off to close every session when the app quits."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用退出后会话继续运行，下次启动时自动恢复。关闭此项后，退出应用时将关闭所有会话。"
           }
         }
       }
@@ -5165,6 +5318,12 @@
             "value" : "Die Leiste über der Tastatur zeigt diese Tasten in dieser Reihenfolge. Passen nicht alle, kannst du sie seitwärts scrollen."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The bar above the keyboard shows these keys in this order. If they do not all fit, you can scroll it sideways."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -5305,6 +5464,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無法復原與終端機常駐程式的連線。"
+          }
+        }
+      }
+    },
+    "The connection to the terminal daemon is not ready. Try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The connection to the terminal daemon is not ready. Try again."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "与终端守护进程的连接尚未就绪。请重试。"
           }
         }
       }
@@ -5458,6 +5634,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Verwende einen einfachen Pfad innerhalb des Jailbreak-Roots: Ein Pfad, der mit jbroot beginnt, funktioniert nach dem nächsten Jailbreak nicht mehr. Leer lassen, um die Standard-Login-Shell zu verwenden."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The program every new terminal runs, for example /bin/zsh. Use a plain path inside the jailbreak root: a path that starts with jbroot stops working after the next jailbreak. Leave this empty to use the default login shell."
           }
         },
         "es" : {
@@ -5747,6 +5929,23 @@
         }
       }
     },
+    "The terminal daemon could not complete this action. Try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The terminal daemon could not complete this action. Try again."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端守护进程无法完成此操作。请重试。"
+          }
+        }
+      }
+    },
     "The terminal daemon is not running." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5960,6 +6159,23 @@
         }
       }
     },
+    "The terminal daemon rejected this action." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The terminal daemon rejected this action."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端守护进程拒绝了此操作。"
+          }
+        }
+      }
+    },
     "Themes come from the Ghostty theme catalog and apply to every tab in every window." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6031,6 +6247,23 @@
         }
       }
     },
+    "This closes all tabs and stops everything running in them." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This closes all tabs and stops everything running in them."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这将关闭所有标签页，并终止其中运行的所有程序。"
+          }
+        }
+      }
+    },
     "This closes all terminals and stops everything running in them." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6055,6 +6288,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alle Terminals werden geschlossen und alles beendet, was darin läuft."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This closes every terminal and stops everything running in them."
           }
         },
         "es" : {
@@ -6137,6 +6376,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Das Terminal wird geschlossen und alles beendet, was darin läuft."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This closes the terminal and stops everything running in it."
           }
         },
         "es" : {
@@ -6593,6 +6838,12 @@
             "value" : "Bis zu drei Zeichen, genau so gesendet, wie sie eingegeben werden. Ein einzelner Buchstabe funktioniert mit Control genau wie ein Buchstabe auf der Tastatur."
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Up to three characters, sent exactly as typed. A single letter works with Control just like a letter on the keyboard."
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -6815,6 +7066,12 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Schreibt Tastenrouting-, Eingabemethoden- und Terminalausgabe-Traces in das Systemprotokoll (idevicesyslog oder Konsole). Solange dies aktiv ist, erscheinen Tastenanschläge im Protokoll."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Writes key routing, IME, and terminal output traces to the system log (idevicesyslog or Console.app). Keystrokes appear in the log while this is on."
           }
         },
         "es" : {

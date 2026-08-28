@@ -70,7 +70,7 @@ private struct IslandSummary: View {
                 Text("\(state.totalCount)")
                     .font(.system(size: 36, weight: .bold, design: .rounded).monospacedDigit())
                     .contentTransition(.numericText())
-                Text("sessions")
+                Text("total")
                     .font(.subheadline)
                     .opacity(0.5)
                 Spacer(minLength: Spacing.line)

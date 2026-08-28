@@ -75,16 +75,15 @@ final class PTYSession {
         executable: String,
         credentials: ShellLaunch.Credentials?
     ) -> String {
-        let user = credentials.map { "uid \($0.uid)" } ?? "the session user"
         switch step {
         case stepExec:
-            return "could not run \(executable): \(systemMessage(code))"
+            return "Unable to run \(executable). Check the default shell in Settings."
         case stepChownTTY:
-            return "could not hand the terminal to \(user): \(systemMessage(code))"
+            return "Unable to set up the terminal for your account. Try again."
         case stepVerifyUID:
-            return "the session refused to start because it was still root after dropping to \(user)"
+            return "Unable to start the terminal for your account. Try again."
         default:
-            return "could not drop privileges to \(user): \(systemMessage(code))"
+            return "Unable to start the terminal for your account. Try again."
         }
     }
 
@@ -122,7 +121,7 @@ final class PTYSession {
         queue: DispatchQueue
     ) throws {
         guard let executable = command.first, !executable.isEmpty else {
-            throw iGhostVTFailure(.spawnFailed, "the session had no command to run")
+            throw iGhostVTFailure(.spawnFailed, "This terminal has no command to run. Check the default shell in Settings.")
         }
 
         self.id = id
@@ -163,7 +162,7 @@ final class PTYSession {
         guard pipe(&reportDescriptors) == 0 else {
             throw iGhostVTFailure(
                 .spawnFailed,
-                "could not create the spawn report pipe: \(Self.systemMessage(errno))"
+                "Unable to start the terminal. Try again."
             )
         }
         let reportRead = reportDescriptors[0]
@@ -218,7 +217,7 @@ final class PTYSession {
         close(reportWrite)
         guard pid > 0, masterDescriptor >= 0 else {
             close(reportRead)
-            throw iGhostVTFailure(.spawnFailed, "forkpty failed: \(Self.systemMessage(errno))")
+            throw iGhostVTFailure(.spawnFailed, "Unable to start the terminal. Try again.")
         }
         // Blocks only until the child execs (EOF) or gives up (8 bytes).
         let reported = Self.readReport(from: reportRead, into: report)

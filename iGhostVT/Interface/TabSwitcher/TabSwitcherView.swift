@@ -139,7 +139,7 @@ struct TabSwitcherView: View {
         }
         AlertViewController(
             title: "Close All Tabs?",
-            message: "This closes all terminals and stops everything running in them.",
+            message: "This closes all tabs and stops everything running in them.",
             actions: [
                 AlertAction("Cancel"),
                 AlertAction("Close All", kind: .destructive) {

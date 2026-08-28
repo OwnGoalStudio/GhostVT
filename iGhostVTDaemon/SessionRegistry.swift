@@ -62,7 +62,7 @@ final class SessionRegistry {
         guard sessions.count < iGhostVTProtocol.maximumSessions else {
             throw iGhostVTFailure(
                 .sessionLimitReached,
-                "the daemon is already holding \(sessions.count) sessions; close some before opening more"
+                "You already have \(sessions.count) terminals open. Close one and try again."
             )
         }
         let plan = try resolvePlan(requestedCommand)
@@ -176,7 +176,7 @@ final class SessionRegistry {
             guard let plan = ShellLaunch.plan(requestedShell: nil) else {
                 throw iGhostVTFailure(
                     .spawnFailed,
-                    "no usable shell: neither the bootstrap's passwd shell nor a fallback shell is executable"
+                    "No usable shell was found. Check the default shell in Settings."
                 )
             }
             return plan
@@ -184,7 +184,7 @@ final class SessionRegistry {
             guard let plan = ShellLaunch.plan(requestedShell: requested[0]) else {
                 throw iGhostVTFailure(
                     .invalidRequest,
-                    "the configured shell \(requested[0]) is not an executable absolute path"
+                    "\(requested[0]) is not an executable file. Choose another shell in Settings."
                 )
             }
             return plan
@@ -192,7 +192,7 @@ final class SessionRegistry {
             guard let command = ShellLaunch.validate(requested) else {
                 throw iGhostVTFailure(
                     .invalidRequest,
-                    "the requested command is not an executable absolute path"
+                    "The requested command is not an executable file. Check the command and try again."
                 )
             }
             return ShellLaunch.verbatimPlan(command: command)

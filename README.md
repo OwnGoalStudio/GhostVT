@@ -16,10 +16,10 @@ still running.
 | Path                   | Purpose                                                          |
 | ---------------------- | ---------------------------------------------------------------- |
 | `iGhostVT/`            | The app: `main.swift`, `Application/`, `Backend/`, `Interface/`, `Resources/` |
-| `iGhostVTDaemon/`       | `ighostvtd`: the only process that spawns anything                |
+| `iGhostVTDaemon/`       | `ighostvtd`: the only process that spawns terminal sessions      |
 | `Shared/`              | XPC wire protocol, compiled into both targets                    |
 | `Packages/iGhostVTKit/` | Transport layer: the `TerminalTransport` protocol                |
-| `Configuration/`       | xcconfig files; `Version.xcconfig` is the version's home         |
+| `Configuration/`       | xcconfig files; `Version.xcconfig` holds the version number      |
 | `Packaging/`           | Debian control, maintainer scripts, ldid entitlements            |
 | `Scripts/`             | xcodebuild wrapper, deb packager, versioning                     |
 
@@ -41,7 +41,7 @@ Requires `ldid` and `dpkg-deb` (Homebrew). Both packages carry the same
 `arm64` binaries and differ only in layout: the roothide one declares
 `iphoneos-arm64e` and installs `/Applications/iGhostVT.app`,
 `/usr/libexec/ighostvtd` and the LaunchDaemon plist unprefixed, for the
-bootstrap to relocate into the jbroot it picked this boot; the rootless one
+bootstrap to relocate into the jbroot chosen at this boot; the rootless one
 declares `iphoneos-arm64` and installs the same three paths under `/var/jb`.
 `postinst` bootstraps the daemon either way.
 
@@ -53,10 +53,10 @@ make harness       # just the daemon's spawn path, on macOS
 make mac-run       # the whole stack on a Mac: daemon as a LaunchAgent + Mac Catalyst app
 ```
 
-The harness covers what a device test is worst at debugging: `forkpty`/`execve`,
+The harness covers what is hardest to debug on a device: `forkpty`/`execve`,
 the read loop, exit-status decoding, `TIOCSWINSZ`, descriptor hygiene, and the
 path resolution of each jailbreak layout. `make mac-run` builds `ighostvtd` for
 macOS, loads it as a per-user LaunchAgent (`make mac-daemon-uninstall` removes
 it), and opens the app built as Mac Catalyst against it — every part of the
 product except what only the device has (GPU entitlement, bootstrap layouts,
-Live Activities). Those are debugged on device: `make deb` and install.
+Live Activities). Test those on device: run `make deb`, then install.

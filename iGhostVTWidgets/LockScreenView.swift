@@ -34,7 +34,7 @@ struct SessionSummaryCard: View {
                         Text("\(state.totalCount)")
                             .font(.system(size: 40, weight: .bold, design: .rounded).monospacedDigit())
                             .contentTransition(.numericText())
-                        Text("sessions")
+                        Text("total")
                             .font(.subheadline)
                             .opacity(0.5)
                     }

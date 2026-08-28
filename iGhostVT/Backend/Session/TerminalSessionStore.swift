@@ -213,7 +213,7 @@ final class TerminalSessionStore: ObservableObject {
             }
         case let .interrupted(reason):
             Self.logger.error("link lost: \(reason ?? "no reason")")
-            printStatusLine("connection lost")
+            printStatusLine(String(localized: "Connection lost. Reconnecting…"))
             scheduleReconnect(lastReason: reason)
         case let .disconnected(reason):
             Self.logger.error("disconnected: \(reason ?? "no reason")")
@@ -224,7 +224,7 @@ final class TerminalSessionStore: ObservableObject {
                 return
             }
             status = reason.map { .failed($0) } ?? .idle
-            printStatusLine(reason.map { "disconnected: \($0)" } ?? "disconnected")
+            printStatusLine(reason ?? String(localized: "Disconnected."))
         }
     }
 
@@ -238,7 +238,7 @@ final class TerminalSessionStore: ObservableObject {
                 localized: "The connection to the terminal daemon could not be restored."
             )
             status = .failed(reason)
-            printStatusLine("disconnected: \(reason)")
+            printStatusLine(reason)
             return
         }
         reconnectAttempt += 1
@@ -259,7 +259,7 @@ final class TerminalSessionStore: ObservableObject {
     /// already end with a newline, so a leading one puts a blank line between
     /// every pair. The carriage return alone still guarantees column zero.
     private func printStatusLine(_ message: String) {
-        session.receive("\r\u{1b}[2m[ighostvt] \(message)\u{1b}[0m\r\n")
+        session.receive("\r\u{1b}[2m[iGhostVT] \(message)\u{1b}[0m\r\n")
     }
 }
 
