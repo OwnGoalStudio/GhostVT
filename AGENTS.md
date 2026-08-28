@@ -20,7 +20,7 @@ every spawned process.
   Keep that boundary; don't add process APIs to the app target.
 - Depends on the **released**
   [libghostty-spm](https://github.com/Lakr233/libghostty-spm) package
-  (`upToNextMajor` from 1.4.2). Since 1.4.0 the package's bare-semver
+  (`upToNextMajor` from 1.4.3). Since 1.4.0 the package's bare-semver
   tags are its own release sequence, decoupled from ghostty's; the
   `upstream.X.Y.Z` tags hold the XCFramework binaries. Terminal-library
   changes land in that repo and ship via a new package release — don't
