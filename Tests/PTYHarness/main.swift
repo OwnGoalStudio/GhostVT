@@ -181,6 +181,64 @@ if let result = run(
     check(false, "spawning a shell that floods the buffer succeeded")
 }
 
+// A shell inherits every descriptor that survives execve. With another
+// session alive — its PTY master, the spawn pipe, the dispatch sources'
+// kqueue — a new shell must still see nothing beyond its own terminal:
+// anything else is a leaked handle on another session, and a hole in the
+// per-process fd budget tools like codex burn through.
+print("descriptors do not leak into the child")
+do {
+    let bystander = try PTYSession(
+        id: 4,
+        command: ["/bin/sh", "-c", "sleep 5"],
+        environment: ["PATH": "/usr/bin:/bin"],
+        columns: 80,
+        rows: 24,
+        queue: harnessQueue
+    )
+    bystander.start(onOutput: { _, _ in }, onExit: { _, _ in })
+    Thread.sleep(forTimeInterval: 0.2)
+    // The shell lists its own table: `ls /dev/fd` would add the descriptors
+    // `ls` opens for the listing itself. The trailing `:` keeps sh from
+    // exec-ing lsof in place, which would make `$$` lsof and list its pipes.
+    if let result = run(command: ["/bin/sh", "-c", "/usr/sbin/lsof -p $$ -a -d 0-1024; :"], timeout: 20) {
+        // The PTY turns every newline into "\r\n", one Character in Swift.
+        let lines = result.output.split(whereSeparator: \.isNewline).map(String.init)
+        // lsof rows: COMMAND PID USER FD TYPE ...; FD is "0u", "3r", "cwd"...
+        let descriptors = lines.dropFirst().compactMap { line -> Int? in
+            let columns = line.split(separator: " ", omittingEmptySubsequences: true)
+            guard columns.count > 3 else { return nil }
+            return Int(columns[3].prefix { $0.isNumber })
+        }
+        check(
+            descriptors.sorted() == [0, 1, 2],
+            "a child holds nothing beyond its terminal (saw \(descriptors.sorted()))"
+        )
+        result.session.invalidate()
+    } else {
+        check(false, "spawning a shell to list its descriptors succeeded")
+    }
+    bystander.invalidate()
+} catch {
+    check(false, "spawning the bystander session succeeded")
+}
+
+// XNU posts NOTE_EXIT before the exiting process is waitable, so an exit
+// notice that reaps exactly once can miss. The PTY's EOF used to hide that
+// whenever the shell was the terminal's last process; a background child
+// keeping the tty open is the case that exposed it — the exit must still
+// arrive promptly, not when the straggler finally lets go.
+print("exit is reported while a background child holds the terminal")
+let holdStart = Date()
+if let result = run(command: ["/bin/sh", "-c", "sleep 4 & exit 5"], timeout: 6) {
+    let elapsed = Date().timeIntervalSince(holdStart)
+    check(result.exitCode == 5, "the shell's own status is reported (got \(String(describing: result.exitCode)))")
+    check(elapsed < 2, "and it arrives before the straggler exits (took \(String(format: "%.2f", elapsed))s)")
+    result.session.invalidate()
+} else {
+    check(false, "spawning a shell with a background child succeeded")
+}
+
 print("rejecting a bad command")
 do {
     _ = try PTYSession(

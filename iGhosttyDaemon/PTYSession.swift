@@ -247,8 +247,16 @@ final class PTYSession {
             eventMask: .exit,
             queue: queue
         )
+        // Polled, not reaped once: XNU's proc_exit posts NOTE_EXIT (what this
+        // source is) *before* it marks the process SZOMB and signals SIGCHLD,
+        // so a single WNOHANG waitpid here can still see the child running
+        // and return 0 — after which nothing would ever try again. The
+        // session then looked alive forever while the shell sat there as a
+        // zombie; the PTY EOF path masked it whenever the shell was the last
+        // process on the terminal, and a background child holding the tty
+        // (codex and grok both leave helpers around) was what exposed it.
         exitSource.setEventHandler { [weak self] in
-            self?.reapChild()
+            self?.pollUntilReaped()
         }
         self.exitSource = exitSource
         exitSource.activate()
@@ -390,22 +398,39 @@ final class PTYSession {
     }
 
     /// WNOHANG-polls until the child is reaped, bounded at two seconds. Only
-    /// started once the PTY has hit EOF, so the child is already on its way
-    /// out; this covers the window where it is not yet reapable and the
-    /// process source never fires.
+    /// started on evidence the child is going — the process source's
+    /// NOTE_EXIT, or EOF on the PTY — so this covers the window between a
+    /// process leaving and the kernel making it waitable, which neither
+    /// signal closes on its own.
     private func pollUntilReaped(attempt: Int = 0) {
         guard isAlive else { return }
         reapChild()
-        guard isAlive, attempt < 100 else { return }
+        guard isAlive else { return }
+        guard attempt < 100 else {
+            DaemonFileLog.log("session \(id) child \(childPID) still not reapable after exit notice")
+            return
+        }
         queue.asyncAfter(deadline: .now() + .milliseconds(20)) { [weak self] in
             self?.pollUntilReaped(attempt: attempt + 1)
         }
     }
 
+    /// The registry's SIGCHLD sweep: reap this child if it has exited. A
+    /// no-op while it runs, and cheap enough to call for every session on
+    /// every SIGCHLD — the signal coalesces and names no pid.
+    func reapIfExited() {
+        reapChild()
+    }
+
     private func reapChild() {
         guard isAlive else { return }
         var status: Int32 = 0
-        let result = waitpid(childPID, &status, WNOHANG)
+        var result = waitpid(childPID, &status, WNOHANG)
+        while result < 0, errno == EINTR {
+            result = waitpid(childPID, &status, WNOHANG)
+        }
+        // 0: still running, or exited but not yet SZOMB — try again later.
+        // ECHILD: nothing to wait for; the child is gone whatever reaped it.
         guard result == childPID || result < 0 else { return }
         isAlive = false
 

@@ -41,6 +41,12 @@ enum DaemonFileLog {
             rotateIfNeeded()
             guard let data = line.data(using: .utf8) else { return }
             if let handle = FileHandle(forWritingAtPath: path) {
+                // The log is written off the control queue, so a forkpty on
+                // that queue can land while this handle is open. Every
+                // descriptor the daemon holds at fork time reaches the
+                // shell unless it is close-on-exec — and a root-owned log
+                // is not something a mobile shell should hold open.
+                _ = fcntl(handle.fileDescriptor, F_SETFD, FD_CLOEXEC)
                 handle.seekToEndOfFile()
                 handle.write(data)
                 try? handle.close()

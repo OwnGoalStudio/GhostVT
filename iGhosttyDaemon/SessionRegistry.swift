@@ -13,9 +13,28 @@ final class SessionRegistry {
     private var sessions: [UInt64: PTYSession] = [:]
     private var attachments: [UInt64: PeerSession] = [:]
     private var nextID: UInt64 = 1
+    private var childExitSignal: DispatchSourceSignal?
 
     init(queue: DispatchQueue) {
         self.queue = queue
+        // Belt and braces under every session's own exit source. SIGCHLD is
+        // the one notice the kernel sends *after* a child is waitable
+        // (proc_exit marks it SZOMB, then signals); the process sources fire
+        // before that and poll to cover the gap. Should a poll ever give up,
+        // or a source never fire, this sweep still reaps — a coalesced
+        // signal names no pid, so every live session gets asked, and asking
+        // a running child costs one WNOHANG. SIGCHLD stays SIG_DFL (see
+        // main.swift): a kqueue signal source observes delivery without
+        // installing a handler, and SIG_IGN would auto-reap behind waitpid.
+        let signalSource = DispatchSource.makeSignalSource(signal: SIGCHLD, queue: queue)
+        signalSource.setEventHandler { [weak self] in
+            guard let self else { return }
+            for session in self.sessions.values {
+                session.reapIfExited()
+            }
+        }
+        signalSource.activate()
+        childExitSignal = signalSource
     }
 
     var summaries: [(id: UInt64, title: String, columns: UInt16, rows: UInt16, isAttached: Bool)] {
