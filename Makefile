@@ -200,6 +200,10 @@ mac-app:
 	@find "$(MAC_APP_BUNDLE)/Contents" -type d \( -name '*.framework' -o -name '*.appex' \) -print0 2>/dev/null \
 		| xargs -0 -n1 -I{} codesign --force --sign - "{}"
 	codesign --force --sign - "$(MAC_APP_BUNDLE)"
+	@# A bundle rebuilt and re-signed in place can leave LaunchServices with
+	@# a stale registration, and `open` then fails with "Launchd job spawn
+	@# failed" while running the executable directly works. Re-register it.
+	@/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$(MAC_APP_BUNDLE)"
 	@echo "Built and signed $(MAC_APP_BUNDLE)"
 
 mac-daemon:

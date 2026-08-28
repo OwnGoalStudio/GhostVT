@@ -23,10 +23,14 @@ struct TabStripBar: View {
                 .barGlass(in: Circle())
                 .accessibilityLabel("Toggle Sidebar")
 
-                if showsSidebar {
-                    activeTitleCapsule
+                if tabManager.tabs.isEmpty {
+                    // With no tabs there is nothing to title or strip: an
+                    // empty capsule collapses to its padding — an 8pt line
+                    // squashed across the bar — so the empty state yields the
+                    // space instead.
+                    Spacer()
                 } else {
-                    chipStrip
+                    centerCapsule
                 }
 
                 // The bar's only trailing control: the sidebar owns settings
@@ -56,47 +60,45 @@ struct TabStripBar: View {
         }
     }
 
-    private var activeTitleCapsule: some View {
-        Group {
-            if let tab = tabManager.activeTab {
-                HStack(spacing: DS.Padding.s) {
-                    ObservedStatusDot(store: tab.store)
-                    ObservedTabTitle(tab: tab)
+    /// One capsule for both modes. The bar is a glass-effect container, and
+    /// replacing a glass capsule with another one makes Liquid Glass morph
+    /// between them — a blob that shrinks to a pill and regrows while the
+    /// sidebar slides. The shape stays mounted; only its content crossfades.
+    private var centerCapsule: some View {
+        ZStack {
+            if showsSidebar {
+                if let tab = tabManager.activeTab {
+                    HStack(spacing: DS.Padding.s) {
+                        ObservedStatusDot(store: tab.store)
+                        ObservedTabTitle(tab: tab)
+                    }
+                    .padding(.horizontal, DS.Padding.l)
+                    .transition(.opacity)
                 }
-                .padding(.horizontal, DS.Padding.l)
-                .frame(maxWidth: .infinity, minHeight: 40)
-                .barGlass(in: Capsule(), interactive: false)
             } else {
-                Spacer()
+                chipStrip
+                    .transition(.opacity)
             }
         }
+        .frame(maxWidth: .infinity, minHeight: 40)
+        .barGlass(in: Capsule(), interactive: false)
     }
 
-    /// With no tabs there is nothing to strip: an empty capsule collapses to
-    /// its padding — an 8pt line squashed across the bar — so the empty
-    /// state yields the space instead, mirroring `activeTitleCapsule`.
     private var chipStrip: some View {
-        Group {
-            if tabManager.tabs.isEmpty {
-                Spacer()
-            } else {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: DS.Padding.xs) {
-                        ForEach(tabManager.tabs) { tab in
-                            TabChip(
-                                tab: tab,
-                                isActive: tab.id == tabManager.activeTabID,
-                                onSelect: { tabManager.activeTabID = tab.id },
-                                onClose: { tabManager.requestClose(tab) }
-                            )
-                        }
-                    }
-                    .padding(DS.Padding.xs)
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: DS.Padding.xs) {
+                ForEach(tabManager.tabs) { tab in
+                    TabChip(
+                        tab: tab,
+                        isActive: tab.id == tabManager.activeTabID,
+                        onSelect: { tabManager.activeTabID = tab.id },
+                        onClose: { tabManager.requestClose(tab) }
+                    )
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .barGlass(in: Capsule(), interactive: false)
             }
+            .padding(DS.Padding.xs)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
