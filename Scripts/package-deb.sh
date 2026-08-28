@@ -38,7 +38,7 @@ done
 
 app_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app_bundle/Info.plist")"
 bundle_identifier="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_bundle/Info.plist")"
-[[ "$bundle_identifier" == wiki.qaq.iGhostty && -x "$app_bundle/$app_executable" ]] || {
+[[ "$bundle_identifier" == wiki.qaq.iGhostVT && -x "$app_bundle/$app_executable" ]] || {
     echo "error: unexpected app identity" >&2
     exit 65
 }
@@ -55,19 +55,19 @@ output_name="$(basename "$output_deb")"
 mkdir -p "$(dirname "$output_deb")"
 output_directory="$(cd "$(dirname "$output_deb")" && pwd -P)"
 output_deb="$output_directory/$output_name"
-staging="$(mktemp -d "${TMPDIR:-/tmp}/ighostty-deb.XXXXXX")"
+staging="$(mktemp -d "${TMPDIR:-/tmp}/ighostvt-deb.XXXXXX")"
 temporary_deb="$output_directory/.$output_name.tmp.$$"
-app_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostty-app-entitlements.XXXXXX.plist")"
-daemon_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostty-daemon-entitlements.XXXXXX.plist")"
-appex_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostty-appex-entitlements.XXXXXX.plist")"
+app_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-app-entitlements.XXXXXX.plist")"
+daemon_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-daemon-entitlements.XXXXXX.plist")"
+appex_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-appex-entitlements.XXXXXX.plist")"
 trap 'rm -rf "$staging"; rm -f "$temporary_deb" "$app_signed_entitlements" "$daemon_signed_entitlements" "$appex_signed_entitlements"' EXIT
 chmod 0755 "$staging"
 
 debian="$staging/DEBIAN"
 installed_root="$staging$install_prefix"
-installed_app="$installed_root/Applications/iGhostty.app"
-installed_daemon="$installed_root/usr/libexec/ighosttyd"
-installed_plist="$installed_root/Library/LaunchDaemons/wiki.qaq.ighosttyd.plist"
+installed_app="$installed_root/Applications/iGhostVT.app"
+installed_daemon="$installed_root/usr/libexec/ighostvtd"
+installed_plist="$installed_root/Library/LaunchDaemons/wiki.qaq.ighostvtd.plist"
 mkdir -p "$debian" "$(dirname "$installed_app")" "$(dirname "$installed_daemon")" "$(dirname "$installed_plist")"
 /usr/bin/ditto "$app_bundle" "$installed_app"
 /usr/bin/ditto "$daemon_binary" "$installed_daemon"
@@ -75,8 +75,8 @@ sed -e "s|@PREFIX@|$install_prefix|g" "$launch_plist" >"$installed_plist"
 # The daemon recovers its install root by stripping this suffix off its own
 # executable path, so the plist has to launch it by the path it is installed
 # at — a mismatch and every bootstrap path it derives is wrong.
-[[ "$(/usr/libexec/PlistBuddy -c 'Print :ProgramArguments:0' "$installed_plist")" == "$install_prefix/usr/libexec/ighosttyd" ]] || {
-    echo "error: the launch daemon does not point at the installed ighosttyd" >&2
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :ProgramArguments:0' "$installed_plist")" == "$install_prefix/usr/libexec/ighostvtd" ]] || {
+    echo "error: the launch daemon does not point at the installed ighostvtd" >&2
     exit 65
 }
 rm -rf "$installed_app/_CodeSignature"
@@ -91,7 +91,7 @@ chmod 0644 "$installed_plist"
 # at them and it should not have to know the app bundle's internal layout to
 # do it. Missing scripts are not fatal: the daemon checks before injecting,
 # and the app falls back to inferring a title from what the user types.
-installed_integration="$installed_root/usr/share/ighostty/shell-integration"
+installed_integration="$installed_root/usr/share/ighostvt/shell-integration"
 integration_source="$(/usr/bin/find "$installed_app" -type d -name shell-integration -print -quit)"
 if [[ -n "$integration_source" ]]; then
     mkdir -p "$(dirname "$installed_integration")"
@@ -148,7 +148,7 @@ require_false() {
 # checking for `false` would pass the very thing it means to catch.
 #
 # The app itself legitimately carries two of these; see the block below, and
-# the symptom that forced each one in Packaging/iGhostty.entitlements.
+# the symptom that forced each one in Packaging/iGhostVT.entitlements.
 require_unprivileged() {
     local plist="$1"
     local label="$2"
@@ -170,14 +170,14 @@ require_unprivileged() {
 # against, plus the mach-lookup exception for the service name) and carries
 # the three things an ad-hoc signed bundle needs to draw a terminal at all,
 # each measured on device (iPad8,9, iOS 18.5 rootless, 2026-08-18) and
-# explained in Packaging/iGhostty.entitlements: the GPU user-client list
+# explained in Packaging/iGhostVT.entitlements: the GPU user-client list
 # (without it the kernel denies AGXDeviceUserClient and Metal cannot create a
 # device), `no-sandbox` (without it the kernel denies the app every write
 # inside its own container, so libghostty's config never lands on disk and no
 # terminal boots), and `storage.AppDataContainers` (so a no-sandbox bundle
 # keeps its container, and UserDefaults stay in it). Spawning is still the
 # daemon's alone — the app target has no process API at all.
-require_true "$app_signed_entitlements" wiki.qaq.ighostty.client
+require_true "$app_signed_entitlements" wiki.qaq.ighostvt.client
 require_true "$app_signed_entitlements" com.apple.private.security.no-sandbox
 require_true "$app_signed_entitlements" com.apple.private.security.storage.AppDataContainers
 [[ -n "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.iokit-user-client-class:0' "$app_signed_entitlements" 2>/dev/null || true)" ]] || {
@@ -195,7 +195,7 @@ for key in platform-application \
         exit 65
     }
 done
-[[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.exception.mach-lookup.global-name:0' "$app_signed_entitlements")" == wiki.qaq.ighostty.service ]] || {
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.exception.mach-lookup.global-name:0' "$app_signed_entitlements")" == wiki.qaq.ighostvt.service ]] || {
     echo "error: app is missing the daemon mach lookup entitlement" >&2
     exit 65
 }
@@ -207,7 +207,7 @@ require_false "$daemon_signed_entitlements" com.apple.private.security.container
 
 # Spawning belongs to the daemon alone: fail the build if the app ever picks
 # up the client entitlement's counterpart on the daemon side by mistake.
-[[ "$(/usr/libexec/PlistBuddy -c 'Print :wiki.qaq.ighostty.client' "$daemon_signed_entitlements" 2>/dev/null || true)" != true ]] || {
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :wiki.qaq.ighostvt.client' "$daemon_signed_entitlements" 2>/dev/null || true)" != true ]] || {
     echo "error: the daemon must not carry the client entitlement" >&2
     exit 65
 }
@@ -220,11 +220,11 @@ for appex in "${appexes[@]}"; do
     appex_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$appex/Info.plist")"
     ldid -e "$appex/$appex_executable" >"$appex_signed_entitlements"
     require_unprivileged "$appex_signed_entitlements" "$(basename "$appex")"
-    [[ "$(/usr/libexec/PlistBuddy -c 'Print :wiki.qaq.ighostty.client' "$appex_signed_entitlements" 2>/dev/null || true)" != true ]] || {
+    [[ "$(/usr/libexec/PlistBuddy -c 'Print :wiki.qaq.ighostvt.client' "$appex_signed_entitlements" 2>/dev/null || true)" != true ]] || {
         echo "error: $(basename "$appex") must not carry the client entitlement" >&2
         exit 65
     }
-    [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.exception.mach-lookup.global-name' "$appex_signed_entitlements" 2>/dev/null || true)" != *ighostty* ]] || {
+    [[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.exception.mach-lookup.global-name' "$appex_signed_entitlements" 2>/dev/null || true)" != *ighostvt* ]] || {
         echo "error: $(basename "$appex") must not reach the daemon's mach service" >&2
         exit 65
     }
@@ -250,11 +250,11 @@ dpkg-deb --root-owner-group -Zzstd -b "$staging" "$temporary_deb"
 [[ "$(dpkg-deb -f "$temporary_deb" Version)" == "$version" ]]
 [[ "$(dpkg-deb -f "$temporary_deb" Architecture)" == "$architecture" ]]
 contents="$(dpkg-deb --contents "$temporary_deb")"
-grep -F ".$install_prefix/Applications/iGhostty.app/$app_executable" <<<"$contents" >/dev/null
-grep -F ".$install_prefix/usr/libexec/ighosttyd" <<<"$contents" >/dev/null
-grep -F ".$install_prefix/Library/LaunchDaemons/wiki.qaq.ighosttyd.plist" <<<"$contents" >/dev/null
-[[ -z "$integration_source" ]] || grep -F ".$install_prefix/usr/share/ighostty/shell-integration/zsh/.zshenv" <<<"$contents" >/dev/null
+grep -F ".$install_prefix/Applications/iGhostVT.app/$app_executable" <<<"$contents" >/dev/null
+grep -F ".$install_prefix/usr/libexec/ighostvtd" <<<"$contents" >/dev/null
+grep -F ".$install_prefix/Library/LaunchDaemons/wiki.qaq.ighostvtd.plist" <<<"$contents" >/dev/null
+[[ -z "$integration_source" ]] || grep -F ".$install_prefix/usr/share/ighostvt/shell-integration/zsh/.zshenv" <<<"$contents" >/dev/null
 
 mv -f "$temporary_deb" "$output_deb"
-echo "Packaged iGhostty: $output_deb"
+echo "Packaged iGhostVT: $output_deb"
 shasum -a 256 "$output_deb"

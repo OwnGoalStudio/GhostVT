@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>wiki.qaq.ighostvtd</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>@PREFIX@/usr/libexec/ighostvtd</string>
+	</array>
+	<key>UserName</key>
+	<string>root</string>
+	<key>ProcessType</key>
+	<string>Interactive</string>
+	<!--
+		The shell and every command it starts inherit the daemon's resource
+		limits. launchd's default soft file-descriptor limit is too small for
+		tools that scan many files concurrently, while the daemon itself can
+		also own one PTY master per live session.
+	-->
+	<key>SoftResourceLimits</key>
+	<dict>
+		<key>NumberOfFiles</key>
+		<integer>10240</integer>
+	</dict>
+	<!--
+		Resident, not demand-launched.
+
+		Demand launch does work here — a killed daemon comes back on the next
+		mach lookup, verified on device. But it makes every disappearance a
+		race the app can lose: the daemon can exit between launchd routing a
+		new connection and the daemon accepting it, and that client sees the
+		service vanish rather than a working session. KeepAlive also covers
+		the case demand launch cannot — a crash while the app sits idle, which
+		otherwise leaves the terminal dead until the user thinks to retry.
+
+		An idle ighostvtd is a few MB holding no sessions. That is the normal
+		shape for a jailbreak daemon, and it is worth far more than the memory.
+	-->
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>Umask</key>
+	<integer>18</integer>
+	<key>MachServices</key>
+	<dict>
+		<key>wiki.qaq.ighostvt.service</key>
+		<true/>
+	</dict>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>DISABLE_TWEAKS</key>
+		<string>1</string>
+	</dict>
+</dict>
+</plist>

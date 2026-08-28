@@ -1,11 +1,11 @@
-# iGhostty
+# iGhostVT
 
 Ghostty-powered terminal for jailbroken iOS — [roothide](https://github.com/roothide)
 and rootless bootstraps alike — built on
 [libghostty-spm](https://github.com/Lakr233/libghostty-spm)'s terminal core
 with a host-managed I/O backend.
 
-The app never spawns a process. `ighosttyd`, a root LaunchDaemon, owns every
+The app never spawns a process. `ighostvtd`, a root LaunchDaemon, owns every
 terminal session and is the only component that can start one; the app reaches
 it over a mach service and is entitled to nothing else. Sessions therefore
 outlive the app — quitting detaches, and relaunching reattaches to the shells
@@ -15,15 +15,15 @@ still running.
 
 | Path                   | Purpose                                                          |
 | ---------------------- | ---------------------------------------------------------------- |
-| `iGhostty/`            | The app: `main.swift`, `Application/`, `Backend/`, `Interface/`, `Resources/` |
-| `iGhosttyDaemon/`       | `ighosttyd`: the only process that spawns anything                |
+| `iGhostVT/`            | The app: `main.swift`, `Application/`, `Backend/`, `Interface/`, `Resources/` |
+| `iGhostVTDaemon/`       | `ighostvtd`: the only process that spawns anything                |
 | `Shared/`              | XPC wire protocol, compiled into both targets                    |
-| `Packages/iGhosttyKit/` | Transport layer: the `TerminalTransport` protocol                |
+| `Packages/iGhostVTKit/` | Transport layer: the `TerminalTransport` protocol                |
 | `Configuration/`       | xcconfig files; `Version.xcconfig` is the version's home         |
 | `Packaging/`           | Debian control, maintainer scripts, ldid entitlements            |
 | `Scripts/`             | xcodebuild wrapper, deb packager, versioning                     |
 
-`iGhostty.xcodeproj` is checked in (objectVersion 77, folder-synchronized
+`iGhostVT.xcodeproj` is checked in (objectVersion 77, folder-synchronized
 groups — adding a file to a synchronized folder adds it to the target). The
 local `../libghostty-spm` checkout is referenced as a path dependency.
 See `Documentation/ARCHITECTURE.md` for the ownership and data-flow design,
@@ -39,8 +39,8 @@ make set-version VERSION=1.2.3
 
 Requires `ldid` and `dpkg-deb` (Homebrew). Both packages carry the same
 `arm64` binaries and differ only in layout: the roothide one declares
-`iphoneos-arm64e` and installs `/Applications/iGhostty.app`,
-`/usr/libexec/ighosttyd` and the LaunchDaemon plist unprefixed, for the
+`iphoneos-arm64e` and installs `/Applications/iGhostVT.app`,
+`/usr/libexec/ighostvtd` and the LaunchDaemon plist unprefixed, for the
 bootstrap to relocate into the jbroot it picked this boot; the rootless one
 declares `iphoneos-arm64` and installs the same three paths under `/var/jb`.
 `postinst` bootstraps the daemon either way.
@@ -55,7 +55,7 @@ make mac-run       # the whole stack on a Mac: daemon as a LaunchAgent + Mac Cat
 
 The harness covers what a device test is worst at debugging: `forkpty`/`execve`,
 the read loop, exit-status decoding, `TIOCSWINSZ`, descriptor hygiene, and the
-path resolution of each jailbreak layout. `make mac-run` builds `ighosttyd` for
+path resolution of each jailbreak layout. `make mac-run` builds `ighostvtd` for
 macOS, loads it as a per-user LaunchAgent (`make mac-daemon-uninstall` removes
 it), and opens the app built as Mac Catalyst against it — every part of the
 product except what only the device has (GPU entitlement, bootstrap layouts,

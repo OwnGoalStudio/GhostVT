@@ -3,8 +3,8 @@
 set -u -o pipefail
 
 label="${XCBUILD_LABEL:-xcodebuild}"
-raw_log="$(mktemp -t "ighostty-${label//\//_}.raw.XXXXXX.log")"
-log="$(mktemp -t "ighostty-${label//\//_}.XXXXXX.log")"
+raw_log="$(mktemp -t "ighostvt-${label//\//_}.raw.XXXXXX.log")"
+log="$(mktemp -t "ighostvt-${label//\//_}.XXXXXX.log")"
 trap 'rm -f "$raw_log" "$log"' EXIT
 
 if xcodebuild "$@" >"$raw_log" 2>&1; then

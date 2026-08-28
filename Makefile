@@ -1,18 +1,18 @@
-# iGhostty Xcode build and jailbreak Debian packaging (roothide, rootless)
+# iGhostVT Xcode build and jailbreak Debian packaging (roothide, rootless)
 
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
 
 ROOT_DIR            := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-PROJECT             := $(ROOT_DIR)/iGhostty.xcodeproj
-SCHEME              := iGhostty
+PROJECT             := $(ROOT_DIR)/iGhostVT.xcodeproj
+SCHEME              := iGhostVT
 CONFIGURATION       ?= Release
-DERIVED_DATA        ?= /private/tmp/ighostty-deriveddata
-APP_BUNDLE          := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/iGhostty.app
-DAEMON_BINARY       := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/ighosttyd
-DAEMON_SCHEME       := ighosttyd
-PACKAGE_ID          ?= wiki.qaq.ighostty
-BUNDLE_ID           := wiki.qaq.iGhostty
+DERIVED_DATA        ?= /private/tmp/ighostvt-deriveddata
+APP_BUNDLE          := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/iGhostVT.app
+DAEMON_BINARY       := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/ighostvtd
+DAEMON_SCHEME       := ighostvtd
+PACKAGE_ID          ?= wiki.qaq.ighostvt
+BUNDLE_ID           := wiki.qaq.iGhostVT
 PROJECT_OBJECT_VERSION := 77
 
 # Which jailbreak layout the .deb is built for. roothide relocates the package
@@ -42,10 +42,10 @@ DEB_PACKAGER        := $(ROOT_DIR)/Scripts/package-deb.sh
 VERSION_APPLIER     := $(ROOT_DIR)/Scripts/apply-version.sh
 MAC_DAEMON_LOADER   := $(ROOT_DIR)/Scripts/mac-daemon.sh
 CONTROL_TEMPLATE    := $(ROOT_DIR)/Packaging/DEBIAN/control
-ENTITLEMENTS        := $(ROOT_DIR)/Packaging/iGhostty.entitlements
-DAEMON_ENTITLEMENTS := $(ROOT_DIR)/Packaging/iGhosttyDaemon.entitlements
-APPEX_ENTITLEMENTS  := $(ROOT_DIR)/Packaging/iGhosttyWidgets.entitlements
-LAUNCH_DAEMON       := $(ROOT_DIR)/Packaging/wiki.qaq.ighosttyd.plist
+ENTITLEMENTS        := $(ROOT_DIR)/Packaging/iGhostVT.entitlements
+DAEMON_ENTITLEMENTS := $(ROOT_DIR)/Packaging/iGhostVTDaemon.entitlements
+APPEX_ENTITLEMENTS  := $(ROOT_DIR)/Packaging/iGhostVTWidgets.entitlements
+LAUNCH_DAEMON       := $(ROOT_DIR)/Packaging/wiki.qaq.ighostvtd.plist
 
 XCODEBUILD := $(XCODEBUILD_WRAPPER) \
 	-project "$(PROJECT)" \
@@ -75,17 +75,17 @@ endif
 all: deb
 
 help:
-	@echo "iGhostty:"
-	@echo "  build       Build the unsigned iGhostty.app for iPhoneOS"
+	@echo "iGhostVT:"
+	@echo "  build       Build the unsigned iGhostVT.app for iPhoneOS"
 	@echo "  deb         Build, ad-hoc sign, and package the .deb (PACKAGE_FLAVOR=$(PACKAGE_FLAVOR))"
 	@echo "  deb-roothide  Package for roothide (unprefixed, iphoneos-arm64e)"
 	@echo "  deb-rootless  Package for a rootless bootstrap (/var/jb, iphoneos-arm64)"
 	@echo "  test        Run the PTY harness"
 	@echo "  harness     Run the daemon's PTY spawn tests on macOS"
 	@echo "  check       Validate the project and packaging inputs"
-	@echo "  mac-run     Build the Mac Catalyst app, load ighosttyd as a LaunchAgent, open the app"
+	@echo "  mac-run     Build the Mac Catalyst app, load ighostvtd as a LaunchAgent, open the app"
 	@echo "  mac-app     Build the Mac Catalyst app only"
-	@echo "  mac-daemon  Build ighosttyd for macOS and (re)load it as a per-user LaunchAgent"
+	@echo "  mac-daemon  Build ighostvtd for macOS and (re)load it as a per-user LaunchAgent"
 	@echo "  mac-daemon-uninstall  Unload and remove the macOS LaunchAgent"
 	@echo "  set-version Write VERSION=x.y.z [BUILD=n] into Configuration/Version.xcconfig"
 	@echo "  clean       Remove derived data and generated packages"
@@ -107,7 +107,7 @@ check:
 	@command -v xcodebuild >/dev/null || { echo "error: xcodebuild is required" >&2; exit 69; }
 	@command -v ldid >/dev/null || { echo "error: ldid is required" >&2; exit 69; }
 	@command -v dpkg-deb >/dev/null || { echo "error: dpkg-deb is required" >&2; exit 69; }
-	@test -d "$(PROJECT)" || { echo "error: iGhostty.xcodeproj is missing" >&2; exit 66; }
+	@test -d "$(PROJECT)" || { echo "error: iGhostVT.xcodeproj is missing" >&2; exit 66; }
 	@objver="$$(sed -n 's/^[[:space:]]*objectVersion = \([0-9]*\);.*/\1/p' "$(PROJECT)/project.pbxproj")"; \
 		[[ "$$objver" == "$(PROJECT_OBJECT_VERSION)" ]] || { echo "error: project.pbxproj objectVersion must stay $(PROJECT_OBJECT_VERSION), got '$$objver'" >&2; exit 65; }
 	@grep -qE '^[[:space:]]*(MARKETING_VERSION|CURRENT_PROJECT_VERSION) =' "$(PROJECT)/project.pbxproj" \
@@ -125,9 +125,9 @@ check:
 	@plutil -lint "$(DAEMON_ENTITLEMENTS)" "$(APPEX_ENTITLEMENTS)" "$(LAUNCH_DAEMON)"
 	@[[ "$$(/usr/libexec/PlistBuddy -c 'Print :SoftResourceLimits:NumberOfFiles' "$(LAUNCH_DAEMON)")" == "10240" ]] || { echo "error: the daemon and its shells require a 10240 soft file-descriptor limit" >&2; exit 65; }
 	@targets="$$(xcodebuild -project "$(PROJECT)" -list)"; \
-		grep -F "ighosttyd" <<<"$$targets" >/dev/null || { echo "error: the ighosttyd target is missing from the project" >&2; exit 65; }
+		grep -F "ighostvtd" <<<"$$targets" >/dev/null || { echo "error: the ighostvtd target is missing from the project" >&2; exit 65; }
 
-# iGhosttyKit is protocol-only since the TCP transport left; the harness is
+# iGhostVTKit is protocol-only since the TCP transport left; the harness is
 # the whole suite until it grows tests again.
 test: harness
 
@@ -135,11 +135,11 @@ test: harness
 # out of reach but forkpty/execve, the read loop, exit decoding, and
 # TIOCSWINSZ behave exactly as they do on device.
 harness:
-	@harness_bin="$$(mktemp /tmp/ighostty-harness.XXXXXX)"; \
+	@harness_bin="$$(mktemp /tmp/ighostvt-harness.XXXXXX)"; \
 	trap 'rm -f "$$harness_bin"' EXIT; \
 	xcrun --sdk macosx swiftc -swift-version 5 \
-		"$(ROOT_DIR)/Shared/iGhosttyProtocol.swift" \
-		$$(ls "$(ROOT_DIR)"/iGhosttyDaemon/*.swift | grep -v '/main\.swift$$') \
+		"$(ROOT_DIR)/Shared/iGhostVTProtocol.swift" \
+		$$(ls "$(ROOT_DIR)"/iGhostVTDaemon/*.swift | grep -v '/main\.swift$$') \
 		"$(ROOT_DIR)/Tests/PTYHarness/main.swift" \
 		-o "$$harness_bin"; \
 	"$$harness_bin"
@@ -185,9 +185,9 @@ deb-rootless:
 # by uid and bundle path, which only a Debug macOS daemon does; that is why
 # the configuration is not a knob.
 MAC_CONFIGURATION   := Debug
-MAC_APP_BUNDLE      := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)-maccatalyst/iGhostty.app
-MAC_DAEMON_BINARY   := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighosttyd
-MAC_LAUNCH_AGENT    := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighosttyd.plist
+MAC_APP_BUNDLE      := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)-maccatalyst/iGhostVT.app
+MAC_DAEMON_BINARY   := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighostvtd
+MAC_LAUNCH_AGENT    := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighostvtd.plist
 
 mac-app:
 	XCBUILD_LABEL=build-mac-app $(UNSIGNED_XCODEBUILD) \

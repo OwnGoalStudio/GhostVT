@@ -3,7 +3,7 @@
 ## Repo layout (FlowDown-style)
 
 ```
-iGhostty/                    the app, one folder-synchronized Xcode group
+iGhostVT/                    the app, one folder-synchronized Xcode group
 ├── main.swift               UIApplicationMain entry (no @main)
 ├── Application/             AppDelegate, SceneDelegate
 ├── Backend/Session/         TerminalTab, TabManager, TerminalSessionStore
@@ -15,17 +15,17 @@ iGhostty/                    the app, one folder-synchronized Xcode group
 │   ├── Settings/            SettingsSheet (themes, default shell)
 │   └── Support/             GlassStyle, StatusDot, KeyboardState
 └── Resources/               Assets.xcassets, Info.plist
-Packages/iGhosttyKit/         transport layer (the TerminalTransport protocol)
+Packages/iGhostVTKit/         transport layer (the TerminalTransport protocol)
 Shared/                      XPC wire protocol, compiled into app + daemon
-iGhosttyDaemon/               ighosttyd: the only process that spawns anything
-iGhosttyWidgets/              WidgetKit appex: the Dynamic Island Live Activity
+iGhostVTDaemon/               ighostvtd: the only process that spawns anything
+iGhostVTWidgets/              WidgetKit appex: the Dynamic Island Live Activity
 ActivityShared/              ActivityAttributes, compiled into app + appex
 ```
 
-`iGhostty.xcodeproj` is checked in: objectVersion 77 with a
-`PBXFileSystemSynchronizedRootGroup` over the `iGhostty/` folder (Info.plist
+`iGhostVT.xcodeproj` is checked in: objectVersion 77 with a
+`PBXFileSystemSynchronizedRootGroup` over the `iGhostVT/` folder (Info.plist
 excluded via membership exception), local package references to
-`../libghostty-spm` and `Packages/iGhosttyKit`. Adding a file to the folder
+`../libghostty-spm` and `Packages/iGhostVTKit`. Adding a file to the folder
 adds it to the target — there is no generator step.
 
 ## Ownership (multi-window)
@@ -90,9 +90,9 @@ backend, and debugging happens on device.
 ## The daemon (device I/O)
 
 ```
-iGhostty.app                          ighosttyd  (LaunchDaemon, root)
+iGhostVT.app                          ighostvtd  (LaunchDaemon, root)
   InMemoryTerminalSession               DaemonServer   mach service listener
-        │                                     │        wiki.qaq.ighostty.service
+        │                                     │        wiki.qaq.ighostvt.service
   XPCDaemonTransport ──── XPC ──────────► PeerAuthenticator
         ▲                                     │   audit token: entitlement +
         └──── output / sessionExit ──────┐    │   uid + root-owned exec path
@@ -102,11 +102,11 @@ iGhostty.app                          ighosttyd  (LaunchDaemon, root)
                                                                 forkpty + execve
 ```
 
-- **The app cannot spawn.** `ighosttyd` is the only component that creates a
+- **The app cannot spawn.** `ighostvtd` is the only component that creates a
   process. The app's whole vocabulary is `openSession` / `attachSession` /
   `write` / `resize` / `closeSession` over the mach service, and the daemon
   authenticates every peer from its kernel audit token before answering: the
-  caller must hold `wiki.qaq.ighostty.client`, run as root or mobile, and *be*
+  caller must hold `wiki.qaq.ighostvt.client`, run as root or mobile, and *be*
   the installed root-owned app binary. `Scripts/package-deb.sh` asserts the
   signed entitlements on both binaries, including that the daemon does not
   carry the client entitlement.
@@ -144,7 +144,7 @@ package installs and how paths are spelled:
 | **rootless** | `/var/jb` | `iphoneos-arm64` |
 
 `JailbreakRoot` works out which one it is running under by stripping its own
-install suffix, `/usr/libexec/ighosttyd`, off its own executable path: nothing
+install suffix, `/usr/libexec/ighostvtd`, off its own executable path: nothing
 left means no prefix, a path that `/var/jb` canonicalises to means rootless
 (a rootless bootstrap may hide a randomly named directory behind that
 symlink), anything else is a jbroot. No libroothide dependency, no bridging
@@ -180,7 +180,7 @@ does the daemon spawn a shell itself, reading `pw_shell` from the
 **bootstrap's** `/etc/passwd` (`resolve(bootstrapPath("/etc/passwd"))`, not
 libc's system database) and supplying the environment `login` would have.
 
-The session runs as **mobile (501)**, not as the daemon. `ighosttyd` is root, so
+The session runs as **mobile (501)**, not as the daemon. `ighostvtd` is root, so
 a session would inherit root unless told otherwise, but root is the wrong
 default to land the user on: `$HOME`, the caches a shell writes, and everything
 else under `/var/mobile` belong to 501, and root-owned files left there break
@@ -210,16 +210,16 @@ anyway would hand over the root shell that was just refused.
 - `Configuration/Version.xcconfig` is the single version source;
   `make set-version` writes it, the Debian control and .deb filename read it.
 - `make deb` builds both targets unsigned for iPhoneOS, ad-hoc signs each
-  with ldid against its own entitlements (`Packaging/iGhostty.entitlements`,
-  `Packaging/iGhosttyDaemon.entitlements`), verifies the signed entitlements
+  with ldid against its own entitlements (`Packaging/iGhostVT.entitlements`,
+  `Packaging/iGhostVTDaemon.entitlements`), verifies the signed entitlements
   and package metadata, then emits the `.deb`:
-  `/Applications/iGhostty.app`, `/usr/libexec/ighosttyd`, and
-  `/Library/LaunchDaemons/wiki.qaq.ighosttyd.plist`. `postinst` bootstraps the
+  `/Applications/iGhostVT.app`, `/usr/libexec/ighostvtd`, and
+  `/Library/LaunchDaemons/wiki.qaq.ighostvtd.plist`. `postinst` bootstraps the
   daemon, `prerm` boots it out.
 - `make deb-rootless` (`PACKAGE_FLAVOR=rootless`) packages the same binaries
   with `/var/jb` in front of those three paths. The prefix is substituted for
   `@PREFIX@` in the launch daemon plist and the maintainer scripts, and the
-  packager asserts the plist launches `ighosttyd` from where it was actually
+  packager asserts the plist launches `ighostvtd` from where it was actually
   installed — the daemon recovers its install root from that path, so a
   mismatch would make every bootstrap path it derives wrong.
 - `make check` guards the pbxproj's objectVersion (77) so newer Xcode

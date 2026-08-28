@@ -3,7 +3,7 @@
 # @PREFIX@ is empty for roothide, whose package is installed inside the jbroot
 # it picked this boot and whose tools resolve every path against it anyway, and
 # /var/jb for a rootless bootstrap, where the prefix has to be spelled out.
-launch_plist=@PREFIX@/Library/LaunchDaemons/wiki.qaq.ighosttyd.plist
+launch_plist=@PREFIX@/Library/LaunchDaemons/wiki.qaq.ighostvtd.plist
 
 launchctl=@PREFIX@/usr/bin/launchctl
 [ -x "$launchctl" ] || launchctl=/bin/launchctl
@@ -16,7 +16,7 @@ killall=@PREFIX@/usr/bin/killall
 # survive: they live in the daemon, and the new daemon instance re-reads its
 # registry.
 if [ -x "$killall" ]; then
-    "$killall" -9 iGhostty 2>/dev/null || true
+    "$killall" -9 iGhostVT 2>/dev/null || true
 fi
 
 if [ -x "$launchctl" ]; then
@@ -25,27 +25,27 @@ if [ -x "$launchctl" ]; then
     # the old instance running and holding the mach service — the fresh one
     # then crash-loops on a dead listener and the app sees nothing but
     # "connection lost". Boot out every domain the service can live in.
-    "$launchctl" bootout system/wiki.qaq.ighosttyd 2>/dev/null || true
-    "$launchctl" bootout user/501/wiki.qaq.ighosttyd 2>/dev/null || true
-    "$launchctl" bootout gui/501/wiki.qaq.ighosttyd 2>/dev/null || true
+    "$launchctl" bootout system/wiki.qaq.ighostvtd 2>/dev/null || true
+    "$launchctl" bootout user/501/wiki.qaq.ighostvtd 2>/dev/null || true
+    "$launchctl" bootout gui/501/wiki.qaq.ighostvtd 2>/dev/null || true
     # A daemon disabled by an earlier bootout -w (or a failed remove) stays
     # disabled across bootstrap and fails with EPERM; clear the override
     # first.
-    "$launchctl" enable system/wiki.qaq.ighosttyd 2>/dev/null || true
+    "$launchctl" enable system/wiki.qaq.ighostvtd 2>/dev/null || true
     "$launchctl" bootstrap system "$launch_plist"
     # The bootout above races the bootstrap on some launchd builds; confirm
     # the service actually came up in one of its domains so a broken install
     # is loud here instead of a silent "connection lost" in the app.
-    if ! "$launchctl" print system/wiki.qaq.ighosttyd >/dev/null 2>&1 &&
-        ! "$launchctl" print user/501/wiki.qaq.ighosttyd >/dev/null 2>&1 &&
-        ! "$launchctl" print gui/501/wiki.qaq.ighosttyd >/dev/null 2>&1; then
-        echo "warning: ighosttyd did not register with launchd; try a reboot" >&2
+    if ! "$launchctl" print system/wiki.qaq.ighostvtd >/dev/null 2>&1 &&
+        ! "$launchctl" print user/501/wiki.qaq.ighostvtd >/dev/null 2>&1 &&
+        ! "$launchctl" print gui/501/wiki.qaq.ighostvtd >/dev/null 2>&1; then
+        echo "warning: ighostvtd did not register with launchd; try a reboot" >&2
     fi
 fi
 
 uicache=@PREFIX@/usr/bin/uicache
 if [ -x "$uicache" ]; then
-    "$uicache" -p @PREFIX@/Applications/iGhostty.app || true
+    "$uicache" -p @PREFIX@/Applications/iGhostVT.app || true
 fi
 
 exit 0

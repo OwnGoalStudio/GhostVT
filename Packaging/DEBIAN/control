@@ -1,5 +1,5 @@
 Package: @PACKAGE_ID@
-Name: iGhostty
+Name: iGhostVT
 Version: @VERSION@
 Architecture: @ARCHITECTURE@
 Description: Ghostty-powered terminal for jailbroken iOS
@@ -7,7 +7,7 @@ Description: Ghostty-powered terminal for jailbroken iOS
  I/O backend. Packaged for both roothide and rootless bootstraps; the
  architecture field says which build this is.
  .
- Shells are spawned by the bundled ighosttyd daemon and survive app
+ Shells are spawned by the bundled ighostvtd daemon and survive app
  relaunches; SSH transport is planned on the same transport interface.
 Icon: https://owngoalstudio.github.io/iGhostty/icon.png
 Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>

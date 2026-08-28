@@ -1,21 +1,21 @@
-# iGhostty — Agent Notes
+# iGhostVT — Agent Notes
 
 Ghostty-powered terminal for jailbroken iOS 15+ — roothide and rootless
-bootstraps both. The app renders; the bundled `ighosttyd` LaunchDaemon owns
+bootstraps both. The app renders; the bundled `ighostvtd` LaunchDaemon owns
 every spawned process.
 
 ## Hard rules
 
-- **No project generators.** `iGhostty.xcodeproj/project.pbxproj` is
+- **No project generators.** `iGhostVT.xcodeproj/project.pbxproj` is
   hand-written and checked in (objectVersion 77, file-system-synchronized
-  groups — files added under `iGhostty/`, `iGhosttyDaemon/`, `Shared/` join
+  groups — files added under `iGhostVT/`, `iGhostVTDaemon/`, `Shared/` join
   their target automatically). Never introduce XcodeGen/Tuist/etc.
 - **Versions live in `Configuration/Version.xcconfig` only** (edit via
   `make set-version`). xcconfigs attach at project level; a target-level
   `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION` in the pbxproj silently
   shadows them and ships the wrong build number. `make check` rejects this —
   keep it that way, and watch for Xcode injecting these keys back.
-- **The app never spawns processes.** Only `ighosttyd` forks
+- **The app never spawns processes.** Only `ighostvtd` forks
   (`forkpty`+`execve`), gated by kernel audit-token peer authentication.
   Keep that boundary; don't add process APIs to the app target.
 - Depends on the **released**
@@ -28,10 +28,10 @@ every spawned process.
 
 ## Layout
 
-FlowDown-style: `iGhostty/main.swift` (manual `UIApplicationMain`) +
+FlowDown-style: `iGhostVT/main.swift` (manual `UIApplicationMain`) +
 `Application/` (delegates) + `Backend/` (sessions, theme, transport) +
-`Interface/<feature>/` + `Resources/`. Daemon code in `iGhosttyDaemon/`,
-shared XPC protocol in `Shared/`, transport seam in `Packages/iGhosttyKit`.
+`Interface/<feature>/` + `Resources/`. Daemon code in `iGhostVTDaemon/`,
+shared XPC protocol in `Shared/`, transport seam in `Packages/iGhostVTKit`.
 
 Data flow: one `TabManager` per `UIWindowScene` (owned by `SceneDelegate`);
 each `TerminalTab` owns a `TerminalSessionStore`, which drives a
@@ -43,7 +43,7 @@ seam.
 
 Tab titles have two sources, in this order. Ghostty's shell integration is
 the real one: the daemon injects it (`ShellIntegration`) and the .deb ships
-libghostty's own scripts to `/usr/share/ighostty/shell-integration`, so the
+libghostty's own scripts to `/usr/share/ighostvt/shell-integration`, so the
 shell reports OSC 2 (command), OSC 7 (cwd), OSC 133 (prompts) by itself.
 That injection reaches zsh, fish, and bash (which gets `--posix` in argv —
 the daemon always spawns the shell directly, see the pam_launchd gotcha
@@ -61,9 +61,9 @@ has to republish their changes or no SwiftUI view redraws.
 - `make deb` — unsigned iphoneos build, ldid ad-hoc sign, roothide
   `iphoneos-arm64e` package; `make deb-rootless` packages the same binaries
   under `/var/jb` as `iphoneos-arm64` (`PACKAGE_FLAVOR` picks the layout)
-- `make mac-run` — the whole stack on a Mac: builds `ighosttyd` for macOS and
+- `make mac-run` — the whole stack on a Mac: builds `ighostvtd` for macOS and
   loads it as a per-user LaunchAgent (`make mac-daemon`, undone by
-  `make mac-daemon-uninstall`; log in `~/Library/Logs/ighosttyd.log`), builds
+  `make mac-daemon-uninstall`; log in `~/Library/Logs/ighostvtd.log`), builds
   the app as Mac Catalyst (`make mac-app`), opens it. This is the off-device
   loop: the Simulator has no daemon, so nothing connects there. Device-only
   behaviour (the GPU entitlement, the bootstrap layouts, privilege drop,
@@ -90,7 +90,7 @@ Gotchas that bit us:
   iOS-family binary, and macOS refuses to launch one with an entitlement no
   provisioning profile granted ("Launchd job spawn failed"), ad-hoc signed
   or not. The Mac build is signed with no entitlements and the macOS daemon
-  authenticates it by uid and `iGhostty.app/Contents/MacOS/iGhostty` path
+  authenticates it by uid and `iGhostVT.app/Contents/MacOS/iGhostVT` path
   instead (`PeerAuthenticator`, `#if os(macOS)` only — the device policy is
   untouched).
 - libghostty asks the host before a protected clipboard operation (an OSC 52
@@ -121,7 +121,7 @@ Gotchas that bit us:
 - A GUI app ad-hoc signed with ldid MUST carry
   `com.apple.security.iokit-user-client-class` (with `IOUserClient` / the
   AGX + IOGPU + IOSurface + IOAccel leaves, see
-  `Packaging/iGhostty.entitlements`). This is a jailbroken-iOS property, not
+  `Packaging/iGhostVT.entitlements`). This is a jailbroken-iOS property, not
   a roothide one — the rootless package needs it just the same. Without it
   the kernel denies the GPU's IOKit user client — `no-sandbox` does NOT cover
   this — Metal can't create a device, and the symptom is a silent black

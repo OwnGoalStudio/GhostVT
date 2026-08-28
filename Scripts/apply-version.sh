@@ -38,7 +38,7 @@ read_setting() {
 [[ -n "$build_number" ]] || build_number="$(read_setting CURRENT_PROJECT_VERSION)"
 [[ -n "$build_number" ]] || { echo "error: CURRENT_PROJECT_VERSION is missing from Version.xcconfig" >&2; exit 65; }
 
-updated="$(mktemp "${TMPDIR:-/tmp}/ighostty-version.XXXXXX")"
+updated="$(mktemp "${TMPDIR:-/tmp}/ighostvt-version.XXXXXX")"
 trap 'rm -f "$updated"' EXIT
 
 awk -v version="$version" -v build="$build_number" '

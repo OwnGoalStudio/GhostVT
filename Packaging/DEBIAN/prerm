@@ -10,19 +10,19 @@ if [ "${1:-}" = remove ] || [ "${1:-}" = deconfigure ]; then
 
     # The app first: it is about to lose its daemon and its own binary.
     if [ -x "$killall" ]; then
-        "$killall" -9 iGhostty 2>/dev/null || true
+        "$killall" -9 iGhostVT 2>/dev/null || true
     fi
 
     if [ -x "$launchctl" ]; then
-        "$launchctl" bootout system/wiki.qaq.ighosttyd 2>/dev/null || true
-        "$launchctl" bootout user/501/wiki.qaq.ighosttyd 2>/dev/null || true
-        "$launchctl" bootout gui/501/wiki.qaq.ighosttyd 2>/dev/null || true
+        "$launchctl" bootout system/wiki.qaq.ighostvtd 2>/dev/null || true
+        "$launchctl" bootout user/501/wiki.qaq.ighostvtd 2>/dev/null || true
+        "$launchctl" bootout gui/501/wiki.qaq.ighostvtd 2>/dev/null || true
     fi
 
     # bootout kills the daemon but not the shells it spawned; they are
     # orphaned children holding PTYs that no longer lead anywhere.
     if [ -x "$killall" ]; then
-        "$killall" -9 ighosttyd 2>/dev/null || true
+        "$killall" -9 ighostvtd 2>/dev/null || true
     fi
 
     # Unregister while the bundle still exists — uicache -u takes the app
@@ -30,7 +30,7 @@ if [ "${1:-}" = remove ] || [ "${1:-}" = deconfigure ]; then
     # that's left.
     uicache=@PREFIX@/usr/bin/uicache
     if [ -x "$uicache" ]; then
-        "$uicache" -u @PREFIX@/Applications/iGhostty.app || true
+        "$uicache" -u @PREFIX@/Applications/iGhostVT.app || true
     fi
 fi
 

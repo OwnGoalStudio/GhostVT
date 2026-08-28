@@ -1,9 +1,9 @@
 # Tag vX.Y.Z → override Configuration/Version.xcconfig with the tag, build the
 # roothide and rootless debs, and attach both to a GitHub Release.
 #
-# The project depends on a SIBLING checkout of Lakr233/libghostty-spm (a local
-# path package), so both repos are checked out side by side and every make
-# invocation runs from the iGhostty/ subdirectory.
+# The terminal core comes from the released Lakr233/libghostty-spm package
+# (resolved by xcodebuild from Package.resolved), so this checkout is all the
+# build needs.
 
 name: Release
 
@@ -21,22 +21,9 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 60
 
-    defaults:
-      run:
-        working-directory: iGhostty
-
     steps:
-      - name: Check out iGhostty
+      - name: Check out iGhostVT
         uses: actions/checkout@v4
-        with:
-          path: iGhostty
-
-      - name: Check out libghostty-spm (sibling path dependency)
-        uses: actions/checkout@v4
-        with:
-          repository: Lakr233/libghostty-spm
-          ref: main
-          path: libghostty-spm
 
       - name: Select newest Xcode
         run: |
@@ -73,10 +60,10 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: ighostty-debs
+          name: ighostvt-debs
           path: |
-            iGhostty/build/Packages/*.deb
-            iGhostty/build/Packages/SHA256SUMS
+            build/Packages/*.deb
+            build/Packages/SHA256SUMS
           if-no-files-found: error
 
       # Create-or-upload with retries: a transient API failure (v0.2.3 died to
@@ -93,7 +80,7 @@ jobs:
               gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber && exit 0
             else
               gh release create "${GITHUB_REF_NAME}" \
-                --title "iGhostty ${GITHUB_REF_NAME}" \
+                --title "iGhostVT ${GITHUB_REF_NAME}" \
                 --generate-notes \
                 "${assets[@]}" && exit 0
             fi

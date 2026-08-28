@@ -1,6 +1,6 @@
 //
 //  TerminalSessionAttributes.swift
-//  iGhostty
+//  iGhostVT
 //
 //  Compiled into both the app and the widget extension; the Live Activity's
 //  payload contract between the two.
@@ -32,7 +32,7 @@ struct TerminalSessionAttributes {
         /// The tab's identity, stable across updates so rows keep their place.
         var id: String
         /// What the shell called itself via OSC 0/2, empty when it never did.
-        /// Deliberately not the transport's endpoint string — "ighosttyd
+        /// Deliberately not the transport's endpoint string — "ighostvtd
         /// session 3" is plumbing, not a title.
         var title: String
         /// OSC 7, already collapsed against the shell's home. Empty when the

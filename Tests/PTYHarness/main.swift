@@ -8,7 +8,7 @@ import Foundation
 // part of the daemon a device test would be worst at debugging, so it gets
 // covered here first.
 
-let harnessQueue = DispatchQueue(label: "wiki.qaq.ighostty.harness")
+let harnessQueue = DispatchQueue(label: "wiki.qaq.ighostvt.harness")
 var failures: [String] = []
 
 func check(_ condition: Bool, _ description: String) {
@@ -96,8 +96,8 @@ func shellPath() -> String {
 print("PTY harness")
 
 print("spawn and capture output")
-if let result = run(command: ["/bin/echo", "hello-from-ighostty"]) {
-    check(result.output.contains("hello-from-ighostty"), "child stdout reaches the host")
+if let result = run(command: ["/bin/echo", "hello-from-ighostvt"]) {
+    check(result.output.contains("hello-from-ighostvt"), "child stdout reaches the host")
     check(result.exitCode == 0, "clean exit reports 0 (got \(String(describing: result.exitCode)))")
 } else {
     check(false, "spawning /bin/echo succeeded")
@@ -117,7 +117,7 @@ if let plan = ShellLaunch.plan(requestedShell: nil) {
         "the default plan starts a session in the session user's home (got \(String(describing: plan.workingDirectory)))"
     )
 }
-let homelessUser = PasswdEntry(name: "nobody", uid: 0, gid: 0, home: "/nonexistent/ighostty-harness", shell: "/bin/sh")
+let homelessUser = PasswdEntry(name: "nobody", uid: 0, gid: 0, home: "/nonexistent/ighostvt-harness", shell: "/bin/sh")
 check(ShellLaunch.workingDirectory(for: homelessUser) == nil, "a home that does not exist is skipped")
 
 print("exit status decoding")
@@ -177,18 +177,18 @@ if let result = run(command: ["/bin/echo", "replay-me"]) {
 // The replay buffer is the daemon's only per-session accumulation, so it is
 // the one thing that could grow without bound while a session runs.
 print("replay buffer is capped")
-let flood = iGhosttyProtocol.sessionReplayByteCount * 3
+let flood = iGhostVTProtocol.sessionReplayByteCount * 3
 if let result = run(
     command: ["/bin/sh", "-c", "dd if=/dev/zero bs=1024 count=\(flood / 1024) 2>/dev/null | tr '\\0' 'x'"],
     timeout: 30
 ) {
     let retained = result.session.replayData().count
     check(
-        retained <= iGhosttyProtocol.sessionReplayByteCount,
-        "a session that printed \(flood / 1024) KiB retains at most \(iGhosttyProtocol.sessionReplayByteCount / 1024) KiB (kept \(retained / 1024) KiB)"
+        retained <= iGhostVTProtocol.sessionReplayByteCount,
+        "a session that printed \(flood / 1024) KiB retains at most \(iGhostVTProtocol.sessionReplayByteCount / 1024) KiB (kept \(retained / 1024) KiB)"
     )
     check(
-        retained > iGhosttyProtocol.sessionReplayByteCount / 2,
+        retained > iGhostVTProtocol.sessionReplayByteCount / 2,
         "and it keeps the most recent output rather than discarding everything"
     )
     result.session.invalidate()
@@ -288,7 +288,7 @@ for (command, expected) in [
             queue: harnessQueue
         )
         check(false, "spawning \(command[0]) fails")
-    } catch let failure as iGhosttyFailure {
+    } catch let failure as iGhostVTFailure {
         check(
             failure.code == .spawnFailed
                 && failure.message.contains(command[0])
@@ -296,12 +296,12 @@ for (command, expected) in [
             "\(command[0]) reports the real errno (said: \(failure.message))"
         )
     } catch {
-        check(false, "spawning \(command[0]) throws iGhosttyFailure, not \(error)")
+        check(false, "spawning \(command[0]) throws iGhostVTFailure, not \(error)")
     }
 }
 
 print("jailbreak path resolution")
-// The harness does not run from /usr/libexec/ighosttyd, so no bootstrap is
+// The harness does not run from /usr/libexec/ighostvtd, so no bootstrap is
 // found and every mapping degrades to identity — the same stub behaviour
 // roothide's own API has on a rootful system.
 check(JailbreakRoot.bootstrap == .none, "no bootstrap is detected off-device")
@@ -357,7 +357,7 @@ print("shell launch planning")
 if let plan = ShellLaunch.plan(requestedShell: nil) {
     check(plan.command.first?.hasPrefix("/") == true, "the default plan execs an absolute path")
     check(plan.environment["TERM"] == "xterm-256color", "TERM is set")
-    check(plan.environment["TERM_PROGRAM"] == "iGhostty", "TERM_PROGRAM identifies the app")
+    check(plan.environment["TERM_PROGRAM"] == "iGhostVT", "TERM_PROGRAM identifies the app")
     // Naming a locale the system cannot load is worse than naming none:
     // setlocale fails and everything silently falls back to C, which is where
     // multibyte input starts drawing one byte at a time.
@@ -387,7 +387,7 @@ if let plan = ShellLaunch.plan(requestedShell: nil) {
 
 print("shell integration")
 // Nothing is injected when the scripts are not installed — the harness host
-// has no /usr/share/ighostty, which is also the state of a device where the
+// has no /usr/share/ighostvt, which is also the state of a device where the
 // package predates them. A stray `--posix` here would start every bash
 // session in a mode its rc files are not written for.
 var integrationEnvironment: [String: String] = ["HOME": "/tmp"]

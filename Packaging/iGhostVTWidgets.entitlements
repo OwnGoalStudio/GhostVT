@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	Deliberately empty.
+
+	The Live Activity appex draws a session count and some tab titles that
+	ActivityKit hands it. It opens nothing, spawns nothing, and talks to
+	nothing: no mach-lookup exception, and above all no
+	wiki.qaq.ighostvt.client — the daemon must never accept a connection from
+	anything but the app binary itself, and package-deb.sh fails the build if
+	this file ever grows either key.
+
+	A standard sandboxed extension is exactly what this needs to be, so there
+	is nothing to ask for. `ldid` still needs the file: signing with an empty
+	entitlement set is the statement, not the absence of one.
+-->
+<plist version="1.0">
+<dict/>
+</plist>

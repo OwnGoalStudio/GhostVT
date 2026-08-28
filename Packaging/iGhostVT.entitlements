@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	The app renders and nothing else. Every privileged operation — spawning a
+	shell, owning a PTY, running as another user — still happens in
+	ighostvtd, which is already root and already authenticates its peers, and
+	the app still cannot spawn anything. What it asks for here is what an
+	ldid-signed bundle needs to draw a terminal at all.
+
+	Everything below was measured on device (iPad8,9, iOS 18.5, rootless
+	bootstrap, 2026-08-18) against the symptom that forced it: the app stuck
+	forever on "Starting…", its surface failing to build on every attempt.
+
+	- `wiki.qaq.ighostvt.client` + the mach-lookup exception — the marker the
+	  daemon authenticates against and permission to look up its service.
+	  This is the whole of the app's privilege in the architecture's terms.
+
+	- `com.apple.security.iokit-user-client-class` — the bootstrap withholds
+	  the GPU from an ad-hoc signed binary, and the kernel says what to do
+	  about it in as many words: `deny(1) iokit-open-user-client
+	  AGXDeviceUserClient … This must be in your
+	  com.apple.security.iokit-user-client-class entitlement`. Without it
+	  Metal cannot create a device (`Failed to create an IOAccelDevice…
+	  IOServiceOpen returned kIOReturn(0xE00002E2)`) and the terminal is a
+	  black square that never reports a viewport. The list is the render path
+	  only: Apple's GPU (AGX), its older IOAccel vocabulary, IOSurface, the
+	  framebuffer, JPEG decode, and the HID clients UIKit opens for input.
+
+	- `com.apple.private.security.no-sandbox` — on this bootstrap the sandbox
+	  denies the app every write inside its OWN container: `deny(1)
+	  file-write-create` on tmp/, Library/Caches, and Saved Application
+	  State, POSIX ownership being correct (mobile:mobile) and the container
+	  freshly rebuilt by uicache. That is fatal here because libghostty has
+	  no API to load configuration from memory — `ghostty_config_load_file`
+	  is the only door — so libghostty-spm renders a ghostty.conf and writes
+	  it to the container's tmp. The write fails, `ghostty_config_new` never
+	  gets a file, `ghostty_app_new` is never reached, and every surface
+	  rebuild fails. Nothing short of this entitlement grants those writes
+	  back: `application-identifier`, `platform-application`,
+	  `storage.AppBundles`, and `storage.AppDataContainers` were each
+	  measured on device and changed no denial. Sileo and Inspector, the
+	  other jailbroken GUI apps on the same device, both carry it.
+
+	- `com.apple.private.security.storage.AppDataContainers` — keeps the data
+	  container attached to a no-sandbox bundle, so UserDefaults (preferences,
+	  theme, sidebar state) stay where the sandboxed builds kept them instead
+	  of moving out to the shared ~/Library/Preferences.
+
+	Still deliberately absent, and what would bring each one back:
+
+	- `platform-application` — measured: changes no denial, and it only
+	  tightens what the sandbox withholds. Add it if the bootstrap ever
+	  refuses to launch a non-platform binary.
+	- `com.apple.private.security.no-container` / `container-required=false`
+	  — these take the container away, which is what AppDataContainers is
+	  here to keep.
+	- `com.apple.private.skip-library-validation` — add back only if the app
+	  fails to launch because a framework it loads is refused.
+
+	The extensions get none of this: see the check in package-deb.sh, which
+	fails the build if an appex ever picks any of it up.
+-->
+<plist version="1.0">
+<dict>
+	<key>wiki.qaq.ighostvt.client</key>
+	<true/>
+	<key>com.apple.security.exception.mach-lookup.global-name</key>
+	<array>
+		<string>wiki.qaq.ighostvt.service</string>
+	</array>
+	<key>com.apple.private.security.no-sandbox</key>
+	<true/>
+	<key>com.apple.private.security.storage.AppDataContainers</key>
+	<true/>
+	<key>com.apple.security.iokit-user-client-class</key>
+	<array>
+		<string>AGXCommandQueue</string>
+		<string>AGXDevice</string>
+		<string>AGXDeviceUserClient</string>
+		<string>AGXSharedUserClient</string>
+		<string>AGXGLContext</string>
+		<string>IOAccelContext</string>
+		<string>IOAccelContext2</string>
+		<string>IOAccelDevice</string>
+		<string>IOAccelDevice2</string>
+		<string>IOAccelSharedUserClient</string>
+		<string>IOAccelSharedUserClient2</string>
+		<string>IOAccelSubmitter2</string>
+		<string>IOSurfaceRootUserClient</string>
+		<string>IOSurfaceAcceleratorClient</string>
+		<string>IOMobileFramebufferUserClient</string>
+		<string>AppleJPEGDriverUserClient</string>
+		<string>IOHIDLibUserClient</string>
+		<string>IOHIDEventServiceFastPathUserClient</string>
+	</array>
+</dict>
+</plist>
