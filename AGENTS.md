@@ -72,6 +72,17 @@ factory closure reads the tab, because a view is made whenever the surface
 mounts and one born after the user locked the tab would otherwise come up
 unlocked.
 
+The keyboard lock has to be enforced at the *input view*, not at the tap that
+toggles it. libghostty becomes first responder from several other places — the
+long-press selection menu, a pointer click, and the host's own `requestFocus`
+after any sheet dismisses — and each of those raised the keyboard again while
+the lock was on. Handing UIKit an empty `inputView` (and a nil
+`inputAccessoryView`) closes all of them at once and keeps first-responder
+status, so hardware keys still arrive. Empty the `inputAssistantItem` groups
+along with it: the iPad shortcuts bar is not part of `inputAccessoryView`, and
+it stays floating over the terminal with a dictation button, costing 40pt of
+grid.
+
 ## Build & verify
 
 - `make check` — project/packaging validation

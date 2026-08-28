@@ -33,13 +33,13 @@ final class TerminalTab: ObservableObject, Identifiable {
         }
     }
 
-    /// Keyboard lock: a tap no longer summons or dismisses the software
-    /// keyboard (`LockableTerminalView.isKeyboardTapLocked`); touches,
-    /// scrolling, and hardware keys still work.
+    /// Keyboard lock: the software keyboard stays down whatever asks for it
+    /// (`LockableTerminalView.isSoftwareKeyboardLocked`); touches, scrolling,
+    /// selection, and hardware keys still work.
     @Published var isKeyboardLocked = false {
         didSet {
             (terminal.attachedPlatformView as? LockableTerminalView)?
-                .isKeyboardTapLocked = isKeyboardLocked
+                .isSoftwareKeyboardLocked = isKeyboardLocked
         }
     }
 
@@ -141,7 +141,7 @@ final class TerminalTab: ObservableObject, Identifiable {
         terminal.makePlatformView = { [weak self] in
             let view = LockableTerminalView(frame: .zero)
             view.isInteractionLocked = self?.isLocked ?? false
-            view.isKeyboardTapLocked = self?.isKeyboardLocked ?? false
+            view.isSoftwareKeyboardLocked = self?.isKeyboardLocked ?? false
             return view
         }
     }
