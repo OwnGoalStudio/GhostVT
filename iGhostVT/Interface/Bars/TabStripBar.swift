@@ -73,6 +73,12 @@ struct TabStripBar: View {
                         ObservedTabTitle(tab: tab)
                     }
                     .padding(.horizontal, DS.Padding.l)
+                    // Keyed on the tab: switching tabs (a new one included)
+                    // crossfades one title for another. Without the key
+                    // SwiftUI reads it as the same text changing and morphs
+                    // the two — strings overlapping mid-slide, the dot
+                    // drifting after them.
+                    .id(tab.id)
                     .transition(.opacity)
                 }
             } else {
@@ -111,6 +117,23 @@ struct ObservedTabTitle: View {
             .font(DS.Font.labelEmphasis)
             .lineLimit(1)
             .truncationMode(.middle)
+            .retitleTransition()
+            .animation(DS.Motion.smooth, value: tab.displayTitle)
+    }
+}
+
+private extension View {
+    /// A retitle crossfades the text instead of swapping it. The shell
+    /// retitles a fresh tab within a second of its prompt appearing, so
+    /// "Terminal" turning into a host name is the first thing a new tab
+    /// does — worth more than a hard cut.
+    @ViewBuilder
+    func retitleTransition() -> some View {
+        if #available(iOS 16.0, *) {
+            contentTransition(.opacity)
+        } else {
+            self
+        }
     }
 }
 
@@ -128,6 +151,7 @@ private struct TabChip: View {
                     .font(DS.Font.label)
                     .lineLimit(1)
                     .truncationMode(.middle)
+                    .retitleTransition()
                     // The floor keeps a short-titled chip around 100pt, so
                     // the close button never crowds the status dot — a tap
                     // near the dot must select, not close.
@@ -149,6 +173,9 @@ private struct TabChip: View {
                 )
             )
             .contentShape(Capsule())
+            // A retitle changes the chip's width; the chips after it slide
+            // over instead of jumping.
+            .animation(DS.Motion.smooth, value: tab.displayTitle)
         }
     }
 }

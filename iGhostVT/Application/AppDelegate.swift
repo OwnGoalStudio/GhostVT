@@ -32,14 +32,25 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    /// The system menu bar (the Mac, an iPad with a keyboard) ships a Format
+    /// menu whose ⌘T is Show Fonts — it shadows the app's own ⌘T, New Tab,
+    /// and a terminal has no rich text for it to format anyway.
+    override func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        guard builder.system == .main else { return }
+        builder.remove(menu: .format)
+    }
+
     /// An explicit quit: ⌘Q on the Mac, or a force-quit on iOS while the app
     /// is still running (a suspended app gets no notice, and its shells stay
     /// in the daemon either way). With Keep Alive off, every shell the daemon
     /// holds — attached to a window or not — dies here, and the connection
-    /// goes with it.
+    /// goes with it. Files the terminal staged for pastes and drops belong
+    /// to those shells; with none left to refer to them, they go too.
     func applicationWillTerminate(_: UIApplication) {
         guard !SessionKeepAlive.isEnabled else { return }
         XPCDaemonTransport.closeAllSessions()
+        TerminalFileStaging.removeAllFiles()
     }
 }
 

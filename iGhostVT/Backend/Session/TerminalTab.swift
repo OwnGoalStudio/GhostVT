@@ -6,6 +6,7 @@
 import Combine
 import Foundation
 import GhosttyTerminal
+import SwiftUI
 
 /// One terminal session: its own surface state and its own connection.
 /// Tabs stay alive (and connected) while in the background; only the active
@@ -73,13 +74,18 @@ final class TerminalTab: ObservableObject, Identifiable {
         // `displayTitle` reads two other observable objects, and SwiftUI
         // only watches the one a view holds — the tab. Without this the
         // title capsule, the tab strip, and the sidebar keep rendering the
-        // title the surface had when the view was first built.
+        // title the surface had when the view was first built. Published
+        // inside an animation so a retitle — which changes a chip's width,
+        // and so every chip after it — moves instead of jumping, in every
+        // view at once.
         titleObservation = Publishers.Merge(
             terminal.$title.removeDuplicates().map { _ in () },
             store.$inferredTitle.removeDuplicates().map { _ in () }
         )
         .sink { [weak self] in
-            self?.objectWillChange.send()
+            withAnimation(DS.Motion.smooth) {
+                self?.objectWillChange.send()
+            }
         }
         statusObservation = store.$status.sink { [weak self] status in
             guard status == .connected else { return }
