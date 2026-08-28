@@ -29,14 +29,16 @@ final class TabManager: ObservableObject {
     /// the four close entry points cannot race each other's presentations.
     @Published var closeRequest: TerminalTab?
 
-    /// A clipboard decision libghostty is waiting on (a program's OSC 52
-    /// read or write, a paste that paste protection flagged), presented as
-    /// one alert by `ClipboardConfirmation` the way `closeRequest` is.
-    /// Requests queue behind the one on screen and are answered one at a
-    /// time; every tab's hook is installed here, at creation, so no tab can
-    /// exist without one and fall back to libghostty's silent denial.
-    @Published private(set) var clipboardRequest: TerminalClipboardConfirmationRequest?
-    private var pendingClipboardRequests: [TerminalClipboardConfirmationRequest] = []
+    /// Clipboard decisions libghostty is waiting on (a program's OSC 52
+    /// read or write, a paste that paste protection flagged), answered one
+    /// at a time: `ClipboardConfirmation` presents the head the way
+    /// `closeRequest` is presented. Every tab's hook is installed by
+    /// `makeTab`, so no tab can exist without one and fall back to
+    /// libghostty's silent denial.
+    @Published private(set) var clipboardRequests: [TerminalClipboardConfirmationRequest] = []
+
+    /// A long press asking for the selection sheet; `RootView` presents it.
+    @Published var selectionRequest: TerminalSelectionRequestBox?
 
     init() {
         SessionActivityController.shared.register(self) { [weak self] in
@@ -57,8 +59,7 @@ final class TabManager: ObservableObject {
                 if tabs.isEmpty { newTab() }
                 return
             }
-            let resumed = resumable.map { TerminalTab(resumeDaemonSessionID: $0) }
-            resumed.forEach(self.adopt)
+            let resumed = resumable.map { self.makeTab(resume: $0) }
             withAnimation(Self.tabTransition) {
                 self.tabs.append(contentsOf: resumed)
                 self.activeTabID = self.tabs.last?.id
@@ -104,32 +105,28 @@ final class TabManager: ObservableObject {
         }
     }
 
-    /// Hooks a tab's terminal into this window's presenters. Every tab goes
-    /// through here before it joins `tabs`.
-    private func adopt(_ tab: TerminalTab) {
+    /// The one way a tab is created: its terminal's hooks land on this
+    /// window's presenters before the tab joins `tabs`.
+    private func makeTab(resume daemonSessionID: UInt64? = nil) -> TerminalTab {
+        let tab = TerminalTab(resumeDaemonSessionID: daemonSessionID)
         tab.terminal.onClipboardConfirmationRequest = { [weak self] request in
-            self?.enqueueClipboardRequest(request)
+            self?.clipboardRequests.append(request)
         }
+        tab.terminal.onTextSelectionRequest = { [weak self] request in
+            self?.selectionRequest = TerminalSelectionRequestBox(request: request)
+        }
+        return tab
     }
 
-    private func enqueueClipboardRequest(_ request: TerminalClipboardConfirmationRequest) {
-        if clipboardRequest == nil {
-            clipboardRequest = request
-        } else {
-            pendingClipboardRequests.append(request)
-        }
-    }
-
-    /// The presenter answered `clipboardRequest`; the next one, if any, takes
-    /// its place.
+    /// The presenter answered the head of `clipboardRequests`.
     func finishClipboardRequest() {
-        clipboardRequest = pendingClipboardRequests.isEmpty ? nil : pendingClipboardRequests.removeFirst()
+        guard !clipboardRequests.isEmpty else { return }
+        clipboardRequests.removeFirst()
     }
 
     @discardableResult
     func newTab() -> TerminalTab {
-        let tab = TerminalTab()
-        adopt(tab)
+        let tab = makeTab()
         withAnimation(Self.tabTransition) {
             tabs.append(tab)
             activeTabID = tab.id
@@ -211,4 +208,11 @@ final class TabManager: ObservableObject {
         let next = (index + offset + tabs.count) % tabs.count
         self.activeTabID = tabs[next].id
     }
+}
+
+/// Wraps a selection request for SwiftUI's `sheet(item:)`; each long press is
+/// its own presentation.
+struct TerminalSelectionRequestBox: Identifiable {
+    let id = UUID()
+    let request: TerminalTextSelectionRequest
 }

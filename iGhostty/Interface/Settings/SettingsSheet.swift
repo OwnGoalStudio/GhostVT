@@ -22,9 +22,7 @@ struct SettingsSheet: View {
         NavigationView {
             Form {
                 appearanceSection
-                #if !targetEnvironment(macCatalyst)
-                    keyboardSection
-                #endif
+                keyboardSection
                 shellSection
                 debugSection
                 aboutSection
@@ -70,8 +68,10 @@ struct SettingsSheet: View {
         }
     }
 
-    #if !targetEnvironment(macCatalyst)
-        private var keyboardSection: some View {
+    /// The accessory bar is a software-keyboard fixture; a Mac has none.
+    @ViewBuilder
+    private var keyboardSection: some View {
+        #if !targetEnvironment(macCatalyst)
             Section {
                 NavigationLink {
                     KeyboardBarSettingsView()
@@ -83,8 +83,8 @@ struct SettingsSheet: View {
             } footer: {
                 Text("Choose and arrange the keys on the bar above the keyboard.")
             }
-        }
-    #endif
+        #endif
+    }
 
     private var shellSection: some View {
         Section {

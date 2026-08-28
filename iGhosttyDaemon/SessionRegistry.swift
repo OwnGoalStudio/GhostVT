@@ -17,15 +17,11 @@ final class SessionRegistry {
 
     init(queue: DispatchQueue) {
         self.queue = queue
-        // Belt and braces under every session's own exit source. SIGCHLD is
-        // the one notice the kernel sends *after* a child is waitable
-        // (proc_exit marks it SZOMB, then signals); the process sources fire
-        // before that and poll to cover the gap. Should a poll ever give up,
-        // or a source never fire, this sweep still reaps — a coalesced
-        // signal names no pid, so every live session gets asked, and asking
-        // a running child costs one WNOHANG. SIGCHLD stays SIG_DFL (see
-        // main.swift): a kqueue signal source observes delivery without
-        // installing a handler, and SIG_IGN would auto-reap behind waitpid.
+        // The authoritative reaper under every session's own exit source
+        // (see PTYSession.start for the kernel ordering): SIGCHLD is sent
+        // once the child is waitable, coalesced and naming no pid, so every
+        // live session gets asked. SIGCHLD stays SIG_DFL (main.swift): the
+        // source observes delivery, and SIG_IGN would auto-reap.
         let signalSource = DispatchSource.makeSignalSource(signal: SIGCHLD, queue: queue)
         signalSource.setEventHandler { [weak self] in
             guard let self else { return }
@@ -80,7 +76,7 @@ final class SessionRegistry {
             columns: clamp(columns, fallback: iGhosttyProtocol.defaultColumns, limit: iGhosttyProtocol.maximumColumns),
             rows: clamp(rows, fallback: iGhosttyProtocol.defaultRows, limit: iGhosttyProtocol.maximumRows),
             credentials: plan.credentials,
-            workingDirectories: plan.workingDirectories,
+            workingDirectory: plan.workingDirectory,
             queue: queue
         )
         sessions[id] = session
@@ -199,14 +195,7 @@ final class SessionRegistry {
                     "the requested command is not an executable absolute path"
                 )
             }
-            // A verbatim argv is still a session, so it still runs as mobile,
-            // from mobile's home.
-            return ShellLaunch.Plan(
-                command: command,
-                environment: [:],
-                credentials: ShellLaunch.sessionCredentials,
-                workingDirectories: ShellLaunch.sessionWorkingDirectories
-            )
+            return ShellLaunch.verbatimPlan(command: command)
         }
     }
 

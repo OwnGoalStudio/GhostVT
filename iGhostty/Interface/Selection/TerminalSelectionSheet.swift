@@ -7,13 +7,6 @@ import GhosttyTerminal
 import SwiftUI
 import UIKit
 
-/// Wraps a selection request for SwiftUI's `sheet(item:)`; each long press is
-/// its own presentation.
-struct TerminalSelectionRequestBox: Identifiable {
-    let id = UUID()
-    let request: TerminalTextSelectionRequest
-}
-
 /// The long-press selection page: the viewport text in a native text view,
 /// pre-selected at the pressed word, so the system's selection handles,
 /// magnifier, and copy menu all work on terminal content.

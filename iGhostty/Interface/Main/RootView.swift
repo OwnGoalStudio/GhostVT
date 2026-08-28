@@ -29,7 +29,6 @@ struct RootView: View {
     @AppStorage("Sidebar.width") private var sidebarWidth = 300.0
     @State private var showsSwitcher = false
     @State private var showsSettingsSheet = false
-    @State private var selectionRequest: TerminalSelectionRequestBox?
 
     private var isRegularWidth: Bool { horizontalSizeClass == .regular }
 
@@ -59,10 +58,7 @@ struct RootView: View {
             .animation(DS.Motion.smooth, value: showsSidebar)
         }
         .background(shortcutButtons)
-        .onAppear {
-            refocus()
-            bindTabHooks()
-        }
+        .onAppear(perform: refocus)
         .onChange(of: tabManager.activeTabID) { _ in refocus() }
         // Backgrounding resigns the surface's first responder (which clears
         // the FocusState through the bridge), so coming back needs the focus
@@ -71,21 +67,15 @@ struct RootView: View {
             guard phase == .active else { return }
             refocus()
         }
-        .onChange(of: tabManager.tabs.count) { _ in bindTabHooks() }
         .onChange(of: theme.selection) { _ in
             for tab in tabManager.tabs {
                 tab.terminal.controller.setTheme(theme.terminalTheme)
             }
         }
         .onReceive(KeyboardBarStore.shared.$entries) { _ in
-            #if !targetEnvironment(macCatalyst)
-                let items = KeyboardBarStore.shared.accessoryItems
-                for tab in tabManager.tabs {
-                    if tab.terminal.inputAccessoryItems != items {
-                        tab.terminal.inputAccessoryItems = items
-                    }
-                }
-            #endif
+            for tab in tabManager.tabs {
+                KeyboardBarStore.shared.apply(to: tab.terminal)
+            }
         }
         .fullScreenCover(isPresented: $showsSwitcher, onDismiss: refocus) {
             TabSwitcherView(tabManager: tabManager)
@@ -93,7 +83,7 @@ struct RootView: View {
         .sheet(isPresented: $showsSettingsSheet, onDismiss: refocus) {
             SettingsSheet()
         }
-        .sheet(item: $selectionRequest, onDismiss: refocus) { box in
+        .sheet(item: $tabManager.selectionRequest, onDismiss: refocus) { box in
             TerminalSelectionSheet(
                 text: box.request.text,
                 anchorRange: box.request.anchorRange
@@ -159,17 +149,6 @@ struct RootView: View {
                         insertion: .opacity,
                         removal: .scale(scale: 0.92).combined(with: .opacity)
                     ))
-            }
-        }
-    }
-
-    /// Hooks that live on each tab's terminal state but present interface in
-    /// this window: re-bound whenever the tab set changes, so a tab created
-    /// anywhere (strip, switcher, shortcut) gets them.
-    private func bindTabHooks() {
-        for tab in tabManager.tabs {
-            tab.terminal.onTextSelectionRequest = { request in
-                selectionRequest = TerminalSelectionRequestBox(request: request)
             }
         }
     }

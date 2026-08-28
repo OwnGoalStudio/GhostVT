@@ -1,6 +1,5 @@
 import GhosttyTerminal
 import SwiftUI
-import UIKit
 
 /// The question Ghostty asks before a protected clipboard operation: a
 /// program reading the clipboard (OSC 52, `clipboard-read = ask`), a
@@ -10,32 +9,17 @@ import UIKit
 /// denies a program's request silently, which is how a tool's "paste from
 /// clipboard" used to do nothing at all.
 ///
-/// Attached once, at the window root, like `CloseTabConfirmation`: the
-/// request lives on the `TabManager` (which installs every tab's hook, so
-/// none is missed), and the alert is a presented `AlertViewController` that
-/// lands above whatever the window is showing.
-struct ClipboardConfirmation: ViewModifier {
-    @ObservedObject var tabManager: TabManager
-    @State private var window: UIWindow?
-    @State private var presented: AlertViewController?
-
-    func body(content: Content) -> some View {
-        content
-            .background(WindowReader(window: $window))
-            .onReceive(tabManager.$clipboardRequest) { request in
-                present(request)
-            }
-            // A request raised before the window was read waits for it.
-            .onChange(of: window == nil) { _ in
-                present(tabManager.clipboardRequest)
-            }
-    }
-
-    private func present(_ request: TerminalClipboardConfirmationRequest?) {
-        guard let request, let window, presented == nil else { return }
-        let alert = AlertViewController(
-            title: Self.title(for: request.kind),
-            message: Self.message(for: request),
+/// The requests queue on the `TabManager`, which installs every tab's hook
+/// so none is missed; the head of the queue is the one on screen.
+@MainActor
+enum ClipboardConfirmation {
+    static func alert(
+        for request: TerminalClipboardConfirmationRequest,
+        finish: @escaping () -> Void
+    ) -> AlertViewController {
+        AlertViewController(
+            title: title(for: request.kind),
+            message: message(for: request),
             actions: [
                 AlertAction("Deny") {
                     request.respond(allow: false)
@@ -47,13 +31,6 @@ struct ClipboardConfirmation: ViewModifier {
                 },
             ]
         )
-        presented = alert
-        alert.present(in: window)
-    }
-
-    private func finish() {
-        presented = nil
-        tabManager.finishClipboardRequest()
     }
 
     private static func title(for kind: TerminalClipboardRequestKind) -> String.LocalizationValue {
@@ -65,7 +42,7 @@ struct ClipboardConfirmation: ViewModifier {
     }
 
     private static func message(for request: TerminalClipboardConfirmationRequest) -> String.LocalizationValue {
-        let preview = Self.preview(of: request.contents)
+        let preview = preview(of: request.contents)
         switch request.kind {
         case .osc52Read:
             return "A program in this terminal wants to read the clipboard: \(preview)"
@@ -77,19 +54,24 @@ struct ClipboardConfirmation: ViewModifier {
     }
 
     /// The first line or so of what is at stake, short enough for a card.
+    /// Sliced before it is flattened: a paste can be large, and this runs on
+    /// the main thread as the alert appears.
     private static func preview(of contents: String) -> String {
-        let flattened = contents
-            .replacingOccurrences(of: "\r\n", with: " ⏎ ")
-            .replacingOccurrences(of: "\n", with: " ⏎ ")
-            .replacingOccurrences(of: "\r", with: " ⏎ ")
         let limit = 120
-        guard flattened.count > limit else { return "“\(flattened)”" }
-        return "“\(flattened.prefix(limit))…”"
+        let head = contents.prefix(limit + 1)
+        let flattened = head.prefix(limit)
+            .split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
+            .joined(separator: " ⏎ ")
+        return head.count > limit ? "“\(flattened)…”" : "“\(flattened)”"
     }
 }
 
 extension View {
     func clipboardConfirmation(_ tabManager: TabManager) -> some View {
-        modifier(ClipboardConfirmation(tabManager: tabManager))
+        modifier(WindowAlertPresenter(
+            requests: tabManager.$clipboardRequests.map(\.first),
+            onFinish: { tabManager.finishClipboardRequest() },
+            makeAlert: ClipboardConfirmation.alert
+        ))
     }
 }

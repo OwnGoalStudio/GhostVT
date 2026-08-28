@@ -24,22 +24,15 @@ final class PeerAuthenticator {
     private lazy var installedClientPaths = resolveInstalledClientPaths()
 
     /// The Mac Catalyst harness: a Debug daemon built for macOS accepts the
-    /// app Xcode just built, running as the daemon's own user. Release
-    /// builds and every device build know no such peer — there the accepted
-    /// peers are root and mobile alone.
+    /// app Xcode just built, running as the daemon's own user and carrying
+    /// no entitlement (AGENTS.md: a Catalyst app cannot carry one). Off the
+    /// device that is the whole threat model — the daemon runs and spawns
+    /// as that user. Release and device builds know no such peer.
     #if os(macOS) && DEBUG
-        private static let developmentUserID = getuid()
-        private static let developmentClientSuffix = "/iGhostty.app/Contents/MacOS/iGhostty"
-
-        private static func isDevelopmentPeer(uid: UInt32, clientPath: String) -> Bool {
-            uid == developmentUserID && clientPath.hasSuffix(developmentClientSuffix)
-        }
+        private static let developmentPeer: (uid: UInt32, bundleSuffix: String)? =
+            (getuid(), "/iGhostty.app/Contents/MacOS/iGhostty")
     #else
-        private static let developmentUserID: UInt32? = nil
-
-        private static func isDevelopmentPeer(uid _: UInt32, clientPath _: String) -> Bool {
-            false
-        }
+        private static let developmentPeer: (uid: UInt32, bundleSuffix: String)? = nil
     #endif
 
     func authenticate(_ connection: xpc_connection_t) -> Int32? {
@@ -52,7 +45,7 @@ final class PeerAuthenticator {
             DaemonFileLog.log("peer denied: implausible pid \(pid)")
             return nil
         }
-        guard uid == 0 || uid == Self.mobileUserID || uid == Self.developmentUserID else {
+        guard uid == 0 || uid == Self.mobileUserID || uid == Self.developmentPeer?.uid else {
             DaemonLog.server.error("peer \(pid) denied: uid \(uid)")
             DaemonFileLog.log("peer \(pid) denied: uid \(uid)")
             return nil
@@ -63,17 +56,7 @@ final class PeerAuthenticator {
             return nil
         }
 
-        // The Mac Catalyst development build: the daemon is a per-user
-        // LaunchAgent and the app is whatever Xcode just built, so there is
-        // no installed, root-owned path to insist on — and no client
-        // entitlement either: a Catalyst app is an iOS-family binary, and
-        // macOS refuses to launch one carrying an entitlement no provisioning
-        // profile granted (RunningBoard's "Launchd job spawn failed"), ad-hoc
-        // signature or not. What remains is the peer being the daemon's own
-        // user and its executable living in an iGhostty.app bundle. Off the
-        // device that is the whole threat model: the daemon runs as that
-        // user and spawns as that user. Debug macOS builds only.
-        if Self.isDevelopmentPeer(uid: uid, clientPath: clientPath) {
+        if let peer = Self.developmentPeer, uid == peer.uid, clientPath.hasSuffix(peer.bundleSuffix) {
             return pid
         }
 

@@ -43,13 +43,9 @@ final class SessionActivityController {
     }
 
     func refresh() {
-        // Live Activities do not exist on the Mac; the Catalyst development
-        // build keeps the callers and drops the payload here.
-        #if !targetEnvironment(macCatalyst)
-            guard #available(iOS 16.2, *) else { return }
-            let state = currentState()
-            Task { await Self.apply(state) }
-        #endif
+        guard #available(iOS 16.2, *) else { return }
+        let state = currentState()
+        Task { await Self.apply(state) }
     }
 
     @available(iOS 16.2, *)
@@ -149,5 +145,10 @@ final class SessionActivityController {
                 content: content
             )
         }
+    #else
+        /// Live Activities do not exist on the Mac; the Catalyst development
+        /// build keeps every caller and drops the payload here.
+        @available(iOS 16.2, *)
+        private static func apply(_: TerminalSessionAttributes.ContentState) async {}
     #endif
 }

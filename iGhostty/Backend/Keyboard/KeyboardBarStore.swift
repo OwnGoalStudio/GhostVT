@@ -157,11 +157,17 @@ final class KeyboardBarStore: ObservableObject {
         entries = codes.compactMap(KeyboardBarKey.init(code:)).map(Entry.init(key:))
     }
 
-    #if !targetEnvironment(macCatalyst)
-        var accessoryItems: [TerminalInputAccessoryItem] {
-            entries.map(\.key.accessoryItem)
-        }
-    #endif
+    /// Puts the arrangement on a terminal, if it changed. The bar is a
+    /// software-keyboard fixture: a Mac has nothing to hang it on, and the
+    /// library defines none there, so this is the one place that knows.
+    func apply(to terminal: TerminalViewState) {
+        #if !targetEnvironment(macCatalyst)
+            let items = entries.map(\.key.accessoryItem)
+            if terminal.inputAccessoryItems != items {
+                terminal.inputAccessoryItems = items
+            }
+        #endif
+    }
 
     /// Catalog keys not currently on the bar. Dividers and free-form custom
     /// keys are not listed — they are added through their own controls and

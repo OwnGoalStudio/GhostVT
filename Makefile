@@ -40,6 +40,7 @@ DEB_OUTPUT          ?= $(ROOT_DIR)/build/Packages/$(PACKAGE_ID)_$(APP_VERSION)_$
 XCODEBUILD_WRAPPER  := $(ROOT_DIR)/Scripts/run-xcodebuild.sh
 DEB_PACKAGER        := $(ROOT_DIR)/Scripts/package-deb.sh
 VERSION_APPLIER     := $(ROOT_DIR)/Scripts/apply-version.sh
+MAC_DAEMON_LOADER   := $(ROOT_DIR)/Scripts/mac-daemon.sh
 CONTROL_TEMPLATE    := $(ROOT_DIR)/Packaging/DEBIAN/control
 ENTITLEMENTS        := $(ROOT_DIR)/Packaging/iGhostty.entitlements
 DAEMON_ENTITLEMENTS := $(ROOT_DIR)/Packaging/iGhosttyDaemon.entitlements
@@ -52,10 +53,12 @@ XCODEBUILD := $(XCODEBUILD_WRAPPER) \
 	-skipMacroValidation \
 	-skipPackagePluginValidation
 
-DEVICE_XCODEBUILD := $(XCODEBUILD) \
+UNSIGNED_XCODEBUILD := $(XCODEBUILD) \
 	CODE_SIGNING_ALLOWED=NO \
 	CODE_SIGNING_REQUIRED=NO \
-	CODE_SIGN_IDENTITY="" \
+	CODE_SIGN_IDENTITY=""
+
+DEVICE_XCODEBUILD := $(UNSIGNED_XCODEBUILD) \
 	ARCHS=arm64 \
 	ONLY_ACTIVE_ARCH=YES \
 	ENABLE_DEBUG_DYLIB=NO
@@ -112,6 +115,7 @@ check:
 	@test -f "$(CONTROL_TEMPLATE)" || { echo "error: Debian control template is missing" >&2; exit 66; }
 	@test -x "$(DEB_PACKAGER)" || { echo "error: package-deb.sh is not executable" >&2; exit 66; }
 	@test -x "$(VERSION_APPLIER)" || { echo "error: apply-version.sh is not executable" >&2; exit 66; }
+	@test -x "$(MAC_DAEMON_LOADER)" || { echo "error: mac-daemon.sh is not executable" >&2; exit 66; }
 	@for xcconfig in Version Base Development Release; do \
 		test -f "$(CONFIG_DIR)/$$xcconfig.xcconfig" || { echo "error: Configuration/$$xcconfig.xcconfig is missing" >&2; exit 66; }; \
 	done
@@ -175,29 +179,18 @@ deb-roothide:
 deb-rootless:
 	@$(MAKE) --no-print-directory PACKAGE_FLAVOR=rootless deb
 
-# Mac Catalyst development harness. The device has no simulator loop (the
-# Simulator has no daemon), so this is the only way to run the whole stack —
-# app, transport, daemon, shells — off-device. Debug configuration; the app
-# is built unsigned and ad-hoc signed with *no* entitlements: a Catalyst app
-# is an iOS-family binary, and macOS will not launch one carrying an
-# entitlement no provisioning profile granted (RunningBoard reports "Launchd
-# job spawn failed"). The daemon built for macOS therefore authenticates the
-# development peer by uid and bundle path instead of the client entitlement
-# (PeerAuthenticator's macOS branch, Debug builds only — which is why the
-# configuration is not a knob). It runs as a per-user LaunchAgent in the gui
-# domain, where the Catalyst app looks the service up.
+# Mac Catalyst development harness: the whole stack off-device (AGENTS.md,
+# "make mac-run"). The app is ad-hoc signed with *no* entitlements — a
+# Catalyst app cannot carry the client one — so the daemon authenticates it
+# by uid and bundle path, which only a Debug macOS daemon does; that is why
+# the configuration is not a knob.
 MAC_CONFIGURATION   := Debug
 MAC_APP_BUNDLE      := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)-maccatalyst/iGhostty.app
 MAC_DAEMON_BINARY   := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighosttyd
 MAC_LAUNCH_AGENT    := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighosttyd.plist
-MAC_AGENT_INSTALL   := $(HOME)/Library/LaunchAgents/wiki.qaq.ighosttyd.plist
-MAC_AGENT_DOMAIN     = gui/$(shell id -u)
 
 mac-app:
-	XCBUILD_LABEL=build-mac-app $(XCODEBUILD) \
-		CODE_SIGNING_ALLOWED=NO \
-		CODE_SIGNING_REQUIRED=NO \
-		CODE_SIGN_IDENTITY="" \
+	XCBUILD_LABEL=build-mac-app $(UNSIGNED_XCODEBUILD) \
 		-configuration "$(MAC_CONFIGURATION)" \
 		-scheme "$(SCHEME)" \
 		-destination "platform=macOS,variant=Mac Catalyst" \
@@ -215,18 +208,10 @@ mac-daemon:
 		-scheme "$(DAEMON_SCHEME)" \
 		-destination "platform=macOS" \
 		build
-	@test -x "$(MAC_DAEMON_BINARY)" || { echo "error: $(MAC_DAEMON_BINARY) was not built" >&2; exit 66; }
-	@mkdir -p "$(dir $(MAC_AGENT_INSTALL))"
-	@launchctl bootout "$(MAC_AGENT_DOMAIN)/wiki.qaq.ighosttyd" 2>/dev/null || true
-	@sed -e "s|@DAEMON@|$(MAC_DAEMON_BINARY)|g" "$(MAC_LAUNCH_AGENT)" >"$(MAC_AGENT_INSTALL)"
-	@plutil -lint "$(MAC_AGENT_INSTALL)" >/dev/null
-	launchctl bootstrap "$(MAC_AGENT_DOMAIN)" "$(MAC_AGENT_INSTALL)"
-	@echo "ighosttyd loaded as $(MAC_AGENT_DOMAIN)/wiki.qaq.ighosttyd; log: ~/Library/Logs/ighosttyd.log"
+	"$(MAC_DAEMON_LOADER)" install "$(MAC_DAEMON_BINARY)" "$(MAC_LAUNCH_AGENT)"
 
 mac-daemon-uninstall:
-	@launchctl bootout "$(MAC_AGENT_DOMAIN)/wiki.qaq.ighosttyd" 2>/dev/null || true
-	@rm -f "$(MAC_AGENT_INSTALL)"
-	@echo "ighosttyd LaunchAgent removed"
+	"$(MAC_DAEMON_LOADER)" uninstall
 
 mac-run: mac-daemon mac-app
 	open "$(MAC_APP_BUNDLE)"

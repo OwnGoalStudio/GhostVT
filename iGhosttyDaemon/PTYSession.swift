@@ -118,7 +118,7 @@ final class PTYSession {
         columns: UInt16,
         rows: UInt16,
         credentials: ShellLaunch.Credentials? = nil,
-        workingDirectories: [String] = [],
+        workingDirectory: String? = nil,
         queue: DispatchQueue
     ) throws {
         guard let executable = command.first, !executable.isEmpty else {
@@ -134,12 +134,12 @@ final class PTYSession {
         let environmentStrings = environment.map { "\($0.key)=\($0.value)" }.sorted()
         let argv = Self.makeCStringArray(command)
         let envp = Self.makeCStringArray(environmentStrings)
-        let directories = Self.makeCStringArray(workingDirectories)
+        let directory: UnsafeMutablePointer<CChar>? = workingDirectory.flatMap { strdup($0) }
         let executablePath = strdup(executable)
         defer {
             Self.freeCStringArray(argv, count: command.count)
             Self.freeCStringArray(envp, count: environmentStrings.count)
-            Self.freeCStringArray(directories, count: workingDirectories.count)
+            free(directory)
             free(executablePath)
         }
 
@@ -180,12 +180,9 @@ final class PTYSession {
             // needs was allocated above. `_exit` avoids running the parent's
             // atexit handlers if exec fails.
             close(reportRead)
-            // Nothing the daemon holds may reach the shell. Every daemon
-            // descriptor is close-on-exec already; this sweep is the
-            // guarantee for the ones that are not yet — a handle some queue
-            // opened a moment before the fork, or one a future change
-            // forgets to mark. The spawn pipe stays until execve closes it.
-            // `close` is async-signal-safe; the table is small.
+            // Every daemon descriptor is close-on-exec already (AGENTS.md);
+            // the sweep guarantees it for any a future change forgets to
+            // mark. The spawn pipe stays until execve closes it.
             let tableSize = getdtablesize()
             var descriptor: Int32 = 3
             while descriptor < tableSize {
@@ -212,14 +209,9 @@ final class PTYSession {
                 if getuid() != credentials.uid || geteuid() != credentials.uid { fail(Self.stepVerifyUID) }
             }
             // After the privilege drop, so the home has to be reachable by
-            // the user the shell will be. A directory that does not exist
-            // (or is not theirs) is skipped for the next spelling; none
-            // usable means the daemon's own directory, as before.
-            var directoryIndex = 0
-            while let directory = directories[directoryIndex] {
-                if chdir(directory) == 0 { break }
-                directoryIndex += 1
-            }
+            // the user the shell will be; a refusal leaves the daemon's own
+            // directory, as before.
+            if let directory { _ = chdir(directory) }
             execve(executablePath, argv, envp)
             fail(Self.stepExec)
         }
@@ -287,31 +279,20 @@ final class PTYSession {
 
         // A process source registered after its process already died never
         // fires, and a fast child (/bin/echo) can beat the registration. One
-        // poll on the queue closes that window — reapChild's WNOHANG makes it
-        // a no-op while the child is still running.
+        // poll on the queue closes that window — WNOHANG makes it a no-op
+        // while the child is still running.
         queue.async { [weak self] in
-            self?.reapChild()
+            self?.reapIfExited()
         }
     }
 
-    /// Bytes typed by the user, forwarded to the shell.
+    /// Bytes typed by the user, forwarded to the shell. EAGAIN on a full PTY
+    /// buffer drops the tail: the shell is not draining, and that beats
+    /// blocking the daemon's queue.
     func write(_ data: Data) {
         guard isAlive, !data.isEmpty else { return }
         data.withUnsafeBytes { buffer in
-            guard var pointer = buffer.baseAddress else { return }
-            var remaining = buffer.count
-            while remaining > 0 {
-                let written = Darwin.write(master, pointer, remaining)
-                if written > 0 {
-                    pointer += written
-                    remaining -= written
-                    continue
-                }
-                if written < 0, errno == EINTR { continue }
-                // EAGAIN on a full PTY buffer: the shell is not draining, so
-                // dropping the tail beats blocking the daemon's queue.
-                break
-            }
+            _ = writeFully(master, buffer)
         }
     }
 
@@ -370,10 +351,7 @@ final class PTYSession {
         attempt: Int = 0
     ) {
         var status: Int32 = 0
-        let result = waitpid(pid, &status, WNOHANG)
-        if result == pid || (result < 0 && errno != EINTR) {
-            return
-        }
+        guard waitNoHang(pid, status: &status) == 0 else { return }
         guard attempt < 25 else {
             DaemonFileLog.log("child \(pid) not reapable after SIGKILL, leaving it")
             return
@@ -421,20 +399,18 @@ final class PTYSession {
         }
     }
 
-    /// WNOHANG-polls until the child is reaped, bounded at two seconds. Only
-    /// started on evidence the child is going — the process source's
-    /// NOTE_EXIT, or EOF on the PTY — so this covers the window between a
-    /// process leaving and the kernel making it waitable, which neither
-    /// signal closes on its own.
+    /// WNOHANG-polls until the child is reaped, bounded at half a second:
+    /// started on evidence the child is going (the exit source, or EOF on
+    /// the PTY), it covers the gap before the kernel makes it waitable.
     private func pollUntilReaped(attempt: Int = 0) {
         guard isAlive else { return }
-        reapChild()
+        reapIfExited()
         guard isAlive else { return }
-        guard attempt < 100 else {
+        guard attempt < 25 else {
             // Not a failure: a large child can spend longer than this in
             // teardown between its exit notice and SZOMB. The registry's
             // SIGCHLD sweep reaps it when the kernel is done.
-            DaemonFileLog.log("session \(id) child \(childPID) not reapable 2s after its exit notice; leaving it to SIGCHLD")
+            DaemonFileLog.log("session \(id) child \(childPID) not reapable 500ms after its exit notice; leaving it to SIGCHLD")
             return
         }
         queue.asyncAfter(deadline: .now() + .milliseconds(20)) { [weak self] in
@@ -442,23 +418,16 @@ final class PTYSession {
         }
     }
 
-    /// The registry's SIGCHLD sweep: reap this child if it has exited. A
-    /// no-op while it runs, and cheap enough to call for every session on
-    /// every SIGCHLD — the signal coalesces and names no pid.
+    /// Reaps the child if it has exited; a cheap no-op while it runs, so the
+    /// registry's SIGCHLD sweep can ask every session — the signal coalesces
+    /// and names no pid.
     func reapIfExited() {
-        reapChild()
-    }
-
-    private func reapChild() {
         guard isAlive else { return }
         var status: Int32 = 0
-        var result = waitpid(childPID, &status, WNOHANG)
-        while result < 0, errno == EINTR {
-            result = waitpid(childPID, &status, WNOHANG)
-        }
+        let result = Self.waitNoHang(childPID, status: &status)
         // 0: still running, or exited but not yet SZOMB — try again later.
         // ECHILD: nothing to wait for; the child is gone whatever reaped it.
-        guard result == childPID || result < 0 else { return }
+        guard result != 0 else { return }
         isAlive = false
 
         let exitCode: Int32 = if result < 0 {
@@ -472,6 +441,17 @@ final class PTYSession {
         // Let any output written just before exit reach the client first.
         drainAvailableOutput()
         onExit?(id, exitCode)
+    }
+
+    /// `waitpid(WNOHANG)` retried through EINTR: the pid once reaped, 0 while
+    /// the child runs (or has exited but is not yet SZOMB), -1 with ECHILD
+    /// when something else reaped it.
+    private static func waitNoHang(_ pid: pid_t, status: inout Int32) -> pid_t {
+        while true {
+            let result = waitpid(pid, &status, WNOHANG)
+            if result < 0, errno == EINTR { continue }
+            return result
+        }
     }
 
     deinit {

@@ -29,7 +29,7 @@ func run(
     rows: UInt16 = 24,
     resizeTo: (columns: UInt16, rows: UInt16)? = nil,
     credentials: ShellLaunch.Credentials? = nil,
-    workingDirectories: [String] = [],
+    workingDirectory: String? = nil,
     timeout: TimeInterval = 10
 ) -> (output: String, exitCode: Int32?, session: PTYSession)? {
     let session: PTYSession
@@ -41,7 +41,7 @@ func run(
             columns: columns,
             rows: rows,
             credentials: credentials,
-            workingDirectories: workingDirectories,
+            workingDirectory: workingDirectory,
             queue: harnessQueue
         )
     } catch {
@@ -104,23 +104,21 @@ if let result = run(command: ["/bin/echo", "hello-from-ighostty"]) {
 }
 
 // A terminal opens in the user's home, not wherever launchd started the
-// daemon. The first spelling that exists wins; a bad one is skipped.
+// daemon; a home that is not there is not used.
 print("working directory")
-if let result = run(
-    command: ["/bin/sh", "-c", "pwd"],
-    workingDirectories: ["/nonexistent/ighostty-harness", "/private/tmp"]
-) {
-    check(result.output.contains("/private/tmp"), "the child starts in the first usable working directory")
+if let result = run(command: ["/bin/sh", "-c", "pwd"], workingDirectory: "/private/tmp") {
+    check(result.output.contains("/private/tmp"), "the child starts in the working directory")
 } else {
     check(false, "spawning a shell with a working directory succeeded")
 }
 if let plan = ShellLaunch.plan(requestedShell: nil) {
-    let home = NSHomeDirectory()
     check(
-        plan.workingDirectories.contains(home),
-        "the default plan starts a session in the session user's home (got \(plan.workingDirectories))"
+        plan.workingDirectory == NSHomeDirectory(),
+        "the default plan starts a session in the session user's home (got \(String(describing: plan.workingDirectory)))"
     )
 }
+let homelessUser = PasswdEntry(name: "nobody", uid: 0, gid: 0, home: "/nonexistent/ighostty-harness", shell: "/bin/sh")
+check(ShellLaunch.workingDirectory(for: homelessUser) == nil, "a home that does not exist is skipped")
 
 print("exit status decoding")
 if let result = run(command: ["/bin/sh", "-c", "exit 7"]) {
@@ -244,11 +242,9 @@ do {
     check(false, "spawning the bystander session succeeded")
 }
 
-// XNU posts NOTE_EXIT before the exiting process is waitable, so an exit
-// notice that reaps exactly once can miss. The PTY's EOF used to hide that
-// whenever the shell was the terminal's last process; a background child
-// keeping the tty open is the case that exposed it — the exit must still
-// arrive promptly, not when the straggler finally lets go.
+// The NOTE_EXIT race (see PTYSession.start): a background child keeping the
+// tty open is the case that exposed it — the exit must still arrive
+// promptly, not when the straggler finally lets go.
 print("exit is reported while a background child holds the terminal")
 let holdStart = Date()
 if let result = run(command: ["/bin/sh", "-c", "sleep 4 & exit 5"], timeout: 6) {

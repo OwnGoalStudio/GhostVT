@@ -44,28 +44,13 @@ enum DaemonFileLog {
         queue.async {
             _ = directoryReady
             rotateIfNeeded()
-            // The log is written off the control queue, so a forkpty on that
-            // queue can land while this descriptor is open, and every
-            // descriptor the daemon holds at fork time reaches the shell
-            // unless it is close-on-exec. `O_CLOEXEC` at open time leaves no
-            // window; a root-owned log is not something a mobile shell
-            // should hold open, let alone append to.
+            // Off the control queue, so a forkpty can land while this is
+            // open: close-on-exec from the start (AGENTS.md, descriptors).
             let descriptor = open(path, O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, 0o644)
             guard descriptor >= 0 else { return }
             defer { close(descriptor) }
-            var bytes = Array(line.utf8)
-            var offset = 0
-            while offset < bytes.count {
-                let written = bytes.withUnsafeMutableBytes { buffer in
-                    Darwin.write(descriptor, buffer.baseAddress! + offset, buffer.count - offset)
-                }
-                if written > 0 {
-                    offset += written
-                    continue
-                }
-                if written < 0, errno == EINTR { continue }
-                return
-            }
+            let bytes = Array(line.utf8)
+            _ = bytes.withUnsafeBytes { writeFully(descriptor, $0) }
         }
     }
 

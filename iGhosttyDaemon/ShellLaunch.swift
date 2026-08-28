@@ -24,22 +24,21 @@ enum ShellLaunch {
         /// Who the shell should run as; the daemon drops privileges itself in
         /// the forked child. `nil` when there is nothing to drop (harness).
         var credentials: Credentials?
-        /// Where the session starts, as `chdir` wants it, best first: the
-        /// first that works wins, and none working leaves the daemon's own
-        /// directory — launchd's `/`, which is what every session used to
-        /// get and what a terminal should never open on.
-        var workingDirectories: [String]
+        /// Where the session starts, as `chdir` wants it. `nil` leaves the
+        /// daemon's own directory — launchd's `/`, which is what every
+        /// session used to get and what a terminal should never open on.
+        var workingDirectory: String?
 
         init(
             command: [String],
             environment: [String: String],
             credentials: Credentials? = nil,
-            workingDirectories: [String] = []
+            workingDirectory: String? = nil
         ) {
             self.command = command
             self.environment = environment
             self.credentials = credentials
-            self.workingDirectories = workingDirectories
+            self.workingDirectory = workingDirectory
         }
     }
 
@@ -235,28 +234,34 @@ enum ShellLaunch {
             command: [JailbreakRoot.resolve(shell)] + integrationArguments + ["-il"],
             environment: environment,
             credentials: credentials(for: user),
-            workingDirectories: workingDirectories(for: user)
+            workingDirectory: workingDirectory(for: user)
         )
     }
 
-    /// The session user's home, spelled every way `chdir` might need it. The
-    /// passwd entry speaks the bootstrap's vocabulary; under roothide that
-    /// may resolve inside the jbroot or may be the real `/var/mobile`, and
-    /// the daemon cannot tell without trying — so both go in, resolved
-    /// first, and the child takes the first that exists.
-    static func workingDirectories(for user: PasswdEntry?) -> [String] {
-        guard let user, !user.home.isEmpty else { return [] }
-        var candidates: [String] = []
-        for candidate in [JailbreakRoot.resolve(user.home), user.home] where !candidates.contains(candidate) {
-            candidates.append(candidate)
-        }
-        return candidates
+    /// The session user's home, in the spelling the filesystem actually
+    /// has. The passwd entry speaks the bootstrap's vocabulary; under
+    /// roothide that resolves inside the jbroot or is the real
+    /// `/var/mobile`, so the first spelling that is a directory wins.
+    static func workingDirectory(for user: PasswdEntry?) -> String? {
+        guard let user, !user.home.isEmpty else { return nil }
+        return [JailbreakRoot.resolve(user.home), user.home].first(where: isDirectory)
     }
 
-    /// Where a session the daemon did not plan itself starts — the same
-    /// home a planned shell gets.
-    static var sessionWorkingDirectories: [String] {
-        workingDirectories(for: sessionUser)
+    private static func isDirectory(_ path: String) -> Bool {
+        var info = stat()
+        return stat(path, &info) == 0 && info.st_mode & S_IFMT == S_IFDIR
+    }
+
+    /// A caller-supplied argv is still a session: it runs as `mobile`, from
+    /// mobile's home, with no environment of its own.
+    static func verbatimPlan(command: [String]) -> Plan {
+        let user = sessionUser
+        return Plan(
+            command: command,
+            environment: [:],
+            credentials: credentials(for: user),
+            workingDirectory: workingDirectory(for: user)
+        )
     }
 
     /// The identity half of the environment `login` would have exported. It
@@ -269,12 +274,6 @@ enum ShellLaunch {
             "USER": user.name,
             "LOGNAME": user.name,
         ]
-    }
-
-    /// Credentials for a session the daemon did not plan itself — a verbatim
-    /// argv still runs as `mobile`.
-    static var sessionCredentials: Credentials? {
-        credentials(for: sessionUser)
     }
 
     /// Validates a caller-supplied command: absolute, present, executable.
