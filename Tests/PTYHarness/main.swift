@@ -29,6 +29,7 @@ func run(
     rows: UInt16 = 24,
     resizeTo: (columns: UInt16, rows: UInt16)? = nil,
     credentials: ShellLaunch.Credentials? = nil,
+    workingDirectories: [String] = [],
     timeout: TimeInterval = 10
 ) -> (output: String, exitCode: Int32?, session: PTYSession)? {
     let session: PTYSession
@@ -40,6 +41,7 @@ func run(
             columns: columns,
             rows: rows,
             credentials: credentials,
+            workingDirectories: workingDirectories,
             queue: harnessQueue
         )
     } catch {
@@ -99,6 +101,25 @@ if let result = run(command: ["/bin/echo", "hello-from-ighostty"]) {
     check(result.exitCode == 0, "clean exit reports 0 (got \(String(describing: result.exitCode)))")
 } else {
     check(false, "spawning /bin/echo succeeded")
+}
+
+// A terminal opens in the user's home, not wherever launchd started the
+// daemon. The first spelling that exists wins; a bad one is skipped.
+print("working directory")
+if let result = run(
+    command: ["/bin/sh", "-c", "pwd"],
+    workingDirectories: ["/nonexistent/ighostty-harness", "/private/tmp"]
+) {
+    check(result.output.contains("/private/tmp"), "the child starts in the first usable working directory")
+} else {
+    check(false, "spawning a shell with a working directory succeeded")
+}
+if let plan = ShellLaunch.plan(requestedShell: nil) {
+    let home = NSHomeDirectory()
+    check(
+        plan.workingDirectories.contains(home),
+        "the default plan starts a session in the session user's home (got \(plan.workingDirectories))"
+    )
 }
 
 print("exit status decoding")

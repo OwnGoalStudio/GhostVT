@@ -118,6 +118,7 @@ final class PTYSession {
         columns: UInt16,
         rows: UInt16,
         credentials: ShellLaunch.Credentials? = nil,
+        workingDirectories: [String] = [],
         queue: DispatchQueue
     ) throws {
         guard let executable = command.first, !executable.isEmpty else {
@@ -133,10 +134,12 @@ final class PTYSession {
         let environmentStrings = environment.map { "\($0.key)=\($0.value)" }.sorted()
         let argv = Self.makeCStringArray(command)
         let envp = Self.makeCStringArray(environmentStrings)
+        let directories = Self.makeCStringArray(workingDirectories)
         let executablePath = strdup(executable)
         defer {
             Self.freeCStringArray(argv, count: command.count)
             Self.freeCStringArray(envp, count: environmentStrings.count)
+            Self.freeCStringArray(directories, count: workingDirectories.count)
             free(executablePath)
         }
 
@@ -177,6 +180,18 @@ final class PTYSession {
             // needs was allocated above. `_exit` avoids running the parent's
             // atexit handlers if exec fails.
             close(reportRead)
+            // Nothing the daemon holds may reach the shell. Every daemon
+            // descriptor is close-on-exec already; this sweep is the
+            // guarantee for the ones that are not yet — a handle some queue
+            // opened a moment before the fork, or one a future change
+            // forgets to mark. The spawn pipe stays until execve closes it.
+            // `close` is async-signal-safe; the table is small.
+            let tableSize = getdtablesize()
+            var descriptor: Int32 = 3
+            while descriptor < tableSize {
+                if descriptor != reportWrite { close(descriptor) }
+                descriptor += 1
+            }
             func fail(_ step: Int32) -> Never {
                 report[0] = step
                 report[1] = errno
@@ -195,6 +210,15 @@ final class PTYSession {
                 if setuid(credentials.uid) != 0 { fail(Self.stepSetUID) }
                 // Belt and braces: if the uid did not actually change, refuse.
                 if getuid() != credentials.uid || geteuid() != credentials.uid { fail(Self.stepVerifyUID) }
+            }
+            // After the privilege drop, so the home has to be reachable by
+            // the user the shell will be. A directory that does not exist
+            // (or is not theirs) is skipped for the next spelling; none
+            // usable means the daemon's own directory, as before.
+            var directoryIndex = 0
+            while let directory = directories[directoryIndex] {
+                if chdir(directory) == 0 { break }
+                directoryIndex += 1
             }
             execve(executablePath, argv, envp)
             fail(Self.stepExec)
@@ -407,7 +431,10 @@ final class PTYSession {
         reapChild()
         guard isAlive else { return }
         guard attempt < 100 else {
-            DaemonFileLog.log("session \(id) child \(childPID) still not reapable after exit notice")
+            // Not a failure: a large child can spend longer than this in
+            // teardown between its exit notice and SZOMB. The registry's
+            // SIGCHLD sweep reaps it when the kernel is done.
+            DaemonFileLog.log("session \(id) child \(childPID) not reapable 2s after its exit notice; leaving it to SIGCHLD")
             return
         }
         queue.asyncAfter(deadline: .now() + .milliseconds(20)) { [weak self] in

@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import GhosttyTerminal
 import SwiftUI
 
 /// The tabs of one window. Owned by that window's `SceneDelegate`; every
@@ -28,6 +29,15 @@ final class TabManager: ObservableObject {
     /// the four close entry points cannot race each other's presentations.
     @Published var closeRequest: TerminalTab?
 
+    /// A clipboard decision libghostty is waiting on (a program's OSC 52
+    /// read or write, a paste that paste protection flagged), presented as
+    /// one alert by `ClipboardConfirmation` the way `closeRequest` is.
+    /// Requests queue behind the one on screen and are answered one at a
+    /// time; every tab's hook is installed here, at creation, so no tab can
+    /// exist without one and fall back to libghostty's silent denial.
+    @Published private(set) var clipboardRequest: TerminalClipboardConfirmationRequest?
+    private var pendingClipboardRequests: [TerminalClipboardConfirmationRequest] = []
+
     init() {
         SessionActivityController.shared.register(self) { [weak self] in
             self.map {
@@ -47,10 +57,10 @@ final class TabManager: ObservableObject {
                 if tabs.isEmpty { newTab() }
                 return
             }
+            let resumed = resumable.map { TerminalTab(resumeDaemonSessionID: $0) }
+            resumed.forEach(self.adopt)
             withAnimation(Self.tabTransition) {
-                self.tabs.append(
-                    contentsOf: resumable.map { TerminalTab(resumeDaemonSessionID: $0) }
-                )
+                self.tabs.append(contentsOf: resumed)
                 self.activeTabID = self.tabs.last?.id
             }
             if self.isSceneActive {
@@ -94,9 +104,32 @@ final class TabManager: ObservableObject {
         }
     }
 
+    /// Hooks a tab's terminal into this window's presenters. Every tab goes
+    /// through here before it joins `tabs`.
+    private func adopt(_ tab: TerminalTab) {
+        tab.terminal.onClipboardConfirmationRequest = { [weak self] request in
+            self?.enqueueClipboardRequest(request)
+        }
+    }
+
+    private func enqueueClipboardRequest(_ request: TerminalClipboardConfirmationRequest) {
+        if clipboardRequest == nil {
+            clipboardRequest = request
+        } else {
+            pendingClipboardRequests.append(request)
+        }
+    }
+
+    /// The presenter answered `clipboardRequest`; the next one, if any, takes
+    /// its place.
+    func finishClipboardRequest() {
+        clipboardRequest = pendingClipboardRequests.isEmpty ? nil : pendingClipboardRequests.removeFirst()
+    }
+
     @discardableResult
     func newTab() -> TerminalTab {
         let tab = TerminalTab()
+        adopt(tab)
         withAnimation(Self.tabTransition) {
             tabs.append(tab)
             activeTabID = tab.id

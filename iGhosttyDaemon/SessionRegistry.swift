@@ -80,6 +80,7 @@ final class SessionRegistry {
             columns: clamp(columns, fallback: iGhosttyProtocol.defaultColumns, limit: iGhosttyProtocol.maximumColumns),
             rows: clamp(rows, fallback: iGhosttyProtocol.defaultRows, limit: iGhosttyProtocol.maximumRows),
             credentials: plan.credentials,
+            workingDirectories: plan.workingDirectories,
             queue: queue
         )
         sessions[id] = session
@@ -198,11 +199,13 @@ final class SessionRegistry {
                     "the requested command is not an executable absolute path"
                 )
             }
-            // A verbatim argv is still a session, so it still runs as mobile.
+            // A verbatim argv is still a session, so it still runs as mobile,
+            // from mobile's home.
             return ShellLaunch.Plan(
                 command: command,
                 environment: [:],
-                credentials: ShellLaunch.sessionCredentials
+                credentials: ShellLaunch.sessionCredentials,
+                workingDirectories: ShellLaunch.sessionWorkingDirectories
             )
         }
     }

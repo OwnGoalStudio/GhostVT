@@ -23,14 +23,23 @@ final class PeerAuthenticator {
 
     private lazy var installedClientPaths = resolveInstalledClientPaths()
 
-    /// The user a development daemon runs as, for the Mac Catalyst harness —
-    /// the daemon's own uid there, never on the device where it is root and
-    /// the accepted peers are root and mobile alone.
-    #if os(macOS)
+    /// The Mac Catalyst harness: a Debug daemon built for macOS accepts the
+    /// app Xcode just built, running as the daemon's own user. Release
+    /// builds and every device build know no such peer — there the accepted
+    /// peers are root and mobile alone.
+    #if os(macOS) && DEBUG
         private static let developmentUserID = getuid()
         private static let developmentClientSuffix = "/iGhostty.app/Contents/MacOS/iGhostty"
+
+        private static func isDevelopmentPeer(uid: UInt32, clientPath: String) -> Bool {
+            uid == developmentUserID && clientPath.hasSuffix(developmentClientSuffix)
+        }
     #else
-        private static let developmentUserID: UInt32 = 0
+        private static let developmentUserID: UInt32? = nil
+
+        private static func isDevelopmentPeer(uid _: UInt32, clientPath _: String) -> Bool {
+            false
+        }
     #endif
 
     func authenticate(_ connection: xpc_connection_t) -> Int32? {
@@ -54,21 +63,19 @@ final class PeerAuthenticator {
             return nil
         }
 
-        #if os(macOS)
-            // The Mac Catalyst development build: the daemon is a per-user
-            // LaunchAgent and the app is whatever Xcode just built, so there
-            // is no installed, root-owned path to insist on — and no client
-            // entitlement either: a Catalyst app is an iOS-family binary, and
-            // macOS refuses to launch one carrying an entitlement no
-            // provisioning profile granted (RunningBoard's "Launchd job spawn
-            // failed"), ad-hoc signature or not. What remains is the peer
-            // being the daemon's own user and its executable living in an
-            // iGhostty.app bundle. Off the device that is the whole threat
-            // model: the daemon runs as that user and spawns as that user.
-            if uid == Self.developmentUserID, clientPath.hasSuffix(Self.developmentClientSuffix) {
-                return pid
-            }
-        #endif
+        // The Mac Catalyst development build: the daemon is a per-user
+        // LaunchAgent and the app is whatever Xcode just built, so there is
+        // no installed, root-owned path to insist on — and no client
+        // entitlement either: a Catalyst app is an iOS-family binary, and
+        // macOS refuses to launch one carrying an entitlement no provisioning
+        // profile granted (RunningBoard's "Launchd job spawn failed"), ad-hoc
+        // signature or not. What remains is the peer being the daemon's own
+        // user and its executable living in an iGhostty.app bundle. Off the
+        // device that is the whole threat model: the daemon runs as that
+        // user and spawns as that user. Debug macOS builds only.
+        if Self.isDevelopmentPeer(uid: uid, clientPath: clientPath) {
+            return pid
+        }
 
         guard hasRequiredEntitlements(token: &token) else {
             DaemonLog.server.error("peer \(pid) denied: missing client entitlement")

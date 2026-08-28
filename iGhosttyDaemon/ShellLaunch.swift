@@ -24,15 +24,22 @@ enum ShellLaunch {
         /// Who the shell should run as; the daemon drops privileges itself in
         /// the forked child. `nil` when there is nothing to drop (harness).
         var credentials: Credentials?
+        /// Where the session starts, as `chdir` wants it, best first: the
+        /// first that works wins, and none working leaves the daemon's own
+        /// directory — launchd's `/`, which is what every session used to
+        /// get and what a terminal should never open on.
+        var workingDirectories: [String]
 
         init(
             command: [String],
             environment: [String: String],
-            credentials: Credentials? = nil
+            credentials: Credentials? = nil,
+            workingDirectories: [String] = []
         ) {
             self.command = command
             self.environment = environment
             self.credentials = credentials
+            self.workingDirectories = workingDirectories
         }
     }
 
@@ -227,8 +234,29 @@ enum ShellLaunch {
         return Plan(
             command: [JailbreakRoot.resolve(shell)] + integrationArguments + ["-il"],
             environment: environment,
-            credentials: credentials(for: user)
+            credentials: credentials(for: user),
+            workingDirectories: workingDirectories(for: user)
         )
+    }
+
+    /// The session user's home, spelled every way `chdir` might need it. The
+    /// passwd entry speaks the bootstrap's vocabulary; under roothide that
+    /// may resolve inside the jbroot or may be the real `/var/mobile`, and
+    /// the daemon cannot tell without trying — so both go in, resolved
+    /// first, and the child takes the first that exists.
+    static func workingDirectories(for user: PasswdEntry?) -> [String] {
+        guard let user, !user.home.isEmpty else { return [] }
+        var candidates: [String] = []
+        for candidate in [JailbreakRoot.resolve(user.home), user.home] where !candidates.contains(candidate) {
+            candidates.append(candidate)
+        }
+        return candidates
+    }
+
+    /// Where a session the daemon did not plan itself starts — the same
+    /// home a planned shell gets.
+    static var sessionWorkingDirectories: [String] {
+        workingDirectories(for: sessionUser)
     }
 
     /// The identity half of the environment `login` would have exported. It

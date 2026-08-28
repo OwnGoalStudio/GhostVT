@@ -7,40 +7,32 @@ import UIKit
 /// program changing it when writes are set to ask, or a paste that paste
 /// protection flagged — line breaks going to a program without bracketed
 /// paste, which would run them as commands. Without an answer libghostty
-/// denies every one of these silently, which is how a tool's "paste from
+/// denies a program's request silently, which is how a tool's "paste from
 /// clipboard" used to do nothing at all.
 ///
-/// Attached once, at the window root, like `CloseTabConfirmation`: the alert
-/// is a presented `AlertViewController`, so it lands above whatever the
-/// window is showing. Requests queue behind an open alert rather than
-/// replacing it — each one is answered exactly once.
+/// Attached once, at the window root, like `CloseTabConfirmation`: the
+/// request lives on the `TabManager` (which installs every tab's hook, so
+/// none is missed), and the alert is a presented `AlertViewController` that
+/// lands above whatever the window is showing.
 struct ClipboardConfirmation: ViewModifier {
     @ObservedObject var tabManager: TabManager
     @State private var window: UIWindow?
-    @State private var pending: [TerminalClipboardConfirmationRequest] = []
     @State private var presented: AlertViewController?
 
     func body(content: Content) -> some View {
         content
             .background(WindowReader(window: $window))
-            .onAppear(perform: bindTabHooks)
-            .onChange(of: tabManager.tabs.count) { _ in bindTabHooks() }
-    }
-
-    /// Re-bound whenever the tab set changes, so a tab created anywhere
-    /// (strip, switcher, shortcut) gets the hook.
-    private func bindTabHooks() {
-        for tab in tabManager.tabs {
-            tab.terminal.onClipboardConfirmationRequest = { request in
-                pending.append(request)
-                presentNextIfIdle()
+            .onReceive(tabManager.$clipboardRequest) { request in
+                present(request)
             }
-        }
+            // A request raised before the window was read waits for it.
+            .onChange(of: window == nil) { _ in
+                present(tabManager.clipboardRequest)
+            }
     }
 
-    private func presentNextIfIdle() {
-        guard presented == nil, let window, !pending.isEmpty else { return }
-        let request = pending.removeFirst()
+    private func present(_ request: TerminalClipboardConfirmationRequest?) {
+        guard let request, let window, presented == nil else { return }
         let alert = AlertViewController(
             title: Self.title(for: request.kind),
             message: Self.message(for: request),
@@ -61,7 +53,7 @@ struct ClipboardConfirmation: ViewModifier {
 
     private func finish() {
         presented = nil
-        presentNextIfIdle()
+        tabManager.finishClipboardRequest()
     }
 
     private static func title(for kind: TerminalClipboardRequestKind) -> String.LocalizationValue {

@@ -31,8 +31,7 @@ enum DaemonFileLog {
         return formatter
     }()
 
-    /// The daemon is vroot-linked on roothide, so this resolves inside the
-    /// jbroot — where Library/Logs does not exist until someone makes it.
+    /// mobile's Library/Logs does not exist until someone makes it.
     private static let directoryReady: Bool = {
         (try? FileManager.default.createDirectory(
             atPath: (path as NSString).deletingLastPathComponent,
@@ -45,20 +44,27 @@ enum DaemonFileLog {
         queue.async {
             _ = directoryReady
             rotateIfNeeded()
-            guard let data = line.data(using: .utf8) else { return }
-            if let handle = FileHandle(forWritingAtPath: path) {
-                // The log is written off the control queue, so a forkpty on
-                // that queue can land while this handle is open. Every
-                // descriptor the daemon holds at fork time reaches the
-                // shell unless it is close-on-exec — and a root-owned log
-                // is not something a mobile shell should hold open.
-                _ = fcntl(handle.fileDescriptor, F_SETFD, FD_CLOEXEC)
-                handle.seekToEndOfFile()
-                handle.write(data)
-                try? handle.close()
-            } else {
-                // First line ever, or the file was deleted out from under us.
-                try? data.write(to: URL(fileURLWithPath: path))
+            // The log is written off the control queue, so a forkpty on that
+            // queue can land while this descriptor is open, and every
+            // descriptor the daemon holds at fork time reaches the shell
+            // unless it is close-on-exec. `O_CLOEXEC` at open time leaves no
+            // window; a root-owned log is not something a mobile shell
+            // should hold open, let alone append to.
+            let descriptor = open(path, O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, 0o644)
+            guard descriptor >= 0 else { return }
+            defer { close(descriptor) }
+            var bytes = Array(line.utf8)
+            var offset = 0
+            while offset < bytes.count {
+                let written = bytes.withUnsafeMutableBytes { buffer in
+                    Darwin.write(descriptor, buffer.baseAddress! + offset, buffer.count - offset)
+                }
+                if written > 0 {
+                    offset += written
+                    continue
+                }
+                if written < 0, errno == EINTR { continue }
+                return
             }
         }
     }

@@ -183,9 +183,10 @@ deb-rootless:
 # entitlement no provisioning profile granted (RunningBoard reports "Launchd
 # job spawn failed"). The daemon built for macOS therefore authenticates the
 # development peer by uid and bundle path instead of the client entitlement
-# (PeerAuthenticator's macOS branch). It runs as a per-user LaunchAgent in
-# the gui domain, where the Catalyst app looks the service up.
-MAC_CONFIGURATION   ?= Debug
+# (PeerAuthenticator's macOS branch, Debug builds only — which is why the
+# configuration is not a knob). It runs as a per-user LaunchAgent in the gui
+# domain, where the Catalyst app looks the service up.
+MAC_CONFIGURATION   := Debug
 MAC_APP_BUNDLE      := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)-maccatalyst/iGhostty.app
 MAC_DAEMON_BINARY   := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighosttyd
 MAC_LAUNCH_AGENT    := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighosttyd.plist
