@@ -256,6 +256,47 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         }
     }
 
+    /// Kill every session the daemon holds, attached or not, and wait for
+    /// the daemon to confirm each one — up to `timeout` in total. Blocking on
+    /// purpose: the one caller is `applicationWillTerminate`, where anything
+    /// still queued dies with the process, and the daemon is asked directly
+    /// because the windows and their tabs may already be gone by then.
+    public static func closeAllSessions(timeout: TimeInterval = 3) {
+        let deadline = DispatchTime.now() + timeout
+        let done = DispatchGroup()
+        done.enter()
+        listSessions(timeout: timeout) { rows in
+            guard let rows, !rows.isEmpty else {
+                done.leave()
+                return
+            }
+            let queue = DispatchQueue(label: "wiki.qaq.ighostvt.client.kill", qos: .userInitiated)
+            guard let connection = iGhostVTProtocol.serviceName.withCString({
+                ighostvtCreateMachServiceConnection($0, queue, 0)
+            }) else {
+                done.leave()
+                return
+            }
+            xpc_connection_set_event_handler(connection) { _ in }
+            xpc_connection_activate(connection)
+            xpc_connection_send_message_with_reply(connection, makeMessage(.hello), queue) { _ in
+                let kills = DispatchGroup()
+                for row in rows {
+                    kills.enter()
+                    let message = Self.makeMessage(.closeSession, sessionID: row.id)
+                    xpc_connection_send_message_with_reply(connection, message, queue) { _ in
+                        kills.leave()
+                    }
+                }
+                kills.notify(queue: queue) {
+                    xpc_connection_cancel(connection)
+                    done.leave()
+                }
+            }
+        }
+        _ = done.wait(timeout: deadline)
+    }
+
     // MARK: - Connection lifecycle
 
     private func establish() {

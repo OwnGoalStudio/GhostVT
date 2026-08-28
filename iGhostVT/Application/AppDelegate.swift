@@ -31,4 +31,25 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         return true
     }
+
+    /// An explicit quit: ⌘Q on the Mac, or a force-quit on iOS while the app
+    /// is still running (a suspended app gets no notice, and its shells stay
+    /// in the daemon either way). With Keep Alive off, every shell the daemon
+    /// holds — attached to a window or not — dies here, and the connection
+    /// goes with it.
+    func applicationWillTerminate(_: UIApplication) {
+        guard !SessionKeepAlive.isEnabled else { return }
+        XPCDaemonTransport.closeAllSessions()
+    }
+}
+
+/// Whether daemon sessions outlive the app. On by default: a shell surviving
+/// the app is the point of the daemon. Off is for a Mac (or a user) that
+/// wants ⌘Q to mean what it means in Terminal.
+enum SessionKeepAlive {
+    static let key = "Session.keepAlive"
+
+    static var isEnabled: Bool {
+        UserDefaults.standard.object(forKey: key) as? Bool ?? true
+    }
 }

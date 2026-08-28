@@ -2567,6 +2567,23 @@
         }
       }
     },
+    "Keep Alive" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep Alive"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保持运行"
+          }
+        }
+      }
+    },
     "Keyboard" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4520,6 +4537,23 @@
         }
       }
     },
+    "Sessions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sessions"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会话"
+          }
+        }
+      }
+    },
     "Settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4587,6 +4621,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "設定"
+          }
+        }
+      }
+    },
+    "Shells keep running after the app quits and come back on the next launch. Turn this off to close every shell when the app quits." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shells keep running after the app quits and come back on the next launch. Turn this off to close every shell when the app quits."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "应用退出后 Shell 继续运行，下次启动时自动恢复。关闭此项后，退出应用时会关闭所有 Shell。"
           }
         }
       }

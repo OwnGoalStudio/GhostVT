@@ -15,6 +15,9 @@ struct SettingsSheet: View {
     /// pick", which hands the session to `login`.
     @AppStorage("Shell.path") private var shellPath = ""
 
+    /// Read by AppDelegate when the app quits; see `SessionKeepAlive`.
+    @AppStorage(SessionKeepAlive.key) private var keepAlive = true
+
     /// Mirrored by AppDelegate at launch; toggling applies immediately.
     @AppStorage("Debug.verboseTerminalLog") private var verboseTerminalLog = false
 
@@ -24,6 +27,7 @@ struct SettingsSheet: View {
                 appearanceSection
                 keyboardSection
                 shellSection
+                sessionsSection
                 debugSection
                 aboutSection
             }
@@ -110,6 +114,22 @@ struct SettingsSheet: View {
     }
 
     private static let shellPlaceholder = "/bin/zsh"
+
+    private var sessionsSection: some View {
+        Section {
+            Toggle("Keep Alive", isOn: $keepAlive)
+        } header: {
+            Text("Sessions")
+        } footer: {
+            Text(
+                """
+                Shells keep running after the app quits and come back on the \
+                next launch. Turn this off to close every shell when the app \
+                quits.
+                """
+            )
+        }
+    }
 
     private var debugSection: some View {
         Section {
