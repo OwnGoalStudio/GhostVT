@@ -142,17 +142,19 @@ Gotchas that bit us:
   anyway. Dragging the app to the Trash also does not unregister the agent,
   which is why Settings ▸ Terminal Helper carries a Turn Off control that
   surfaces what `unregister()` returns.
-- **A Mac drop pastes the path; an iOS drop pastes a staged copy's path.** The
-  library stages every dropped file into `ghostty-paste/` and pastes *that*
-  path, which is the only honest answer on iOS — a drop from Files or Photos
-  has no path a shell could open. A Finder drag does: it registers the file's
-  data type *and* `public.file-url`, and the library checks data first, so on
-  Catalyst `LockableTerminalView` swaps in `MacFileDropDelegate`, which prefers
-  the real URL and hands everything else back to the library (staging included,
-  for Photos and Mail attachments that carry no path). It has to *replace* the
+- **A drop pastes a path the shell can use, and where that path comes from
+  depends on where the item lives.** `TerminalDropDelegate` replaces the
+  library's drop interaction on both platforms (it has to *replace* the
   interaction rather than override the method: `dropInteraction(_:performDrop:)`
-  is `public`, not `open`, so a subclass outside the module can call it but
-  cannot override it.
+  is `public`, not `open`). A Finder drag on Catalyst pastes the item's own
+  path, opened in place — a folder as readily as a file. A Files drag on iOS
+  has no path a shell in another process could open, so the item (folder
+  included) is copied under `TerminalFileStaging.directory` and that path
+  is pasted. Data with no file behind it (Photos, a Mail attachment, an image
+  off a web page) is written there too, named for its UTType so the path
+  carries a real extension. Links and text snippets paste as text. The
+  library's own staging API is internal, so the copy lives in the app; only
+  the directory and the stale sweep are shared with pastes.
 - `SMAppService` is `macCatalyst(16.0)`, above this app's iOS 15 deployment
   target, so every call sits behind `#available`. The packager raises the
   staged bundle's `LSMinimumSystemVersion` to 13.0, since a Catalyst app built

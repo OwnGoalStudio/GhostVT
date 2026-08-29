@@ -86,106 +86,28 @@ final class LockableTerminalView: TerminalView {
         }
     #endif
 
-    #if targetEnvironment(macCatalyst)
-        /// Retains the drop delegate: `UIDropInteraction` holds its delegate
-        /// weakly, and non-nil is also the flag that the swap already happened.
-        private var macFileDrop: MacFileDropDelegate?
+    /// Retains the drop delegate: `UIDropInteraction` holds its delegate
+    /// weakly, and non-nil is also the flag that the swap already happened.
+    private var dropDelegate: TerminalDropDelegate?
 
-        /// Swaps the library's drop handling for the Mac's.
-        ///
-        /// The library's `dropInteraction(_:performDrop:)` is `public`, not
-        /// `open`, so a subclass cannot override it — but it can be *called*,
-        /// which is what makes replacing the whole interaction safe: everything
-        /// this host does not want to change is forwarded straight back to it.
-        /// The library installs its interaction from `setupPlatformInput()`
-        /// during init, so by the time there is a window it is there to remove.
-        override func didMoveToWindow() {
-            super.didMoveToWindow()
-            guard window != nil, macFileDrop == nil else { return }
-            for interaction in interactions where interaction is UIDropInteraction {
-                removeInteraction(interaction)
-            }
-            let delegate = MacFileDropDelegate(terminal: self)
-            macFileDrop = delegate
-            addInteraction(UIDropInteraction(delegate: delegate))
-        }
-    #endif
-}
-
-#if targetEnvironment(macCatalyst)
-
-    /// Dropping a file on a Mac pastes **the path it already has**.
+    /// Swaps the library's drop handling for the app's
+    /// (`TerminalDropDelegate`): a real path on the Mac, a staged copy on
+    /// iOS, folders on both, and named-by-type files for data that has no
+    /// file behind it.
     ///
-    /// The library stages a copy first, and on iOS that is the only honest
-    /// answer: a drop out of Files or Photos has no path the shell could open,
-    /// so the terminal writes one. A Mac drag is the opposite case — the file
-    /// is sitting in the filesystem the shell is already looking at, and it
-    /// carries `public.file-url` saying exactly where. Pasting the path of a
-    /// copy instead is wrong twice over: someone drags `report.pdf` off the
-    /// Desktop to run `open` on it and gets a duplicate, which then silently
-    /// rots 24 hours later when the staging sweep collects it.
-    ///
-    /// A Finder drag registers the file's data type *and* its URL, and the
-    /// library looks at data first — so this has to come in ahead of it, not
-    /// after. Drops that really do carry no path (Photos, a Mail attachment)
-    /// find no URL here and are handed back to the library, where staging is
-    /// still the right answer. So is every other part of the protocol: only
-    /// `performDrop`, and only its file-URL half, behaves differently here.
-    private final class MacFileDropDelegate: NSObject, UIDropInteractionDelegate {
-        private weak var terminal: LockableTerminalView?
-
-        init(terminal: LockableTerminalView) {
-            self.terminal = terminal
+    /// The library's `dropInteraction(_:performDrop:)` is `public`, not
+    /// `open`, so a subclass cannot override it — replacing the whole
+    /// interaction is what a host can do. The library installs its
+    /// interaction from `setupPlatformInput()` during init, so by the time
+    /// there is a window it is there to remove.
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        guard window != nil, dropDelegate == nil else { return }
+        for interaction in interactions where interaction is UIDropInteraction {
+            removeInteraction(interaction)
         }
-
-        func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-            terminal?.dropInteraction(interaction, canHandle: session) ?? false
-        }
-
-        func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
-            terminal?.dropInteraction(interaction, sessionDidUpdate: session) ?? UIDropProposal(operation: .cancel)
-        }
-
-        func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
-            guard let terminal else { return }
-            guard session.canLoadObjects(ofClass: NSURL.self) else {
-                terminal.dropInteraction(interaction, performDrop: session)
-                return
-            }
-            _ = session.loadObjects(ofClass: NSURL.self) { [weak terminal] objects in
-                let urls = objects.compactMap { ($0 as? NSURL) as URL? }
-                guard let terminal, !urls.isEmpty else { return }
-                // A path is escaped for the prompt the user goes on typing at;
-                // a web link has no path to escape and goes in whole.
-                let text = urls
-                    .map { $0.isFileURL ? Self.shellEscaped($0.path) : $0.absoluteString }
-                    .joined(separator: " ")
-                // The trailing space is the ergonomic half: it separates a
-                // second dropped file from the first, and leaves the caret
-                // ready for an argument instead of glued to the path.
-                _ = terminal.paste(text: text + " ")
-            }
-        }
-
-        /// Backslash-escapes what a POSIX shell would otherwise read as syntax.
-        ///
-        /// The character set is Ghostty's `Shell.escape`, mirrored here because
-        /// the library keeps its own copy internal. Backslashes rather than
-        /// quotes: this lands at a live prompt someone keeps editing, not in a
-        /// command line being assembled.
-        private static func shellEscaped(_ path: String) -> String {
-            let sensitive: Set<Character> = [
-                "\\", " ", "(", ")", "[", "]", "{", "}", "<", ">", "\"", "'", "`",
-                "!", "#", "$", "&", ";", "|", "*", "?", "\t",
-            ]
-            var result = ""
-            result.reserveCapacity(path.utf8.count)
-            for character in path {
-                if sensitive.contains(character) { result.append("\\") }
-                result.append(character)
-            }
-            return result
-        }
+        let delegate = TerminalDropDelegate(terminal: self)
+        dropDelegate = delegate
+        addInteraction(UIDropInteraction(delegate: delegate))
     }
-
-#endif
+}

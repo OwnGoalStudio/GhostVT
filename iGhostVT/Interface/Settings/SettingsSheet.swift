@@ -12,6 +12,15 @@ struct SettingsSheet: View {
     @ObservedObject private var agent = MacLaunchAgent.shared
     @Environment(\.dismiss) private var dismiss
 
+    /// Steps from the system's Dynamic Type size; see `InterfaceTextSize`.
+    /// The bounds come from the system size the root modifier recorded,
+    /// since by here `dynamicTypeSize` is already the resolved one.
+    @AppStorage(InterfaceTextSize.key) private var interfaceTextStep = 0
+    @Environment(\.systemDynamicTypeSize) private var systemTypeSize
+
+    /// Read by `TerminalTab` when a surface is made; open tabs keep theirs.
+    @AppStorage(TerminalFontSize.key) private var terminalFontSize = TerminalFontSize.default
+
     /// Read by the daemon when spawning shells. Empty means "let the daemon
     /// pick", which hands the session to `login`.
     @AppStorage("Shell.path") private var shellPath = ""
@@ -26,6 +35,7 @@ struct SettingsSheet: View {
         NavigationView {
             Form {
                 appearanceSection
+                textSizeSection
                 keyboardSection
                 shellSection
                 sessionsSection
@@ -74,6 +84,52 @@ struct SettingsSheet: View {
         }
     }
 
+    /// One stepper per kind of text: the chrome's, which rides Dynamic Type
+    /// and so counts steps, and the terminal's, a point size the surface
+    /// takes as it is. The sheet itself is under the interface override, so
+    /// the first stepper shows its effect as it goes.
+    private var textSizeSection: some View {
+        Section {
+            Stepper(
+                value: $interfaceTextStep,
+                in: InterfaceTextSize.stepRange(from: systemTypeSize)
+            ) {
+                slotRow(title: "Interface", icon: "textformat.size", name: interfaceStepDescription)
+            }
+            Stepper(value: $terminalFontSize, in: TerminalFontSize.range) {
+                slotRow(
+                    title: "Terminal",
+                    icon: "terminal",
+                    name: String.localizedStringWithFormat(
+                        NSLocalizedString("%lld pt", comment: "A font size in points"),
+                        terminalFontSize
+                    )
+                )
+            }
+        } header: {
+            Text("Text Size")
+        } footer: {
+            Text(
+                """
+                The interface size steps up or down from the system text \
+                size. New terminals open at the terminal size; a tab that \
+                is already open keeps the size it was zoomed to.
+                """
+            )
+        }
+    }
+
+    private var interfaceStepDescription: String {
+        switch interfaceTextStep {
+        case 0:
+            String(localized: "Default")
+        case ..<0:
+            "\u{2212}\(-interfaceTextStep)"
+        default:
+            "+\(interfaceTextStep)"
+        }
+    }
+
     /// The accessory bar is a software-keyboard fixture; a Mac has none.
     @ViewBuilder
     private var keyboardSection: some View {
@@ -104,14 +160,25 @@ struct SettingsSheet: View {
         } header: {
             Text("Default Shell")
         } footer: {
-            Text(
-                """
-                The program every new terminal runs, for example /bin/zsh. \
-                Leave this empty to use the default login shell. Use a plain \
-                path; one that includes the jailbreak root stops working after \
-                the next jailbreak.
-                """
-            )
+            // The jailbreak-root caveat is a device matter; a Mac has no
+            // bootstrap to prefix a path with.
+            #if targetEnvironment(macCatalyst)
+                Text(
+                    """
+                    The program every new terminal runs, for example /bin/zsh. \
+                    Leave this empty to use your login shell.
+                    """
+                )
+            #else
+                Text(
+                    """
+                    The program every new terminal runs, for example /bin/zsh. \
+                    Leave this empty to use the default login shell. Use a plain \
+                    path; one that includes the jailbreak root stops working after \
+                    the next jailbreak.
+                    """
+                )
+            #endif
         }
     }
 

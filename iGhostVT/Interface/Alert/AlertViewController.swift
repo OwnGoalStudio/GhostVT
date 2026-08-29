@@ -53,6 +53,7 @@ final class AlertViewController: UIViewController {
                 message: alertMessage,
                 actions: dismissing
             )
+            .interfaceTextSize()
         )
         host.view.backgroundColor = .clear
         addChild(host)

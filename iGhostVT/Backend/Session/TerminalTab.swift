@@ -84,7 +84,8 @@ final class TerminalTab: ObservableObject, Identifiable {
             }
         }
         terminal.configuration = TerminalSurfaceOptions(
-            backend: .inMemory(store.session)
+            backend: .inMemory(store.session),
+            fontSize: TerminalFontSize.preferred
         )
         // The user's arrangement of the keyboard accessory bar; later edits
         // reach existing tabs through RootView's store subscription.
