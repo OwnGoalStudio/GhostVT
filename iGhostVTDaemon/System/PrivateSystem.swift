@@ -42,6 +42,34 @@ func ighostvtProcName(
     _ size: UInt32
 ) -> Int32
 
+/// `proc_pidinfo` from libproc, used with `PROC_PIDVNODEPATHINFO` to read a
+/// process's current directory as the kernel spells it — the form `chdir`
+/// wants, whatever vocabulary the shell itself speaks. Returns the number of
+/// bytes filled, 0 on failure. The iOS SDK ships no `proc_info.h`, so the
+/// struct's layout is carried as constants (`ProcVnodePathInfo`).
+@_silgen_name("proc_pidinfo")
+func ighostvtProcPIDInfo(
+    _ pid: Int32,
+    _ flavor: Int32,
+    _ argument: UInt64,
+    _ buffer: UnsafeMutableRawPointer?,
+    _ size: Int32
+) -> Int32
+
+/// ABI of `struct proc_vnodepathinfo` (`sys/proc_info.h`), fixed across
+/// arm64 macOS and iOS: two `vnode_info_path`s — current directory, then
+/// root — each a `vnode_info` followed by a `MAXPATHLEN` path. The
+/// harness's "inherited working directory" checks read a live session's
+/// directory through these offsets against the macOS SDK's real struct,
+/// which is the one proof they are right; keep that test.
+enum ProcVnodePathInfo {
+    static let flavor: Int32 = 9 // PROC_PIDVNODEPATHINFO
+    static let size = 2352
+    /// `offsetof(struct proc_vnodepathinfo, pvi_cdir.vip_path)`
+    static let currentDirectoryPathOffset = 152
+    static let pathLength = 1024 // MAXPATHLEN
+}
+
 /// `forkpty` handles the child-side dance a terminal needs — `setsid`, the
 /// `TIOCSCTTY` controlling-terminal assignment, and wiring the slave to
 /// stdin/stdout/stderr — none of which `posix_spawn` can express.

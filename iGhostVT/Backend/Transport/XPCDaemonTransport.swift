@@ -52,6 +52,12 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     /// anything else — the app cannot talk it into running arbitrary bytes.
     private let shellPath: String?
 
+    /// A live daemon session whose shell's current directory a fresh open
+    /// starts in — the tab this one was opened from. Sent with the open
+    /// only: an attach reaches a shell that already has a directory. The
+    /// daemon reads the path from the kernel; the app never names one.
+    private let inheritDirectoryFrom: UInt64?
+
     public var onEvent: (@Sendable (TerminalTransportEvent) -> Void)? {
         get { lock.locked { _onEvent } }
         set { lock.locked { _onEvent = newValue } }
@@ -92,10 +98,15 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         lock.locked { sessionID }
     }
 
-    public init(shellPath: String? = nil, resumeSessionID: UInt64? = nil) {
+    public init(
+        shellPath: String? = nil,
+        resumeSessionID: UInt64? = nil,
+        inheritDirectoryFrom: UInt64? = nil
+    ) {
         let trimmed = shellPath?.trimmingCharacters(in: .whitespacesAndNewlines)
         self.shellPath = (trimmed?.isEmpty ?? true) ? nil : trimmed
         self.resumeSessionID = resumeSessionID
+        self.inheritDirectoryFrom = inheritDirectoryFrom
     }
 
     deinit {
@@ -416,6 +427,9 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             let command = xpc_array_create(nil, 0)
             xpc_array_set_string(command, XPC_ARRAY_APPEND, shellPath)
             xpc_dictionary_set_value(message, iGhostVTWireKey.command, command)
+        }
+        if let inheritDirectoryFrom {
+            xpc_dictionary_set_uint64(message, iGhostVTWireKey.inheritDirectoryFrom, inheritDirectoryFrom)
         }
         xpc_connection_send_message_with_reply(connection, message, queue) { [weak self] reply in
             guard let self else { return }

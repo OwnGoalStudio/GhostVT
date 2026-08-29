@@ -30,6 +30,7 @@ func run(
     resizeTo: (columns: UInt16, rows: UInt16)? = nil,
     credentials: ShellLaunch.Credentials? = nil,
     workingDirectory: String? = nil,
+    fallbackWorkingDirectory: String? = nil,
     timeout: TimeInterval = 10
 ) -> (output: String, exitCode: Int32?, session: PTYSession)? {
     let session: PTYSession
@@ -42,6 +43,7 @@ func run(
             rows: rows,
             credentials: credentials,
             workingDirectory: workingDirectory,
+            fallbackWorkingDirectory: fallbackWorkingDirectory,
             queue: harnessQueue
         )
     } catch {
@@ -116,6 +118,17 @@ if let plan = ShellLaunch.plan(requestedShell: nil) {
         plan.workingDirectory == NSHomeDirectory(),
         "the default plan starts a session in the session user's home (got \(String(describing: plan.workingDirectory)))"
     )
+}
+// An inherited directory the session user cannot enter falls back to the
+// plan's own, never to the daemon's `/`.
+if let result = run(
+    command: ["/bin/sh", "-c", "pwd"],
+    workingDirectory: "/nonexistent/ighostvt-harness",
+    fallbackWorkingDirectory: "/private/tmp"
+) {
+    check(result.output.contains("/private/tmp"), "a working directory that refuses falls back to the plan's own")
+} else {
+    check(false, "spawning a shell with a fallback working directory succeeded")
 }
 let homelessUser = PasswdEntry(name: "nobody", uid: 0, gid: 0, home: "/nonexistent/ighostvt-harness", shell: "/bin/sh")
 check(ShellLaunch.workingDirectory(for: homelessUser) == nil, "a home that does not exist is skipped")
@@ -490,6 +503,104 @@ if getuid() == 0 {
         ShellLaunch.credentials(for: PasswdEntry.forCurrentUser()) == nil,
         "a non-root daemon drops nothing — setuid would only fail"
     )
+}
+
+// A new tab opens where the current one's shell is. The daemon asks the
+// kernel for the shell's directory rather than trusting the shell's own
+// report, so it works for a shell with no OSC 7 and yields the path in the
+// spelling `chdir` wants.
+print("inherited working directory")
+do {
+    let registry = SessionRegistry(queue: harnessQueue)
+    // `exec` keeps the pid: the directory read is the spawned child's.
+    let source = try registry.open(
+        command: ["/bin/sh", "-c", "cd /private/tmp && exec /bin/sleep 30"],
+        environment: [:],
+        columns: 80,
+        rows: 24
+    )
+    var sourceDirectory: String?
+    let deadline = Date().addingTimeInterval(5)
+    while Date() < deadline {
+        sourceDirectory = source.currentDirectory
+        if sourceDirectory == "/private/tmp" { break }
+        usleep(50_000)
+    }
+    check(sourceDirectory == "/private/tmp", "a live session's current directory is read from the kernel (got \(String(describing: sourceDirectory)))")
+    check(registry.inheritableDirectory(from: source.id) == "/private/tmp", "the registry offers a live session's directory")
+    check(registry.inheritableDirectory(from: source.id &+ 1000) == nil, "an unknown session offers nothing")
+
+    let inherited = try registry.open(
+        command: ["/bin/sh", "-c", "exec /bin/sleep 30"],
+        environment: [:],
+        columns: 80,
+        rows: 24,
+        inheritDirectoryFrom: source.id
+    )
+    var inheritedDirectory: String?
+    let inheritedDeadline = Date().addingTimeInterval(5)
+    while Date() < inheritedDeadline {
+        inheritedDirectory = inherited.currentDirectory
+        if inheritedDirectory == "/private/tmp" { break }
+        usleep(50_000)
+    }
+    check(inheritedDirectory == "/private/tmp", "a session opened from another starts in its directory (got \(String(describing: inheritedDirectory)))")
+
+    let fresh = try registry.open(
+        command: ["/bin/sh", "-c", "exec /bin/sleep 30"],
+        environment: [:],
+        columns: 80,
+        rows: 24,
+        inheritDirectoryFrom: source.id &+ 1000
+    )
+    var freshDirectory: String?
+    let freshDeadline = Date().addingTimeInterval(5)
+    while Date() < freshDeadline {
+        freshDirectory = fresh.currentDirectory
+        if freshDirectory == NSHomeDirectory() { break }
+        usleep(50_000)
+    }
+    check(freshDirectory == NSHomeDirectory(), "naming a session that never existed opens in the home (got \(String(describing: freshDirectory)))")
+
+    // `proc_pidinfo` keeps answering with the old path after the directory
+    // is removed, so the registry's own stat check is what refuses it.
+    var template = Array("/private/tmp/ighostvt-harness-cwd.XXXXXX".utf8CString)
+    let removable = template.withUnsafeMutableBufferPointer { mkdtemp($0.baseAddress) }.map { String(cString: $0) }
+    if let removable {
+        let mover = try registry.open(
+            command: ["/bin/sh", "-c", "cd '\(removable)' && exec /bin/sleep 30"],
+            environment: [:],
+            columns: 80,
+            rows: 24
+        )
+        let moverDeadline = Date().addingTimeInterval(5)
+        while Date() < moverDeadline, mover.currentDirectory != removable { usleep(50_000) }
+        check(registry.inheritableDirectory(from: mover.id) == removable, "a directory that exists is offered")
+        check(rmdir(removable) == 0, "the harness can remove the directory under the session")
+        check(mover.currentDirectory == removable, "the kernel still names the removed directory")
+        check(registry.inheritableDirectory(from: mover.id) == nil, "a directory that is gone is not offered")
+        try? registry.close(mover.id)
+    } else {
+        check(false, "a removable directory is created")
+    }
+
+    // A source that has exited offers nothing, even before it is reaped.
+    let departed = try registry.open(
+        command: ["/bin/sh", "-c", "cd /private/tmp && exit 0"],
+        environment: [:],
+        columns: 80,
+        rows: 24
+    )
+    let departedDeadline = Date().addingTimeInterval(5)
+    while Date() < departedDeadline, registry.session(departed.id) != nil { usleep(50_000) }
+    check(registry.session(departed.id) == nil, "an exited source leaves the registry")
+    check(registry.inheritableDirectory(from: departed.id) == nil, "an exited source offers nothing")
+
+    for session in [source, inherited, fresh] {
+        try? registry.close(session.id)
+    }
+} catch {
+    check(false, "inherited-directory sessions spawn (\(error))")
 }
 
 print("foreground process name")

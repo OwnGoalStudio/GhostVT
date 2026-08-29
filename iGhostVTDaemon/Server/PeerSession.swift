@@ -168,6 +168,7 @@ final class PeerSession {
         let environment = stringDictionary(message, key: iGhostVTWireKey.environment)
         let columns = UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(message, iGhostVTWireKey.columns))
         let rows = UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(message, iGhostVTWireKey.rows))
+        let inheritDirectoryFrom = optionalUInt64(message, key: iGhostVTWireKey.inheritDirectoryFrom)
 
         DaemonFileLog.log("peer \(clientPID) openSession \(columns)x\(rows)")
         do {
@@ -175,7 +176,8 @@ final class PeerSession {
                 command: command,
                 environment: environment,
                 columns: columns,
-                rows: rows
+                rows: rows,
+                inheritDirectoryFrom: inheritDirectoryFrom
             )
             _ = try registry.attach(session.id, to: self)
             attachedSessionIDs.insert(session.id)
@@ -312,6 +314,14 @@ final class PeerSession {
     }
 
     // MARK: - Wire helpers
+
+    /// Absent and zero are different things for a session id, so this
+    /// distinguishes them where `xpc_dictionary_get_uint64` would not.
+    private func optionalUInt64(_ message: xpc_object_t, key: String) -> UInt64? {
+        guard let value = xpc_dictionary_get_value(message, key),
+              xpc_get_type(value) == XPC_TYPE_UINT64 else { return nil }
+        return xpc_uint64_get_value(value)
+    }
 
     private func stringArray(_ message: xpc_object_t, key: String) -> [String] {
         guard let array = xpc_dictionary_get_value(message, key),

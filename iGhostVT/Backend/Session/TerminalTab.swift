@@ -58,7 +58,20 @@ final class TerminalTab: ObservableObject, Identifiable {
     private var activityObservation: AnyCancellable?
     private var titleObservation: AnyCancellable?
 
-    init(resumeDaemonSessionID: UInt64? = nil) {
+    /// The daemon session this tab is attached to, once it has one. Another
+    /// tab opened from this one names it so its shell starts in this shell's
+    /// current directory.
+    var daemonSessionID: UInt64? {
+        daemonSession.id
+    }
+
+    /// `inheritDirectoryFrom` is the daemon session of the tab this one was
+    /// opened from; a resumed tab ignores it, since its shell already sits
+    /// somewhere. The transport factory sends it on every open, so a shell
+    /// that exits and is reopened starts where the *source* shell is by
+    /// then — or in the home once that session is gone — never where this
+    /// tab's dead shell was.
+    init(resumeDaemonSessionID: UInt64? = nil, inheritDirectoryFrom: UInt64? = nil) {
         let daemonSession = DaemonSessionBox(id: resumeDaemonSessionID)
         self.daemonSession = daemonSession
         terminal = TerminalViewState(theme: AppTheme.shared.terminalTheme)
@@ -69,7 +82,8 @@ final class TerminalTab: ObservableObject, Identifiable {
         store = TerminalSessionStore(makeTransport: {
             let transport = XPCDaemonTransport(
                 shellPath: UserDefaults.standard.string(forKey: "Shell.path"),
-                resumeSessionID: daemonSession.id
+                resumeSessionID: daemonSession.id,
+                inheritDirectoryFrom: inheritDirectoryFrom
             )
             // A real process exit (including one we asked for via
             // closeSession) means the ID must never be reused: forget it in

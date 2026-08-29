@@ -151,6 +151,7 @@ final class PTYSession {
         rows: UInt16,
         credentials: ShellLaunch.Credentials? = nil,
         workingDirectory: String? = nil,
+        fallbackWorkingDirectory: String? = nil,
         queue: DispatchQueue
     ) throws {
         guard let executable = command.first, !executable.isEmpty else {
@@ -168,11 +169,13 @@ final class PTYSession {
         let argv = Self.makeCStringArray(command)
         let envp = Self.makeCStringArray(environmentStrings)
         let directory: UnsafeMutablePointer<CChar>? = workingDirectory.flatMap { strdup($0) }
+        let fallbackDirectory: UnsafeMutablePointer<CChar>? = fallbackWorkingDirectory.flatMap { strdup($0) }
         let executablePath = strdup(executable)
         defer {
             Self.freeCStringArray(argv, count: command.count)
             Self.freeCStringArray(envp, count: environmentStrings.count)
             free(directory)
+            free(fallbackDirectory)
             free(executablePath)
         }
 
@@ -186,6 +189,7 @@ final class PTYSession {
         // may only make async-signal-safe calls, and building an array is not
         // one of them.
         var supplementaryGroups: [gid_t] = credentials.map { [$0.gid] } ?? []
+        var movedToDirectory = false
 
         // How the child says why it never reached `execve`. The write end is
         // close-on-exec, so a successful exec closes it and the parent simply
@@ -241,10 +245,12 @@ final class PTYSession {
                 // Belt and braces: if the uid did not actually change, refuse.
                 if getuid() != credentials.uid || geteuid() != credentials.uid { fail(Self.stepVerifyUID) }
             }
-            // After the privilege drop, so the home has to be reachable by
-            // the user the shell will be; a refusal leaves the daemon's own
-            // directory, as before.
-            if let directory { _ = chdir(directory) }
+            // After the privilege drop, so the directory has to be reachable
+            // by the user the shell will be. An inherited directory the user
+            // can no longer enter falls back to the plan's own (the home);
+            // only when both refuse does the shell keep the daemon's `/`.
+            if let directory { movedToDirectory = chdir(directory) == 0 }
+            if !movedToDirectory, let fallbackDirectory { _ = chdir(fallbackDirectory) }
             execve(executablePath, argv, envp)
             fail(Self.stepExec)
         }
@@ -492,6 +498,38 @@ final class PTYSession {
         foregroundProcessName = name
         isForegroundShell = isShell
         onProcessName?(id, name, isShell)
+    }
+
+    /// The spawned program's current directory, as the kernel spells it —
+    /// what another session's `chdir` wants, whatever vocabulary the shell
+    /// speaks (under roothide a vroot-linked shell prints its `$PWD` with
+    /// the jbroot stripped). Asked of the shell itself, not the foreground
+    /// program: a `:cd` inside vim is vim's business, and the directory a
+    /// user thinks of as the tab's is the one the prompt will return to.
+    /// `nil` once the child is gone or when the kernel refuses.
+    var currentDirectory: String? {
+        guard isAlive else { return nil }
+        let buffer = UnsafeMutableRawPointer.allocate(
+            byteCount: ProcVnodePathInfo.size,
+            alignment: MemoryLayout<UInt64>.alignment
+        )
+        defer { buffer.deallocate() }
+        buffer.initializeMemory(as: UInt8.self, repeating: 0, count: ProcVnodePathInfo.size)
+        let filled = ighostvtProcPIDInfo(
+            childPID,
+            ProcVnodePathInfo.flavor,
+            0,
+            buffer,
+            Int32(ProcVnodePathInfo.size)
+        )
+        guard filled == Int32(ProcVnodePathInfo.size) else { return nil }
+        let pathStart = buffer.advanced(by: ProcVnodePathInfo.currentDirectoryPathOffset)
+        // Bounded: the kernel NUL-terminates, but never trust a struct copy
+        // to keep doing so.
+        let bytes = UnsafeRawBufferPointer(start: pathStart, count: ProcVnodePathInfo.pathLength)
+        let length = bytes.firstIndex(of: 0) ?? ProcVnodePathInfo.pathLength
+        let path = String(decoding: bytes.prefix(length), as: UTF8.self)
+        return path.hasPrefix("/") ? path : nil
     }
 
     /// WNOHANG-polls until the child is reaped, bounded at half a second:

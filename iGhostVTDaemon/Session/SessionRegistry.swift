@@ -53,11 +53,18 @@ final class SessionRegistry {
         sessions[id]
     }
 
+    /// `inheritDirectoryFrom` names a live session whose shell's current
+    /// directory the new one starts in — how a new tab opens where the
+    /// current one is. The directory is read from the kernel here, not
+    /// carried over the wire, so nothing the app says picks a path; a
+    /// session that is gone, or a directory that is not one any more,
+    /// simply means the plan's own start (the home).
     func open(
         command requestedCommand: [String],
         environment requestedEnvironment: [String: String],
         columns: UInt16,
-        rows: UInt16
+        rows: UInt16,
+        inheritDirectoryFrom sourceSessionID: UInt64? = nil
     ) throws -> PTYSession {
         guard sessions.count < iGhostVTProtocol.maximumSessions else {
             throw iGhostVTFailure(
@@ -66,6 +73,7 @@ final class SessionRegistry {
             )
         }
         let plan = try resolvePlan(requestedCommand)
+        let inheritedDirectory = sourceSessionID.flatMap(inheritableDirectory)
         let id = nextID
         nextID &+= 1
 
@@ -76,7 +84,8 @@ final class SessionRegistry {
             columns: clamp(columns, fallback: iGhostVTProtocol.defaultColumns, limit: iGhostVTProtocol.maximumColumns),
             rows: clamp(rows, fallback: iGhostVTProtocol.defaultRows, limit: iGhostVTProtocol.maximumRows),
             credentials: plan.credentials,
-            workingDirectory: plan.workingDirectory,
+            workingDirectory: inheritedDirectory ?? plan.workingDirectory,
+            fallbackWorkingDirectory: inheritedDirectory == nil ? nil : plan.workingDirectory,
             queue: queue
         )
         sessions[id] = session
@@ -84,7 +93,9 @@ final class SessionRegistry {
             "session \(id) spawned \(plan.command.first ?? "?", privacy: .public), \(self.sessions.count)/\(iGhostVTProtocol.maximumSessions) held"
         )
         DaemonFileLog.log(
-            "session \(id) spawned \(plan.command.first ?? "?"), \(sessions.count)/\(iGhostVTProtocol.maximumSessions) held"
+            "session \(id) spawned \(plan.command.first ?? "?")"
+                + (inheritedDirectory.map { " in \($0) (from session \(sourceSessionID.map(String.init) ?? "?"))" } ?? "")
+                + ", \(sessions.count)/\(iGhostVTProtocol.maximumSessions) held"
         )
         session.start(
             onOutput: { [weak self] sessionID, data in
@@ -173,6 +184,17 @@ final class SessionRegistry {
     private func discard(_ id: UInt64) {
         attachments.removeValue(forKey: id)
         sessions.removeValue(forKey: id)?.invalidate()
+    }
+
+    /// The directory a new session may inherit from `sourceSessionID`:
+    /// its shell's current one, if the session is still alive and the path
+    /// is a directory right now. Checked as the daemon; the child re-checks
+    /// as the session user when it `chdir`s, and falls back if refused.
+    func inheritableDirectory(from sourceSessionID: UInt64) -> String? {
+        guard let path = sessions[sourceSessionID]?.currentDirectory else { return nil }
+        var info = stat()
+        guard stat(path, &info) == 0, info.st_mode & S_IFMT == S_IFDIR else { return nil }
+        return path
     }
 
     /// A client sends either nothing (give me a shell), a single path (give me

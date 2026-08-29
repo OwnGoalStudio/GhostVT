@@ -121,8 +121,14 @@ final class TabManager: ObservableObject {
 
     /// The one way a tab is created: its terminal's hooks land on this
     /// window's presenters before the tab joins `tabs`.
-    private func makeTab(resume daemonSessionID: UInt64? = nil) -> TerminalTab {
-        let tab = TerminalTab(resumeDaemonSessionID: daemonSessionID)
+    private func makeTab(
+        resume daemonSessionID: UInt64? = nil,
+        inheritDirectoryFrom sourceSessionID: UInt64? = nil
+    ) -> TerminalTab {
+        let tab = TerminalTab(
+            resumeDaemonSessionID: daemonSessionID,
+            inheritDirectoryFrom: sourceSessionID
+        )
         tab.terminal.onClipboardConfirmationRequest = { [weak self] request in
             self?.clipboardRequests.append(request)
         }
@@ -147,9 +153,15 @@ final class TabManager: ObservableObject {
         clipboardRequests.removeFirst()
     }
 
+    /// Opens where the current tab's shell is: the new session names the
+    /// active tab's daemon session and the daemon reads that shell's current
+    /// directory from the kernel — so it works for a shell that reports no
+    /// OSC 7 as well, and no directory is ever typed into a PTY. A window
+    /// with no active tab, or one whose tab has no session yet, opens in
+    /// the home as before.
     @discardableResult
     func newTab() -> TerminalTab {
-        let tab = makeTab()
+        let tab = makeTab(inheritDirectoryFrom: activeTab?.daemonSessionID)
         withAnimation(Self.tabTransition) {
             tabs.append(tab)
             activeTabID = tab.id

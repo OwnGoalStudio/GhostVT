@@ -95,6 +95,10 @@ enum iGhostVTWireKey {
     static let rows = "rows"
     static let command = "cmd"
     static let environment = "env"
+    /// On `openSession`: a live session whose shell's current directory the
+    /// new one should start in. The daemon reads that directory from the
+    /// kernel itself — the app never names a path.
+    static let inheritDirectoryFrom = "cwdsid"
     static let title = "title"
     static let isAttached = "attached"
     static let processName = "proc"

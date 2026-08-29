@@ -49,6 +49,19 @@ persists session IDs so a cold launch reattaches (256 KiB replay).
 SSH later = another `TerminalTransport` implementation; don't collapse the
 seam.
 
+A new tab opens where the current one is, and the directory never crosses
+the wire: `TabManager.newTab` names the active tab's daemon session
+(`inheritDirectoryFrom`, sent with the open only — an attach reaches a shell
+that already sits somewhere), and `SessionRegistry` reads *that shell's*
+current directory from the kernel (`proc_pidinfo` / `PROC_PIDVNODEPATHINFO`
+on the child, not the foreground program) and `chdir`s the new child there
+before `execve`. Nothing is typed into a PTY, the app picks no path, it works
+for a shell with no OSC 7, and the kernel's spelling is the one `chdir`
+wants, whatever vocabulary a vroot-linked shell prints. A directory the
+session user can no longer enter falls back to the plan's home, never to
+launchd's `/`. The iOS SDK ships no `proc_info.h`, so the struct's ABI lives
+as constants in `ProcVnodePathInfo`.
+
 Tab titles have three sources, in this order. The daemon is the primary: each
 session polls `tcgetpgrp` on its PTY (and re-checks as output drains, rate
 limited — the drain sees one check per 64 KiB otherwise),
