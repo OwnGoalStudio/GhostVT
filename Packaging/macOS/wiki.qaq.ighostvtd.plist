@@ -10,6 +10,10 @@
 	Catalyst app looks the service up. Sessions therefore run as the user
 	with no privilege drop, and the peer check accepts the same user's app
 	bundle (see PeerAuthenticator's macOS branch).
+
+	KeepAlive matches the bundled agent's: restart a crash, let the exit the
+	quitting app asks for (`shutdown`) stand, and rely on MachServices to
+	demand-launch the next time the app connects.
 -->
 <plist version="1.0">
 <dict>
@@ -29,7 +33,10 @@
 	<key>RunAtLoad</key>
 	<true/>
 	<key>KeepAlive</key>
-	<true/>
+	<dict>
+		<key>SuccessfulExit</key>
+		<false/>
+	</dict>
 	<key>MachServices</key>
 	<dict>
 		<key>wiki.qaq.ighostvt.service</key>

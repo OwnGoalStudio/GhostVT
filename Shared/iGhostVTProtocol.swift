@@ -57,6 +57,12 @@ enum iGhostVTOperation: UInt64, Sendable {
     case resize = 7
     case closeSession = 8
     case goodbye = 9
+    /// Exit, if no session is held; `sessionBusy` otherwise. Sent by the app
+    /// as it quits, after closing the tabs it decided to close and seeing
+    /// them leave `listSessions`. Whether the exit sticks is launchd's call:
+    /// the Mac's agent restarts only on a crash, the device daemon is kept
+    /// alive regardless, so the app only asks on the Mac.
+    case shutdown = 10
 }
 
 /// Daemon-initiated pushes on an attached connection. These carry no reply.

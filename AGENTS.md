@@ -49,6 +49,22 @@ persists session IDs so a cold launch reattaches (256 KiB replay).
 SSH later = another `TerminalTransport` implementation; don't collapse the
 seam.
 
+Quitting is the app's decision, made in `applicationWillTerminate` from the
+tabs of every connected scene: a tab whose shell is at its prompt
+(`!hasRunningProgram`, the same test that lets its × close without asking)
+is killed, a tab with a program running is left in the daemon for the next
+launch, and with Keep Alive off everything goes. The kills travel over one
+blocking one-shot connection (`XPCDaemonTransport.closeSessionsForQuit`) —
+not the tabs' transports, whose `closeSession` is fire-and-forget on a queue
+the exit outruns — and the call polls `listSessions` until the closed
+sessions are gone, because a close reply only says the SIGHUP was sent. If
+that leaves the daemon holding nothing, the Mac build sends `shutdown` and
+the launch agent exits; the daemon's only part in this is a `registry.isEmpty`
+guard on that one request. Its plist's `KeepAlive` is `{SuccessfulExit =
+false}` for exactly this: a crash restarts, the asked-for exit stands, and
+`MachServices` demand-launches it the next time the app connects. The device
+LaunchDaemon keeps `KeepAlive = true` and is never asked.
+
 A new tab opens where the current one is, and the directory never crosses
 the wire: `TabManager.newTab` names the active tab's daemon session
 (`inheritDirectoryFrom`, sent with the open only — an attach reaches a shell
@@ -206,18 +222,19 @@ Gotchas that bit us:
   terminal would simply never connect.
 
 - **The PTY's winsize must be the *last* grid the surface reported, and
-  only one record of that grid may ever be sent.** Reports come off ghostty's
-  IO thread; the transport queue, the main actor (`Task`), and the daemon's
-  open/attach reply each see them at their own pace. `TransportRelay` keeps
-  the record and primes a freshly installed transport with it under the same
-  lock the reports take; `XPCDaemonTransport` records every size it hears and
-  flushes the newest one from inside the open/attach reply (a size that
-  arrives mid-round-trip must not be lost, and the one captured *before* the
-  trip must not win). Never re-send a main-actor copy on `.connected`: at
-  cold launch that copy trails the IO thread, lands after the settled grid,
-  and — because the library reports only *changes* — leaves a 49×16 PTY under
-  a 93×32 surface until the next real resize. That 49×16 is the surface's
-  birth size before its first `setSize`, not a transient layout.
+  only the relay's record of that grid may ever be re-sent.** Reports come
+  off ghostty's IO thread; the transport queue, the main actor (`Task`), and
+  the daemon's open/attach reply each see them at their own pace.
+  `TransportRelay` keeps the record under the lock the reports take, primes a
+  freshly installed transport with it, and replays it from the transport's
+  `.connected` event — synchronously, on the transport's queue, before the
+  hop to the main actor — so a size reported during the round trip lands
+  behind the open or attach. The transport itself never replays a size; it
+  only dedupes against what the daemon already holds. Never re-send a
+  main-actor copy: at cold launch that copy trails the IO thread, lands after
+  the settled grid, and — because the library reports only *changes* — leaves
+  a 49×16 PTY under a 93×32 surface until the next real resize. That 49×16 is
+  the surface's birth size before its first `setSize`, not a transient layout.
 - A shell inherits both the daemon's resource limits and every descriptor
   that survives `execve`. Keep an explicit launchd `NumberOfFiles` soft limit
   sized for user workloads, and mark every daemon-owned session descriptor

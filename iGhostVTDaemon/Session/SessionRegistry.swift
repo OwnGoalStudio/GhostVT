@@ -15,6 +15,8 @@ final class SessionRegistry {
     private var nextID: UInt64 = 1
     private var childExitSignal: DispatchSourceSignal?
 
+    var isEmpty: Bool { sessions.isEmpty }
+
     init(queue: DispatchQueue) {
         self.queue = queue
         // The authoritative reaper under every session's own exit source

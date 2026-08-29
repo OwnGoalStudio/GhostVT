@@ -7720,73 +7720,73 @@
         }
       }
     },
-    "Sessions keep running after the app quits and come back on the next launch. Turn this off to close every session when the app quits." : {
+    "Sessions with a program running keep going after the app quits and come back on the next launch; a shell sitting at its prompt closes. Turn this off to close every session when the app quits." : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sitzungen laufen nach dem Beenden der App weiter und kehren beim nächsten Start zurück. Deaktiviere dies, um beim Beenden alle Sitzungen zu schließen."
+            "value" : "Sitzungen mit einem laufenden Programm laufen nach dem Beenden der App weiter und kehren beim nächsten Start zurück; eine Shell, die an ihrer Eingabeaufforderung wartet, wird geschlossen. Deaktiviere dies, um beim Beenden alle Sitzungen zu schließen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sessions keep running after the app quits and come back on the next launch. Turn this off to close every session when the app quits."
+            "value" : "Sessions with a program running keep going after the app quits and come back on the next launch; a shell sitting at its prompt closes. Turn this off to close every session when the app quits."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las sesiones siguen activas después de salir de la app y vuelven al abrirla de nuevo. Desactiva esto para cerrar todas las sesiones al salir."
+            "value" : "Las sesiones con un programa en ejecución siguen activas después de salir de la app y vuelven al abrirla de nuevo; una shell que espera en su prompt se cierra. Desactiva esto para cerrar todas las sesiones al salir."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les sessions continuent après la fermeture de l’app et reviennent au lancement suivant. Désactivez cette option pour fermer toutes les sessions à la fermeture de l’app."
+            "value" : "Les sessions où un programme s’exécute continuent après la fermeture de l’app et reviennent au lancement suivant ; un shell en attente à son invite est fermé. Désactivez cette option pour fermer toutes les sessions à la fermeture de l’app."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le sessioni restano attive dopo la chiusura dell’app e tornano al lancio successivo. Disattiva questa opzione per chiudere tutte le sessioni quando esci dall’app."
+            "value" : "Le sessioni con un programma in esecuzione restano attive dopo la chiusura dell’app e tornano al lancio successivo; una shell ferma al prompt viene chiusa. Disattiva questa opzione per chiudere tutte le sessioni quando esci dall’app."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appを終了してもセッションは実行を続け、次回起動時に復元されます。オフにすると、終了時にすべてのセッションが閉じられます。"
+            "value" : "プログラムを実行中のセッションはAppを終了しても実行を続け、次回起動時に復元されます。プロンプトで待機しているだけのシェルは閉じられます。オフにすると、終了時にすべてのセッションが閉じられます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "앱을 종료해도 세션이 계속 실행되고 다음 실행 시 복원됩니다. 이 옵션을 끄면 앱을 종료할 때 모든 세션이 닫힙니다."
+            "value" : "프로그램이 실행 중인 세션은 앱을 종료해도 계속 실행되고 다음 실행 시 복원됩니다. 프롬프트에서 대기 중인 셸은 닫힙니다. 이 옵션을 끄면 앱을 종료할 때 모든 세션이 닫힙니다."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As sessões continuam em execução depois que o app é encerrado e voltam na próxima abertura. Desative isto para fechar todas as sessões ao sair."
+            "value" : "As sessões com um programa em execução continuam depois que o app é encerrado e voltam na próxima abertura; um shell parado no prompt é fechado. Desative isto para fechar todas as sessões ao sair."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сеансы продолжают работать после выхода из приложения и восстанавливаются при следующем запуске. Выключите, чтобы закрывать все сеансы при выходе."
+            "value" : "Сеансы с запущенной программой продолжают работать после выхода из приложения и восстанавливаются при следующем запуске; оболочка, ожидающая в приглашении, закрывается. Выключите, чтобы закрывать все сеансы при выходе."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "应用退出后会话继续运行，下次启动时自动恢复。关闭此项后，退出应用时将关闭所有会话。"
+            "value" : "有程序正在运行的会话会在应用退出后继续运行，下次启动时自动恢复；停在提示符处的 shell 会被关闭。关闭此项后，退出应用时将关闭所有会话。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "App 結束後工作階段會繼續執行，並在下次啟動時恢復。關閉此項後，結束 App 時將關閉所有工作階段。"
+            "value" : "有程式正在執行的工作階段會在 App 結束後繼續執行，並在下次啟動時恢復；停在提示字元的 shell 會被關閉。關閉此項後，結束 App 時將關閉所有工作階段。"
           }
         }
       }

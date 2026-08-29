@@ -140,6 +140,14 @@ final class PeerSession {
         case .goodbye:
             queue.async { [weak self] in self?.invalidate() }
             return .success
+        case .shutdown:
+            // Only with nothing held: a session the app did not close is a
+            // shell someone is coming back for. Replied to before exiting,
+            // so the quitting app hears the outcome.
+            guard registry.isEmpty else { return .sessionBusy }
+            DaemonFileLog.log("peer \(clientPID) shutdown with nothing held, exiting")
+            queue.async { exit(EXIT_SUCCESS) }
+            return .success
         }
     }
 

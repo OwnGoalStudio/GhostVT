@@ -244,31 +244,33 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             xpc_connection_send_message_with_reply(
                 link.connection, makeMessage(.listSessions), queue
             ) { reply in
-                defer { xpc_connection_cancel(link.connection) }
-                guard Self.replyCode(of: reply) == .success,
-                      let array = xpc_dictionary_get_value(reply, iGhostVTWireKey.sessions),
-                      xpc_get_type(array) == XPC_TYPE_ARRAY
-                else {
-                    finished.finish(nil)
-                    return
-                }
-                var rows: [SessionSummary] = []
-                for index in 0 ..< xpc_array_get_count(array) {
-                    let entry = xpc_array_get_value(array, index)
-                    guard xpc_get_type(entry) == XPC_TYPE_DICTIONARY else { continue }
-                    let title = xpc_dictionary_get_string(entry, iGhostVTWireKey.title)
-                        .map { String(cString: $0) } ?? ""
-                    rows.append(SessionSummary(
-                        id: xpc_dictionary_get_uint64(entry, iGhostVTWireKey.sessionID),
-                        title: title,
-                        columns: UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(entry, iGhostVTWireKey.columns)),
-                        rows: UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(entry, iGhostVTWireKey.rows)),
-                        isAttached: xpc_dictionary_get_bool(entry, iGhostVTWireKey.isAttached)
-                    ))
-                }
-                finished.finish(rows)
+                xpc_connection_cancel(link.connection)
+                finished.finish(Self.sessions(in: reply))
             }
         }
+    }
+
+    /// The rows of a `listSessions` reply; nil for anything but a success.
+    private static func sessions(in reply: xpc_object_t) -> [SessionSummary]? {
+        guard replyCode(of: reply) == .success,
+              let array = xpc_dictionary_get_value(reply, iGhostVTWireKey.sessions),
+              xpc_get_type(array) == XPC_TYPE_ARRAY
+        else { return nil }
+        var rows: [SessionSummary] = []
+        for index in 0 ..< xpc_array_get_count(array) {
+            let entry = xpc_array_get_value(array, index)
+            guard xpc_get_type(entry) == XPC_TYPE_DICTIONARY else { continue }
+            let title = xpc_dictionary_get_string(entry, iGhostVTWireKey.title)
+                .map { String(cString: $0) } ?? ""
+            rows.append(SessionSummary(
+                id: xpc_dictionary_get_uint64(entry, iGhostVTWireKey.sessionID),
+                title: title,
+                columns: UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(entry, iGhostVTWireKey.columns)),
+                rows: UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(entry, iGhostVTWireKey.rows)),
+                isAttached: xpc_dictionary_get_bool(entry, iGhostVTWireKey.isAttached)
+            ))
+        }
+        return rows
     }
 
     /// Kill a session over a connection of its own, for when the tab's
@@ -293,41 +295,81 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         }
     }
 
-    /// Kill every session the daemon holds, attached or not, and wait for
-    /// the daemon to confirm each one — up to `timeout` in total. Blocking on
-    /// purpose: the one caller is `applicationWillTerminate`, where anything
-    /// still queued dies with the process, and the daemon is asked directly
-    /// because the windows and their tabs may already be gone by then.
-    public static func closeAllSessions(timeout: TimeInterval = 3) {
+    /// The quit path. Kills `ids` (every session the daemon holds, attached
+    /// or not, when nil), waits for the daemon to report each one *gone* —
+    /// the close reply says only that the SIGHUP was sent, and a shell has
+    /// up to the daemon's two-second grace to leave — and then, if asked and
+    /// only if the daemon is left holding nothing at all, tells it to exit.
+    /// A session kept on purpose is still in the list, so it alone is what
+    /// keeps the daemon up; the daemon refuses the exit on its own count
+    /// too, so a session opened by a window this app never saw is safe
+    /// either way.
+    ///
+    /// Blocking on purpose, bounded by `timeout` for the whole sequence:
+    /// the one caller is `applicationWillTerminate`, where anything still
+    /// queued dies with the process. The tabs' own transports cannot do
+    /// this — `closeSession` there is fire-and-forget on a queue the exit
+    /// would outrun, and the disconnect that follows drops the connection
+    /// the exit event would have arrived on.
+    public static func closeSessionsForQuit(
+        _ ids: [UInt64]?,
+        stopDaemonWhenEmpty: Bool,
+        timeout: TimeInterval = 3
+    ) {
         let deadline = DispatchTime.now() + timeout
+        let queue = DispatchQueue(label: "wiki.qaq.ighostvt.client.quit", qos: .userInitiated)
+        guard let connection = iGhostVTProtocol.serviceName.withCString({
+            ighostvtCreateMachServiceConnection($0, queue, 0)
+        }) else { return }
+        xpc_connection_set_event_handler(connection) { _ in }
+        xpc_connection_activate(connection)
         let done = DispatchGroup()
         done.enter()
-        listSessions(timeout: timeout) { rows in
-            guard let rows, !rows.isEmpty else {
-                done.leave()
-                return
+        func finish() {
+            xpc_connection_cancel(connection)
+            done.leave()
+        }
+        func list(_ completion: @escaping ([SessionSummary]?) -> Void) {
+            xpc_connection_send_message_with_reply(connection, makeMessage(.listSessions), queue) { reply in
+                completion(Self.sessions(in: reply))
             }
-            let queue = DispatchQueue(label: "wiki.qaq.ighostvt.client.kill", qos: .userInitiated)
-            guard let connection = iGhostVTProtocol.serviceName.withCString({
-                ighostvtCreateMachServiceConnection($0, queue, 0)
-            }) else {
-                done.leave()
-                return
+        }
+        // Polls the daemon's list until none of `targets` remain, or the
+        // deadline passes; hands over the last list either way.
+        func awaitGone(_ targets: Set<UInt64>, then: @escaping ([SessionSummary]) -> Void) {
+            list { rows in
+                guard let rows else { return finish() }
+                if !rows.contains(where: { targets.contains($0.id) }) || DispatchTime.now() >= deadline {
+                    return then(rows)
+                }
+                queue.asyncAfter(deadline: .now() + .milliseconds(100)) {
+                    awaitGone(targets, then: then)
+                }
             }
-            xpc_connection_set_event_handler(connection) { _ in }
-            xpc_connection_activate(connection)
-            xpc_connection_send_message_with_reply(connection, makeMessage(.hello), queue) { _ in
+        }
+        xpc_connection_send_message_with_reply(connection, makeMessage(.hello), queue) { reply in
+            guard Self.replyCode(of: reply) == .success else { return finish() }
+            list { rows in
+                guard let rows else { return finish() }
+                let held = Set(rows.map(\.id))
+                let targets = ids.map { held.intersection($0) } ?? held
                 let kills = DispatchGroup()
-                for row in rows {
+                for id in targets {
                     kills.enter()
-                    let message = Self.makeMessage(.closeSession, sessionID: row.id)
+                    let message = Self.makeMessage(.closeSession, sessionID: id)
                     xpc_connection_send_message_with_reply(connection, message, queue) { _ in
                         kills.leave()
                     }
                 }
                 kills.notify(queue: queue) {
-                    xpc_connection_cancel(connection)
-                    done.leave()
+                    awaitGone(targets) { remaining in
+                        guard stopDaemonWhenEmpty, remaining.isEmpty else { return finish() }
+                        xpc_connection_send_message_with_reply(
+                            connection, makeMessage(.shutdown), queue
+                        ) { _ in
+                            finish()
+                        }
+                    }
                 }
             }
         }

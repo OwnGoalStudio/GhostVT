@@ -287,6 +287,11 @@ mac-zip-check:
 		|| { echo "error: the bundled agent's Label must be wiki.qaq.ighostvtd" >&2; exit 65; }
 	@[[ "$$(/usr/libexec/PlistBuddy -c 'Print :SoftResourceLimits:NumberOfFiles' "$(MAC_AGENT_PLIST)")" == "10240" ]] \
 		|| { echo "error: the daemon and its shells require a 10240 soft file-descriptor limit" >&2; exit 65; }
+	@# The app asks the helper to exit when it quits with nothing running
+	@# (`shutdown`); a KeepAlive that restarts every exit would bring it
+	@# straight back, and one that never restarts would leave a crash dead.
+	@[[ "$$(/usr/libexec/PlistBuddy -c 'Print :KeepAlive:SuccessfulExit' "$(MAC_AGENT_PLIST)")" == "false" ]] \
+		|| { echo "error: the bundled agent's KeepAlive must be { SuccessfulExit = false }" >&2; exit 65; }
 	@# The App Sandbox is unsupported here, not merely unused: Background Task
 	@# Management refuses a sandboxed app's unsandboxed SMAppService job, and a
 	@# sandboxed helper would hand its container to every shell it spawns.

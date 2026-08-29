@@ -13,7 +13,9 @@ import UIKit
 @objc(SceneDelegate)
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
-    private let tabManager = TabManager()
+    /// Read by `AppDelegate.applicationWillTerminate`, which walks every
+    /// connected scene's tabs to decide what the quit closes.
+    let tabManager = TabManager()
     private let interface = WindowInterfaceState()
 
     /// Watches the Mac's background helper. Nothing on iOS ever publishes.

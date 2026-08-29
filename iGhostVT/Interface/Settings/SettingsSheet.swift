@@ -195,9 +195,9 @@ struct SettingsSheet: View {
             VStack(alignment: .leading, spacing: DS.Padding.s) {
                 Text(
                     """
-                    Sessions keep running after the app quits and come back on the \
-                    next launch. Turn this off to close every session when the app \
-                    quits.
+                    Sessions with a program running keep going after the app quits \
+                    and come back on the next launch; a shell sitting at its prompt \
+                    closes. Turn this off to close every session when the app quits.
                     """
                 )
                 Text(

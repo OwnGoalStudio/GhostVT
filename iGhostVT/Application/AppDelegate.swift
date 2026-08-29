@@ -46,14 +46,38 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     /// An explicit quit: ⌘Q on the Mac, or a force-quit on iOS while the app
     /// is still running (a suspended app gets no notice, and its shells stay
-    /// in the daemon either way). With Keep Alive off, every shell the daemon
-    /// holds — attached to a window or not — dies here, and the connection
-    /// goes with it. Files the terminal staged for pastes and drops belong
-    /// to those shells; with none left to refer to them, they go too.
-    func applicationWillTerminate(_: UIApplication) {
-        guard !SessionKeepAlive.isEnabled else { return }
-        XPCDaemonTransport.closeAllSessions()
-        TerminalFileStaging.removeAllFiles()
+    /// in the daemon either way).
+    ///
+    /// Every tab closes here the way its own × would have closed without
+    /// asking: a shell sitting at its prompt has nothing to lose
+    /// (`hasRunningProgram`), so it dies with the app, while a tab with a
+    /// program in front of the shell stays in the daemon for the next
+    /// launch to reattach. With Keep Alive off every session the daemon
+    /// holds — attached to a window or not — dies, and the files the
+    /// terminal staged for pastes and drops go with the last shell that
+    /// could refer to them.
+    ///
+    /// When that leaves the daemon holding nothing, the Mac asks its launch
+    /// agent to exit as well; launchd starts it again on the next launch.
+    /// The device daemon is kept alive by launchd whatever it does, so it is
+    /// never asked.
+    func applicationWillTerminate(_ application: UIApplication) {
+        #if targetEnvironment(macCatalyst)
+            let stopDaemon = true
+        #else
+            let stopDaemon = false
+        #endif
+        if SessionKeepAlive.isEnabled {
+            let idle = application.connectedScenes
+                .compactMap { ($0.delegate as? SceneDelegate)?.tabManager }
+                .flatMap(\.tabs)
+                .filter { !$0.hasRunningProgram }
+                .compactMap(\.daemonSessionID)
+            XPCDaemonTransport.closeSessionsForQuit(idle, stopDaemonWhenEmpty: stopDaemon)
+        } else {
+            XPCDaemonTransport.closeSessionsForQuit(nil, stopDaemonWhenEmpty: stopDaemon)
+            TerminalFileStaging.removeAllFiles()
+        }
     }
 }
 

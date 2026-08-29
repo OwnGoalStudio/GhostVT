@@ -22,10 +22,15 @@
 	looking for what asked to run in the background finds something they
 	recognise.
 
-	RunAtLoad + KeepAlive mirror the device LaunchDaemon and the harness
-	agent: sessions outlive the app on purpose, so the process that owns the
-	PTYs must not exit when the last client disconnects. MachServices is
-	still declared because that is the port the app looks the daemon up on.
+	RunAtLoad mirrors the device LaunchDaemon and the harness agent:
+	sessions outlive the app on purpose, so the process that owns the PTYs
+	must not exit when the last client disconnects. KeepAlive is narrower
+	than the device's: a crash is restarted, a successful exit is not. That
+	exit is the one the app asks for as it quits with nothing left running
+	(the `shutdown` request, AppDelegate.applicationWillTerminate), so a
+	closed iGhostVT leaves no helper behind. MachServices is what brings it
+	back — the next launch's first message demand-launches the job — and is
+	the port the app looks the daemon up on either way.
 -->
 <plist version="1.0">
 <dict>
@@ -47,7 +52,10 @@
 	<key>RunAtLoad</key>
 	<true/>
 	<key>KeepAlive</key>
-	<true/>
+	<dict>
+		<key>SuccessfulExit</key>
+		<false/>
+	</dict>
 	<key>MachServices</key>
 	<dict>
 		<key>wiki.qaq.ighostvt.service</key>
