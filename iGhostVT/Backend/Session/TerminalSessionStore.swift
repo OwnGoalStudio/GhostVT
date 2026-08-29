@@ -250,7 +250,7 @@ final class TerminalSessionStore: ObservableObject {
         guard reconnectAttempt < Self.reconnectAttemptLimit else {
             reconnectAttempt = 0
             let reason = lastReason ?? String(
-                localized: "The connection to the terminal daemon could not be restored."
+                localized: "Unable to reconnect to the terminal. Try again or close the tab."
             )
             status = .failed(reason)
             printStatusLine(reason)

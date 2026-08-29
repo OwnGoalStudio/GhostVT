@@ -2,7 +2,7 @@ import Darwin
 import Dispatch
 import Foundation
 import iGhostVTKit
-import XPC
+@preconcurrency import XPC
 
 @_silgen_name("xpc_connection_create_mach_service")
 private func ighostvtCreateMachServiceConnection(
@@ -304,7 +304,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             ighostvtCreateMachServiceConnection($0, queue, 0)
         }) else {
             emit(.state(.disconnected(
-                reason: String(localized: "The terminal daemon is not running.")
+                reason: String(localized: "The terminal helper is not running. Restart iGhostVT and try again.")
             )))
             return
         }
@@ -322,7 +322,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             guard let self else { return }
             guard self.replyCode(reply) == .success else {
                 self.teardown(
-                    reason: String(localized: "The terminal daemon refused the connection.")
+                    reason: String(localized: "Unable to connect to the terminal helper. Restart iGhostVT and try again.")
                 )
                 return
             }
@@ -417,7 +417,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             // reported as an interruption.
             guard dropConnection() else { return }
             emit(.state(.interrupted(
-                reason: String(localized: "The connection to the terminal daemon was interrupted.")
+                reason: String(localized: "The terminal connection was interrupted. Try again.")
             )))
             return
         }
@@ -556,10 +556,11 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         // so it takes the generic wording rather than inventing a sentence
         // that would read as nonsense in an error card.
         case .success, .operationFailed:
-            String(localized: "The terminal daemon could not complete this action. Try again.")
-        case .invalidRequest: String(localized: "The terminal daemon rejected this action.")
-        case .unsupportedVersion: String(localized: "The app and the terminal daemon are different versions. Reinstall iGhostVT to update both.")
-        case .handshakeRequired: String(localized: "The connection to the terminal daemon is not ready. Try again.")
+            String(localized: "Unable to complete this action. Try again.")
+        case .invalidRequest: String(localized: "Unable to complete this action. Try again.")
+        case .unsupportedVersion:
+            String(localized: "iGhostVT and its terminal helper are different versions. Reinstall iGhostVT to update both.")
+        case .handshakeRequired: String(localized: "The terminal connection is not ready. Try again.")
         case .sessionLimitReached: String(localized: "Too many terminals are open. Close one and try again.")
         case .unknownSession: String(localized: "This terminal no longer exists.")
         case .sessionBusy: String(localized: "This terminal is already open in another window.")

@@ -65,17 +65,16 @@ struct SessionStatusOverlay: View {
                 title: String(localized: "Move iGhostVT to Applications"),
                 message: String(
                     localized: """
-                    iGhostVT runs its terminals through a background helper that \
-                    starts with your Mac. Drag iGhostVT to your Applications \
-                    folder and open it from there, so the helper keeps working \
-                    after you close this window.
+                    Drag iGhostVT to your Applications folder and open it from \
+                    there, so your terminals keep running after you close this \
+                    window.
                     """
                 ),
                 actions: [AlertAction("Check Again", kind: .accent) { agent.refresh() }]
             )
         case .notRegistered:
             AlertCardView(
-                title: String(localized: "Turn On the Terminal Helper"),
+                title: String(localized: "Turn On Terminal Helper"),
                 message: String(
                     localized: """
                     The background helper that runs your terminals is switched \
@@ -86,7 +85,7 @@ struct SessionStatusOverlay: View {
             )
         case .needsApproval:
             AlertCardView(
-                title: String(localized: "Allow the Terminal Helper"),
+                title: String(localized: "Allow Terminal Helper"),
                 message: String(
                     localized: """
                     iGhostVT needs its background helper before it can open a \
@@ -107,7 +106,7 @@ struct SessionStatusOverlay: View {
                 message: reason,
                 actions: [
                     AlertAction("Check Again") { agent.refresh() },
-                    AlertAction("Try Again", kind: .accent) { agent.activate() },
+                    AlertAction("Turn On Helper", kind: .accent) { agent.activate() },
                 ]
             )
         case .notApplicable, .unsupported, .enabled:

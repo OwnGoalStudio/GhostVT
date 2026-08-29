@@ -104,7 +104,7 @@ struct KeyboardBarSettingsView: View {
                 KeyboardBarKeyGlyph(key: .divider, size: 28)
                 Text("Divider")
                 Spacer()
-                Text("Repeatable")
+                Text("Multiple Allowed")
                     .font(DS.Font.detail)
                     .foregroundColor(.secondary)
             }

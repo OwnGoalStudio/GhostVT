@@ -111,7 +111,7 @@ final class MacLaunchAgent: ObservableObject {
                 // instead of sending them to Login Items.
                 status = .failed(
                     String(
-                        localized: "The background helper is missing from the app bundle. Reinstall iGhostVT.",
+                        localized: "The background helper is missing. Reinstall iGhostVT.",
                         comment: "Mac agent error when the bundled LaunchAgent plist is absent"
                     )
                 )
@@ -144,7 +144,12 @@ final class MacLaunchAgent: ObservableObject {
                 Self.isTurnedOffByUser = true
                 refresh()
             } catch {
-                status = .failed(error.localizedDescription)
+                status = .failed(
+                    String(
+                        localized: "Unable to turn off the background helper. Try again.",
+                        comment: "Mac agent error when unregistering the LaunchAgent fails"
+                    )
+                )
             }
         }
 
@@ -173,7 +178,12 @@ final class MacLaunchAgent: ObservableObject {
                 // an error worth showing; the status re-read below tells the
                 // truth either way.
                 if service.status != .requiresApproval, service.status != .enabled {
-                    status = .failed(error.localizedDescription)
+                    status = .failed(
+                        String(
+                            localized: "Unable to turn on the background helper. Try again.",
+                            comment: "Mac agent error when registering the LaunchAgent fails"
+                        )
+                    )
                     return
                 }
             }

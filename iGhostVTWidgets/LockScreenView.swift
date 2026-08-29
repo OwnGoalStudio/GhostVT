@@ -45,13 +45,13 @@ struct SessionSummaryCard: View {
                     )
                     HStack(alignment: .top, spacing: Spacing.card) {
                         if let running = state.runningSummary {
-                            InfoPair(label: "Running", value: running)
+                            InfoPair(label: "Status", value: running)
                         }
                         if state.detachedCount > 0 {
                             InfoPair(
                                 label: "Detached",
                                 value: String(
-                                    localized: "\(state.detachedCount) in background",
+                                    localized: "\(state.detachedCount) detached",
                                     comment: "Sessions running with no tab attached"
                                 )
                             )

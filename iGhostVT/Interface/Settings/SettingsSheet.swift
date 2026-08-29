@@ -107,9 +107,9 @@ struct SettingsSheet: View {
             Text(
                 """
                 The program every new terminal runs, for example /bin/zsh. \
-                Use a plain path; one that includes the jailbreak root stops \
-                working after the next jailbreak. Leave this empty to use the \
-                default login shell.
+                Leave this empty to use the default login shell. Use a plain \
+                path; one that includes the jailbreak root stops working after \
+                the next jailbreak.
                 """
             )
         }
@@ -194,7 +194,7 @@ struct SettingsSheet: View {
 
     private var debugSection: some View {
         Section {
-            Toggle("Verbose Terminal Log", isOn: $verboseTerminalLog)
+            Toggle("Detailed Terminal Log", isOn: $verboseTerminalLog)
                 .onChange(of: verboseTerminalLog) { enabled in
                     if enabled {
                         TerminalDebugLog.enable(.standard)
