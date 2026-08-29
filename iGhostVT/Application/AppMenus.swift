@@ -40,9 +40,14 @@ import UIKit
 /// Next Tab with ⇧⌘] hidden, ⌃⌘S (the AppKit standard) for the sidebar with
 /// Safari's ⇧⌘L hidden. A hidden command still fires; it is only kept out of
 /// the menu and the overlay so each action reads with a single key.
+///
+/// Main-actor isolated, as `UIMenuBuilder` and every element it takes are;
+/// the one entry point is `buildMenu(with:)`, which already runs there.
+@MainActor
 enum AppMenus {
     /// `propertyList` of the Go to Tab command that means "the last tab".
-    static let lastTabIndex = -1
+    /// Nonisolated: a plain constant a validator may read from anywhere.
+    nonisolated static let lastTabIndex = -1
 
     static func install(into builder: UIMenuBuilder) {
         installFileMenu(into: builder)
