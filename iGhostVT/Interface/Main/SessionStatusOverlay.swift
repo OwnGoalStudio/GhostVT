@@ -50,6 +50,10 @@ struct SessionStatusOverlay: View {
                 agentCard
                     .padding(DS.Padding.l)
             }
+            // Under the bars too: they are glass, and a dim that stops at
+            // their edge reads as a second pane. The keyboard still pushes
+            // the card up.
+            .ignoresSafeArea(.container)
             .transition(.opacity)
         }
     }
@@ -61,17 +65,9 @@ struct SessionStatusOverlay: View {
     private var agentCard: some View {
         switch agent.status {
         case .needsRelocation:
-            AlertCardView(
-                title: String(localized: "Move iGhostVT to Applications"),
-                message: String(
-                    localized: """
-                    Drag iGhostVT to your Applications folder and open it from \
-                    there, so your terminals keep running after you close this \
-                    window.
-                    """
-                ),
-                actions: [AlertAction("Check Again", kind: .accent) { agent.refresh() }]
-            )
+            // The window's `relocationPrompt` alert is the whole story here,
+            // and it sits over this dim; a card under it would only stack.
+            EmptyView()
         case .notRegistered:
             AlertCardView(
                 title: String(localized: "Turn On Terminal Helper"),
@@ -97,6 +93,25 @@ struct SessionStatusOverlay: View {
                     AlertAction("Check Again") { agent.refresh() },
                     AlertAction("Open Login Items", kind: .accent) {
                         agent.openLoginItemsSettings()
+                    },
+                ]
+            )
+        case .brokenInstallation:
+            // Nothing in the app can repair a bundle with pieces missing, so
+            // the card opens the page a whole one comes from — a URL in the
+            // text could not be clicked — and offers the way out.
+            AlertCardView(
+                title: String(localized: "Broken Installation"),
+                message: String(
+                    localized: """
+                    Part of iGhostVT is missing, so it cannot open a terminal. \
+                    Download iGhostVT again and replace this copy.
+                    """
+                ),
+                actions: [
+                    AlertAction("Quit") { agent.quit() },
+                    AlertAction("Download", kind: .accent) {
+                        UIApplication.shared.open(MacLaunchAgent.downloadPageURL)
                     },
                 ]
             )
@@ -138,6 +153,7 @@ struct SessionStatusOverlay: View {
                     alertCard(reason: reason)
                         .padding(DS.Padding.l)
                 }
+                .ignoresSafeArea(.container)
                 .transition(.opacity)
             }
 

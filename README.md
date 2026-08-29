@@ -64,12 +64,11 @@ To install: **unzip → drag `iGhostVT.app` to `/Applications` → open it from
 there.** The order matters. Login Items binds to the path the app registered
 from, and a first launch out of the Downloads folder — where Gatekeeper runs
 it from a translocated, disappearing mount — would register a path that is gone
-by the second launch. The app checks, and asks to be moved rather than
-registering from the wrong place. macOS then asks once to allow the background
-item; until that is granted the terminal says so instead of spinning on
-"Connecting…". Settings ▸ Terminal Helper can turn it back off, which is also
-the only way to remove the Login Items entry — dragging the app to the Trash
-does not.
+by the second launch. The app checks, and offers to move itself there (or
+quit) rather than registering from the wrong place. macOS then asks once to
+allow the background item; until that is granted the terminal says so instead
+of spinning on "Connecting…". To remove the helper, turn iGhostVT off under
+Login Items in System Settings — dragging the app to the Trash does not.
 
 Neither the app nor the helper is sandboxed, and neither can be: macOS 14.2's
 Background Task Management rejects a sandboxed app registering an unsandboxed

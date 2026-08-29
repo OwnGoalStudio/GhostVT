@@ -9,7 +9,6 @@ import SwiftUI
 
 struct SettingsSheet: View {
     @ObservedObject private var theme = AppTheme.shared
-    @ObservedObject private var agent = MacLaunchAgent.shared
     @Environment(\.dismiss) private var dismiss
 
     /// Steps around the platform's own text size; see `InterfaceTextSize`.
@@ -18,18 +17,11 @@ struct SettingsSheet: View {
     /// Read by `TerminalTab` when a surface is made; open tabs keep theirs.
     @AppStorage(TerminalFontSize.key) private var terminalFontSize = TerminalFontSize.default
 
-    /// Read by the daemon when spawning shells. Empty means "let the daemon
-    /// pick", which hands the session to `login`.
-    @AppStorage("Shell.path") private var shellPath = ""
-
     /// Read by AppDelegate when the app quits; see `SessionKeepAlive`.
     @AppStorage(SessionKeepAlive.key) private var keepAlive = true
 
     /// Read by `TabManager` when a session ends; see `SessionAutoClose`.
     @AppStorage(SessionAutoClose.key) private var autoCloseTabs = false
-
-    /// Mirrored by AppDelegate at launch; toggling applies immediately.
-    @AppStorage("Debug.verboseTerminalLog") private var verboseTerminalLog = false
 
     var body: some View {
         NavigationView {
@@ -37,10 +29,7 @@ struct SettingsSheet: View {
                 appearanceSection
                 textSizeSection
                 keyboardSection
-                shellSection
                 sessionsSection
-                terminalHelperSection
-                debugSection
                 aboutSection
             }
             .navigationTitle("Settings")
@@ -50,8 +39,9 @@ struct SettingsSheet: View {
                     Button(action: { dismiss() }) {
                         Image(systemName: "checkmark")
                             .font(.body.weight(.semibold))
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(.white)
                     }
+                    .prominentToolbarButton()
                     .accessibilityLabel("Done")
                 }
             }
@@ -78,9 +68,6 @@ struct SettingsSheet: View {
                     icon: "moon.fill",
                     name: theme.selection.darkName ?? Self.defaultLabel("Afterglow")
                 )
-            }
-            Button("Reset Themes") {
-                theme.selection = AppTheme.Selection(lightName: nil, darkName: nil)
             }
         } header: {
             Text("Appearance")
@@ -151,44 +138,6 @@ struct SettingsSheet: View {
         #endif
     }
 
-    private var shellSection: some View {
-        Section {
-            // A literal example, not copy: the StringProtocol overload keeps
-            // it out of the string catalog.
-            TextField(Self.shellPlaceholder, text: $shellPath)
-                .keyboardType(.asciiCapable)
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
-        } header: {
-            Text("Default Shell")
-                .font(DS.Font.caption)
-        } footer: {
-            // The jailbreak-root caveat is a device matter; a Mac has no
-            // bootstrap to prefix a path with.
-            #if targetEnvironment(macCatalyst)
-                Text(
-                    """
-                    The program every new terminal runs, for example /bin/zsh. \
-                    Leave this empty to use your login shell.
-                    """
-                )
-                    .font(DS.Font.detail)
-            #else
-                Text(
-                    """
-                    The program every new terminal runs, for example /bin/zsh. \
-                    Leave this empty to use the default login shell. Use a plain \
-                    path; one that includes the jailbreak root stops working after \
-                    the next jailbreak.
-                    """
-                )
-                    .font(DS.Font.detail)
-            #endif
-        }
-    }
-
-    private static let shellPlaceholder = "/bin/zsh"
-
     private var sessionsSection: some View {
         Section {
             Toggle("Keep Sessions Running", isOn: $keepAlive)
@@ -216,91 +165,9 @@ struct SettingsSheet: View {
         }
     }
 
-    /// The Mac's only install step, and its only uninstall step.
-    ///
-    /// Dragging the app to the Trash does not remove a Login Items entry —
-    /// macOS keeps it, pointing at a bundle that no longer exists, and the
-    /// person who wants it gone has no obvious way back to it. This is that
-    /// way back. It also surfaces what `unregister()` returns, because a
-    /// silent failure here leaves a background agent running with nothing on
-    /// screen admitting it.
-    @ViewBuilder
-    private var terminalHelperSection: some View {
-        #if targetEnvironment(macCatalyst)
-            if agent.status != .unsupported {
-                Section {
-                    HStack {
-                        Text("Status")
-                        Spacer()
-                        Text(agentStatusDescription)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.trailing)
-                    }
-                    if agent.isRegistered {
-                        Button("Turn Off Helper", role: .destructive) { agent.deactivate() }
-                    } else {
-                        Button("Turn On Helper") { agent.activate() }
-                    }
-                    Button("Open Login Items") { agent.openLoginItemsSettings() }
-                } header: {
-                    Text("Terminal Helper")
-                        .font(DS.Font.caption)
-                } footer: {
-                    Text(
-                        """
-                        iGhostVT opens terminals through a helper that runs in \
-                        the background, so sessions keep going while the app is \
-                        closed. Turning it off ends every session and removes \
-                        iGhostVT from Login Items.
-                        """
-                    )
-                        .font(DS.Font.detail)
-                }
-            }
-        #endif
-    }
-
-    private var agentStatusDescription: String {
-        switch agent.status {
-        case .enabled:
-            String(localized: "On")
-        case .needsApproval:
-            String(localized: "Waiting for Approval")
-        case .needsRelocation:
-            String(localized: "Move to Applications")
-        case .notRegistered:
-            String(localized: "Off")
-        case let .failed(reason):
-            reason
-        case .notApplicable, .unsupported:
-            String(localized: "Not Available")
-        }
-    }
-
-    private var debugSection: some View {
-        Section {
-            Toggle("Detailed Terminal Log", isOn: $verboseTerminalLog)
-                .onChange(of: verboseTerminalLog) { enabled in
-                    if enabled {
-                        TerminalDebugLog.enable(.standard)
-                    } else {
-                        TerminalDebugLog.enable([.lifecycle, .metrics])
-                    }
-                }
-        } header: {
-            Text("Debugging")
-                .font(DS.Font.caption)
-        } footer: {
-            Text(
-                """
-                Writes detailed terminal activity to the system log, \
-                including every keystroke, while this is on.
-                """
-            )
-                .font(DS.Font.detail)
-        }
-    }
-
+    /// Advanced sits here, at the end, and not among the everyday sections:
+    /// the shell path, the Mac helper, and the keystroke log are settings
+    /// most people never need, and the ones who do will look past Version.
     private var aboutSection: some View {
         Section {
             HStack {
@@ -309,13 +176,14 @@ struct SettingsSheet: View {
                 Text(Self.versionDescription)
                     .foregroundColor(.secondary)
             }
+            NavigationLink {
+                AdvancedSettingsView()
+            } label: {
+                Text("Advanced")
+            }
         } header: {
             Text("About")
                 .font(DS.Font.caption)
-        } footer: {
-            Text(Self.ghosttyConfigPath)
-                .font(DS.Font.detail)
-                .textSelection(.enabled)
         }
     }
 
@@ -332,41 +200,6 @@ struct SettingsSheet: View {
         let version = info?["CFBundleShortVersionString"] as? String ?? "?"
         let build = info?["CFBundleVersion"] as? String ?? "?"
         return "\(version) (\(build))"
-    }
-
-    /// Where libghostty is reading its settings from.
-    ///
-    /// libghostty has no API to take configuration from memory —
-    /// `ghostty_config_load_file` is the only door — so the terminal's colors,
-    /// font, and keybinds reach it as a file rendered into the temporary
-    /// directory on every reconfigure. On a jailbroken install that write is
-    /// exactly what fails when the bundle is signed without the entitlements
-    /// its bootstrap demands, and the symptom (a terminal stuck on
-    /// "Starting…") says nothing about a path, so the path belongs on screen.
-    private static var ghosttyConfigPath: String {
-        let directory = FileManager.default.temporaryDirectory
-        let rendered = (try? FileManager.default.contentsOfDirectory(
-            at: directory,
-            includingPropertiesForKeys: [.contentModificationDateKey]
-        ))?
-            .filter { $0.lastPathComponent.hasPrefix("ghostty-config-") }
-            .max { left, right in
-                let leftDate = (try? left.resourceValues(forKeys: [.contentModificationDateKey]))?
-                    .contentModificationDate ?? .distantPast
-                let rightDate = (try? right.resourceValues(forKeys: [.contentModificationDateKey]))?
-                    .contentModificationDate ?? .distantPast
-                return leftDate < rightDate
-            }
-        guard let rendered else {
-            return String.localizedStringWithFormat(
-                NSLocalizedString(
-                    "No configuration file yet. It will be saved to %@.",
-                    comment: "Settings footer when the rendered ghostty config is missing; %@ is a directory path"
-                ),
-                directory.path
-            )
-        }
-        return rendered.path
     }
 
     private func slotRow(title: LocalizedStringKey, icon: String, name: String) -> some View {
@@ -412,10 +245,12 @@ struct ThemeListView: View {
                         .lineLimit(1)
                     Spacer(minLength: DS.Padding.s)
                     paletteStrip(for: definition)
-                    if definition.name == selectedName {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(.accentColor)
-                    }
+                    // Every row keeps the checkmark's slot, so the strips
+                    // stay in one column whichever row is selected.
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.accentColor)
+                        .opacity(definition.name == selectedName ? 1 : 0)
+                        .accessibilityHidden(definition.name != selectedName)
                 }
             }
         }
@@ -464,6 +299,19 @@ struct ThemeListView: View {
             theme.selection.lightName = definition.name
         case .dark:
             theme.selection.darkName = definition.name
+        }
+    }
+}
+
+private extension View {
+    /// The sheet's one confirming control, filled with the accent: glass on
+    /// iOS 26, the bordered prominent style below.
+    @ViewBuilder
+    func prominentToolbarButton() -> some View {
+        if #available(iOS 26.0, *) {
+            buttonStyle(.glassProminent).tint(.accentColor)
+        } else {
+            buttonStyle(.borderedProminent).tint(.accentColor)
         }
     }
 }

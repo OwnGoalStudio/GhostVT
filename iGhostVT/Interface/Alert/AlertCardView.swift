@@ -37,7 +37,7 @@ struct AlertAction: Identifiable {
 }
 
 /// The app's one alert design, a SwiftUI rendition of Lakr233/AlertController:
-/// centered material card, app-icon header, and a button row whose emphasized
+/// centered glass card (material below iOS 26), app-icon header, and a button row whose emphasized
 /// action fills with its tint. Shown inline by `SessionStatusOverlay` and
 /// presented modally by `AlertViewController` — the design lives here so both
 /// stay the same card.
@@ -80,10 +80,22 @@ struct AlertCardView: View {
         }
         .padding(DS.Padding.l)
         .frame(maxWidth: 350)
-        .background(.regularMaterial)
-        .background(Color(UIColor.systemBackground).opacity(0.5))
-        .clipShape(RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous))
+        .cardGlass(in: RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous))
         .fixedSize(horizontal: false, vertical: true)
+    }
+}
+
+private extension View {
+    /// Liquid Glass on iOS 26+; the material card it replaces below.
+    @ViewBuilder
+    func cardGlass(in shape: some Shape) -> some View {
+        if #available(iOS 26.0, *) {
+            glassEffect(.regular, in: shape)
+        } else {
+            background(.regularMaterial)
+                .background(Color(UIColor.systemBackground).opacity(0.5))
+                .clipShape(shape)
+        }
     }
 }
 

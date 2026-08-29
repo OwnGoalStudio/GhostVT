@@ -5,10 +5,10 @@
 
 import SwiftUI
 
-/// The grabber on the sidebar's trailing edge: a rounded-rectangle pill that
-/// advertises the width is adjustable, riding a hit area wide enough to
-/// actually catch a finger. Dragging resizes the sidebar live — the terminal
-/// pane's own resize throttle absorbs the storm of grid changes.
+/// The invisible strip on the sidebar's trailing edge that resizes it: a hit
+/// area wide enough to catch a finger, drawn as nothing — the hairline is
+/// the affordance, as in Finder. Dragging resizes the sidebar live — the
+/// terminal pane's own resize throttle absorbs the storm of grid changes.
 struct SidebarResizeHandle: View {
     @Binding var width: Double
 
@@ -19,12 +19,9 @@ struct SidebarResizeHandle: View {
     /// Width at the drag's start; translations apply against this so a drag
     /// that wanders past a clamp edge and back stays anchored to the finger.
     @State private var dragBaseWidth: Double?
-    @State private var isDragging = false
 
     var body: some View {
-        RoundedRectangle(cornerRadius: 2.5, style: .continuous)
-            .fill(Color.secondary.opacity(isDragging ? 0.8 : 0.4))
-            .frame(width: 5, height: 44)
+        Color.clear
             .frame(width: 20)
             .frame(maxHeight: .infinity)
             .contentShape(Rectangle())
@@ -37,16 +34,13 @@ struct SidebarResizeHandle: View {
                     .onChanged { value in
                         let base = dragBaseWidth ?? width
                         dragBaseWidth = base
-                        isDragging = true
                         width = (base + value.translation.width)
                             .clamped(to: Self.widthRange)
                     }
                     .onEnded { _ in
                         dragBaseWidth = nil
-                        isDragging = false
                     }
             )
-            .animation(DS.Motion.snappy, value: isDragging)
             .accessibilityLabel("Resize Sidebar")
             .accessibilityAdjustableAction { direction in
                 switch direction {

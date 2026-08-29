@@ -9,6 +9,11 @@ import SwiftUI
 /// it shows scrollable tab chips; with the sidebar open the tabs live there
 /// and this bar shows the active tab's title instead.
 struct TabStripBar: View {
+    /// The bar's height: its controls plus the padding above and below.
+    /// The Mac's traffic lights are centred on it (`CatalystWindowChrome`).
+    static let height: CGFloat = DS.Padding.s + controlSize + DS.Padding.s
+    static let controlSize: CGFloat = 40
+
     @ObservedObject var tabManager: TabManager
     @Binding var showsSidebar: Bool
     @State private var window: UIWindow?
@@ -19,7 +24,8 @@ struct TabStripBar: View {
                 Button(action: { showsSidebar.toggle() }) {
                     Image(systemName: "sidebar.leading")
                         .font(DS.Font.control)
-                        .frame(width: 40, height: 40)
+                        .frame(width: Self.controlSize, height: Self.controlSize)
+                        .contentShape(Circle())
                 }
                 .barGlass(in: Circle())
                 .accessibilityLabel("Toggle Sidebar")
@@ -41,19 +47,32 @@ struct TabStripBar: View {
                 Button(action: { tabManager.newTab() }) {
                     Image(systemName: "plus")
                         .font(DS.Font.control)
-                        .frame(width: 40, height: 40)
+                        .frame(width: Self.controlSize, height: Self.controlSize)
+                        .contentShape(Circle())
                 }
                 .barGlass(in: Circle())
                 .contextMenu { windowMenu }
                 .accessibilityLabel("New Tab")
             }
             .padding(.horizontal, DS.Padding.l)
+            .padding(.leading, windowControlsInset)
             .padding(.top, DS.Padding.s)
             .padding(.bottom, DS.Padding.s)
+            .background(WindowDragRegion())
         }
         .buttonStyle(.plain)
         // For the context menu's share sheet, which presents via UIKit.
         .background(WindowReader(window: $window))
+    }
+
+    /// With the sidebar hidden, the Mac's traffic lights float over this
+    /// bar's leading end; the sidebar toggle moves out from under them.
+    private var windowControlsInset: CGFloat {
+        #if targetEnvironment(macCatalyst)
+            showsSidebar ? 0 : CatalystWindowChrome.windowControlsWidth - DS.Padding.l
+        #else
+            0
+        #endif
     }
 
     @ViewBuilder
@@ -96,7 +115,7 @@ struct TabStripBar: View {
                     .transition(.opacity)
             }
         }
-        .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+        .frame(maxWidth: .infinity, minHeight: Self.controlSize, alignment: .leading)
         .barGlass(in: Capsule(), interactive: false)
     }
 
@@ -129,7 +148,7 @@ struct TabStripBar: View {
         }
         // A GeometryReader fills whatever it is given, in both axes; the
         // bar's height is the capsule's, not the window's.
-        .frame(maxWidth: .infinity, maxHeight: 40, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: Self.controlSize, alignment: .leading)
     }
 }
 

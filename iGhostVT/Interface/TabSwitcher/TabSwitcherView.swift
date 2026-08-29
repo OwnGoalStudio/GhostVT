@@ -96,6 +96,7 @@ struct TabSwitcherView: View {
                     Image(systemName: "gearshape")
                         .font(DS.Font.control)
                         .frame(width: 44, height: 44)
+                        .contentShape(Circle())
                 }
                 .barGlass(in: Circle())
                 .accessibilityLabel("Settings")
@@ -112,6 +113,7 @@ struct TabSwitcherView: View {
                             .foregroundColor(.red)
                             .padding(.horizontal, DS.Padding.l)
                             .frame(height: 44)
+                            .contentShape(Capsule())
                     }
                     .barGlass(in: Capsule())
 
@@ -123,6 +125,7 @@ struct TabSwitcherView: View {
                         .font(DS.Font.controlEmphasis)
                         .padding(.horizontal, DS.Padding.l)
                         .frame(height: 44)
+                        .contentShape(Capsule())
                 }
                 .barGlass(in: Capsule())
             }

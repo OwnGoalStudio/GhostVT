@@ -37,7 +37,8 @@ final class MacLaunchAgent: ObservableObject {
         case unsupported
         /// Launched from the download, or Gatekeeper-translocated. Registering
         /// now would bind Login Items to a path that vanishes when the app
-        /// quits, so the app asks to be moved to /Applications first.
+        /// quits, so the app offers to move itself to /Applications first
+        /// (`moveToApplications()`).
         case needsRelocation
         /// Nothing is registered: either this is a first launch that has not
         /// got there yet, or the helper was turned off in Settings.
@@ -45,38 +46,38 @@ final class MacLaunchAgent: ObservableObject {
         /// Registered, but a person still has to allow it in Login Items.
         case needsApproval
         case enabled
+        /// The bundle has no helper plist to register. A packaging fault —
+        /// or a copy someone took apart — that no control in the app can
+        /// mend; the only way on is a fresh download.
+        case brokenInstallation
         case failed(String)
     }
 
     @Published private(set) var status: Status
+
+    /// Where a whole copy of the app comes from, for the broken-install card.
+    static let downloadPageURL = URL(string: "https://github.com/OwnGoalStudio/GhostVT/releases")!
 
     /// Whether sessions may be opened. `unsupported` counts: it means this
     /// type has no opinion, not that the daemon is missing.
     var isReady: Bool {
         switch status {
         case .notApplicable, .unsupported, .enabled: true
-        case .needsRelocation, .notRegistered, .needsApproval, .failed: false
+        case .needsRelocation, .notRegistered, .needsApproval, .brokenInstallation, .failed: false
         }
-    }
-
-    /// Whether the user can be offered a Turn Off control — only worth showing
-    /// once there is something registered to turn off.
-    var isRegistered: Bool {
-        status == .enabled || status == .needsApproval
     }
 
     private init() {
         #if targetEnvironment(macCatalyst)
             status = .unsupported
             refresh()
-            // First launch registers by itself; a later one does not, because
-            // by then `notRegistered` may be a decision somebody made. An
-            // *enabled* helper goes through `activate()` every launch: the
-            // plain register is idempotent and bootstraps the job when launchd
-            // has none, and `activate()` is where a replaced helper is caught
-            // (see `helperDigest`) — the case where Login Items still says
-            // "enabled" but nothing can run.
-            if status == .enabled || (status == .notRegistered && !Self.isTurnedOffByUser) {
+            // Every launch registers: the plain register is idempotent and
+            // bootstraps the job when launchd has none, and `activate()` is
+            // where a replaced helper is caught (see `helperDigest`) — the
+            // case where Login Items still says "enabled" but nothing can
+            // run. Someone who turned the item off in System Settings keeps
+            // it off; a register does not override that.
+            if status == .enabled || status == .notRegistered {
                 activate()
             }
         #else
@@ -115,20 +116,14 @@ final class MacLaunchAgent: ObservableObject {
                 // The plist is missing from the bundle. That is a packaging
                 // fault, not something a person can act on, so name it as one
                 // instead of sending them to Login Items.
-                status = .failed(
-                    String(
-                        localized: "The background helper is missing. Reinstall iGhostVT.",
-                        comment: "Mac agent error when the bundled LaunchAgent plist is absent"
-                    )
-                )
+                status = .brokenInstallation
             @unknown default:
                 status = .needsApproval
             }
         }
 
-        /// Registers the bundled agent. Called on every launch while the
-        /// helper is enabled, on a first launch, and from Settings after
-        /// somebody turned it off.
+        /// Registers the bundled agent. Called on every launch, and from the
+        /// cards that name a helper that is not running.
         ///
         /// A registration is not just a plist: Background Task Management
         /// keeps a *launch constraint* for the item, and for an ad-hoc signed
@@ -148,7 +143,6 @@ final class MacLaunchAgent: ObservableObject {
                 status = .needsRelocation
                 return
             }
-            Self.isTurnedOffByUser = false
             let service = SMAppService.agent(plistName: Self.plistName)
             let digest = Self.helperDigest
             if service.status != .notRegistered, digest != Self.registeredHelperDigest {
@@ -160,42 +154,116 @@ final class MacLaunchAgent: ObservableObject {
             register(service, helperDigest: digest)
         }
 
-        /// Removes the agent from Login Items.
-        ///
-        /// Moving the app to the Trash does *not* do this — the Login Items
-        /// entry outlives the bundle and shows up as a nameless leftover — so
-        /// Settings carries this control and surfaces what it returns.
-        func deactivate() {
-            guard #available(macCatalyst 16.0, *) else { return }
-            do {
-                try SMAppService.agent(plistName: Self.plistName).unregister()
-                Self.isTurnedOffByUser = true
-                Self.registeredHelperDigest = nil
-                refresh()
-            } catch {
-                status = .failed(
-                    String(
-                        localized: "Unable to turn off the background helper. Try again.",
-                        comment: "Mac agent error when unregistering the LaunchAgent fails"
-                    )
-                )
-            }
-        }
-
-        /// Whether the helper was turned off deliberately, as opposed to never
-        /// having been registered. Persisted because the difference only
-        /// matters across launches: it is what stops the next one from
-        /// switching the helper back on behind somebody's back.
-        private static let turnedOffKey = "MacLaunchAgent.turnedOffByUser"
-        private static var isTurnedOffByUser: Bool {
-            get { UserDefaults.standard.bool(forKey: turnedOffKey) }
-            set { UserDefaults.standard.set(newValue, forKey: turnedOffKey) }
-        }
-
         /// Opens System Settings on Login Items, for the approval step.
         func openLoginItemsSettings() {
             guard #available(macCatalyst 16.0, *) else { return }
             SMAppService.openSystemSettingsLoginItems()
+        }
+
+        /// Moves this bundle into the Applications folder and reopens it from
+        /// there — what LetsMove does for AppKit apps, possible here because
+        /// the Mac build is not sandboxed.
+        ///
+        /// The bundle that moves is the *original*: a quarantined download
+        /// runs from Gatekeeper's read-only translocation mount, and
+        /// `Bundle.main` names the mount, not the file in Downloads. A move
+        /// (a rename on the same volume) is tried first and a copy stands in
+        /// when the source is read-only, a mounted disk image say. The
+        /// quarantine flag comes off the result, or the copy would be
+        /// translocated again on its first launch and land right back here.
+        /// The relaunch goes through LaunchServices — `NSWorkspace`, reached
+        /// through the runtime — with `createsNewApplicationInstance`, since
+        /// a plain open would only activate this instance; this one exits
+        /// once the new one is on its way. Nothing was connected yet (the
+        /// status gates every session), so nothing is lost.
+        func moveToApplications() {
+            let source = Self.originalBundleURL
+            let folder = Self.applicationsFolder
+            let destination = folder.appendingPathComponent(source.lastPathComponent)
+            let fileManager = FileManager.default
+            do {
+                try fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
+                if fileManager.fileExists(atPath: destination.path) {
+                    try fileManager.trashItem(at: destination, resultingItemURL: nil)
+                }
+                do {
+                    try fileManager.moveItem(at: source, to: destination)
+                } catch {
+                    try fileManager.copyItem(at: source, to: destination)
+                    try? fileManager.trashItem(at: source, resultingItemURL: nil)
+                }
+                Self.removeQuarantine(at: destination)
+            } catch {
+                status = .failed(
+                    String(
+                        localized: "iGhostVT could not be moved to Applications. \(error.localizedDescription)",
+                        comment: "Mac agent error when moving the app bundle fails; the system's reason follows"
+                    )
+                )
+                return
+            }
+            Self.relaunch(from: destination)
+        }
+
+        /// The folder the app belongs in: `/Applications`, or the user's own
+        /// when the system one is not writable (a managed Mac).
+        private static var applicationsFolder: URL {
+            let system = URL(fileURLWithPath: "/Applications", isDirectory: true)
+            if FileManager.default.isWritableFile(atPath: system.path) { return system }
+            let home = homeDirectory ?? NSHomeDirectory()
+            return URL(fileURLWithPath: home, isDirectory: true)
+                .appendingPathComponent("Applications", isDirectory: true)
+        }
+
+        /// The bundle on disk, seen through Gatekeeper's translocation when
+        /// there is one. `SecTranslocateCreateOriginalPathForURL` is not in
+        /// the Catalyst SDK, so it is looked up in Security by hand.
+        private static var originalBundleURL: URL {
+            let bundle = Bundle.main.bundleURL
+            typealias Original = @convention(c) (CFURL, UnsafeMutablePointer<Unmanaged<CFError>?>?) -> Unmanaged<CFURL>?
+            guard let security = dlopen("/System/Library/Frameworks/Security.framework/Security", RTLD_LAZY),
+                  let symbol = dlsym(security, "SecTranslocateCreateOriginalPathForURL")
+            else { return bundle }
+            let original = unsafeBitCast(symbol, to: Original.self)
+            guard let url = original(bundle as CFURL, nil)?.takeRetainedValue() else { return bundle }
+            return url as URL
+        }
+
+        private static func removeQuarantine(at url: URL) {
+            let name = "com.apple.quarantine"
+            removexattr(url.path, name, XATTR_NOFOLLOW)
+            guard let items = FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil) else { return }
+            for case let item as URL in items {
+                removexattr(item.path, name, XATTR_NOFOLLOW)
+            }
+        }
+
+        /// The relocation alert's other answer. Through AppKit, so
+        /// `applicationWillTerminate` runs as it would for ⌘Q.
+        func quit() {
+            guard let appClass = NSClassFromString("NSApplication") as? NSObject.Type,
+                  let app = appClass.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue() as? NSObject
+            else { exit(0) }
+            _ = app.perform(NSSelectorFromString("terminate:"), with: nil)
+        }
+
+        private static func relaunch(from url: URL) {
+            guard let workspaceClass = NSClassFromString("NSWorkspace") as? NSObject.Type,
+                  let workspace = workspaceClass.perform(NSSelectorFromString("sharedWorkspace"))?.takeUnretainedValue() as? NSObject,
+                  let configurationClass = NSClassFromString("NSWorkspaceOpenConfiguration") as? NSObject.Type,
+                  let configuration = configurationClass.perform(NSSelectorFromString("configuration"))?.takeUnretainedValue() as? NSObject
+            else { return }
+            configuration.setValue(true, forKey: "createsNewApplicationInstance")
+            let selector = NSSelectorFromString("openApplicationAtURL:configuration:completionHandler:")
+            guard workspace.responds(to: selector) else { return }
+            typealias Open = @convention(c) (AnyObject, Selector, NSURL, AnyObject, AnyObject?) -> Void
+            let open = unsafeBitCast(workspace.method(for: selector), to: Open.self)
+            let completion: @convention(block) (AnyObject?, AnyObject?) -> Void = { _, _ in
+                DispatchQueue.main.async { exit(0) }
+            }
+            open(workspace, selector, url as NSURL, configuration, unsafeBitCast(completion, to: AnyObject.self))
+            // In case LaunchServices never calls back.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) { exit(0) }
         }
 
         /// SHA-256 of the helper binary in this bundle, or nil when there is
@@ -270,8 +338,9 @@ final class MacLaunchAgent: ObservableObject {
 
         func refresh() {}
         func activate() {}
-        func deactivate() {}
         func openLoginItemsSettings() {}
+        func moveToApplications() {}
+        func quit() {}
 
     #endif
 }

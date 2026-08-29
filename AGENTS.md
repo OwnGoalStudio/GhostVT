@@ -138,8 +138,9 @@ its `canPerformAction` is what greys an item out — a command that would act
 on whatever sits under a modal reads as disabled instead of failing quietly.
 Bindings follow Terminal.app and Safari for tabs (⌃Tab, ⇧⌘\, ⌘1–9, ⌃⌘S for
 the sidebar) and Ghostty for the terminal (⌘+ ⌘− ⌘0, ⌘K); where two
-conventions coexist the second key is a hidden alias of the same action, and
-⌘⌫ is one more hidden alias of Close Tab — the tab's × from the keyboard. The
+conventions coexist the second key is a hidden alias of the same action.
+Close Tab is ⌘W alone — ⌘⌫ was tried as an alias and taken back, because in
+a terminal it is delete-to-line-start (readline's ⌘⌫ on the Mac). The
 font commands run ghostty's own `increase_font_size` actions on the active
 surface and step `TerminalFontSize` alongside — they pre-empt the ⌘+/⌘−
 press the library would otherwise have forwarded to ghostty itself. Menu
@@ -195,11 +196,16 @@ Gotchas that bit us:
   from Hardened Runtime (`codesign --options runtime`) instead.
 - **Login Items binds to the path the app registered from.** A first launch out
   of Downloads registers a Gatekeeper-translocated mount that is gone by the
-  next launch. `MacLaunchAgent` refuses to register outside `/Applications` and
-  the overlay asks to be moved instead — do not "fix" that by registering
-  anyway. Dragging the app to the Trash also does not unregister the agent,
-  which is why Settings ▸ Terminal Helper carries a Turn Off control that
-  surfaces what `unregister()` returns. **Replacing the bundle in place (an
+  next launch. `MacLaunchAgent` refuses to register outside `/Applications`
+  and the window's alert offers to move the app there itself (Move or Quit;
+  `moveToApplications()` moves or copies the translocation *original*,
+  strips its quarantine flag so the copy is not translocated again, and
+  launches it through `NSWorkspace` with `createsNewApplicationInstance`
+  before this instance exits) — do not "fix" that by registering anyway.
+  Dragging the app to the Trash does not unregister the agent either; the
+  app offers no Turn Off of its own (registration is automatic on every
+  launch) and Settings ▸ Advanced points at Login Items in System Settings,
+  the system's own control, for removal. **Replacing the bundle in place (an
   update, a reinstall) breaks the registration, and `register()` alone
   cannot mend it.** Background Task Management stores a launch constraint
   with the item, and for an ad-hoc signed helper (no Team ID) it pins that
@@ -231,6 +237,25 @@ Gotchas that bit us:
   carries a real extension. Links and text snippets paste as text. The
   library's own staging API is internal, so the copy lives in the app; only
   the directory and the stale sweep are shared with pastes.
+- **The Mac window's blur is AppKit's, reached through the ObjC runtime.**
+  `CatalystWindowChrome.install()` (called from `main.swift`, before any
+  scene) hooks `UINSApplicationDelegate didCreateUIScene:` and slides an
+  `NSGlassEffectView` (macOS 26) / `NSVisualEffectView` (sidebar material,
+  behind-window) under the scene view — FlowDown's trick; a
+  `UIVisualEffectView` only samples within the window. It shows through
+  whatever stays transparent: the window, the hosting controller, and the
+  sidebar (no material on Catalyst); the terminal column paints the theme
+  itself. The title bar is hidden and `RootView` ignores the top safe area,
+  so the top bar rides the window's edge and is the title bar now: the
+  traffic lights are moved to its vertical centre (`standardWindowButton:`,
+  re-done on every `NSWindowDidResizeNotification`, since AppKit re-tiles
+  them), the sidebar keeps a strip of the bar's height above its list, and
+  the bar beside a hidden sidebar starts after `windowControlsWidth`. The
+  lights' geometry is *screen* points and gets converted: the iPad-idiom
+  Catalyst app draws at 77%, so a UIKit inset sized in the app's own points
+  lands 23% short of the lights. `WindowDragRegion`,
+  behind the bar and the sidebar's strip and footer, moves the window from
+  bare chrome (`performWindowDragWithEvent:` on `NSApp.currentEvent`).
 - `SMAppService` is `macCatalyst(16.0)`, above this app's iOS 15 deployment
   target, so every call sits behind `#available`. The packager raises the
   staged bundle's `LSMinimumSystemVersion` to 13.0, since a Catalyst app built

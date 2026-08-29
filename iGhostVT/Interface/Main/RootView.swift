@@ -31,8 +31,13 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            theme.background(for: colorScheme)
-                .ignoresSafeArea()
+            // On the Mac the sidebar stays transparent to the blur behind
+            // the window (`CatalystWindowChrome`); only the terminal column
+            // paints (`terminalColumn`).
+            #if !targetEnvironment(macCatalyst)
+                theme.background(for: colorScheme)
+                    .ignoresSafeArea()
+            #endif
 
             HStack(spacing: 0) {
                 if isRegularWidth, showsSidebar {
@@ -53,6 +58,10 @@ struct RootView: View {
             // does not reliably land inside a `withAnimation` transaction, so
             // wrapping the setter leaves the transition unanimated.
             .animation(DS.Motion.smooth, value: showsSidebar)
+            // The title bar is hidden and its strip is ours: the top bar
+            // rides the window's edge, the sidebar clears the traffic lights
+            // itself.
+            .catalystIgnoresTitleBar()
         }
         .onAppear(perform: refocus)
         .onChange(of: tabManager.activeTabID) { _ in refocus() }
@@ -90,6 +99,7 @@ struct RootView: View {
         // the switcher's cover too.
         .closeTabConfirmation(tabManager)
         .clipboardConfirmation(tabManager)
+        .relocationPrompt(MacLaunchAgent.shared)
     }
 
     private var terminalColumn: some View {
@@ -116,6 +126,7 @@ struct RootView: View {
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
             }
+            .catalystColumnBackground(theme.background(for: colorScheme))
     }
 
     /// Every tab's surface stays mounted so background sessions keep their
@@ -197,5 +208,27 @@ private struct TerminalPane: View {
             .allowsHitTesting(isActive)
             .accessibilityHidden(!isActive)
             .onChange(of: tab.isLocked) { _ in onLockChange() }
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func catalystIgnoresTitleBar() -> some View {
+        #if targetEnvironment(macCatalyst)
+            ignoresSafeArea(.container, edges: .top)
+        #else
+            self
+        #endif
+    }
+
+    /// The Mac paints the theme under the terminal column only — the
+    /// sidebar beside it shows the window's blur.
+    @ViewBuilder
+    func catalystColumnBackground(_ color: Color) -> some View {
+        #if targetEnvironment(macCatalyst)
+            background(color.ignoresSafeArea())
+        #else
+            self
+        #endif
     }
 }

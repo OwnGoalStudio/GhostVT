@@ -12,10 +12,14 @@ struct SidebarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // The Mac's window carries the product name in its title bar
-            // already; on iPad the sidebar's head is the one place it shows.
-            #if !targetEnvironment(macCatalyst)
-            header
+            // On iPad the sidebar's head is the one place the product name
+            // shows. The Mac's title bar is hidden, and its strip — where
+            // the traffic lights float — is kept clear and drags the window.
+            #if targetEnvironment(macCatalyst)
+                WindowDragRegion()
+                    .frame(height: CatalystWindowChrome.titleBarHeight)
+            #else
+                header
             #endif
 
             ScrollView {
@@ -55,11 +59,15 @@ struct SidebarView: View {
         }
         // One standard blur spans the complete sidebar. Keeping it in a
         // single layer avoids the different tints produced when separate
-        // materials sample the header, list, and footer independently.
+        // materials sample the header, list, and footer independently. On
+        // the Mac the blur is AppKit's, behind the window
+        // (`CatalystWindowChrome`), and the sidebar is transparent to it.
         .background {
-            Rectangle()
-                .fill(.regularMaterial)
-                .ignoresSafeArea()
+            #if !targetEnvironment(macCatalyst)
+                Rectangle()
+                    .fill(.regularMaterial)
+                    .ignoresSafeArea()
+            #endif
         }
         // For the context menu's share sheet, which presents via UIKit.
         .background(WindowReader(window: $window))
@@ -104,6 +112,7 @@ struct SidebarView: View {
         .padding(.horizontal, DS.Padding.m)
         .padding(.vertical, DS.Padding.s)
         .frame(maxWidth: .infinity)
+        .background(WindowDragRegion())
     }
 
     private var countLabel: String {

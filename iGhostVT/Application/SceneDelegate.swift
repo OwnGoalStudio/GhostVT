@@ -27,15 +27,30 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options _: UIScene.ConnectionOptions
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
+        #if targetEnvironment(macCatalyst)
+            // No title bar: the app draws to the top edge and the traffic
+            // lights float over its chrome (`CatalystWindowChrome`).
+            if let titlebar = windowScene.titlebar {
+                titlebar.titleVisibility = .hidden
+                titlebar.toolbar = nil
+            }
+        #endif
         // The window answers the menu bar's commands for these tabs.
         let window = TerminalWindow(
             windowScene: windowScene,
             tabManager: tabManager,
             interface: interface
         )
-        window.rootViewController = UIHostingController(
+        let host = UIHostingController(
             rootView: RootView(tabManager: tabManager, interface: interface).interfaceTextSize()
         )
+        #if targetEnvironment(macCatalyst)
+            // Transparent down to the effect view behind the scene, so the
+            // sidebar's blur is the desktop and not a flat wash.
+            window.backgroundColor = .clear
+            host.view.backgroundColor = .clear
+        #endif
+        window.rootViewController = host
         window.makeKeyAndVisible()
         self.window = window
         observeLaunchAgent()

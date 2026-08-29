@@ -30,6 +30,7 @@ struct BottomBar: View {
                     Image(systemName: "plus")
                         .font(DS.Font.control)
                         .frame(width: 44, height: 44)
+                        .contentShape(Circle())
                 }
                 .barGlass(in: Circle())
                 .accessibilityLabel("New Tab")
@@ -48,6 +49,7 @@ struct BottomBar: View {
                                     .offset(x: 2, y: 2)
                             }
                         }
+                        .contentShape(Circle())
                 }
                 .barGlass(in: Circle())
                 .accessibilityLabel("Show Tabs")
