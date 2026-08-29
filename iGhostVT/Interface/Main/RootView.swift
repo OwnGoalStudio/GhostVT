@@ -11,6 +11,8 @@ import SwiftUI
 /// window carries independent tabs.
 struct RootView: View {
     @ObservedObject var tabManager: TabManager
+    /// The presentations the window's menu commands can open.
+    @ObservedObject var interface: WindowInterfaceState
     @ObservedObject private var theme = AppTheme.shared
     @StateObject private var keyboard = KeyboardState()
     @Environment(\.colorScheme) private var colorScheme
@@ -18,18 +20,13 @@ struct RootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @FocusState private var focusedTabID: UUID?
 
-    /// Open by default at regular width, the way Safari shows its sidebar on
-    /// iPad, and remembered once the user takes a side. Compact width never
-    /// shows a sidebar, so the preference only ever describes iPad-sized
-    /// layouts.
-    @AppStorage("Sidebar.visible") private var showsSidebar = true
+    /// See `SidebarVisibility`; a UserDefaults value so View ▸ Show Sidebar
+    /// can flip it from UIKit.
+    @AppStorage(SidebarVisibility.key) private var showsSidebar = true
 
     /// User-dragged sidebar width, remembered like the visibility. The
     /// resize handle clamps it, so a stored value is always presentable.
     @AppStorage("Sidebar.width") private var sidebarWidth = 300.0
-    @State private var showsSwitcher = false
-    @State private var showsSettingsSheet = false
-
     private var isRegularWidth: Bool { horizontalSizeClass == .regular }
 
     var body: some View {
@@ -41,7 +38,7 @@ struct RootView: View {
                 if isRegularWidth, showsSidebar {
                     SidebarView(
                         tabManager: tabManager,
-                        onShowSettings: { showsSettingsSheet = true }
+                        onShowSettings: { interface.showsSettingsSheet = true }
                     )
                     .frame(width: sidebarWidth)
                     .overlay(alignment: .trailing) {
@@ -57,7 +54,6 @@ struct RootView: View {
             // wrapping the setter leaves the transition unanimated.
             .animation(DS.Motion.smooth, value: showsSidebar)
         }
-        .background(shortcutButtons)
         .onAppear(perform: refocus)
         .onChange(of: tabManager.activeTabID) { _ in refocus() }
         // Backgrounding resigns the surface's first responder (which clears
@@ -77,10 +73,10 @@ struct RootView: View {
                 KeyboardBarStore.shared.apply(to: tab.terminal)
             }
         }
-        .fullScreenCover(isPresented: $showsSwitcher, onDismiss: refocus) {
+        .fullScreenCover(isPresented: $interface.showsSwitcher, onDismiss: refocus) {
             TabSwitcherView(tabManager: tabManager)
         }
-        .sheet(isPresented: $showsSettingsSheet, onDismiss: refocus) {
+        .sheet(isPresented: $interface.showsSettingsSheet, onDismiss: refocus) {
             SettingsSheet()
         }
         .sheet(item: $tabManager.selectionRequest, onDismiss: refocus) { box in
@@ -114,8 +110,8 @@ struct RootView: View {
                 if !isRegularWidth, !keyboard.isVisible, !tabManager.tabs.isEmpty {
                     BottomBar(
                         tabManager: tabManager,
-                        onShowSettings: { showsSettingsSheet = true },
-                        onShowSwitcher: { showsSwitcher = true }
+                        onShowSettings: { interface.showsSettingsSheet = true },
+                        onShowSwitcher: { interface.showsSwitcher = true }
                     )
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
@@ -162,47 +158,6 @@ struct RootView: View {
         // first responder and eating every hardware key. Hand focus over
         // imperatively so a tab switch always lands on the active terminal.
         tab.terminal.requestFocus()
-    }
-
-    /// Hardware keyboard shortcuts (iPad with a keyboard, mainly).
-    private var shortcutButtons: some View {
-        Group {
-            Button("New Tab") { tabManager.newTab() }
-                .keyboardShortcut("t", modifiers: .command)
-            Button("New Window") { Self.requestNewWindow() }
-                .keyboardShortcut("n", modifiers: .command)
-            Button("Close Tab") {
-                if let tab = tabManager.activeTab {
-                    tabManager.requestClose(tab)
-                }
-            }
-                .keyboardShortcut("w", modifiers: .command)
-            Button("Next Tab") { tabManager.activateAdjacentTab(offset: 1) }
-                .keyboardShortcut("]", modifiers: [.command, .shift])
-            Button("Previous Tab") { tabManager.activateAdjacentTab(offset: -1) }
-                .keyboardShortcut("[", modifiers: [.command, .shift])
-            Button("Toggle Sidebar") { showsSidebar.toggle() }
-                .keyboardShortcut("l", modifiers: [.command, .shift])
-            Button("Show Tabs") { showsSwitcher.toggle() }
-                .keyboardShortcut("\\", modifiers: [.command, .shift])
-            Button("Settings") { showsSettingsSheet = true }
-                .keyboardShortcut(",", modifiers: .command)
-        }
-        .opacity(0)
-        .frame(width: 0, height: 0)
-        .accessibilityHidden(true)
-    }
-
-    /// Opens a new window scene (its own `TabManager`) on devices that
-    /// support multiple scenes; no-op elsewhere.
-    static func requestNewWindow() {
-        guard UIApplication.shared.supportsMultipleScenes else { return }
-        UIApplication.shared.requestSceneSessionActivation(
-            nil,
-            userActivity: nil,
-            options: nil,
-            errorHandler: nil
-        )
     }
 }
 

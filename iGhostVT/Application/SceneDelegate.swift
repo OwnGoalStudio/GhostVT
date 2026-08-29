@@ -14,6 +14,7 @@ import UIKit
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private let tabManager = TabManager()
+    private let interface = WindowInterfaceState()
 
     /// Watches the Mac's background helper. Nothing on iOS ever publishes.
     private var agentObserver: AnyCancellable?
@@ -24,9 +25,14 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options _: UIScene.ConnectionOptions
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
-        let window = UIWindow(windowScene: windowScene)
+        // The window answers the menu bar's commands for these tabs.
+        let window = TerminalWindow(
+            windowScene: windowScene,
+            tabManager: tabManager,
+            interface: interface
+        )
         window.rootViewController = UIHostingController(
-            rootView: RootView(tabManager: tabManager).interfaceTextSize()
+            rootView: RootView(tabManager: tabManager, interface: interface).interfaceTextSize()
         )
         window.makeKeyAndVisible()
         self.window = window

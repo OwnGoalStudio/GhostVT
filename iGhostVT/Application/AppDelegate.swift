@@ -32,13 +32,16 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-    /// The system menu bar (the Mac, an iPad with a keyboard) ships a Format
-    /// menu whose ⌘T is Show Fonts — it shadows the app's own ⌘T, New Tab,
-    /// and a terminal has no rich text for it to format anyway.
+    /// The system menu bar (the Mac, an iPad with a keyboard — where it is
+    /// also the hold-⌘ shortcut overlay). The Format menu goes: its ⌘T is
+    /// Show Fonts, which shadows New Tab, and a terminal has no rich text
+    /// for it to format anyway. `AppMenus` adds the app's own commands;
+    /// `TerminalWindow` answers them.
     override func buildMenu(with builder: UIMenuBuilder) {
         super.buildMenu(with: builder)
         guard builder.system == .main else { return }
         builder.remove(menu: .format)
+        AppMenus.install(into: builder)
     }
 
     /// An explicit quit: ⌘Q on the Mac, or a force-quit on iOS while the app

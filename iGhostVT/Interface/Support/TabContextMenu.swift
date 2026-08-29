@@ -10,10 +10,10 @@ import UIKit
 /// The context menu shared by every presentation of a tab — the strip's
 /// chips, the title capsule, the sidebar rows, and the switcher cards.
 ///
-/// Copy and export read the viewport ("the page"): what the terminal is
-/// showing right now, trailing padding stripped. Copy as Image prefers the
-/// surface's real pixels and falls back to drawing the text for a tab whose
-/// surface is not currently rendering.
+/// Copy and export read the viewport ("the page", see `TabPageExport`):
+/// what the terminal is showing right now, trailing padding stripped. Copy
+/// as Image prefers the surface's real pixels and falls back to drawing the
+/// text for a tab whose surface is not currently rendering.
 struct TabContextMenu: View {
     @ObservedObject var tab: TerminalTab
     let tabManager: TabManager
@@ -73,21 +73,7 @@ struct TabContextMenu: View {
 
     // MARK: - The page as text
 
-    /// The viewport's rows, each stripped of the trailing padding a grid
-    /// carries, without the blank region under the last printed row.
-    private var pageText: String {
-        tab.snapshotPreview()
-            .split(separator: "\n", omittingEmptySubsequences: false)
-            .map { row in
-                var row = row
-                while let last = row.last, last == " " || last == "\t" {
-                    row = row.dropLast()
-                }
-                return String(row)
-            }
-            .joined(separator: "\n")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-    }
+    private var pageText: String { TabPageExport.pageText(of: tab) }
 
     private func copyText() {
         UIPasteboard.general.string = pageText
@@ -142,46 +128,6 @@ struct TabContextMenu: View {
     // MARK: - Export
 
     private func exportText() {
-        let text = pageText
-        let base = tab.displayTitle
-            .replacingOccurrences(of: "/", with: "-")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("\(base.isEmpty ? "Terminal" : base).txt")
-        do {
-            try text.write(to: url, atomically: true, encoding: .utf8)
-        } catch {
-            return
-        }
-        let window = window
-        // After the menu's dismissal animation: presenting into it leaves a
-        // dead sheet (the switcher's settings entry hit the same race).
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            Self.presentShareSheet(for: url, in: window)
-        }
-    }
-
-    private static func presentShareSheet(for url: URL, in window: UIWindow?) {
-        guard let window, var top = window.rootViewController else { return }
-        while let presented = top.presentedViewController {
-            top = presented
-        }
-        let controller = UIActivityViewController(
-            activityItems: [url],
-            applicationActivities: nil
-        )
-        // iPad and the Mac require an anchor or the presentation crashes;
-        // the menu that triggered this is gone, so anchor to the window.
-        if let popover = controller.popoverPresentationController {
-            popover.sourceView = window
-            popover.sourceRect = CGRect(
-                x: window.bounds.midX,
-                y: window.bounds.midY,
-                width: 1,
-                height: 1
-            )
-            popover.permittedArrowDirections = []
-        }
-        top.present(controller, animated: true)
+        TabPageExport.exportText(of: tab, in: window)
     }
 }

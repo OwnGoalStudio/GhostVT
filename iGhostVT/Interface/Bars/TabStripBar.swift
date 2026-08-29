@@ -58,7 +58,7 @@ struct TabStripBar: View {
 
     @ViewBuilder
     private var windowMenu: some View {
-        Button(action: { RootView.requestNewWindow() }) {
+        Button(action: { TerminalWindow.requestNewWindow() }) {
             Label("New Window", systemImage: "macwindow.badge.plus")
         }
     }
@@ -75,7 +75,7 @@ struct TabStripBar: View {
             if showsSidebar {
                 if let tab = tabManager.activeTab {
                     HStack(spacing: DS.Padding.s) {
-                        ObservedStatusDot(store: tab.store)
+                        ObservedStatusDot(store: tab.store, font: .labelEmphasis)
                         ObservedTabTitle(tab: tab)
                         ObservedTabSubtitle(tab: tab)
                     }
@@ -192,7 +192,7 @@ private struct TabChip: View {
     var body: some View {
         Button(action: onSelect) {
             HStack(spacing: DS.Padding.xs) {
-                ObservedStatusDot(store: tab.store)
+                ObservedStatusDot(store: tab.store, font: .label)
                 Text(tab.displayTitle)
                     .font(DS.Font.label)
                     .lineLimit(1)

@@ -90,6 +90,26 @@ along with it: the iPad shortcuts bar is not part of `inputAccessoryView`, and
 it stays floating over the terminal with a dictation button, costing 40pt of
 grid.
 
+Every keyboard shortcut is a `UIKeyCommand` in the main menu — `AppMenus`,
+installed from `AppDelegate.buildMenu` — never a SwiftUI `keyboardShortcut`.
+One list feeds both the Mac's menu bar and the iPad's hold-⌘ overlay, and it
+is where the system's own File ▸ New (⌘N, a window) and Close (⌘W, the
+window) are replaced: in a tabbed terminal both keys belong to the tab.
+`TerminalWindow` answers the commands, because the window is the one
+responder every key passes through (sheets and the switcher included), and
+its `canPerformAction` is what greys an item out — a command that would act
+on whatever sits under a modal reads as disabled instead of failing quietly.
+Bindings follow Terminal.app and Safari for tabs (⌃Tab, ⇧⌘\, ⌘1–9, ⌃⌘S for
+the sidebar) and Ghostty for the terminal (⌘+ ⌘− ⌘0, ⌘K); where two
+conventions coexist the second key is a hidden alias of the same action. The
+font commands run ghostty's own `increase_font_size` actions on the active
+surface and step `TerminalFontSize` alongside — they pre-empt the ⌘+/⌘−
+press the library would otherwise have forwarded to ghostty itself. Menu
+titles are hand-entered in `Localizable.xcstrings` (eleven languages,
+`extractionState: manual`), and two keys made of the same words collide in
+the catalog's generated symbols, which is why the menu's entry is keyed
+`Settings… (menu)`.
+
 ## Build & verify
 
 - `make check` — project/packaging validation

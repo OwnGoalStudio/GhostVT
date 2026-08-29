@@ -44,7 +44,23 @@ enum TerminalFontSize {
 
     /// The stored size, clamped, as the surface configuration wants it.
     static var preferred: Float {
-        let stored = UserDefaults.standard.object(forKey: key) as? Int ?? `default`
-        return Float(min(max(stored, range.lowerBound), range.upperBound))
+        Float(stored)
+    }
+
+    private static var stored: Int {
+        let value = UserDefaults.standard.object(forKey: key) as? Int ?? `default`
+        return min(max(value, range.lowerBound), range.upperBound)
+    }
+
+    /// View ▸ Bigger / Smaller: the active surface zooms by one point and
+    /// the preference follows it, so the next tab opens at the same size.
+    static func stepPreferred(by delta: Int) {
+        let value = min(max(stored + delta, range.lowerBound), range.upperBound)
+        UserDefaults.standard.set(value, forKey: key)
+    }
+
+    /// View ▸ Actual Size: back to the platform default.
+    static func resetPreferred() {
+        UserDefaults.standard.removeObject(forKey: key)
     }
 }
