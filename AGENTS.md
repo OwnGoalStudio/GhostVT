@@ -20,9 +20,11 @@ every spawned process.
   Keep that boundary; don't add process APIs to the app target.
 - Depends on the **released**
   [libghostty-spm](https://github.com/Lakr233/libghostty-spm) package
-  (`upToNextMajor` from 1.4.10 — below 1.4.9, `TerminalViewState` publishes
+  (`upToNextMajor` from 1.4.11 — below 1.4.9, `TerminalViewState` publishes
   from inside SwiftUI's update pass; below 1.4.10, a hardware Escape drops
-  the keyboard instead of reaching the shell). Since 1.4.0 the package's
+  the keyboard on iOS instead of reaching the shell; below 1.4.11 it does
+  the same on Catalyst, where it resigns the terminal and every key after
+  it is lost until the next click). Since 1.4.0 the package's
   bare-semver tags are its own release sequence, decoupled from ghostty's;
   the `upstream.X.Y.Z` tags hold the XCFramework binaries. Terminal-library
   changes land in that repo and ship via a new package release — don't
@@ -136,7 +138,8 @@ its `canPerformAction` is what greys an item out — a command that would act
 on whatever sits under a modal reads as disabled instead of failing quietly.
 Bindings follow Terminal.app and Safari for tabs (⌃Tab, ⇧⌘\, ⌘1–9, ⌃⌘S for
 the sidebar) and Ghostty for the terminal (⌘+ ⌘− ⌘0, ⌘K); where two
-conventions coexist the second key is a hidden alias of the same action. The
+conventions coexist the second key is a hidden alias of the same action, and
+⌘⌫ is one more hidden alias of Close Tab — the tab's × from the keyboard. The
 font commands run ghostty's own `increase_font_size` actions on the active
 surface and step `TerminalFontSize` alongside — they pre-empt the ⌘+/⌘−
 press the library would otherwise have forwarded to ghostty itself. Menu

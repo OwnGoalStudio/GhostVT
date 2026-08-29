@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Lakr233/libghostty-spm",
       "state" : {
-        "revision" : "5d224eccf403a1beffe86a9b59b077e9f9ea40ab",
-        "version" : "1.4.10"
+        "revision" : "ff5d27c3b0657db805000a317ca145a06ce08eb7",
+        "version" : "1.4.11"
       }
     },
     {

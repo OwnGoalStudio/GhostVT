@@ -39,7 +39,8 @@ import UIKit
 /// Apple's apps print — ⌘T for New Tab with ⌘N as a hidden alias, ⌃Tab for
 /// Next Tab with ⇧⌘] hidden, ⌃⌘S (the AppKit standard) for the sidebar with
 /// Safari's ⇧⌘L hidden. A hidden command still fires; it is only kept out of
-/// the menu and the overlay so each action reads with a single key.
+/// the menu and the overlay so each action reads with a single key. ⌘⌫ is
+/// one more hidden alias, of Close Tab: the tab's × from the keyboard.
 ///
 /// Main-actor isolated, as `UIMenuBuilder` and every element it takes are;
 /// the one entry point is `buildMenu(with:)`, which already runs there.
@@ -93,6 +94,9 @@ enum AppMenus {
                     #selector(AppCommandResponder.closeTab(_:)),
                     "w", .command
                 ),
+                // ⌘⌫: the tab's × from the keyboard, the same close (and the
+                // same asking-first) as ⌘W.
+                hidden(#selector(AppCommandResponder.closeTab(_:)), UIKeyCommand.inputDelete, .command),
                 command(
                     L("Close Window", "Menu item: closes the window"),
                     #selector(AppCommandResponder.closeWindow(_:)),
