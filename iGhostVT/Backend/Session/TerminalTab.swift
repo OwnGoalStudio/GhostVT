@@ -45,8 +45,8 @@ final class TerminalTab: ObservableObject, Identifiable {
     }
 
     /// The session's process ended — on its own, or because someone asked
-    /// it to. Installed by `TabManager.makeTab`, so the auto-close policy
-    /// lives with the tab list rather than in every tab. Runs after the
+    /// it to. Installed by `TabManager.makeTab`, which closes the tab: the
+    /// policy lives with the tab list rather than in every tab. Runs after the
     /// store has recorded the exit, so a presenter that reads the status
     /// sees a finished session, never a live one.
     var onSessionExit: (() -> Void)?
@@ -103,8 +103,8 @@ final class TerminalTab: ObservableObject, Identifiable {
         exitRelay.handler = { [weak self] status in
             Task { @MainActor [weak self] in
                 guard let self else { return }
-                self.store.noteProcessExit(status: status)
-                self.onSessionExit?()
+                store.noteProcessExit(status: status)
+                onSessionExit?()
             }
         }
         terminal.configuration = TerminalSurfaceOptions(
@@ -177,7 +177,9 @@ final class TerminalTab: ObservableObject, Identifiable {
     /// title, then the endpoint, for transports that never report one.
     var displayTitle: String {
         let process = store.processName
-        if !process.isEmpty { return process }
+        if !process.isEmpty {
+            return process
+        }
         return reportedTitle.isEmpty ? store.endpointDescription : reportedTitle
     }
 
@@ -187,7 +189,9 @@ final class TerminalTab: ObservableObject, Identifiable {
     /// with no process name the reported title is already the first line,
     /// so this yields the endpoint instead.
     var secondaryTitle: String {
-        if store.processName.isEmpty { return store.endpointDescription }
+        if store.processName.isEmpty {
+            return store.endpointDescription
+        }
         return reportedTitle.isEmpty ? store.endpointDescription : reportedTitle
     }
 
@@ -257,7 +261,8 @@ final class TerminalTab: ObservableObject, Identifiable {
     /// ledger entry already gone, so nothing could ever kill it.
     func close() {
         if let transport = store.activeTransport as? XPCDaemonTransport,
-           let id = transport.currentSessionID {
+           let id = transport.currentSessionID
+        {
             transport.closeSession()
             DaemonSessionDirectory.shared.evict(id)
         } else if let id = daemonSession.id {
