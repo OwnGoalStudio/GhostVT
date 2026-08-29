@@ -469,22 +469,6 @@
         }
       }
     },
-    "sessions" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "sessions"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "个会话"
-          }
-        }
-      }
-    },
     "Starting…" : {
       "extractionState" : "manual",
       "localizations" : {

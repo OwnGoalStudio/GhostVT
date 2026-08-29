@@ -224,3 +224,41 @@ anyway would hand over the root shell that was just refused.
   mismatch would make every bootstrap path it derives wrong.
 - `make check` guards the pbxproj's objectVersion (77) so newer Xcode
   doesn't silently rewrite the project format.
+
+## Packaging (macOS)
+
+The Mac has no package manager to install a daemon, so the same two programs
+ship as one bundle and the app installs its own helper:
+
+```
+iGhostVT.app
+  Contents/MacOS/iGhostVT                  Catalyst GUI, unsandboxed
+  Contents/MacOS/ighostvtd                 the only process that forks
+  Contents/Library/LaunchAgents/wiki.qaq.ighostvtd.plist   BundleProgram
+```
+
+- `make mac-zip` builds both targets unsigned and universal (arm64 +
+  x86_64) for Release, then `Scripts/package-mac.sh` stages the helper and the
+  agent plist into the bundle, raises `LSMinimumSystemVersion` to 13.0, signs
+  inside out with Hardened Runtime, and `ditto`s the zip. Ad-hoc by default;
+  `MAC_ZIP_IDENTITY` takes a Developer ID and `MAC_NOTARY_PROFILE` a notarytool
+  keychain profile. Same contract as the deb packager: xcodebuild never signs.
+- `MacLaunchAgent` registers the bundled agent with `SMAppService` on first
+  launch, and only from `/Applications` — Login Items binds to the registering
+  path, and a translocated launch out of Downloads would bind to a mount that
+  disappears. `SessionStatusOverlay` reads it *before* `store.status`, so a
+  pending approval says so instead of hanging on "Connecting…", and
+  `SceneDelegate` holds the first connection attempt until the helper is
+  running.
+- `PeerAuthenticator`'s macOS branch replaces the client entitlement, which a
+  Catalyst binary cannot carry, with a code-signing requirement checked against
+  the caller's audit token. What it demands depends on how the daemon itself
+  was signed: a Developer ID build pins identifier + Apple anchor + team, while
+  an ad-hoc build pins *location* instead — the peer must be the `iGhostVT`
+  binary beside the daemon in the same `Contents/MacOS`, which `BundleProgram`
+  guarantees is the app that shipped with it. The branch is accept-or-deny and
+  never falls through to the device checks.
+- Neither Mach-O is sandboxed. Background Task Management refuses a sandboxed
+  app's unsandboxed `SMAppService` job, and a sandboxed helper would pass its
+  container to every shell it spawns. `mac-zip-check` fails if
+  `com.apple.security.app-sandbox` turns up in either entitlements file.

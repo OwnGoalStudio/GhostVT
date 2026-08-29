@@ -105,6 +105,20 @@ final class TabManager: ObservableObject {
         }
     }
 
+    /// Reconnects the tabs that are sitting on a failure.
+    ///
+    /// `noteSceneActive()` cannot do this: the store's auto-connect fires
+    /// exactly once, so a second call is a no-op for a tab that already tried
+    /// and failed. On the Mac the first attempt can fail for a reason outside
+    /// the app — the background helper was not approved yet — and when that
+    /// clears, these tabs deserve the attempt they would have got had the
+    /// helper been there at launch.
+    func retryFailedTabs() {
+        for tab in tabs where tab.store.hasFailed {
+            tab.store.connect()
+        }
+    }
+
     /// The one way a tab is created: its terminal's hooks land on this
     /// window's presenters before the tab joins `tabs`.
     private func makeTab(resume daemonSessionID: UInt64? = nil) -> TerminalTab {

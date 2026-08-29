@@ -27,6 +27,14 @@ final class TerminalSessionStore: ObservableObject {
 
     @Published private(set) var status: Status = .idle
 
+    /// Whether the session is sitting on a failure a retry could clear. Read
+    /// by `TabManager.retryFailedTabs()` when the reason for the failure was
+    /// external — on the Mac, a daemon that had not been approved yet.
+    var hasFailed: Bool {
+        if case .failed = status { return true }
+        return false
+    }
+
     /// Exit status of the session's process once it has ended, nil while it
     /// lives (or before it ever ran). Branches the failure card: an exited
     /// shell is an outcome to acknowledge, a lost daemon is an error to

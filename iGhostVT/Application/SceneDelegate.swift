@@ -3,6 +3,7 @@
 //  iGhostVT
 //
 
+import Combine
 import SwiftUI
 import UIKit
 
@@ -13,6 +14,9 @@ import UIKit
 final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     private let tabManager = TabManager()
+
+    /// Watches the Mac's background helper. Nothing on iOS ever publishes.
+    private var agentObserver: AnyCancellable?
 
     func scene(
         _ scene: UIScene,
@@ -26,6 +30,28 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         )
         window.makeKeyAndVisible()
         self.window = window
+        observeLaunchAgent()
+    }
+
+    /// Approval happens in System Settings, outside the app, and there is no
+    /// callback for it — the app finds out by looking. Two things look: the
+    /// status re-read on every activation below, and this subscription, which
+    /// turns "the helper is now running" into the connection attempt the tabs
+    /// never got to make at launch.
+    private func observeLaunchAgent() {
+        agentObserver = MacLaunchAgent.shared.$status
+            .removeDuplicates()
+            // Only *transitions* to enabled. `@Published` replays its current
+            // value on subscribe, and acting on that would start connecting
+            // from `willConnectTo` — before the scene is active, which is the
+            // one thing the auto-connect ordering exists to avoid.
+            .dropFirst()
+            .filter { $0 == .enabled }
+            .sink { [weak self] _ in
+                guard let self else { return }
+                tabManager.noteSceneActive()
+                tabManager.retryFailedTabs()
+            }
     }
 
     func sceneDidDisconnect(_: UIScene) {
@@ -35,7 +61,15 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// Sessions auto-connect only from here on: the launch transition is
     /// over, layout has settled, and surfaces render unoccluded — the
     /// viewport a shell spawns with is the one the user actually sees.
+    ///
+    /// On the Mac there is one more precondition. The daemon is a bundled
+    /// LaunchAgent a person has to allow once, and connecting before that is
+    /// approved buys a guaranteed failure and a "Terminal Unavailable" card
+    /// that names the wrong problem. So the first attempt waits for the
+    /// helper, and `observeLaunchAgent()` makes it when the helper arrives.
     func sceneDidBecomeActive(_: UIScene) {
+        MacLaunchAgent.shared.refresh()
+        guard MacLaunchAgent.shared.isReady else { return }
         tabManager.noteSceneActive()
     }
 

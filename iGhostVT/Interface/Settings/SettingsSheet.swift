@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingsSheet: View {
     @ObservedObject private var theme = AppTheme.shared
+    @ObservedObject private var agent = MacLaunchAgent.shared
     @Environment(\.dismiss) private var dismiss
 
     /// Read by the daemon when spawning shells. Empty means "let the daemon
@@ -28,6 +29,7 @@ struct SettingsSheet: View {
                 keyboardSection
                 shellSection
                 sessionsSection
+                terminalHelperSection
                 debugSection
                 aboutSection
             }
@@ -128,6 +130,65 @@ struct SettingsSheet: View {
                 quits.
                 """
             )
+        }
+    }
+
+    /// The Mac's only install step, and its only uninstall step.
+    ///
+    /// Dragging the app to the Trash does not remove a Login Items entry —
+    /// macOS keeps it, pointing at a bundle that no longer exists, and the
+    /// person who wants it gone has no obvious way back to it. This is that
+    /// way back. It also surfaces what `unregister()` returns, because a
+    /// silent failure here leaves a background agent running with nothing on
+    /// screen admitting it.
+    @ViewBuilder
+    private var terminalHelperSection: some View {
+        #if targetEnvironment(macCatalyst)
+            if agent.status != .unsupported {
+                Section {
+                    HStack {
+                        Text("Status")
+                        Spacer()
+                        Text(agentStatusDescription)
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.trailing)
+                    }
+                    if agent.isRegistered {
+                        Button("Turn Off Helper", role: .destructive) { agent.deactivate() }
+                    } else {
+                        Button("Turn On Helper") { agent.activate() }
+                    }
+                    Button("Open Login Items") { agent.openLoginItemsSettings() }
+                } header: {
+                    Text("Terminal Helper")
+                } footer: {
+                    Text(
+                        """
+                        iGhostVT opens terminals through a helper that runs in \
+                        the background, so sessions keep going while the app is \
+                        closed. Turning it off ends every session and removes \
+                        iGhostVT from Login Items.
+                        """
+                    )
+                }
+            }
+        #endif
+    }
+
+    private var agentStatusDescription: String {
+        switch agent.status {
+        case .enabled:
+            String(localized: "On")
+        case .needsApproval:
+            String(localized: "Waiting for Approval")
+        case .needsRelocation:
+            String(localized: "Move to Applications")
+        case .notRegistered:
+            String(localized: "Off")
+        case let .failed(reason):
+            reason
+        case .notApplicable, .unsupported:
+            String(localized: "Not Available")
         }
     }
 

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	Entitlements for ighostvtd inside the distributed macOS app bundle.
+	Empty, for the reason spelled out in iGhostVT.entitlements: this process
+	is the one that forks, and a sandbox here would be inherited by every
+	shell it spawns.
+
+	The device daemon's entitlements live in
+	Packaging/iGhostVTDaemon.entitlements and are a different set entirely —
+	that binary runs as root under a jailbreak's launchd and needs the
+	platform's permissions. This one runs as the logged-in user in the gui
+	domain and needs none.
+-->
+<plist version="1.0">
+<dict/>
+</plist>

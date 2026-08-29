@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	Entitlements for the distributed macOS build of the app. Deliberately
+	empty, and it has to stay that way.
+
+	The App Sandbox is not a fallback here, it is unsupported. macOS 14.2's
+	Background Task Management refuses to let a sandboxed app register an
+	unsandboxed SMAppService job, and the helper cannot be sandboxed either:
+	it forkpty/execves the user's login shell, and a child inherits the job's
+	sandbox — every command the user ran would inherit it too. So both
+	Mach-Os ship unsandboxed and the hardening comes from Hardened Runtime
+	(a codesign flag, --options runtime) rather than from a container.
+
+	This file is also why the iOS app target must never gain a
+	CODE_SIGN_ENTITLEMENTS build setting: the device package needs the
+	jailbreak entitlements in Packaging/iGhostVT.entitlements, and both are
+	applied by the packaging scripts at signing time, never by xcodebuild.
+	Nothing may be added here without re-reading the SMAppService constraint
+	above; `make mac-check` fails if com.apple.security.app-sandbox appears.
+-->
+<plist version="1.0">
+<dict/>
+</plist>

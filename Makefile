@@ -41,6 +41,7 @@ XCODEBUILD_WRAPPER  := $(ROOT_DIR)/Scripts/run-xcodebuild.sh
 DEB_PACKAGER        := $(ROOT_DIR)/Scripts/package-deb.sh
 VERSION_APPLIER     := $(ROOT_DIR)/Scripts/apply-version.sh
 MAC_DAEMON_LOADER   := $(ROOT_DIR)/Scripts/mac-daemon.sh
+MAC_PACKAGER        := $(ROOT_DIR)/Scripts/package-mac.sh
 CONTROL_TEMPLATE    := $(ROOT_DIR)/Packaging/DEBIAN/control
 ENTITLEMENTS        := $(ROOT_DIR)/Packaging/iGhostVT.entitlements
 DAEMON_ENTITLEMENTS := $(ROOT_DIR)/Packaging/iGhostVTDaemon.entitlements
@@ -70,7 +71,7 @@ ifeq ($(BUILD_NUMBER),)
 $(error CURRENT_PROJECT_VERSION is missing from Configuration/Version.xcconfig)
 endif
 
-.PHONY: all help print-version print-build-number print-deb-path set-version check test harness build deb deb-roothide deb-rootless mac-app mac-daemon mac-daemon-uninstall mac-run clean
+.PHONY: all help print-version print-build-number print-deb-path print-mac-zip-path set-version check test harness build deb deb-roothide deb-rootless mac-app mac-daemon mac-daemon-uninstall mac-run mac-zip-check mac-zip clean
 
 all: deb
 
@@ -87,6 +88,8 @@ help:
 	@echo "  mac-app     Build the Mac Catalyst app only"
 	@echo "  mac-daemon  Build ighostvtd for macOS and (re)load it as a per-user LaunchAgent"
 	@echo "  mac-daemon-uninstall  Unload and remove the macOS LaunchAgent"
+	@echo "  mac-zip     Build, sign, and zip the distributable macOS app (MAC_ZIP_IDENTITY=$(MAC_ZIP_IDENTITY))"
+	@echo "  mac-zip-check  Validate the macOS packaging inputs"
 	@echo "  set-version Write VERSION=x.y.z [BUILD=n] into Configuration/Version.xcconfig"
 	@echo "  clean       Remove derived data and generated packages"
 
@@ -98,6 +101,9 @@ print-build-number:
 
 print-deb-path:
 	@echo "$(DEB_OUTPUT)"
+
+print-mac-zip-path:
+	@echo "$(MAC_ZIP_OUTPUT)"
 
 set-version:
 	@test -n "$(VERSION)" || { echo "usage: make set-version VERSION=1.2.3 [BUILD=42]" >&2; exit 64; }
@@ -139,7 +145,7 @@ harness:
 	trap 'rm -f "$$harness_bin"' EXIT; \
 	xcrun --sdk macosx swiftc -swift-version 5 \
 		"$(ROOT_DIR)/Shared/iGhostVTProtocol.swift" \
-		$$(ls "$(ROOT_DIR)"/iGhostVTDaemon/*.swift | grep -v '/main\.swift$$') \
+		$$(find "$(ROOT_DIR)/iGhostVTDaemon" -name '*.swift' ! -name 'main.swift' | sort) \
 		"$(ROOT_DIR)/Tests/PTYHarness/main.swift" \
 		-o "$$harness_bin"; \
 	"$$harness_bin"
@@ -227,6 +233,91 @@ mac-daemon-uninstall:
 
 mac-run: mac-daemon mac-app
 	open "$(MAC_APP_BUNDLE)"
+
+# ---------------------------------------------------------------------------
+# Distributable macOS build (`make mac-zip`)
+#
+# A different path from `make mac-run` on purpose. The harness above loads a
+# DerivedData binary through a sidecar plist in ~/Library/LaunchAgents; this
+# one produces a self-contained app that carries its helper inside the bundle
+# and registers it with SMAppService on first launch. The two must never both
+# be loaded — they share the label wiki.qaq.ighostvtd, and SMAppService answers
+# kSMErrorInvalidSignature when it finds a job it does not own. Run
+# `make mac-daemon-uninstall` before testing a zip.
+#
+# Signing is ad-hoc by default, which is what an unattended build (and every
+# checkout without a certificate) can do. An ad-hoc bundle is not
+# Gatekeeper-clean: whoever downloads it has to clear the quarantine bit once.
+# To ship one that does not need that, pass a Developer ID and a notarytool
+# keychain profile:
+#
+#   make mac-zip MAC_ZIP_IDENTITY="Developer ID Application: NAME (TEAMID)" \
+#                MAC_NOTARY_PROFILE=ighostvt-notary
+MAC_RELEASE_CONFIGURATION := Release
+# Universal by default. libghostty-spm ships both slices, and an Intel Mac is
+# still the machine a lot of people keep a terminal on.
+MAC_ARCHS           ?= arm64 x86_64
+MAC_ZIP_IDENTITY    ?= -
+MAC_NOTARY_PROFILE  ?=
+MAC_APP_ENTITLEMENTS    := $(ROOT_DIR)/Packaging/macOS/iGhostVT.entitlements
+MAC_DAEMON_ENTITLEMENTS := $(ROOT_DIR)/Packaging/macOS/iGhostVTDaemon.entitlements
+MAC_AGENT_PLIST     := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighostvtd.agent.plist
+MAC_ZIP_APP_BUNDLE  := $(DERIVED_DATA)/Build/Products/$(MAC_RELEASE_CONFIGURATION)-maccatalyst/iGhostVT.app
+MAC_ZIP_DAEMON      := $(DERIVED_DATA)/Build/Products/$(MAC_RELEASE_CONFIGURATION)/ighostvtd
+MAC_ZIP_OUTPUT      ?= $(ROOT_DIR)/build/Packages/iGhostVT-$(APP_VERSION)-macos.zip
+
+MAC_XCODEBUILD := $(UNSIGNED_XCODEBUILD) \
+	ARCHS="$(MAC_ARCHS)" \
+	ONLY_ACTIVE_ARCH=NO
+
+# Deliberately *not* a dependency of `check`, and it does not depend on it
+# either: `check` requires the jailbreak toolchain (ldid, dpkg-deb), and a Mac
+# with nothing but Xcode has to be able to produce this zip.
+mac-zip-check:
+	@command -v xcodebuild >/dev/null || { echo "error: xcodebuild is required" >&2; exit 69; }
+	@command -v codesign >/dev/null || { echo "error: codesign is required" >&2; exit 69; }
+	@command -v ditto >/dev/null || { echo "error: ditto is required" >&2; exit 69; }
+	@test -x "$(MAC_PACKAGER)" || { echo "error: package-mac.sh is not executable" >&2; exit 66; }
+	@plutil -lint "$(MAC_AGENT_PLIST)" "$(MAC_APP_ENTITLEMENTS)" "$(MAC_DAEMON_ENTITLEMENTS)"
+	@# BundleProgram is how the agent finds the helper inside the bundle, and
+	@# the label is what SMAppService and mac-daemon.sh both address.
+	@[[ "$$(/usr/libexec/PlistBuddy -c 'Print :BundleProgram' "$(MAC_AGENT_PLIST)")" == "Contents/MacOS/ighostvtd" ]] \
+		|| { echo "error: the bundled agent's BundleProgram must be Contents/MacOS/ighostvtd" >&2; exit 65; }
+	@[[ "$$(/usr/libexec/PlistBuddy -c 'Print :Label' "$(MAC_AGENT_PLIST)")" == "wiki.qaq.ighostvtd" ]] \
+		|| { echo "error: the bundled agent's Label must be wiki.qaq.ighostvtd" >&2; exit 65; }
+	@[[ "$$(/usr/libexec/PlistBuddy -c 'Print :SoftResourceLimits:NumberOfFiles' "$(MAC_AGENT_PLIST)")" == "10240" ]] \
+		|| { echo "error: the daemon and its shells require a 10240 soft file-descriptor limit" >&2; exit 65; }
+	@# The App Sandbox is unsupported here, not merely unused: Background Task
+	@# Management refuses a sandboxed app's unsandboxed SMAppService job, and a
+	@# sandboxed helper would hand its container to every shell it spawns.
+	@for ent in "$(MAC_APP_ENTITLEMENTS)" "$(MAC_DAEMON_ENTITLEMENTS)"; do \
+		if /usr/libexec/PlistBuddy -c 'Print :com.apple.security.app-sandbox' "$$ent" >/dev/null 2>&1; then \
+			echo "error: $$ent declares com.apple.security.app-sandbox; the helper cannot be sandboxed" >&2; \
+			exit 65; \
+		fi; \
+	done
+
+mac-zip: mac-zip-check
+	XCBUILD_LABEL=build-mac-zip-app $(MAC_XCODEBUILD) \
+		-configuration "$(MAC_RELEASE_CONFIGURATION)" \
+		-scheme "$(SCHEME)" \
+		-destination "platform=macOS,variant=Mac Catalyst" \
+		build
+	XCBUILD_LABEL=build-mac-zip-daemon $(MAC_XCODEBUILD) \
+		-configuration "$(MAC_RELEASE_CONFIGURATION)" \
+		-scheme "$(DAEMON_SCHEME)" \
+		-destination "platform=macOS" \
+		build
+	"$(MAC_PACKAGER)" \
+		"$(MAC_ZIP_APP_BUNDLE)" \
+		"$(MAC_ZIP_DAEMON)" \
+		"$(MAC_AGENT_PLIST)" \
+		"$(MAC_APP_ENTITLEMENTS)" \
+		"$(MAC_DAEMON_ENTITLEMENTS)" \
+		"$(MAC_ZIP_OUTPUT)" \
+		"$(APP_VERSION)" \
+		"$(MAC_ZIP_IDENTITY)" \
+		"$(MAC_NOTARY_PROFILE)"
 
 clean:
 	rm -rf "$(DERIVED_DATA)"

@@ -1,9 +1,18 @@
 # Tag vX.Y.Z → override Configuration/Version.xcconfig with the tag, build the
-# roothide and rootless debs, and attach both to a GitHub Release.
+# roothide and rootless debs and the macOS app, and attach all of them to a
+# GitHub Release.
 #
 # The terminal core comes from the released Lakr233/libghostty-spm package
 # (resolved by xcodebuild from Package.resolved), so this checkout is all the
 # build needs.
+#
+# The macOS zip is ad-hoc signed. A runner has no Developer ID certificate and
+# nothing here should invent one, so the artifact is exactly what
+# `make mac-zip` produces on a checkout with no signing identity: a universal,
+# hardened-runtime bundle that Gatekeeper will not trust on sight. Whoever
+# installs it clears the quarantine bit once — the release notes say so, and so
+# does the packager. Signing it properly is a local `make mac-zip
+# MAC_ZIP_IDENTITY=...` away.
 
 name: Release
 
@@ -88,4 +97,79 @@ jobs:
             sleep 20
           done
           echo "could not publish the release after 5 attempts" >&2
+          exit 1
+
+  # Runs after `deb` rather than beside it, only so the release already exists
+  # by the time this job has something to attach. Two jobs racing to be the one
+  # that calls `gh release create` is how you get a release with half its
+  # assets. The build itself shares nothing with the deb job.
+  macos:
+    needs: deb
+    runs-on: macos-26
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out iGhostVT
+        uses: actions/checkout@v4
+
+      - name: Select newest Xcode
+        run: |
+          latest="$(ls -d /Applications/Xcode*.app | sort -V | tail -n1)"
+          sudo xcode-select -s "$latest/Contents/Developer"
+          xcodebuild -version
+
+      # No ldid or dpkg here: `make mac-zip` deliberately does not depend on
+      # `make check`, so a machine with nothing but Xcode can produce the zip.
+      - name: Install build tools
+        run: brew install xcbeautify
+
+      # Same tag and the same run number as the deb job, so the version in the
+      # app's About screen matches the one on the packages beside it.
+      - name: Override version from tag
+        if: github.ref_type == 'tag'
+        run: make set-version VERSION="${GITHUB_REF_NAME}" BUILD="${{ github.run_number }}"
+
+      # MAC_ZIP_IDENTITY defaults to "-", so this is the ad-hoc path. Universal
+      # (arm64 + x86_64) and hardened-runtime; see the header of this file.
+      - name: Build the macOS app
+        run: make mac-zip
+
+      - name: Checksums
+        run: |
+          cd build/Packages
+          shasum -a 256 *.zip | tee SHA256SUMS.macos
+
+      - name: Verify the bundled helper
+        run: |
+          app="$(mktemp -d)/iGhostVT.app"
+          ditto -x -k build/Packages/iGhostVT-*-macos.zip "$(dirname "$app")"
+          test -x "$app/Contents/MacOS/ighostvtd" || { echo "the helper is missing" >&2; exit 1; }
+          test -f "$app/Contents/Library/LaunchAgents/wiki.qaq.ighostvtd.plist" \
+            || { echo "the bundled agent plist is missing" >&2; exit 1; }
+          lipo -info "$app/Contents/MacOS/iGhostVT"
+          lipo -info "$app/Contents/MacOS/ighostvtd"
+          codesign --verify --deep --strict --verbose=2 "$app"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ighostvt-macos
+          path: |
+            build/Packages/*.zip
+            build/Packages/SHA256SUMS.macos
+          if-no-files-found: error
+
+      # The release was created by the `deb` job, so this only ever uploads.
+      - name: Attach to the GitHub Release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          assets=(build/Packages/*.zip build/Packages/SHA256SUMS.macos)
+          for attempt in 1 2 3 4 5; do
+            gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber && exit 0
+            echo "upload attempt ${attempt} failed; retrying in 20s" >&2
+            sleep 20
+          done
+          echo "could not attach the macOS build after 5 attempts" >&2
           exit 1

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	ighostvtd as a *bundled* LaunchAgent, staged by Scripts/package-mac.sh
+	into iGhostVT.app/Contents/Library/LaunchAgents/ and registered on first
+	launch with SMAppService.agent(plistName:).
+
+	This is not the file `make mac-run` installs. That one is the sibling
+	wiki.qaq.ighostvtd.plist, an @DAEMON@-substituted sidecar dropped into
+	~/Library/LaunchAgents pointing at a DerivedData binary. The two must
+	never both be loaded: SMAppService checks that the job it manages is the
+	one inside the bundle, and a stale harness job holding the same label
+	answers with kSMErrorInvalidSignature. `make mac-daemon-uninstall`
+	clears the harness one.
+
+	BundleProgram is resolved relative to the bundle, which is the whole
+	point of the exercise: the helper moves, updates, and is deleted with the
+	app instead of leaving a dangling ~/Library/LaunchAgents entry behind.
+
+	AssociatedBundleIdentifiers is what makes Login Items in System Settings
+	name the app rather than a bare "wiki.qaq.ighostvtd", so a user who goes
+	looking for what asked to run in the background finds something they
+	recognise.
+
+	RunAtLoad + KeepAlive mirror the device LaunchDaemon and the harness
+	agent: sessions outlive the app on purpose, so the process that owns the
+	PTYs must not exit when the last client disconnects. MachServices is
+	still declared because that is the port the app looks the daemon up on.
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>wiki.qaq.ighostvtd</string>
+	<key>BundleProgram</key>
+	<string>Contents/MacOS/ighostvtd</string>
+	<key>AssociatedBundleIdentifiers</key>
+	<array>
+		<string>wiki.qaq.iGhostVT</string>
+	</array>
+	<key>ProcessType</key>
+	<string>Interactive</string>
+	<key>SoftResourceLimits</key>
+	<dict>
+		<key>NumberOfFiles</key>
+		<integer>10240</integer>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>MachServices</key>
+	<dict>
+		<key>wiki.qaq.ighostvt.service</key>
+		<true/>
+	</dict>
+</dict>
+</plist>

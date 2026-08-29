@@ -30,8 +30,14 @@ every spawned process.
 
 FlowDown-style: `iGhostVT/main.swift` (manual `UIApplicationMain`) +
 `Application/` (delegates) + `Backend/` (sessions, theme, transport) +
-`Interface/<feature>/` + `Resources/`. Daemon code in `iGhostVTDaemon/`,
-shared XPC protocol in `Shared/`, transport seam in `Packages/iGhostVTKit`.
+`Interface/<feature>/` + `Resources/`. The daemon mirrors that shape:
+`iGhostVTDaemon/main.swift` + `Server/` (listener, peer auth, connections) +
+`Session/` (registry, PTY, descriptor I/O) + `Shell/` (what a session runs) +
+`System/` (bootstrap paths, C shims) + `Logging/`. Shared XPC protocol in
+`Shared/`, transport seam in `Packages/iGhostVTKit`. Both targets use
+file-system-synchronized groups, so a new subfolder joins the target on its
+own — but `make harness` compiles the daemon by hand and has to find them, so
+it globs recursively; keep it that way.
 
 Data flow: one `TabManager` per `UIWindowScene` (owned by `SceneDelegate`);
 each `TerminalTab` owns a `TerminalSessionStore`, which drives a
@@ -99,8 +105,58 @@ grid.
   behaviour (the GPU entitlement, the bootstrap layouts, privilege drop,
   Live Activities, the software keyboard's accessory bar) is still debugged
   on the jailbroken device with the installed deb.
+- `make mac-zip` — the *distributable* Mac build, a separate path from
+  `make mac-run` (`mac-zip-check` validates its inputs; `Scripts/package-mac.sh`
+  stages, signs, zips). Universal Release, ad-hoc signed by default, Developer
+  ID and notarization optional via `MAC_ZIP_IDENTITY` / `MAC_NOTARY_PROFILE`.
+  It deliberately does **not** depend on `make check`: that target requires the
+  jailbreak toolchain, and a Mac with only Xcode has to be able to cut this zip.
+
+The macOS product is one bundle carrying both programs — `Contents/MacOS/`
+holds the Catalyst GUI and `ighostvtd`, and
+`Contents/Library/LaunchAgents/wiki.qaq.ighostvtd.plist` (`BundleProgram`, not
+`ProgramArguments`) is registered on first launch by `MacLaunchAgent` through
+`SMAppService`. The two agent plists in `Packaging/macOS/` are not
+interchangeable: the `@DAEMON@` one is the harness sidecar `make mac-run`
+installs into `~/Library/LaunchAgents`, the `.agent.` one ships inside the
+bundle. They share the label `wiki.qaq.ighostvtd`, so a stale harness job makes
+`SMAppService` answer `kSMErrorInvalidSignature` — run
+`make mac-daemon-uninstall` before testing a zip.
 
 Gotchas that bit us:
+
+- **The Mac app cannot be sandboxed, and neither can its helper.** macOS 14.2's
+  Background Task Management refuses to let a sandboxed app register an
+  unsandboxed `SMAppService` job, and the helper cannot be sandboxed either —
+  it `forkpty`/`execve`s the user's shell, and children inherit the job's
+  sandbox, so every command the user ran would inherit it too. This is not a
+  flag to flip if something breaks; it is unsupported. Both
+  `Packaging/macOS/*.entitlements` are empty dicts, `mac-zip-check` fails if
+  `com.apple.security.app-sandbox` appears in either, and the hardening comes
+  from Hardened Runtime (`codesign --options runtime`) instead.
+- **Login Items binds to the path the app registered from.** A first launch out
+  of Downloads registers a Gatekeeper-translocated mount that is gone by the
+  next launch. `MacLaunchAgent` refuses to register outside `/Applications` and
+  the overlay asks to be moved instead — do not "fix" that by registering
+  anyway. Dragging the app to the Trash also does not unregister the agent,
+  which is why Settings ▸ Terminal Helper carries a Turn Off control that
+  surfaces what `unregister()` returns.
+- **A Mac drop pastes the path; an iOS drop pastes a staged copy's path.** The
+  library stages every dropped file into `ghostty-paste/` and pastes *that*
+  path, which is the only honest answer on iOS — a drop from Files or Photos
+  has no path a shell could open. A Finder drag does: it registers the file's
+  data type *and* `public.file-url`, and the library checks data first, so on
+  Catalyst `LockableTerminalView` swaps in `MacFileDropDelegate`, which prefers
+  the real URL and hands everything else back to the library (staging included,
+  for Photos and Mail attachments that carry no path). It has to *replace* the
+  interaction rather than override the method: `dropInteraction(_:performDrop:)`
+  is `public`, not `open`, so a subclass outside the module can call it but
+  cannot override it.
+- `SMAppService` is `macCatalyst(16.0)`, above this app's iOS 15 deployment
+  target, so every call sits behind `#available`. The packager raises the
+  staged bundle's `LSMinimumSystemVersion` to 13.0, since a Catalyst app built
+  for iOS 15 otherwise advertises macOS 12, where none of this exists and the
+  terminal would simply never connect.
 
 - A shell inherits both the daemon's resource limits and every descriptor
   that survives `execve`. Keep an explicit launchd `NumberOfFiles` soft limit
