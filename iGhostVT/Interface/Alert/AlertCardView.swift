@@ -132,6 +132,10 @@ struct AlertButtonStyle: ButtonStyle {
                 RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
                     .strokeBorder(tint, lineWidth: 1)
             )
+            // The unfilled kind is text, a 1pt stroke, and clear in between,
+            // and clear does not hit-test: without this the button answers
+            // only on its letters and its border.
+            .contentShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
             .opacity(configuration.isPressed ? 0.75 : 1)
     }
 }
