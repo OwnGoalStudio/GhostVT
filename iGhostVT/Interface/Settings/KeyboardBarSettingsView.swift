@@ -52,8 +52,10 @@ struct KeyboardBarSettingsView: View {
             .listRowBackground(Color(uiColor: .secondarySystemGroupedBackground))
         } header: {
             Text("Preview")
+                .font(DS.Font.caption)
         } footer: {
             Text("The bar above the keyboard shows these keys in this order. Scroll sideways if they do not all fit.")
+                .font(DS.Font.detail)
         }
     }
 
@@ -80,8 +82,10 @@ struct KeyboardBarSettingsView: View {
             }
         } header: {
             Text("On the Bar")
+                .font(DS.Font.caption)
         } footer: {
             Text("Drag to reorder. Removing a standard key returns it to More Keys; dividers and custom keys are deleted.")
+                .font(DS.Font.detail)
         }
     }
 
@@ -121,8 +125,10 @@ struct KeyboardBarSettingsView: View {
             .buttonStyle(.borderless)
         } header: {
             Text("More Keys")
+                .font(DS.Font.caption)
         } footer: {
             Text("A custom key types the characters you enter, together with any modifier keys that are switched on.")
+                .font(DS.Font.detail)
         }
     }
 
@@ -214,11 +220,11 @@ private struct CustomKeySheet: View {
                     // A literal example, not copy: the StringProtocol
                     // overload keeps it out of the string catalog.
                     TextField(Self.placeholder, text: $text)
-                        .font(DS.Font.mono)
                         .textInputAutocapitalization(.never)
                         .disableAutocorrection(true)
                 } footer: {
                     Text("Up to three characters, sent exactly as typed. A single letter also works with Control.")
+                        .font(DS.Font.detail)
                 }
             }
             .navigationTitle("Custom Key")

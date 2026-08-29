@@ -25,6 +25,9 @@ struct SettingsSheet: View {
     /// Read by AppDelegate when the app quits; see `SessionKeepAlive`.
     @AppStorage(SessionKeepAlive.key) private var keepAlive = true
 
+    /// Read by `TabManager` when a session ends; see `SessionAutoClose`.
+    @AppStorage(SessionAutoClose.key) private var autoCloseTabs = false
+
     /// Mirrored by AppDelegate at launch; toggling applies immediately.
     @AppStorage("Debug.verboseTerminalLog") private var verboseTerminalLog = false
 
@@ -76,8 +79,10 @@ struct SettingsSheet: View {
             }
         } header: {
             Text("Appearance")
+                .font(DS.Font.caption)
         } footer: {
             Text("Themes come from the Ghostty theme catalog and apply to every tab in every window.")
+                .font(DS.Font.detail)
         }
     }
 
@@ -102,6 +107,7 @@ struct SettingsSheet: View {
             }
         } header: {
             Text("Text Size")
+                .font(DS.Font.caption)
         } footer: {
             Text(
                 """
@@ -110,6 +116,7 @@ struct SettingsSheet: View {
                 open keeps the size it was zoomed to.
                 """
             )
+                .font(DS.Font.detail)
         }
     }
 
@@ -131,8 +138,10 @@ struct SettingsSheet: View {
                 }
             } header: {
                 Text("Keyboard")
+                    .font(DS.Font.caption)
             } footer: {
                 Text("Choose and arrange the keys on the bar above the keyboard.")
+                    .font(DS.Font.detail)
             }
         #endif
     }
@@ -145,9 +154,9 @@ struct SettingsSheet: View {
                 .keyboardType(.asciiCapable)
                 .textInputAutocapitalization(.never)
                 .disableAutocorrection(true)
-                .font(DS.Font.mono)
         } header: {
             Text("Default Shell")
+                .font(DS.Font.caption)
         } footer: {
             // The jailbreak-root caveat is a device matter; a Mac has no
             // bootstrap to prefix a path with.
@@ -158,6 +167,7 @@ struct SettingsSheet: View {
                     Leave this empty to use your login shell.
                     """
                 )
+                    .font(DS.Font.detail)
             #else
                 Text(
                     """
@@ -167,6 +177,7 @@ struct SettingsSheet: View {
                     the next jailbreak.
                     """
                 )
+                    .font(DS.Font.detail)
             #endif
         }
     }
@@ -176,16 +187,27 @@ struct SettingsSheet: View {
     private var sessionsSection: some View {
         Section {
             Toggle("Keep Sessions Running", isOn: $keepAlive)
+            Toggle("Auto-Close Tabs", isOn: $autoCloseTabs)
         } header: {
             Text("Sessions")
+                .font(DS.Font.caption)
         } footer: {
-            Text(
-                """
-                Sessions keep running after the app quits and come back on the \
-                next launch. Turn this off to close every session when the app \
-                quits.
-                """
-            )
+            VStack(alignment: .leading, spacing: DS.Padding.s) {
+                Text(
+                    """
+                    Sessions keep running after the app quits and come back on the \
+                    next launch. Turn this off to close every session when the app \
+                    quits.
+                    """
+                )
+                Text(
+                    """
+                    With Auto-Close Tabs on, a tab closes by itself when its \
+                    session ends instead of asking whether to keep it.
+                    """
+                )
+            }
+            .font(DS.Font.detail)
         }
     }
 
@@ -217,6 +239,7 @@ struct SettingsSheet: View {
                     Button("Open Login Items") { agent.openLoginItemsSettings() }
                 } header: {
                     Text("Terminal Helper")
+                        .font(DS.Font.caption)
                 } footer: {
                     Text(
                         """
@@ -226,6 +249,7 @@ struct SettingsSheet: View {
                         iGhostVT from Login Items.
                         """
                     )
+                        .font(DS.Font.detail)
                 }
             }
         #endif
@@ -260,6 +284,7 @@ struct SettingsSheet: View {
                 }
         } header: {
             Text("Debugging")
+                .font(DS.Font.caption)
         } footer: {
             Text(
                 """
@@ -267,6 +292,7 @@ struct SettingsSheet: View {
                 including every keystroke, while this is on.
                 """
             )
+                .font(DS.Font.detail)
         }
     }
 
@@ -280,9 +306,10 @@ struct SettingsSheet: View {
             }
         } header: {
             Text("About")
+                .font(DS.Font.caption)
         } footer: {
             Text(Self.ghosttyConfigPath)
-                .font(DS.Font.monoCaption)
+                .font(DS.Font.detail)
                 .textSelection(.enabled)
         }
     }

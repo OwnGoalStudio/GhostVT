@@ -35,7 +35,7 @@ enum DS {
         static let l: CGFloat = 16
     }
 
-    /// Text roles. Each is a system text style plus a weight or design,
+    /// Text roles. Each is a system text style plus a weight,
     /// resolved to a point size at the view — `.font(DS.Font.body)` goes
     /// through the `View.font(_:)` overload below — so the size can carry
     /// the interface text size preference. The base is the platform's own
@@ -63,10 +63,6 @@ enum DS {
         case caption
         /// Tiny controls that must hold their own: badges, close glyphs.
         case captionEmphasis
-        /// Monospaced body (paths, commands).
-        case mono
-        /// Monospaced caption (file paths in footers).
-        case monoCaption
         /// Large symbol glyphs sitting alone in a row or card.
         case symbol
         /// The one oversized symbol of an empty state.
@@ -76,10 +72,10 @@ enum DS {
         var style: UIFont.TextStyle {
             switch self {
             case .title: .headline
-            case .control, .controlEmphasis, .body, .mono: .body
+            case .control, .controlEmphasis, .body: .body
             case .label, .labelEmphasis: .subheadline
             case .detail: .footnote
-            case .caption, .captionEmphasis, .monoCaption: .caption1
+            case .caption, .captionEmphasis: .caption1
             case .symbol: .title3
             case .heroSymbol: .largeTitle
             }
@@ -94,13 +90,6 @@ enum DS {
             }
         }
 
-        var design: SwiftUI.Font.Design {
-            switch self {
-            case .mono, .monoCaption: .monospaced
-            default: .default
-            }
-        }
-
         /// The role at `scale`, sized for `category` — the system's Dynamic
         /// Type setting on iOS, ignored by the Mac, where the base is fixed.
         func resolved(scale: CGFloat, category: UIContentSizeCategory) -> SwiftUI.Font {
@@ -112,7 +101,7 @@ enum DS {
                     compatibleWith: UITraitCollection(preferredContentSizeCategory: category)
                 ).pointSize
             }
-            return .system(size: base * scale, weight: weight, design: design)
+            return .system(size: base * scale, weight: weight)
         }
     }
 
