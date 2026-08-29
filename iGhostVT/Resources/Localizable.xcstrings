@@ -335,6 +335,78 @@
         }
       }
     },
+    "%lld pt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pt"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pt"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pt"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pt"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pt"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pt"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pt"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld пт"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 点"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 點"
+          }
+        }
+      },
+      "comment" : "A font size in points"
+    },
     "A custom key types the characters you enter, together with any modifier keys that are switched on." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1046,6 +1118,76 @@
         }
       }
     },
+    "Advanced" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erweitert"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Advanced"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avanzado"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avancé"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avanzate"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細設定"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "고급"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avançado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дополнительно"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "高级"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "進階"
+          }
+        }
+      }
+    },
     "Allow" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1543,6 +1685,76 @@
         }
       }
     },
+    "Broken Installation" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beschädigte Installation"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Broken Installation"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalación dañada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installation endommagée"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Installazione danneggiata"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "インストールが破損しています"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "손상된 설치"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Instalação Danificada"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Повреждённая установка"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安装损坏"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安裝損壞"
+          }
+        }
+      }
+    },
     "Cancel" : {
       "localizations" : {
         "de" : {
@@ -1897,148 +2109,6 @@
         }
       }
     },
-    "Close Window" : {
-      "comment" : "Menu item: closes the window",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fenster schließen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close Window"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cerrar ventana"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fermer la fenêtre"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chiudi finestra"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ウインドウを閉じる"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "윈도우 닫기"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fechar janela"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Закрыть окно"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关闭窗口"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "關閉視窗"
-          }
-        }
-      }
-    },
-    "Close “%@”?" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "„%@“ schließen?"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close “%@”?"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "¿Cerrar “%@”?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fermer « %@ » ?"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Chiudere “%@”?"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「%@」を閉じますか?"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "“%@”을(를) 닫으시겠습니까?"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fechar “%@”?"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Закрыть «%@»?"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关闭“%@”？"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "關閉「%@」？"
-          }
-        }
-      }
-    },
     "Close All" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2248,6 +2318,148 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "關閉分頁"
+          }
+        }
+      }
+    },
+    "Close Window" : {
+      "comment" : "Menu item: closes the window",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fenster schließen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close Window"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar ventana"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer la fenêtre"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiudi finestra"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウインドウを閉じる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "윈도우 닫기"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechar janela"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закрыть окно"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭窗口"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關閉視窗"
+          }
+        }
+      }
+    },
+    "Close “%@”?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„%@“ schließen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close “%@”?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cerrar “%@”?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer « %@ » ?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chiudere “%@”?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%@」を閉じますか?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "“%@”을(를) 닫으시겠습니까?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fechar “%@”?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Закрыть «%@»?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "关闭“%@”？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "關閉「%@」？"
           }
         }
       }
@@ -2678,77 +2890,6 @@
         }
       }
     },
-    "Copy as Image" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Als Bild kopieren"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copy as Image"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copiar como imagen"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copier comme image"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copia come immagine"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "画像としてコピー"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이미지로 복사"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Copiar como imagem"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Скопировать как изображение"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拷贝为图片"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拷貝為圖片"
-          }
-        }
-      }
-    },
     "Copy Text" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2816,6 +2957,77 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "拷貝文字"
+          }
+        }
+      }
+    },
+    "Copy as Image" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Als Bild kopieren"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy as Image"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar como imagen"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copier comme image"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copia come immagine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "画像としてコピー"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이미지로 복사"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copiar como imagem"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Скопировать как изображение"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拷贝为图片"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拷貝為圖片"
           }
         }
       }
@@ -3529,72 +3741,72 @@
         }
       }
     },
-    "Drag iGhostVT to your Applications folder and open it from there, so your terminals keep running after you close this window." : {
+    "Download" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ziehe iGhostVT in deinen Programme-Ordner und öffne es von dort, damit deine Terminals nach dem Schließen dieses Fensters weiterlaufen."
+            "value" : "Laden"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Drag iGhostVT to your Applications folder and open it from there, so your terminals keep running after you close this window."
+            "value" : "Download"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arrastra iGhostVT a tu carpeta Aplicaciones y ábrelo desde ahí para que tus terminales sigan funcionando después de cerrar esta ventana."
+            "value" : "Descargar"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Faites glisser iGhostVT dans votre dossier Applications et ouvrez-le depuis cet emplacement, afin que vos terminaux continuent de fonctionner après la fermeture de cette fenêtre."
+            "value" : "Télécharger"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Trascina iGhostVT nella cartella Applicazioni e aprilo da lì, così i tuoi terminali continuano a funzionare dopo la chiusura di questa finestra."
+            "value" : "Scarica"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT を「アプリケーション」フォルダにドラッグし、そこから開いてください。このウインドウを閉じてもターミナルが動作し続けます。"
+            "value" : "ダウンロード"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT를 응용 프로그램 폴더로 끌어다 놓은 후 그곳에서 열어 주세요. 이 창을 닫아도 터미널이 계속 실행됩니다."
+            "value" : "다운로드"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arraste o iGhostVT para a pasta Aplicativos e abra-o de lá, para que seus terminais continuem funcionando depois que você fechar esta janela."
+            "value" : "Baixar"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Перетащите iGhostVT в папку «Программы» и откройте его оттуда, чтобы терминалы продолжали работать после закрытия этого окна."
+            "value" : "Загрузить"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请将 iGhostVT 拖到“应用程序”文件夹并从那里打开，这样关闭此窗口后终端仍会继续运行。"
+            "value" : "下载"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "請將 iGhostVT 拖到「應用程式」檔案夾並從該處開啟，這樣關閉此視窗後終端機仍會繼續執行。"
+            "value" : "下載"
           }
         }
       }
@@ -4028,859 +4240,73 @@
         }
       }
     },
-    "Last Tab" : {
-      "comment" : "Menu item: switches to the last tab",
+    "Interface" : {
       "extractionState" : "manual",
       "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Letzter Tab"
-          }
-        },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Last Tab"
+            "value" : "Interface"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oberfläche"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Última pestaña"
+            "value" : "Interfaz"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dernier onglet"
+            "value" : "Interface"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ultima scheda"
+            "value" : "Interfaccia"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最後のタブ"
+            "value" : "インターフェイス"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "마지막 탭"
+            "value" : "인터페이스"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Última aba"
+            "value" : "Interface"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Последняя вкладка"
+            "value" : "Интерфейс"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最后一个标签页"
+            "value" : "界面"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "最後一個分頁"
-          }
-        }
-      }
-    },
-    "Settings… (menu)" : {
-      "comment" : "Menu item: opens the app's settings; the English text is “Settings…”",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Einstellungen …"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Settings…"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajustes…"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Réglages…"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impostazioni…"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "設定…"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "설정…"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ajustes…"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Настройки…"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设置…"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "設定…"
-          }
-        }
-      }
-    },
-    "Show All Tabs" : {
-      "comment" : "Menu item: opens the tab overview",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alle Tabs einblenden"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show All Tabs"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar todas las pestañas"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher tous les onglets"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra tutte le schede"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "すべてのタブを表示"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "모든 탭 보기"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar todas as abas"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показать все вкладки"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示所有标签页"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "顯示所有分頁"
-          }
-        }
-      }
-    },
-    "Show Next Tab" : {
-      "comment" : "Menu item: activates the tab after the current one",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nächsten Tab einblenden"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show Next Tab"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar la pestaña siguiente"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher l’onglet suivant"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra scheda successiva"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "次のタブを表示"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "다음 탭 보기"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar próxima aba"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показать следующую вкладку"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示下一个标签页"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "顯示下一個分頁"
-          }
-        }
-      }
-    },
-    "Show Previous Tab" : {
-      "comment" : "Menu item: activates the tab before the current one",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vorherigen Tab einblenden"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show Previous Tab"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar la pestaña anterior"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher l’onglet précédent"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra scheda precedente"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "前のタブを表示"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이전 탭 보기"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar aba anterior"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показать предыдущую вкладку"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示上一个标签页"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "顯示上一個分頁"
-          }
-        }
-      }
-    },
-    "Show Sidebar" : {
-      "comment" : "Menu item: shows the tab sidebar",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Seitenleiste einblenden"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show Sidebar"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar la barra lateral"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher la barre latérale"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra la barra laterale"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サイドバーを表示"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "사이드바 표시"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar barra lateral"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показать боковую панель"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示边栏"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "顯示側邊欄"
-          }
-        }
-      }
-    },
-    "Smaller" : {
-      "comment" : "Menu item: decreases the terminal font size",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kleiner"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Smaller"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Más pequeño"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Plus petit"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Più piccolo"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "小さく"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "작게"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Menor"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Мельче"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "缩小"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "縮小"
-          }
-        }
-      }
-    },
-    "Tab %d" : {
-      "comment" : "Menu item: switches to the tab at this position; %d is the position",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tab %d"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tab %d"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pestaña %d"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Onglet %d"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Scheda %d"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "タブ %d"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "탭 %d"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aba %d"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вкладка %d"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "标签页 %d"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "分頁 %d"
-          }
-        }
-      }
-    },
-    "With Auto-Close Tabs on, a tab closes by itself when its session ends instead of asking whether to keep it." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Wenn „Tabs automatisch schließen“ aktiviert ist, schließt sich ein Tab von selbst, sobald seine Sitzung endet, statt zu fragen, ob er behalten werden soll."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "With Auto-Close Tabs on, a tab closes by itself when its session ends instead of asking whether to keep it."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Con «Cerrar pestañas automáticamente» activado, la pestaña se cierra sola cuando su sesión termina, en lugar de preguntar si quieres mantenerla."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avec « Fermer les onglets automatiquement » activé, l’onglet se ferme de lui-même à la fin de sa session au lieu de demander s’il faut le conserver."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Con «Chiudi schede automaticamente» attivo, la scheda si chiude da sola al termine della sessione invece di chiedere se mantenerla."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「タブを自動的に閉じる」がオンの場合、セッションが終了するとタブを残すかどうかを確認せずに自動的に閉じます。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "‘탭 자동 닫기’가 켜져 있으면 세션이 종료될 때 탭을 유지할지 묻지 않고 자동으로 닫힙니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Com “Fechar abas automaticamente” ativado, a aba fecha sozinha quando a sessão termina, em vez de perguntar se você quer mantê-la."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Если включено «Автоматически закрывать вкладки», вкладка закрывается сама по завершении сеанса, не спрашивая, оставить ли её."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开启“自动关闭标签页”后，会话结束时标签页会自动关闭，不再询问是否保留。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "開啟「自動關閉分頁」後，工作階段結束時分頁會自動關閉，不再詢問是否保留。"
-          }
-        }
-      }
-    },
-    "iGhostVT and its terminal helper are different versions. Reinstall iGhostVT to update both." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT und sein Terminal-Helfer haben unterschiedliche Versionen. Installiere iGhostVT neu, um beide zu aktualisieren."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT and its terminal helper are different versions. Reinstall iGhostVT to update both."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT y su asistente del terminal tienen versiones distintas. Reinstala iGhostVT para actualizar ambos."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT et son assistant du terminal n’ont pas la même version. Réinstallez iGhostVT pour mettre à jour les deux."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT e il suo assistente del terminale hanno versioni diverse. Reinstalla iGhostVT per aggiornare entrambi."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT とターミナルヘルパーのバージョンが異なります。iGhostVT を再インストールして、両方を更新してください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT와 터미널 헬퍼의 버전이 다릅니다. iGhostVT를 다시 설치하여 둘 다 업데이트하세요."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O iGhostVT e o assistente do terminal estão em versões diferentes. Reinstale o iGhostVT para atualizar os dois."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Версии iGhostVT и его помощника терминала не совпадают. Переустановите iGhostVT, чтобы обновить обе."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT 与其终端助手版本不一致。请重新安装 iGhostVT 以同时更新两者。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT 與其終端機助手版本不一致。請重新安裝 iGhostVT 以同時更新兩者。"
-          }
-        }
-      }
-    },
-    "iGhostVT needs its background helper before it can open a terminal. Turn on iGhostVT under Login Items in System Settings." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT benötigt seinen Hintergrund-Helfer, um ein Terminal zu öffnen. Aktiviere iGhostVT in den Systemeinstellungen unter „Anmeldeobjekte“."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT needs its background helper before it can open a terminal. Turn on iGhostVT under Login Items in System Settings."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT necesita su asistente en segundo plano para abrir un terminal. Activa iGhostVT en Ítems de inicio, en Ajustes del Sistema."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT a besoin de son assistant en arrière-plan pour ouvrir un terminal. Activez iGhostVT dans Ouverture, dans Réglages Système."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT ha bisogno del suo assistente in background per aprire un terminale. Attiva iGhostVT in Elementi login, in Impostazioni di Sistema."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルを開くには iGhostVT のバックグラウンドヘルパーが必要です。「システム設定」の「ログイン項目」で iGhostVT をオンにしてください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널을 열려면 iGhostVT의 백그라운드 헬퍼가 필요합니다. 시스템 설정의 로그인 항목에서 iGhostVT를 켜세요."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O iGhostVT precisa do assistente em segundo plano para abrir um terminal. Ative o iGhostVT em Itens de Início, nos Ajustes do Sistema."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Чтобы открыть терминал, iGhostVT нужен фоновый помощник. Включите iGhostVT в разделе «Объекты входа» в Системных настройках."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT 需要后台助手才能打开终端。请在“系统设置”的“登录项”中开启 iGhostVT。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT 需要背景助手才能開啟終端機。請在「系統設定」的「登入項目」中開啟 iGhostVT。"
-          }
-        }
-      }
-    },
-    "iGhostVT opens terminals through a helper that runs in the background, so sessions keep going while the app is closed. Turning it off ends every session and removes iGhostVT from Login Items." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT öffnet Terminals über einen Helfer, der im Hintergrund läuft, damit Sitzungen auch bei geschlossener App weiterlaufen. Beim Ausschalten werden alle Sitzungen beendet und iGhostVT aus den Anmeldeobjekten entfernt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT opens terminals through a helper that runs in the background, so sessions keep going while the app is closed. Turning it off ends every session and removes iGhostVT from Login Items."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT abre los terminales mediante un asistente que se ejecuta en segundo plano, para que las sesiones continúen con la app cerrada. Al desactivarlo se cierran todas las sesiones y se elimina iGhostVT de los Ítems de inicio."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT ouvre les terminaux via un assistant qui fonctionne en arrière-plan, afin que les sessions continuent lorsque l’app est fermée. Le désactiver met fin à toutes les sessions et retire iGhostVT de la liste Ouverture."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT apre i terminali tramite un assistente che gira in background, così le sessioni continuano anche con l’app chiusa. Disattivandolo termini tutte le sessioni e rimuovi iGhostVT dagli Elementi login."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT はバックグラウンドで動作するヘルパーを通じてターミナルを開くため、Appを閉じてもセッションは継続します。オフにするとすべてのセッションが終了し、iGhostVT は「ログイン項目」から削除されます。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT는 백그라운드에서 실행되는 헬퍼를 통해 터미널을 열기 때문에 앱을 닫아도 세션이 계속됩니다. 끄면 모든 세션이 종료되고 iGhostVT가 로그인 항목에서 제거됩니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O iGhostVT abre terminais por meio de um assistente que roda em segundo plano, para que as sessões continuem com o app fechado. Desativá-lo encerra todas as sessões e remove o iGhostVT dos Itens de Início."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT открывает терминалы через помощник, работающий в фоне, поэтому сеансы продолжаются при закрытом приложении. Выключение завершит все сеансы и удалит iGhostVT из объектов входа."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT 通过后台运行的助手打开终端，因此应用关闭后会话仍会继续。关闭它会结束所有会话，并将 iGhostVT 从“登录项”中移除。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT 透過在背景執行的助手開啟終端機，因此 App 關閉後工作階段仍會繼續。關閉後會結束所有工作階段，並將 iGhostVT 從「登入項目」中移除。"
+            "value" : "介面"
           }
         }
       }
@@ -5236,6 +4662,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "鍵盤"
+          }
+        }
+      }
+    },
+    "Last Tab" : {
+      "comment" : "Menu item: switches to the last tab",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Letzter Tab"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last Tab"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última pestaña"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernier onglet"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ultima scheda"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最後のタブ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "마지막 탭"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última aba"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последняя вкладка"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最后一个标签页"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最後一個分頁"
           }
         }
       }
@@ -5666,6 +5164,76 @@
         }
       }
     },
+    "Move" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déplacer"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sposta"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이동"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переместить"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移動"
+          }
+        }
+      }
+    },
     "Move iGhostVT to Applications" : {
       "localizations" : {
         "de" : {
@@ -5732,6 +5300,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "將 iGhostVT 移到「應用程式」"
+          }
+        }
+      }
+    },
+    "Move iGhostVT to Applications?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT in „Programme“ bewegen?"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Move iGhostVT to Applications?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Mover iGhostVT a Aplicaciones?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déplacer iGhostVT vers Applications ?"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spostare iGhostVT in Applicazioni?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT を「アプリケーション」に移動しますか？"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT를 응용 프로그램으로 이동하겠습니까?"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mover o iGhostVT para Aplicativos?"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Переместить iGhostVT в «Программы»?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "将 iGhostVT 移到“应用程序”？"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "將 iGhostVT 移到「應用程式」？"
           }
         }
       }
@@ -6018,74 +5656,72 @@
         }
       }
     },
-    "No configuration file yet. It will be saved to %@." : {
-      "comment" : "Settings footer when the rendered ghostty config is missing; %@ is a directory path",
-      "extractionState" : "manual",
+    "New terminals open at the terminal size; a tab that is already open keeps the size it was zoomed to. The interface size scales every label and control." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Noch keine Konfigurationsdatei. Sie wird unter %@ gesichert."
+            "value" : "Neue Terminals öffnen in der Terminalgröße; ein bereits geöffneter Tab behält die Größe, auf die er gezoomt wurde. Die Oberflächengröße skaliert jede Beschriftung und jedes Bedienelement."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No configuration file yet. It will be saved to %@."
+            "value" : "New terminals open at the terminal size; a tab that is already open keeps the size it was zoomed to. The interface size scales every label and control."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aún no hay archivo de configuración. Se guardará en %@."
+            "value" : "Los terminales nuevos se abren con el tamaño de terminal; una pestaña ya abierta conserva el tamaño al que se amplió. El tamaño de la interfaz escala todas las etiquetas y controles."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun fichier de configuration pour l’instant. Il sera enregistré dans %@."
+            "value" : "Les nouveaux terminaux s’ouvrent à la taille du terminal ; un onglet déjà ouvert conserve la taille à laquelle il a été zoomé. La taille de l’interface met à l’échelle chaque libellé et chaque commande."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Non c’è ancora un file di configurazione. Verrà salvato in %@."
+            "value" : "I nuovi terminali si aprono alla dimensione del terminale; una scheda già aperta mantiene la dimensione a cui è stata ingrandita. La dimensione dell’interfaccia ridimensiona ogni etichetta e controllo."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "設定ファイルはまだありません。%@ に保存されます。"
+            "value" : "新しいターミナルはターミナルのサイズで開きます。すでに開いているタブは、ズームしたサイズのままです。インターフェイスのサイズは、すべてのラベルとコントロールを拡大縮小します。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "아직 구성 파일이 없습니다. %@에 저장됩니다."
+            "value" : "새 터미널은 터미널 크기로 열리며, 이미 열려 있는 탭은 확대한 크기를 유지합니다. 인터페이스 크기는 모든 레이블과 컨트롤을 확대하거나 축소합니다."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ainda não há arquivo de configuração. Ele será salvo em %@."
+            "value" : "Novos terminais abrem no tamanho do terminal; uma aba já aberta mantém o tamanho para o qual foi ampliada. O tamanho da interface redimensiona todos os rótulos e controles."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Файла конфигурации пока нет. Он будет сохранён в %@."
+            "value" : "Новые терминалы открываются с размером терминала; уже открытая вкладка сохраняет размер, до которого её увеличили. Размер интерфейса масштабирует все подписи и элементы управления."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "尚无配置文件。它将保存到 %@。"
+            "value" : "新终端以终端大小打开；已打开的标签页保持缩放后的大小。界面大小会缩放所有标签和控件。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "尚無設定檔。它將儲存到 %@。"
+            "value" : "新終端機以終端機大小開啟；已開啟的分頁會保留縮放後的大小。介面大小會縮放所有標籤和控制項。"
           }
         }
       }
@@ -6157,6 +5793,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無開啟的分頁"
+          }
+        }
+      }
+    },
+    "No configuration file yet. It will be saved to %@." : {
+      "comment" : "Settings footer when the rendered ghostty config is missing; %@ is a directory path",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Noch keine Konfigurationsdatei. Sie wird unter %@ gesichert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No configuration file yet. It will be saved to %@."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay archivo de configuración. Se guardará en %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun fichier de configuration pour l’instant. Il sera enregistré dans %@."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non c’è ancora un file di configurazione. Verrà salvato in %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定ファイルはまだありません。%@ に保存されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "아직 구성 파일이 없습니다. %@에 저장됩니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ainda não há arquivo de configuração. Ele será salvo em %@."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Файла конфигурации пока нет. Он будет сохранён в %@."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚无配置文件。它将保存到 %@。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "尚無設定檔。它將儲存到 %@。"
           }
         }
       }
@@ -6725,6 +6433,76 @@
         }
       }
     },
+    "Part of iGhostVT is missing, so it cannot open a terminal. Download iGhostVT again and replace this copy." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Teil von iGhostVT fehlt, daher kann kein Terminal geöffnet werden. Lade iGhostVT erneut herunter und ersetze diese Kopie."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Part of iGhostVT is missing, so it cannot open a terminal. Download iGhostVT again and replace this copy."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falta una parte de iGhostVT, por lo que no puede abrir un terminal. Descarga iGhostVT de nuevo y reemplaza esta copia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une partie d’iGhostVT est manquante et empêche d’ouvrir un terminal. Téléchargez à nouveau iGhostVT et remplacez cette copie."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manca una parte di iGhostVT, quindi non è possibile aprire un terminale. Scarica di nuovo iGhostVT e sostituisci questa copia."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT の一部が見つからないため、ターミナルを開くことができません。iGhostVT を再ダウンロードしてこのコピーを置き換えてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT의 일부가 누락되어 터미널을 열 수 없습니다. iGhostVT를 다시 다운로드하여 이 복사본을 교체해 주세요."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parte do iGhostVT está ausente, portanto não é possível abrir um terminal. Baixe o iGhostVT novamente e substitua esta cópia."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Часть iGhostVT отсутствует, поэтому невозможно открыть терминал. Загрузите iGhostVT снова и замените эту копию."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT 的部分组件缺失，无法打开终端。请重新下载 iGhostVT 并替换当前副本。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT 的部分組件遺失，無法開啟終端機。請重新下載 iGhostVT 並取代目前複本。"
+          }
+        }
+      }
+    },
     "Paste" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6934,6 +6712,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "預覽"
+          }
+        }
+      }
+    },
+    "Quit" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beenden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quit"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitter"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esci"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終了"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "종료"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encerrar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Завершить"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結束"
           }
         }
       }
@@ -7862,6 +7710,366 @@
         }
       }
     },
+    "Settings… (menu)" : {
+      "comment" : "Menu item: opens the app's settings; the English text is “Settings…”",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Einstellungen …"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réglages…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impostazioni…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설정…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajustes…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设置…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "設定…"
+          }
+        }
+      }
+    },
+    "Show All Tabs" : {
+      "comment" : "Menu item: opens the tab overview",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alle Tabs einblenden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show All Tabs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar todas las pestañas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher tous les onglets"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra tutte le schede"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべてのタブを表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "모든 탭 보기"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar todas as abas"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать все вкладки"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示所有标签页"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示所有分頁"
+          }
+        }
+      }
+    },
+    "Show Next Tab" : {
+      "comment" : "Menu item: activates the tab after the current one",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nächsten Tab einblenden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Next Tab"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar la pestaña siguiente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher l’onglet suivant"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra scheda successiva"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次のタブを表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음 탭 보기"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar próxima aba"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать следующую вкладку"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示下一个标签页"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示下一個分頁"
+          }
+        }
+      }
+    },
+    "Show Previous Tab" : {
+      "comment" : "Menu item: activates the tab before the current one",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vorherigen Tab einblenden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Previous Tab"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar la pestaña anterior"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher l’onglet précédent"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra scheda precedente"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "前のタブを表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이전 탭 보기"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar aba anterior"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать предыдущую вкладку"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示上一个标签页"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示上一個分頁"
+          }
+        }
+      }
+    },
+    "Show Sidebar" : {
+      "comment" : "Menu item: shows the tab sidebar",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seitenleiste einblenden"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Sidebar"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar la barra lateral"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher la barre latérale"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostra la barra laterale"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サイドバーを表示"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사이드바 표시"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar barra lateral"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать боковую панель"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示边栏"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "顯示側邊欄"
+          }
+        }
+      }
+    },
     "Show Tabs" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7929,6 +8137,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示分頁"
+          }
+        }
+      }
+    },
+    "Smaller" : {
+      "comment" : "Menu item: decreases the terminal font size",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kleiner"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Smaller"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más pequeño"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus petit"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Più piccolo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "小さく"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "작게"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Menor"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Мельче"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缩小"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "縮小"
           }
         }
       }
@@ -8216,6 +8496,78 @@
         }
       }
     },
+    "Tab %d" : {
+      "comment" : "Menu item: switches to the tab at this position; %d is the position",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tab %d"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tab %d"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pestaña %d"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Onglet %d"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scheda %d"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タブ %d"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "탭 %d"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aba %d"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вкладка %d"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "标签页 %d"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分頁 %d"
+          }
+        }
+      }
+    },
     "Terminal" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8494,6 +8846,77 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "終端機不可用"
+          }
+        }
+      }
+    },
+    "Text Size" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text Size"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Textgröße"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamaño del texto"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taille du texte"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dimensione del testo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字サイズ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "텍스트 크기"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamanho do texto"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Размер текста"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字大小"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字大小"
           }
         }
       }
@@ -9202,6 +9625,77 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每個新終端機執行的程式，例如 /bin/zsh。留空則使用預設登入 Shell。請使用一般路徑；包含越獄根目錄的路徑在下次越獄後將失效。"
+          }
+        }
+      }
+    },
+    "The program every new terminal runs, for example /bin/zsh. Leave this empty to use your login shell." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The program every new terminal runs, for example /bin/zsh. Leave this empty to use your login shell."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Leer lassen, um deine Login-Shell zu verwenden."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Déjalo vacío para usar tu shell de inicio de sesión."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le programme que lance chaque nouveau terminal, par exemple /bin/zsh. Laissez vide pour utiliser votre shell de connexion."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il programma che ogni nuovo terminale esegue, ad esempio /bin/zsh. Lascia vuoto per usare la tua shell di login."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新しいターミナルごとに実行するプログラム（例: /bin/zsh）。空のままにするとログインシェルを使用します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "새 터미널마다 실행하는 프로그램입니다(예: /bin/zsh). 비워 두면 로그인 셸을 사용합니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O programa que cada novo terminal executa, por exemplo /bin/zsh. Deixe vazio para usar seu shell de login."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Программа, которую запускает каждый новый терминал, например /bin/zsh. Оставьте пустым, чтобы использовать вашу оболочку входа."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每个新终端运行的程序，例如 /bin/zsh。留空则使用你的登录 shell。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每個新終端機執行的程式，例如 /bin/zsh。留空則使用你的登入 shell。"
           }
         }
       }
@@ -11823,6 +12317,77 @@
         }
       }
     },
+    "With Auto-Close Tabs on, a tab closes by itself when its session ends instead of asking whether to keep it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn „Tabs automatisch schließen“ aktiviert ist, schließt sich ein Tab von selbst, sobald seine Sitzung endet, statt zu fragen, ob er behalten werden soll."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "With Auto-Close Tabs on, a tab closes by itself when its session ends instead of asking whether to keep it."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con «Cerrar pestañas automáticamente» activado, la pestaña se cierra sola cuando su sesión termina, en lugar de preguntar si quieres mantenerla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avec « Fermer les onglets automatiquement » activé, l’onglet se ferme de lui-même à la fin de sa session au lieu de demander s’il faut le conserver."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Con «Chiudi schede automaticamente» attivo, la scheda si chiude da sola al termine della sessione invece di chiedere se mantenerla."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「タブを自動的に閉じる」がオンの場合、セッションが終了するとタブを残すかどうかを確認せずに自動的に閉じます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "‘탭 자동 닫기’가 켜져 있으면 세션이 종료될 때 탭을 유지할지 묻지 않고 자동으로 닫힙니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Com “Fechar abas automaticamente” ativado, a aba fecha sozinha quando a sessão termina, em vez de perguntar se você quer mantê-la."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если включено «Автоматически закрывать вкладки», вкладка закрывается сама по завершении сеанса, не спрашивая, оставить ли её."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启“自动关闭标签页”后，会话结束时标签页会自动关闭，不再询问是否保留。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟「自動關閉分頁」後，工作階段結束時分頁會自動關閉，不再詢問是否保留。"
+          }
+        }
+      }
+    },
     "Writes detailed terminal activity to the system log, including every keystroke, while this is on." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11894,358 +12459,282 @@
         }
       }
     },
-    "%lld pt" : {
-      "extractionState" : "manual",
+    "iGhostVT and its terminal helper are different versions. Reinstall iGhostVT to update both." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pt"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld pt"
+            "value" : "iGhostVT und sein Terminal-Helfer haben unterschiedliche Versionen. Installiere iGhostVT neu, um beide zu aktualisieren."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT and its terminal helper are different versions. Reinstall iGhostVT to update both."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld pt"
+            "value" : "iGhostVT y su asistente del terminal tienen versiones distintas. Reinstala iGhostVT para actualizar ambos."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld pt"
+            "value" : "iGhostVT et son assistant du terminal n’ont pas la même version. Réinstallez iGhostVT pour mettre à jour les deux."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld pt"
+            "value" : "iGhostVT e il suo assistente del terminale hanno versioni diverse. Reinstalla iGhostVT per aggiornare entrambi."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld pt"
+            "value" : "iGhostVT とターミナルヘルパーのバージョンが異なります。iGhostVT を再インストールして、両方を更新してください。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld pt"
+            "value" : "iGhostVT와 터미널 헬퍼의 버전이 다릅니다. iGhostVT를 다시 설치하여 둘 다 업데이트하세요."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld pt"
+            "value" : "O iGhostVT e o assistente do terminal estão em versões diferentes. Reinstale o iGhostVT para atualizar os dois."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld пт"
+            "value" : "Версии iGhostVT и его помощника терминала не совпадают. Переустановите iGhostVT, чтобы обновить обе."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld 点"
+            "value" : "iGhostVT 与其终端助手版本不一致。请重新安装 iGhostVT 以同时更新两者。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld 點"
-          }
-        }
-      },
-      "comment" : "A font size in points"
-    },
-    "Interface" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Interface"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oberfläche"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Interfaz"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Interface"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Interfaccia"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "インターフェイス"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "인터페이스"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Interface"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Интерфейс"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "界面"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "介面"
+            "value" : "iGhostVT 與其終端機助手版本不一致。請重新安裝 iGhostVT 以同時更新兩者。"
           }
         }
       }
     },
-    "Text Size" : {
-      "extractionState" : "manual",
+    "iGhostVT needs its background helper before it can open a terminal. Turn on iGhostVT under Login Items in System Settings." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Text Size"
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Textgröße"
+            "value" : "iGhostVT benötigt seinen Hintergrund-Helfer, um ein Terminal zu öffnen. Aktiviere iGhostVT in den Systemeinstellungen unter „Anmeldeobjekte“."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT needs its background helper before it can open a terminal. Turn on iGhostVT under Login Items in System Settings."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tamaño del texto"
+            "value" : "iGhostVT necesita su asistente en segundo plano para abrir un terminal. Activa iGhostVT en Ítems de inicio, en Ajustes del Sistema."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Taille du texte"
+            "value" : "iGhostVT a besoin de son assistant en arrière-plan pour ouvrir un terminal. Activez iGhostVT dans Ouverture, dans Réglages Système."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dimensione del testo"
+            "value" : "iGhostVT ha bisogno del suo assistente in background per aprire un terminale. Attiva iGhostVT in Elementi login, in Impostazioni di Sistema."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "文字サイズ"
+            "value" : "ターミナルを開くには iGhostVT のバックグラウンドヘルパーが必要です。「システム設定」の「ログイン項目」で iGhostVT をオンにしてください。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "텍스트 크기"
+            "value" : "터미널을 열려면 iGhostVT의 백그라운드 헬퍼가 필요합니다. 시스템 설정의 로그인 항목에서 iGhostVT를 켜세요."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tamanho do texto"
+            "value" : "O iGhostVT precisa do assistente em segundo plano para abrir um terminal. Ative o iGhostVT em Itens de Início, nos Ajustes do Sistema."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Размер текста"
+            "value" : "Чтобы открыть терминал, iGhostVT нужен фоновый помощник. Включите iGhostVT в разделе «Объекты входа» в Системных настройках."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "文字大小"
+            "value" : "iGhostVT 需要后台助手才能打开终端。请在“系统设置”的“登录项”中开启 iGhostVT。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "文字大小"
+            "value" : "iGhostVT 需要背景助手才能開啟終端機。請在「系統設定」的「登入項目」中開啟 iGhostVT。"
           }
         }
       }
     },
-    "The program every new terminal runs, for example /bin/zsh. Leave this empty to use your login shell." : {
-      "extractionState" : "manual",
+    "iGhostVT opens terminals through a helper that runs in the background, so sessions keep going while the app is closed. It is set up automatically. To remove it, turn iGhostVT off under Login Items in System Settings." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The program every new terminal runs, for example /bin/zsh. Leave this empty to use your login shell."
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Leer lassen, um deine Login-Shell zu verwenden."
+            "value" : "iGhostVT öffnet Terminals über einen Helfer, der im Hintergrund läuft, damit Sitzungen auch bei geschlossener App weiterlaufen. Er wird automatisch eingerichtet. Um ihn zu entfernen, schalte iGhostVT unter Anmeldeobjekte in den Systemeinstellungen aus."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT opens terminals through a helper that runs in the background, so sessions keep going while the app is closed. It is set up automatically. To remove it, turn iGhostVT off under Login Items in System Settings."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Déjalo vacío para usar tu shell de inicio de sesión."
+            "value" : "iGhostVT abre los terminales mediante un asistente que se ejecuta en segundo plano, para que las sesiones continúen con la app cerrada. Se configura automáticamente. Para eliminarlo, desactiva iGhostVT en Ítems de inicio en Ajustes del Sistema."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le programme que lance chaque nouveau terminal, par exemple /bin/zsh. Laissez vide pour utiliser votre shell de connexion."
+            "value" : "iGhostVT ouvre les terminaux via un assistant qui fonctionne en arrière-plan, afin que les sessions continuent lorsque l’app est fermée. Il est configuré automatiquement. Pour le supprimer, désactivez iGhostVT dans la liste Ouverture des Réglages Système."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Il programma che ogni nuovo terminale esegue, ad esempio /bin/zsh. Lascia vuoto per usare la tua shell di login."
+            "value" : "iGhostVT apre i terminali tramite un assistente che gira in background, così le sessioni continuano anche con l’app chiusa. Viene configurato automaticamente. Per rimuoverlo, disattiva iGhostVT negli Elementi login in Impostazioni di Sistema."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新しいターミナルごとに実行するプログラム（例: /bin/zsh）。空のままにするとログインシェルを使用します。"
+            "value" : "iGhostVT はバックグラウンドで動作するヘルパーを通じてターミナルを開くため、Appを閉じてもセッションは継続します。自動的に設定されます。削除するには、システム設定の「ログイン項目」で iGhostVT をオフにしてください。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "새 터미널마다 실행하는 프로그램입니다(예: /bin/zsh). 비워 두면 로그인 셸을 사용합니다."
+            "value" : "iGhostVT는 백그라운드에서 실행되는 헬퍼를 통해 터미널을 열기 때문에 앱을 닫아도 세션이 계속됩니다. 자동으로 설정됩니다. 제거하려면 시스템 설정의 로그인 항목에서 iGhostVT를 끄세요."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O programa que cada novo terminal executa, por exemplo /bin/zsh. Deixe vazio para usar seu shell de login."
+            "value" : "O iGhostVT abre terminais por meio de um assistente que roda em segundo plano, para que as sessões continuem com o app fechado. Ele é configurado automaticamente. Para removê-lo, desative o iGhostVT nos Itens de Início nos Ajustes do Sistema."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Программа, которую запускает каждый новый терминал, например /bin/zsh. Оставьте пустым, чтобы использовать вашу оболочку входа."
+            "value" : "iGhostVT открывает терминалы через помощник, работающий в фоне, поэтому сеансы продолжаются при закрытом приложении. Он настраивается автоматически. Чтобы удалить его, выключите iGhostVT в объектах входа в Системных настройках."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "每个新终端运行的程序，例如 /bin/zsh。留空则使用你的登录 shell。"
+            "value" : "iGhostVT 通过后台运行的助手打开终端，因此应用关闭后会话仍会继续。助手会自动完成设置。如需移除，请在“系统设置”的“登录项”中关闭 iGhostVT。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "每個新終端機執行的程式，例如 /bin/zsh。留空則使用你的登入 shell。"
+            "value" : "iGhostVT 透過在背景執行的助手開啟終端機，因此 App 關閉後工作階段仍會繼續。助手會自動完成設定。如需移除，請在「系統設定」的「登入項目」中關閉 iGhostVT。"
           }
         }
       }
     },
-    "The interface size scales every label and control. New terminals open at the terminal size; a tab that is already open keeps the size it was zoomed to." : {
-      "extractionState" : "manual",
+    "iGhostVT works from your Applications folder, so your terminals keep running after you close this window. It can move itself there and reopen." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The interface size scales every label and control. New terminals open at the terminal size; a tab that is already open keeps the size it was zoomed to."
-          }
-        },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Oberflächengröße skaliert jede Beschriftung und jedes Bedienelement. Neue Terminals öffnen in der Terminalgröße; ein bereits geöffneter Tab behält die Größe, auf die er gezoomt wurde."
+            "value" : "iGhostVT läuft aus deinem Programme-Ordner, damit deine Terminals nach dem Schließen dieses Fensters weiterlaufen. Die App kann sich selbst dorthin bewegen und neu öffnen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT works from your Applications folder, so your terminals keep running after you close this window. It can move itself there and reopen."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El tamaño de la interfaz escala todas las etiquetas y controles. Los terminales nuevos se abren con el tamaño de terminal; una pestaña ya abierta conserva el tamaño al que se amplió."
+            "value" : "iGhostVT funciona desde tu carpeta Aplicaciones para que tus terminales sigan funcionando después de cerrar esta ventana. Puede trasladarse allí por sí misma y volver a abrirse."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La taille de l'interface met à l'échelle chaque libellé et chaque commande. Les nouveaux terminaux s'ouvrent à la taille du terminal ; un onglet déjà ouvert conserve la taille à laquelle il a été zoomé."
+            "value" : "iGhostVT fonctionne depuis votre dossier Applications afin que vos terminaux continuent de fonctionner après la fermeture de cette fenêtre. L’application peut s’y déplacer automatiquement et se rouvrir."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La dimensione dell'interfaccia ridimensiona ogni etichetta e controllo. I nuovi terminali si aprono alla dimensione del terminale; una scheda già aperta mantiene la dimensione a cui è stata ingrandita."
+            "value" : "iGhostVT funziona dalla cartella Applicazioni, così i tuoi terminali continuano a funzionare dopo aver chiuso questa finestra. Può spostarsi lì da sola e riaprirsi."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "インターフェイスのサイズは、すべてのラベルとコントロールを拡大縮小します。新しいターミナルはターミナルのサイズで開きます。すでに開いているタブは、ズームしたサイズのままです。"
+            "value" : "iGhostVT は「アプリケーション」フォルダから動作するため、このウインドウを閉じてもターミナルが動作し続けます。自身を移動して再起動できます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "인터페이스 크기는 모든 레이블과 컨트롤을 확대하거나 축소합니다. 새 터미널은 터미널 크기로 열리며, 이미 열려 있는 탭은 확대한 크기를 유지합니다."
+            "value" : "iGhostVT는 응용 프로그램 폴더에서 작동하므로 이 창을 닫아도 터미널이 계속 실행됩니다. 자동으로 그곳으로 이동한 후 다시 열 수 있습니다."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O tamanho da interface redimensiona todos os rótulos e controles. Novos terminais abrem no tamanho do terminal; uma aba já aberta mantém o tamanho para o qual foi ampliada."
+            "value" : "O iGhostVT funciona a partir da pasta Aplicativos, para que seus terminais continuem funcionando depois de fechar esta janela. Ele pode ser movido para lá e reaberto automaticamente."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Размер интерфейса масштабирует все подписи и элементы управления. Новые терминалы открываются с размером терминала; уже открытая вкладка сохраняет размер, до которого её увеличили."
+            "value" : "iGhostVT работает из папки «Программы», чтобы терминалы продолжали работать после закрытия этого окна. Приложение может переместиться туда самостоятельно и открыться снова."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "界面大小会缩放所有标签和控件。新终端以终端大小打开；已打开的标签页保持缩放后的大小。"
+            "value" : "iGhostVT 在“应用程序”文件夹中运行，这样关闭此窗口后终端仍会继续运行。它可以自动移至该处并重新打开。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "介面大小會縮放所有標籤和控制項。新終端機以終端機大小開啟；已開啟的分頁會保留縮放後的大小。"
+            "value" : "iGhostVT 在「應用程式」檔案夾中執行，這樣關閉此視窗後終端機仍會繼續執行。它可以自動移至該處並重新開啟。"
           }
         }
       }
