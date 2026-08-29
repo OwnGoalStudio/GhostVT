@@ -34,6 +34,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 titlebar.titleVisibility = .hidden
                 titlebar.toolbar = nil
             }
+            capInitialWindowSize(windowScene)
         #endif
         // The window answers the menu bar's commands for these tabs.
         let window = TerminalWindow(
@@ -55,6 +56,48 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
         observeLaunchAgent()
     }
+
+    #if targetEnvironment(macCatalyst)
+        /// Catalyst opens a new window at most of the screen, which for a
+        /// terminal is a wall of empty grid. Cap the window at a modest size
+        /// — Terminal.app-sized plus the sidebar — while it is created, and
+        /// lift the cap once it is up, so the system still places it and
+        /// the person can still drag it as large as they like. A geometry
+        /// request would need an origin, and the origin the scene reports
+        /// while connecting is a placeholder that pins the window off the
+        /// screen's bottom. Sizes are in the app's own points.
+        private static let preferredWindowSize = CGSize(width: 1180, height: 780)
+        private var windowSizeCap: CGSize?
+        /// The cap comes off only when both are true: the scene is active
+        /// *and* the window has a frame. Activation arrives first, while
+        /// the reported frame is still empty; the window is sized between
+        /// the two, and a cap lifted at activation never touches it.
+        private var sceneIsActive = false
+        private var windowHasFrame = false
+
+        private func capInitialWindowSize(_ windowScene: UIWindowScene) {
+            guard let restrictions = windowScene.sizeRestrictions else { return }
+            restrictions.minimumSize = CGSize(width: 620, height: 420)
+            windowSizeCap = restrictions.maximumSize
+            restrictions.maximumSize = Self.preferredWindowSize
+        }
+
+        private func liftWindowSizeCapIfReady(_ windowScene: UIWindowScene) {
+            guard sceneIsActive, windowHasFrame,
+                  let cap = windowSizeCap, let restrictions = windowScene.sizeRestrictions
+            else { return }
+            windowSizeCap = nil
+            restrictions.maximumSize = cap
+        }
+
+        @available(macCatalyst 16.0, *)
+        func windowScene(_ windowScene: UIWindowScene, didUpdateEffectiveGeometry _: UIWindowScene.Geometry) {
+            if !windowScene.effectiveGeometry.systemFrame.isEmpty {
+                windowHasFrame = true
+                liftWindowSizeCapIfReady(windowScene)
+            }
+        }
+    #endif
 
     /// Approval happens in System Settings, outside the app, and there is no
     /// callback for it — the app finds out by looking. Two things look: the
@@ -90,7 +133,13 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// approved buys a guaranteed failure and a "Terminal Unavailable" card
     /// that names the wrong problem. So the first attempt waits for the
     /// helper, and `observeLaunchAgent()` makes it when the helper arrives.
-    func sceneDidBecomeActive(_: UIScene) {
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        #if targetEnvironment(macCatalyst)
+            sceneIsActive = true
+            if let windowScene = scene as? UIWindowScene {
+                liftWindowSizeCapIfReady(windowScene)
+            }
+        #endif
         MacLaunchAgent.shared.refresh()
         guard MacLaunchAgent.shared.isReady else { return }
         tabManager.noteSceneActive()
