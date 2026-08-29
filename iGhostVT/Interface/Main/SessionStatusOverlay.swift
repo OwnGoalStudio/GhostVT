@@ -46,7 +46,7 @@ struct SessionStatusOverlay: View {
             sessionContent
         } else {
             ZStack {
-                Color.black.opacity(0.25)
+                dim
                 agentCard
                     .padding(DS.Padding.l)
             }
@@ -149,7 +149,7 @@ struct SessionStatusOverlay: View {
         case let .failed(reason):
             if acknowledged != store.status {
                 ZStack {
-                    Color.black.opacity(0.25)
+                    dim
                     alertCard(reason: reason)
                         .padding(DS.Padding.l)
                 }
@@ -160,6 +160,15 @@ struct SessionStatusOverlay: View {
         case .connected:
             EmptyView()
         }
+    }
+
+    /// The dim reaches under the keyboard as well as the bars: the keyboard
+    /// bar's corners are clear, and a dim that stops at the keyboard's edge
+    /// leaves the pane showing white through them. Only the dim ignores the
+    /// keyboard — the card stays above it, where its buttons can be pressed.
+    private var dim: some View {
+        Color.black.opacity(0.25)
+            .ignoresSafeArea(.all)
     }
 
     private var processExited: Bool {

@@ -40,6 +40,8 @@ final class AppTheme: ObservableObject {
     /// Those themes' backgrounds, for the moment the catalog has no answer.
     private static let defaultLightBackground = "FEFFFF"
     private static let defaultDarkBackground = "1E1E1E"
+    private static let defaultLightForeground = "000000"
+    private static let defaultDarkForeground = "FFFFFF"
 
     private init() {
         selection = Selection(
@@ -67,6 +69,16 @@ final class AppTheme: ObservableObject {
         let hex = scheme == .dark
             ? darkDefinition?.background ?? Self.defaultDarkBackground
             : lightDefinition?.background ?? Self.defaultLightBackground
+        return Color(hex: hex)
+    }
+
+    /// The theme's text colour — what an empty pane writes in, so the
+    /// placeholder reads on any background the theme paints, not only the
+    /// one the system scheme would have chosen.
+    func foreground(for scheme: ColorScheme) -> Color {
+        let hex = scheme == .dark
+            ? darkDefinition?.foreground ?? Self.defaultDarkForeground
+            : lightDefinition?.foreground ?? Self.defaultLightForeground
         return Color(hex: hex)
     }
 

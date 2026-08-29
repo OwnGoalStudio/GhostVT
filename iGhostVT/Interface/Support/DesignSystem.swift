@@ -67,6 +67,8 @@ enum DS {
         case symbol
         /// The one oversized symbol of an empty state.
         case heroSymbol
+        /// The mock prompt of an empty terminal: oversized and monospaced.
+        case heroPrompt
 
         /// The text style whose platform size is the base.
         var style: UIFont.TextStyle {
@@ -77,7 +79,7 @@ enum DS {
             case .detail: .footnote
             case .caption, .captionEmphasis: .caption1
             case .symbol: .title3
-            case .heroSymbol: .largeTitle
+            case .heroSymbol, .heroPrompt: .largeTitle
             }
         }
 
@@ -90,18 +92,23 @@ enum DS {
             }
         }
 
+        var design: SwiftUI.Font.Design {
+            self == .heroPrompt ? .monospaced : .default
+        }
+
         /// The role at `scale`, sized for `category` — the system's Dynamic
         /// Type setting on iOS, ignored by the Mac, where the base is fixed.
         func resolved(scale: CGFloat, category: UIContentSizeCategory) -> SwiftUI.Font {
-            let base: CGFloat = if case .heroSymbol = self {
-                52
-            } else {
+            let base: CGFloat = switch self {
+            case .heroSymbol: 52
+            case .heroPrompt: 34
+            default:
                 UIFont.preferredFont(
                     forTextStyle: style,
                     compatibleWith: UITraitCollection(preferredContentSizeCategory: category)
                 ).pointSize
             }
-            return .system(size: base * scale, weight: weight)
+            return .system(size: base * scale, weight: weight, design: design)
         }
     }
 

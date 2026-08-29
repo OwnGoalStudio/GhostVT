@@ -122,11 +122,10 @@ struct RootView: View {
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                // An empty window hides the bar entirely: with no tab there is
-                // no title to show, and a lone new-tab button plus a switcher
-                // onto an empty grid only competes with the empty state's own
-                // call to action.
-                if !isRegularWidth, !keyboard.isVisible, !tabManager.tabs.isEmpty {
+                // The bar stays up with no tabs: its `+` is the only way to
+                // open one at this width. The title capsule leaves on its
+                // own with the tab.
+                if !isRegularWidth, !keyboard.isVisible {
                     BottomBar(
                         tabManager: tabManager,
                         onShowSettings: { interface.showsSettingsSheet = true },
@@ -145,7 +144,7 @@ struct RootView: View {
     private var panes: some View {
         ZStack {
             if tabManager.tabs.isEmpty {
-                EmptyTabsView(onNewTab: { tabManager.newTab() })
+                EmptyTabsView()
                     .transition(.opacity)
             }
             ForEach(tabManager.tabs) { tab in

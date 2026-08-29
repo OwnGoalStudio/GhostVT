@@ -72,8 +72,11 @@ struct SidebarView: View {
         // For the context menu's share sheet, which presents via UIKit.
         .background(WindowReader(window: $window))
         .overlay(alignment: .trailing) {
+            // Half the hairline the cards and switcher use: this one runs
+            // the window's full height, and at full strength it reads as a
+            // border rather than a seam.
             Rectangle()
-                .fill(theme.hairline(for: colorScheme))
+                .fill(theme.hairline(for: colorScheme).opacity(0.5))
                 .frame(width: 1)
                 .ignoresSafeArea()
         }

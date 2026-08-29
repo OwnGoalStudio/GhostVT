@@ -223,7 +223,13 @@ Gotchas that bit us:
   not the one it registered — a missing record counts, so an update from a
   build without the check repairs itself once. Do not replace this with a
   plain re-register, and do not key it on the version: a locally cut zip
-  can carry the same version as the one it replaces.
+  can carry the same version as the one it replaces. The repair only holds
+  when the *old helper is no longer running* at the unregister: a bundle
+  swapped under a live `ighostvtd` (the app killed, not quit, so no
+  `shutdown` went out) kept BTM's pin and the new helper died all the same.
+  Quit the app before replacing the bundle; after the fact, `launchctl
+  bootout gui/$UID/wiki.qaq.ighostvtd`, delete the
+  `MacLaunchAgent.registeredHelperDigest` default, and relaunch.
 - **A drop pastes a path the shell can use, and where that path comes from
   depends on where the item lives.** `TerminalDropDelegate` replaces the
   library's drop interaction on both platforms (it has to *replace* the

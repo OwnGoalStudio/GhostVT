@@ -6,37 +6,43 @@
 import SwiftUI
 
 /// What a window shows once its last tab is closed. Closing everything is
-/// allowed — the window stays open, and only a tap here (or the bar's `+`)
-/// opens the next shell.
+/// allowed — the window stays open, and the bar's `+` (or ⌘T) opens the next
+/// shell; this view offers nothing of its own.
+///
+/// A prompt glyph and a title, in the theme's text colour on the theme's
+/// background — the pane behind this view is the theme's background whatever
+/// the system scheme says, so the label colour would not do.
 struct EmptyTabsView: View {
-    let onNewTab: () -> Void
+    @ObservedObject private var theme = AppTheme.shared
+    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         VStack(spacing: DS.Padding.l) {
-            Image(systemName: "terminal")
-                .font(DS.Font.heroSymbol)
-                .foregroundColor(.secondary)
+            Text(verbatim: "❯")
+                .font(DS.Font.heroPrompt)
+                .foregroundColor(theme.foreground(for: colorScheme).opacity(0.7))
+                .accessibilityHidden(true)
             Text("No Open Tabs")
                 .font(DS.Font.title)
-            Text("Start a new tab to keep working.")
-                .font(DS.Font.label)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-            Button(action: onNewTab) {
-                Label("New Tab", systemImage: "plus")
-                    .font(DS.Font.controlEmphasis)
-                    .padding(.horizontal, DS.Padding.s)
-                    .padding(.vertical, DS.Padding.xs)
-            }
-            .buttonStyle(.borderedProminent)
-            .padding(.top, DS.Padding.s)
+                .foregroundColor(theme.foreground(for: colorScheme))
         }
         .padding(DS.Padding.xl)
-        .frame(maxWidth: 360)
         // Greedy on purpose: with no tabs this view is the whole terminal
         // column, and the top bar hangs off that column as a safe-area inset
         // — its width is the column's width. Without this the column shrinks
-        // to the card's ideal size and drags the bar with it.
+        // to the text's ideal size and drags the bar with it.
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay(alignment: .bottom) {
+            // Regular width only: on a phone the bottom bar owns that edge.
+            if horizontalSizeClass == .regular {
+                Text("An OwnGoal Studio Project with AI")
+                    .font(DS.Font.caption)
+                    .foregroundColor(theme.foreground(for: colorScheme).opacity(0.4))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, DS.Padding.xl)
+                    .padding(.bottom, DS.Padding.xl)
+            }
+        }
     }
 }

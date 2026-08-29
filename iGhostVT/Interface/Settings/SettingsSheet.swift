@@ -295,12 +295,11 @@ struct ThemeListView: View {
 }
 
 private extension View {
-    /// The sheet's one confirming control, filled with the accent. On iOS 26
-    /// the toolbar wraps every item in glass of its own, which a prominent
-    /// button would then sit inside — a disc within a disc — so the item's
-    /// shared background is hidden and the button's own glass is the circle.
-    /// Two toolbars rather than one conditional item: `ToolbarContent`
-    /// cannot branch on iOS 15.
+    /// The sheet's one confirming control: the toolbar's own prominent
+    /// button, left at the size the toolbar gives it. iOS 26 draws it as its
+    /// own glass disc; earlier systems fill it with the accent. Two toolbars
+    /// rather than one conditional item: `ToolbarContent` cannot branch on
+    /// iOS 15.
     @ViewBuilder
     func doneToolbarItem(action: @escaping () -> Void) -> some View {
         if #available(iOS 26.0, *) {
@@ -308,17 +307,13 @@ private extension View {
                 ToolbarItem(placement: .confirmationAction) {
                     DoneButton(action: action)
                         .buttonStyle(.glassProminent)
-                        .buttonBorderShape(.circle)
-                        .tint(.accentColor)
                 }
-                .sharedBackgroundVisibility(.hidden)
             }
         } else {
             toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     DoneButton(action: action)
                         .buttonStyle(.borderedProminent)
-                        .tint(.accentColor)
                 }
             }
         }
@@ -331,8 +326,6 @@ private struct DoneButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: "checkmark")
-                .font(.body.weight(.semibold))
-                .foregroundColor(.white)
         }
         .accessibilityLabel("Done")
     }
