@@ -299,6 +299,13 @@ enum AppMenus {
     }
 
     /// An alias key: fires the same action, never listed.
+    ///
+    /// `UIMenuBuilder` rejects two commands with the same action unless a
+    /// `propertyList` tells them apart — inserting the alias next to its
+    /// listed twin otherwise throws at launch ("Inserted elements contain
+    /// duplicates"). The value only has to differ from the twin's `nil`;
+    /// `TerminalWindow` reads a `propertyList` as an `Int` tab index and
+    /// ignores this string.
     private static func hidden(
         _ action: Selector,
         _ input: String,
@@ -309,6 +316,7 @@ enum AppMenus {
             action: action,
             input: input,
             modifierFlags: modifiers,
+            propertyList: "alias",
             attributes: .hidden
         )
     }
