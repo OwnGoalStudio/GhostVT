@@ -54,7 +54,9 @@ struct TabStripBar: View {
                 .contextMenu { windowMenu }
                 .accessibilityLabel("New Tab")
             }
-            .padding(.horizontal, DS.Padding.l)
+            // One inset all round: the controls sit as far from the window's
+            // side as from its top edge.
+            .padding(.horizontal, DS.Padding.s)
             .padding(.leading, windowControlsInset)
             .padding(.top, DS.Padding.s)
             .padding(.bottom, DS.Padding.s)
