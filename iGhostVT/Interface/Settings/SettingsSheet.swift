@@ -377,7 +377,9 @@ struct ThemeListView: View {
                     swatch(for: definition)
                     Text(definition.name)
                         .foregroundColor(.primary)
-                    Spacer()
+                        .lineLimit(1)
+                    Spacer(minLength: DS.Padding.s)
+                    paletteStrip(for: definition)
                     if definition.name == selectedName {
                         Image(systemName: "checkmark")
                             .foregroundColor(.accentColor)
@@ -403,6 +405,25 @@ struct ThemeListView: View {
                 .font(.system(size: 10, weight: .bold, design: .monospaced))
                 .foregroundColor(Color(hex: definition.foreground))
         }
+    }
+
+    /// The eight base ANSI colors (0–7) as one segmented strip, so a theme's
+    /// character shows without opening it. A missing entry falls back to the
+    /// foreground rather than leaving a gap, so every strip has the same width.
+    private func paletteStrip(for definition: GhosttyThemeDefinition) -> some View {
+        HStack(spacing: 0) {
+            ForEach(0 ..< 8, id: \.self) { index in
+                Color(hex: definition.palette[index] ?? definition.foreground)
+                    .frame(width: 7)
+            }
+        }
+        .frame(height: 14)
+        .clipShape(RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: DS.Radius.s, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.15), lineWidth: 1)
+        }
+        .accessibilityHidden(true)
     }
 
     private func select(_ definition: GhosttyThemeDefinition) {
