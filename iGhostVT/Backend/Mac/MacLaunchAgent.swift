@@ -209,7 +209,9 @@ final class MacLaunchAgent: ObservableObject {
         /// when the system one is not writable (a managed Mac).
         private static var applicationsFolder: URL {
             let system = URL(fileURLWithPath: "/Applications", isDirectory: true)
-            if FileManager.default.isWritableFile(atPath: system.path) { return system }
+            if FileManager.default.isWritableFile(atPath: system.path) {
+                return system
+            }
             let home = homeDirectory ?? NSHomeDirectory()
             return URL(fileURLWithPath: home, isDirectory: true)
                 .appendingPathComponent("Applications", isDirectory: true)
@@ -317,7 +319,9 @@ final class MacLaunchAgent: ObservableObject {
         /// until the app lives somewhere permanent.
         private static var isInApplications: Bool {
             let path = Bundle.main.bundleURL.resolvingSymlinksInPath().path
-            if path.hasPrefix("/Applications/") { return true }
+            if path.hasPrefix("/Applications/") {
+                return true
+            }
             guard let home = Self.homeDirectory else { return false }
             return path.hasPrefix("\(home)/Applications/")
         }

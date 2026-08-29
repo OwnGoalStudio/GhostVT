@@ -74,7 +74,8 @@ final class AlertViewController: UIViewController {
     func present(in window: UIWindow?) {
         guard var presenter = window?.rootViewController else { return }
         while let presented = presenter.presentedViewController,
-              !presented.isBeingDismissed {
+              !presented.isBeingDismissed
+        {
             presenter = presented
         }
         presenter.present(self, animated: true)

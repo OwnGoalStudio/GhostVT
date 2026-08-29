@@ -58,13 +58,13 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
             // Resolved together, pasted in drop order.
             let resolved = await withTaskGroup(of: (Int, Resolved?).self) { group in
                 for (index, payload) in payloads.enumerated() {
-                    group.addTask { (index, await payload.resolve(stagingIn: directory)) }
+                    group.addTask { await (index, payload.resolve(stagingIn: directory)) }
                 }
                 var results = [Resolved?](repeating: nil, count: payloads.count)
                 for await (index, result) in group {
                     results[index] = result
                 }
-                return results.compactMap { $0 }
+                return results.compactMap(\.self)
             }
             guard let terminal = self?.terminal, !resolved.isEmpty else {
                 logger.info("drop skipped: nothing resolved from \(payloads.count) item(s)")
@@ -90,7 +90,9 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
         }
 
         var isPath: Bool {
-            if case .path = self { return true }
+            if case .path = self {
+                return true
+            }
             return false
         }
     }
@@ -316,7 +318,9 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
         var result = ""
         result.reserveCapacity(path.utf8.count)
         for character in path {
-            if sensitive.contains(character) { result.append("\\") }
+            if sensitive.contains(character) {
+                result.append("\\")
+            }
             result.append(character)
         }
         return result

@@ -73,7 +73,9 @@ struct TabContextMenu: View {
 
     // MARK: - The page as text
 
-    private var pageText: String { TabPageExport.pageText(of: tab) }
+    private var pageText: String {
+        TabPageExport.pageText(of: tab)
+    }
 
     private func copyText() {
         UIPasteboard.general.string = pageText

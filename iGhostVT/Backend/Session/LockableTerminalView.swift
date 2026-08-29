@@ -77,9 +77,9 @@ final class LockableTerminalView: TerminalView {
     }
 
     #if !targetEnvironment(macCatalyst)
-        // The library's tap path calls this after the tap's click has been
-        // sent; only the keyboard raise/dismiss is ours to swallow. On
-        // Catalyst there is no software keyboard and no such member.
+        /// The library's tap path calls this after the tap's click has been
+        /// sent; only the keyboard raise/dismiss is ours to swallow. On
+        /// Catalyst there is no software keyboard and no such member.
         override func toggleSoftwareKeyboard() {
             guard !isSoftwareKeyboardLocked else { return }
             super.toggleSoftwareKeyboard()

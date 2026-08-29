@@ -32,7 +32,9 @@ final class TerminalSessionStore: ObservableObject {
     /// by `TabManager.retryFailedTabs()` when the reason for the failure was
     /// external — on the Mac, a daemon that had not been approved yet.
     var hasFailed: Bool {
-        if case .failed = status { return true }
+        if case .failed = status {
+            return true
+        }
         return false
     }
 
@@ -82,7 +84,9 @@ final class TerminalSessionStore: ObservableObject {
 
     /// The transport of the current connection, for callers that need
     /// implementation-specific capability (daemon session control).
-    var activeTransport: TerminalTransport? { relay.transport }
+    var activeTransport: TerminalTransport? {
+        relay.transport
+    }
 
     /// Where this session's bytes go, for titles and the sidebar subtitle.
     var endpointDescription: String {
@@ -282,8 +286,8 @@ final class TerminalSessionStore: ObservableObject {
         Self.logger.info("reconnect attempt \(self.reconnectAttempt) scheduled")
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: Self.reconnectDelay)
-            guard let self, self.reconnectGeneration == generation else { return }
-            self.connect()
+            guard let self, reconnectGeneration == generation else { return }
+            connect()
         }
     }
 

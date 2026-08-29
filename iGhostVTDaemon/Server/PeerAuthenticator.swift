@@ -84,7 +84,9 @@ final class PeerAuthenticator {
                     DaemonFileLog.log("peer \(pid): candidate \(installedPath) failed the root-owned check")
                     continue
                 }
-                if clientPath == installedPath { return pid }
+                if clientPath == installedPath {
+                    return pid
+                }
             }
             deny(
                 pid,
@@ -174,12 +176,11 @@ final class PeerAuthenticator {
             teamIdentifier = team
             siblingClientPath = Self.ownSiblingClientPath()
 
-            let text: String
-            if let team {
-                text = "identifier \"\(Self.clientIdentifier)\" and anchor apple generic "
+            let text = if let team {
+                "identifier \"\(Self.clientIdentifier)\" and anchor apple generic "
                     + "and certificate leaf[subject.OU] = \"\(team)\""
             } else {
-                text = "identifier \"\(Self.clientIdentifier)\""
+                "identifier \"\(Self.clientIdentifier)\""
             }
             var compiled: SecRequirement?
             if SecRequirementCreateWithString(text as CFString, [], &compiled) != errSecSuccess {
@@ -202,7 +203,9 @@ final class PeerAuthenticator {
                 // anything, so the same-user check is the whole gate — which
                 // off-device, where the daemon spawns as that user, is the
                 // whole threat model. No Release build knows this peer.
-                if clientPath.hasSuffix("/iGhostVT.app/Contents/MacOS/iGhostVT") { return nil }
+                if clientPath.hasSuffix("/iGhostVT.app/Contents/MacOS/iGhostVT") {
+                    return nil
+                }
             #endif
 
             guard let requirement else {

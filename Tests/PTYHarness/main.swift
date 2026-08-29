@@ -113,12 +113,14 @@ if let result = run(command: ["/bin/sh", "-c", "pwd"], workingDirectory: "/priva
 } else {
     check(false, "spawning a shell with a working directory succeeded")
 }
+
 if let plan = ShellLaunch.plan(requestedShell: nil) {
     check(
         plan.workingDirectory == NSHomeDirectory(),
         "the default plan starts a session in the session user's home (got \(String(describing: plan.workingDirectory)))"
     )
 }
+
 // An inherited directory the session user cannot enter falls back to the
 // plan's own, never to the daemon's `/`.
 if let result = run(
@@ -130,6 +132,7 @@ if let result = run(
 } else {
     check(false, "spawning a shell with a fallback working directory succeeded")
 }
+
 let homelessUser = PasswdEntry(name: "nobody", uid: 0, gid: 0, home: "/nonexistent/ighostvt-harness", shell: "/bin/sh")
 check(ShellLaunch.workingDirectory(for: homelessUser) == nil, "a home that does not exist is skipped")
 
@@ -399,10 +402,10 @@ if let plan = ShellLaunch.plan(requestedShell: nil) {
 }
 
 print("shell integration")
-// Nothing is injected when the scripts are not installed — the harness host
-// has no /usr/share/ighostvt, which is also the state of a device where the
-// package predates them. A stray `--posix` here would start every bash
-// session in a mode its rc files are not written for.
+/// Nothing is injected when the scripts are not installed — the harness host
+/// has no /usr/share/ighostvt, which is also the state of a device where the
+/// package predates them. A stray `--posix` here would start every bash
+/// session in a mode its rc files are not written for.
 var integrationEnvironment: [String: String] = ["HOME": "/tmp"]
 check(
     ShellIntegration.apply(
@@ -416,9 +419,9 @@ check(
     integrationEnvironment == ["HOME": "/tmp"],
     "no scripts on disk means the environment is left alone"
 )
-// `sh` is not a shell anyone ships an integration for, and pointing it at
-// another shell's rc files is how a session ends up printing syntax errors
-// before its first prompt.
+/// `sh` is not a shell anyone ships an integration for, and pointing it at
+/// another shell's rc files is how a session ends up printing syntax errors
+/// before its first prompt.
 var shEnvironment: [String: String] = [:]
 check(
     ShellIntegration.apply(
@@ -461,6 +464,7 @@ if let entry = PasswdEntry.forCurrentUser() {
 } else {
     check(false, "the current user is found")
 }
+
 // By name, from the passwd *file* — the daemon looks `mobile` up this way
 // because libc answers from the system database, which on the device is the
 // iOS one and has no bootstrap users in it. `root` is the one name present in
@@ -523,8 +527,10 @@ do {
     let deadline = Date().addingTimeInterval(5)
     while Date() < deadline {
         sourceDirectory = source.currentDirectory
-        if sourceDirectory == "/private/tmp" { break }
-        usleep(50_000)
+        if sourceDirectory == "/private/tmp" {
+            break
+        }
+        usleep(50000)
     }
     check(sourceDirectory == "/private/tmp", "a live session's current directory is read from the kernel (got \(String(describing: sourceDirectory)))")
     check(registry.inheritableDirectory(from: source.id) == "/private/tmp", "the registry offers a live session's directory")
@@ -541,8 +547,10 @@ do {
     let inheritedDeadline = Date().addingTimeInterval(5)
     while Date() < inheritedDeadline {
         inheritedDirectory = inherited.currentDirectory
-        if inheritedDirectory == "/private/tmp" { break }
-        usleep(50_000)
+        if inheritedDirectory == "/private/tmp" {
+            break
+        }
+        usleep(50000)
     }
     check(inheritedDirectory == "/private/tmp", "a session opened from another starts in its directory (got \(String(describing: inheritedDirectory)))")
 
@@ -557,8 +565,10 @@ do {
     let freshDeadline = Date().addingTimeInterval(5)
     while Date() < freshDeadline {
         freshDirectory = fresh.currentDirectory
-        if freshDirectory == NSHomeDirectory() { break }
-        usleep(50_000)
+        if freshDirectory == NSHomeDirectory() {
+            break
+        }
+        usleep(50000)
     }
     check(freshDirectory == NSHomeDirectory(), "naming a session that never existed opens in the home (got \(String(describing: freshDirectory)))")
 
@@ -574,7 +584,9 @@ do {
             rows: 24
         )
         let moverDeadline = Date().addingTimeInterval(5)
-        while Date() < moverDeadline, mover.currentDirectory != removable { usleep(50_000) }
+        while Date() < moverDeadline, mover.currentDirectory != removable {
+            usleep(50000)
+        }
         check(registry.inheritableDirectory(from: mover.id) == removable, "a directory that exists is offered")
         check(rmdir(removable) == 0, "the harness can remove the directory under the session")
         check(mover.currentDirectory == removable, "the kernel still names the removed directory")
@@ -592,7 +604,9 @@ do {
         rows: 24
     )
     let departedDeadline = Date().addingTimeInterval(5)
-    while Date() < departedDeadline, registry.session(departed.id) != nil { usleep(50_000) }
+    while Date() < departedDeadline, registry.session(departed.id) != nil {
+        usleep(50000)
+    }
     check(registry.session(departed.id) == nil, "an exited source leaves the registry")
     check(registry.inheritableDirectory(from: departed.id) == nil, "an exited source offers nothing")
 
@@ -635,7 +649,9 @@ do {
             namesLock.lock()
             let hit = reports.contains(where: predicate)
             namesLock.unlock()
-            if hit { return true }
+            if hit {
+                return true
+            }
             usleep(100_000)
         }
         return false

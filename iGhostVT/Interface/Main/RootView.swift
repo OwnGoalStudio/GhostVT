@@ -27,7 +27,9 @@ struct RootView: View {
     /// User-dragged sidebar width, remembered like the visibility. The
     /// resize handle clamps it, so a stored value is always presentable.
     @AppStorage("Sidebar.width") private var sidebarWidth = 300.0
-    private var isRegularWidth: Bool { horizontalSizeClass == .regular }
+    private var isRegularWidth: Bool {
+        horizontalSizeClass == .regular
+    }
 
     var body: some View {
         ZStack {

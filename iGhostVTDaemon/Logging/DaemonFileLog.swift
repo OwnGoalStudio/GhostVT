@@ -11,8 +11,8 @@ import Foundation
 /// mobile, and readable over ssh without elevation.
 enum DaemonFileLog {
     #if os(macOS)
-        // The Mac Catalyst harness runs the daemon as the user; mobile's
-        // home does not exist there.
+        /// The Mac Catalyst harness runs the daemon as the user; mobile's
+        /// home does not exist there.
         private static let path = NSHomeDirectory() + "/Library/Logs/ighostvtd.log"
     #else
         private static let path = "/var/mobile/Library/Logs/ighostvtd.log"
@@ -32,12 +32,10 @@ enum DaemonFileLog {
     }()
 
     /// mobile's Library/Logs does not exist until someone makes it.
-    private static let directoryReady: Bool = {
-        (try? FileManager.default.createDirectory(
-            atPath: (path as NSString).deletingLastPathComponent,
-            withIntermediateDirectories: true
-        )) != nil
-    }()
+    private static let directoryReady: Bool = (try? FileManager.default.createDirectory(
+        atPath: (path as NSString).deletingLastPathComponent,
+        withIntermediateDirectories: true
+    )) != nil
 
     static func log(_ message: String) {
         let line = "\(formatter.string(from: Date())) [\(getpid())] \(message)\n"

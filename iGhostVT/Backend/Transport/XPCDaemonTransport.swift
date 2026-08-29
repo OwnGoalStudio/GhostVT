@@ -334,8 +334,8 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                 completion(Self.sessions(in: reply))
             }
         }
-        // Polls the daemon's list until none of `targets` remain, or the
-        // deadline passes; hands over the last list either way.
+        /// Polls the daemon's list until none of `targets` remain, or the
+        /// deadline passes; hands over the last list either way.
         @Sendable func awaitGone(_ targets: Set<UInt64>, then: @escaping @Sendable ([SessionSummary]) -> Void) {
             list { rows in
                 guard let rows else { return finish() }
@@ -399,13 +399,13 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         let hello = Self.makeMessage(.hello)
         xpc_connection_send_message_with_reply(connection, hello, queue) { [weak self] reply in
             guard let self else { return }
-            guard self.replyCode(reply) == .success else {
-                self.teardown(
+            guard replyCode(reply) == .success else {
+                teardown(
                     reason: String(localized: "Unable to connect to the terminal helper. Restart iGhostVT and try again.")
                 )
                 return
             }
-            self.openOrAttachSession()
+            openOrAttachSession()
         }
     }
 
@@ -416,16 +416,16 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, resumeSessionID)
             xpc_connection_send_message_with_reply(connection, message, queue) { [weak self] reply in
                 guard let self else { return }
-                if self.replyCode(reply) == .success {
-                    self.lock.locked { self.sessionID = resumeSessionID }
+                if replyCode(reply) == .success {
+                    lock.locked { self.sessionID = resumeSessionID }
                     // The attach carried no size; the reply says which one
                     // the session kept, so the host's re-send on
                     // `.connected` costs nothing when the grid is unchanged.
                     let columns = Int(xpc_dictionary_get_uint64(reply, iGhostVTWireKey.columns))
                     let rows = Int(xpc_dictionary_get_uint64(reply, iGhostVTWireKey.rows))
-                    self.appliedViewport = columns > 0 && rows > 0 ? (columns, rows) : nil
-                    self.emit(.state(.connected))
-                    self.emitForegroundProcess(in: reply)
+                    appliedViewport = columns > 0 && rows > 0 ? (columns, rows) : nil
+                    emit(.state(.connected))
+                    emitForegroundProcess(in: reply)
                     // Replayed scrollback so the surface rebuilds its screen.
                     // Repainted from a clean slate: on an in-app reconnect the
                     // surface still shows the session's last frame, and
@@ -436,16 +436,16 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                     if let replay = Self.data(iGhostVTWireKey.data, in: reply), !replay.isEmpty {
                         var payload = Data("\u{1B}[H\u{1B}[2J".utf8)
                         payload.append(replay)
-                        self.emit(.received(payload))
+                        emit(.received(payload))
                     }
                 } else {
                     // The session is gone: scrub the dead ID everywhere
                     // before falling back to a fresh shell. Leaving it in
                     // the ledger means the Live Activity forever counts a
                     // detached shell the daemon no longer has.
-                    self.lock.locked { self.resumeSessionID = nil }
-                    self.onSessionExit?(resumeSessionID, -1)
-                    self.openSession()
+                    lock.locked { self.resumeSessionID = nil }
+                    onSessionExit?(resumeSessionID, -1)
+                    openSession()
                 }
             }
             return
@@ -475,19 +475,19 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         }
         xpc_connection_send_message_with_reply(connection, message, queue) { [weak self] reply in
             guard let self else { return }
-            let code = self.replyCode(reply)
+            let code = replyCode(reply)
             guard code == .success else {
-                self.teardown(reason: Self.failureReason(reply, code: code))
+                teardown(reason: Self.failureReason(reply, code: code))
                 return
             }
             let sessionID = xpc_dictionary_get_uint64(reply, iGhostVTWireKey.sessionID)
-            self.lock.locked {
+            lock.locked {
                 self.sessionID = sessionID
                 self.resumeSessionID = sessionID
             }
-            self.appliedViewport = (Int(columns), Int(rows))
-            self.emit(.state(.connected))
-            self.emitForegroundProcess(in: reply)
+            appliedViewport = (Int(columns), Int(rows))
+            emit(.state(.connected))
+            emitForegroundProcess(in: reply)
         }
     }
 

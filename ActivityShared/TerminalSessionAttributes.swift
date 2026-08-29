@@ -9,9 +9,9 @@
 import ActivityKit
 import Foundation
 
-// The ActivityKit conformance is added below, off Catalyst only: the
-// framework imports there but `ActivityAttributes` itself is unavailable,
-// and the payload still has to compile into the Mac development build.
+/// The ActivityKit conformance is added below, off Catalyst only: the
+/// framework imports there but `ActivityAttributes` itself is unavailable,
+/// and the payload still has to compile into the Mac development build.
 @available(iOS 16.2, *)
 struct TerminalSessionAttributes {
     /// One open tab, as the Live Activity lists it.

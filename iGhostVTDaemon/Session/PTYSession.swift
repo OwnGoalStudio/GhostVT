@@ -92,7 +92,9 @@ final class PTYSession {
                 total += count
                 continue
             }
-            if count < 0, errno == EINTR { continue }
+            if count < 0, errno == EINTR {
+                continue
+            }
             break
         }
         return total == wanted
@@ -102,7 +104,7 @@ final class PTYSession {
         step: Int32,
         code: Int32,
         executable: String,
-        credentials: ShellLaunch.Credentials?
+        credentials _: ShellLaunch.Credentials?
     ) -> String {
         // The system's reason stays in the sentence (the harness holds this
         // contract): "No such file or directory" versus "Permission denied"
@@ -110,13 +112,13 @@ final class PTYSession {
         // copy alone cannot say which.
         switch step {
         case stepExec:
-            return "Unable to run \(executable) (\(systemMessage(code))). Check the default shell in Settings."
+            "Unable to run \(executable) (\(systemMessage(code))). Check the default shell in Settings."
         case stepChownTTY:
-            return "Unable to set up the terminal for your account (\(systemMessage(code))). Try again."
+            "Unable to set up the terminal for your account (\(systemMessage(code))). Try again."
         case stepVerifyUID:
-            return "Unable to start the terminal for your account (\(systemMessage(code))). Try again."
+            "Unable to start the terminal for your account (\(systemMessage(code))). Try again."
         default:
-            return "Unable to start the terminal for your account (\(systemMessage(code))). Try again."
+            "Unable to start the terminal for your account (\(systemMessage(code))). Try again."
         }
     }
 
@@ -223,7 +225,9 @@ final class PTYSession {
             let tableSize = getdtablesize()
             var descriptor: Int32 = 3
             while descriptor < tableSize {
-                if descriptor != reportWrite { close(descriptor) }
+                if descriptor != reportWrite {
+                    close(descriptor)
+                }
                 descriptor += 1
             }
             func fail(_ step: Int32) -> Never {
@@ -237,20 +241,34 @@ final class PTYSession {
                 // matters: once the uid is gone the group changes are no
                 // longer permitted. A failure here has to be fatal — execing
                 // anyway would hand the user the root shell we just refused.
-                if fchown(STDIN_FILENO, credentials.uid, credentials.gid) != 0 { fail(Self.stepChownTTY) }
+                if fchown(STDIN_FILENO, credentials.uid, credentials.gid) != 0 {
+                    fail(Self.stepChownTTY)
+                }
                 _ = fchmod(STDIN_FILENO, 0o620)
-                if setgroups(1, &supplementaryGroups) != 0 { fail(Self.stepSetGroups) }
-                if setgid(credentials.gid) != 0 { fail(Self.stepSetGID) }
-                if setuid(credentials.uid) != 0 { fail(Self.stepSetUID) }
+                if setgroups(1, &supplementaryGroups) != 0 {
+                    fail(Self.stepSetGroups)
+                }
+                if setgid(credentials.gid) != 0 {
+                    fail(Self.stepSetGID)
+                }
+                if setuid(credentials.uid) != 0 {
+                    fail(Self.stepSetUID)
+                }
                 // Belt and braces: if the uid did not actually change, refuse.
-                if getuid() != credentials.uid || geteuid() != credentials.uid { fail(Self.stepVerifyUID) }
+                if getuid() != credentials.uid || geteuid() != credentials.uid {
+                    fail(Self.stepVerifyUID)
+                }
             }
             // After the privilege drop, so the directory has to be reachable
             // by the user the shell will be. An inherited directory the user
             // can no longer enter falls back to the plan's own (the home);
             // only when both refuse does the shell keep the daemon's `/`.
-            if let directory { movedToDirectory = chdir(directory) == 0 }
-            if !movedToDirectory, let fallbackDirectory { _ = chdir(fallbackDirectory) }
+            if let directory {
+                movedToDirectory = chdir(directory) == 0
+            }
+            if !movedToDirectory, let fallbackDirectory {
+                _ = chdir(fallbackDirectory)
+            }
             execve(executablePath, argv, envp)
             fail(Self.stepExec)
         }
@@ -437,7 +455,9 @@ final class PTYSession {
                 refreshForegroundProcessNameIfDue()
                 continue
             }
-            if count < 0, errno == EINTR { continue }
+            if count < 0, errno == EINTR {
+                continue
+            }
             if count == 0 {
                 // EOF: the child closed the terminal. The process source
                 // usually reports the status, but a fast child (/bin/echo)
@@ -582,7 +602,9 @@ final class PTYSession {
     private static func waitNoHang(_ pid: pid_t, status: inout Int32) -> pid_t {
         while true {
             let result = waitpid(pid, &status, WNOHANG)
-            if result < 0, errno == EINTR { continue }
+            if result < 0, errno == EINTR {
+                continue
+            }
             return result
         }
     }

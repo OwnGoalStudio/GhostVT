@@ -100,29 +100,29 @@ private struct IslandSummary: View {
 
 #if DEBUG
 
-import ActivityKit
-import SwiftUI
-import WidgetKit
+    import ActivityKit
+    import SwiftUI
+    import WidgetKit
 
-#Preview("Island Expanded", as: .dynamicIsland(.expanded), using: TerminalSessionAttributes.preview) {
-    TerminalSessionActivityWidget()
-} contentStates: {
-    TerminalSessionAttributes.ContentState.typical
-    TerminalSessionAttributes.ContentState.crowded
-}
+    #Preview("Island Expanded", as: .dynamicIsland(.expanded), using: TerminalSessionAttributes.preview) {
+        TerminalSessionActivityWidget()
+    } contentStates: {
+        TerminalSessionAttributes.ContentState.typical
+        TerminalSessionAttributes.ContentState.crowded
+    }
 
-#Preview("Island Compact", as: .dynamicIsland(.compact), using: TerminalSessionAttributes.preview) {
-    TerminalSessionActivityWidget()
-} contentStates: {
-    TerminalSessionAttributes.ContentState.typical
-    TerminalSessionAttributes.ContentState.crowded
-}
+    #Preview("Island Compact", as: .dynamicIsland(.compact), using: TerminalSessionAttributes.preview) {
+        TerminalSessionActivityWidget()
+    } contentStates: {
+        TerminalSessionAttributes.ContentState.typical
+        TerminalSessionAttributes.ContentState.crowded
+    }
 
-#Preview("Island Minimal", as: .dynamicIsland(.minimal), using: TerminalSessionAttributes.preview) {
-    TerminalSessionActivityWidget()
-} contentStates: {
-    TerminalSessionAttributes.ContentState.typical
-    TerminalSessionAttributes.ContentState.crowded
-}
+    #Preview("Island Minimal", as: .dynamicIsland(.minimal), using: TerminalSessionAttributes.preview) {
+        TerminalSessionActivityWidget()
+    } contentStates: {
+        TerminalSessionAttributes.ContentState.typical
+        TerminalSessionAttributes.ContentState.crowded
+    }
 
 #endif

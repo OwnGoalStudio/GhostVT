@@ -42,7 +42,7 @@ final class KeyboardState: ObservableObject {
     private static func isSoftwareKeyboard(_ notification: Notification) -> Bool {
         guard
             let value = notification
-                .userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
+            .userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
         else { return true }
         let screenBounds = UIScreen.main.bounds
         let visibleHeight = value.cgRectValue

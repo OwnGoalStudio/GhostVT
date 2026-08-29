@@ -268,7 +268,8 @@ final class PeerSession {
         }
         var count = 0
         guard let bytes = xpc_dictionary_get_data(message, iGhostVTWireKey.data, &count),
-              count <= iGhostVTProtocol.maximumMessageDataByteCount else {
+              count <= iGhostVTProtocol.maximumMessageDataByteCount
+        else {
             return .invalidRequest
         }
         session.write(Data(bytes: bytes, count: count))
@@ -283,7 +284,8 @@ final class PeerSession {
         let columns = xpc_dictionary_get_uint64(message, iGhostVTWireKey.columns)
         let rows = xpc_dictionary_get_uint64(message, iGhostVTWireKey.rows)
         guard columns > 0, columns <= UInt64(iGhostVTProtocol.maximumColumns),
-              rows > 0, rows <= UInt64(iGhostVTProtocol.maximumRows) else {
+              rows > 0, rows <= UInt64(iGhostVTProtocol.maximumRows)
+        else {
             return .invalidRequest
         }
         session.resize(columns: UInt16(columns), rows: UInt16(rows))
@@ -349,7 +351,8 @@ final class PeerSession {
         var values: [String: String] = [:]
         xpc_dictionary_apply(dictionary) { entryKey, entryValue in
             if xpc_get_type(entryValue) == XPC_TYPE_STRING,
-               let string = xpc_string_get_string_ptr(entryValue) {
+               let string = xpc_string_get_string_ptr(entryValue)
+            {
                 values[String(cString: entryKey)] = String(cString: string)
             }
             return true

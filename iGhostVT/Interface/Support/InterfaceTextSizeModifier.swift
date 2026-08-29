@@ -22,16 +22,9 @@ private struct InterfaceTextSizeModifier: ViewModifier {
     }
 }
 
-private struct InterfaceTextScaleKey: EnvironmentKey {
-    static let defaultValue: CGFloat = 1
-}
-
 extension EnvironmentValues {
-    /// The multiplier `DS.Font` roles apply; 1 is the platform's own size.
-    var interfaceTextScale: CGFloat {
-        get { self[InterfaceTextScaleKey.self] }
-        set { self[InterfaceTextScaleKey.self] = newValue }
-    }
+    // The multiplier `DS.Font` roles apply; 1 is the platform's own size.
+    @Entry var interfaceTextScale: CGFloat = 1
 }
 
 extension View {

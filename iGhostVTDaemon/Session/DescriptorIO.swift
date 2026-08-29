@@ -13,7 +13,9 @@ func writeFully(_ descriptor: Int32, _ buffer: UnsafeRawBufferPointer) -> Bool {
             remaining -= written
             continue
         }
-        if written < 0, errno == EINTR { continue }
+        if written < 0, errno == EINTR {
+            continue
+        }
         return false
     }
     return true

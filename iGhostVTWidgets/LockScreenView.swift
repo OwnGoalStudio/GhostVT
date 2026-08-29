@@ -90,7 +90,9 @@ struct StatusBar: View {
     let starting: Int
     let failed: Int
 
-    private var total: Int { live + starting + failed }
+    private var total: Int {
+        live + starting + failed
+    }
 
     var body: some View {
         GeometryReader { geo in
@@ -141,9 +143,17 @@ private struct InfoPair: View {
 /// The counts describe the listed sessions — the payload carries no status
 /// for overflowed or detached ones.
 extension TerminalSessionAttributes.ContentState {
-    var liveCount: Int { sessions.filter { $0.status == .live }.count }
-    var startingCount: Int { sessions.filter { $0.status == .starting }.count }
-    var failedCount: Int { sessions.filter { $0.status == .failed }.count }
+    var liveCount: Int {
+        sessions.filter { $0.status == .live }.count
+    }
+
+    var startingCount: Int {
+        sessions.filter { $0.status == .starting }.count
+    }
+
+    var failedCount: Int {
+        sessions.filter { $0.status == .failed }.count
+    }
 
     /// The frontmost session's shell — the one line of shell-adjacent data
     /// the app itself picked, so it can't be ugly.
@@ -181,7 +191,9 @@ extension TerminalSessionAttributes.ContentState {
     /// detached count folded in, since there's no room for label pairs.
     var summaryLine: String? {
         var parts: [String] = []
-        if let runningSummary { parts.append(runningSummary) }
+        if let runningSummary {
+            parts.append(runningSummary)
+        }
         if detachedCount > 0 {
             parts.append(String(
                 localized: "\(detachedCount) detached",
@@ -196,81 +208,81 @@ extension TerminalSessionAttributes.ContentState {
 
 #if DEBUG
 
-extension TerminalSessionAttributes {
-    static let preview = TerminalSessionAttributes()
-}
+    extension TerminalSessionAttributes {
+        static let preview = TerminalSessionAttributes()
+    }
 
-extension TerminalSessionAttributes.ContentState {
-    /// The common case: a couple of tabs, one frontmost.
-    static let typical = TerminalSessionAttributes.ContentState(
-        sessions: [
-            .init(
-                id: "a",
-                title: "make deb",
-                directory: "~/Documents/GitHub/iGhostVT",
-                shell: "zsh",
-                number: 1,
-                status: .live,
-                isActive: true
-            ),
-            .init(
-                id: "b",
-                title: "",
-                directory: "~",
-                shell: "fish",
-                number: 2,
-                status: .live,
-                isActive: false
-            ),
-        ],
-        overflowCount: 0,
-        detachedCount: 0
-    )
+    extension TerminalSessionAttributes.ContentState {
+        /// The common case: a couple of tabs, one frontmost.
+        static let typical = TerminalSessionAttributes.ContentState(
+            sessions: [
+                .init(
+                    id: "a",
+                    title: "make deb",
+                    directory: "~/Documents/GitHub/iGhostVT",
+                    shell: "zsh",
+                    number: 1,
+                    status: .live,
+                    isActive: true
+                ),
+                .init(
+                    id: "b",
+                    title: "",
+                    directory: "~",
+                    shell: "fish",
+                    number: 2,
+                    status: .live,
+                    isActive: false
+                ),
+            ],
+            overflowCount: 0,
+            detachedCount: 0
+        )
 
-    /// `typical`, a moment later — the same two sessions, a third one
-    /// opening and one failed, more of them past the row cap. The overlap
-    /// lets the canvas demonstrate the transition: the number rolls, the
-    /// bar reapportions, the detached pair fades in.
-    static let crowded = TerminalSessionAttributes.ContentState(
-        sessions: [
-            .init(
-                id: "a",
-                title: "make deb",
-                directory: "~/Documents/GitHub/iGhostVT",
-                shell: "zsh",
-                number: 1,
-                status: .live,
-                isActive: false
-            ),
-            .init(
-                id: "b",
-                title: "",
-                directory: "~",
-                shell: "fish",
-                number: 2,
-                status: .failed,
-                isActive: false
-            ),
-            .init(
-                id: "c",
-                title: "ssh build-host",
-                directory: "",
-                shell: "zsh",
-                number: 3,
-                status: .starting,
-                isActive: true
-            ),
-        ],
-        overflowCount: 2,
-        detachedCount: 1
-    )
-}
+        /// `typical`, a moment later — the same two sessions, a third one
+        /// opening and one failed, more of them past the row cap. The overlap
+        /// lets the canvas demonstrate the transition: the number rolls, the
+        /// bar reapportions, the detached pair fades in.
+        static let crowded = TerminalSessionAttributes.ContentState(
+            sessions: [
+                .init(
+                    id: "a",
+                    title: "make deb",
+                    directory: "~/Documents/GitHub/iGhostVT",
+                    shell: "zsh",
+                    number: 1,
+                    status: .live,
+                    isActive: false
+                ),
+                .init(
+                    id: "b",
+                    title: "",
+                    directory: "~",
+                    shell: "fish",
+                    number: 2,
+                    status: .failed,
+                    isActive: false
+                ),
+                .init(
+                    id: "c",
+                    title: "ssh build-host",
+                    directory: "",
+                    shell: "zsh",
+                    number: 3,
+                    status: .starting,
+                    isActive: true
+                ),
+            ],
+            overflowCount: 2,
+            detachedCount: 1
+        )
+    }
 
-#Preview("Lock Screen", as: .content, using: TerminalSessionAttributes.preview) {
-    TerminalSessionActivityWidget()
-} contentStates: {
-    TerminalSessionAttributes.ContentState.typical
-    TerminalSessionAttributes.ContentState.crowded
-}
+    #Preview("Lock Screen", as: .content, using: TerminalSessionAttributes.preview) {
+        TerminalSessionActivityWidget()
+    } contentStates: {
+        TerminalSessionAttributes.ContentState.typical
+        TerminalSessionAttributes.ContentState.crowded
+    }
 
 #endif

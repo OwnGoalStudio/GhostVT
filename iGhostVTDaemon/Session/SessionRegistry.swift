@@ -15,7 +15,9 @@ final class SessionRegistry {
     private var nextID: UInt64 = 1
     private var childExitSignal: DispatchSourceSignal?
 
-    var isEmpty: Bool { sessions.isEmpty }
+    var isEmpty: Bool {
+        sessions.isEmpty
+    }
 
     init(queue: DispatchQueue) {
         self.queue = queue
@@ -27,7 +29,7 @@ final class SessionRegistry {
         let signalSource = DispatchSource.makeSignalSource(signal: SIGCHLD, queue: queue)
         signalSource.setEventHandler { [weak self] in
             guard let self else { return }
-            for session in self.sessions.values {
+            for session in sessions.values {
                 session.reapIfExited()
             }
         }
@@ -159,8 +161,8 @@ final class SessionRegistry {
         DaemonLog.sessions.info("session \(id) close requested, SIGHUP sent")
         session.terminate()
         queue.asyncAfter(deadline: .now() + Self.closeGracePeriod) { [weak self] in
-            guard let self, self.sessions[id] === session else { return }
-            self.handleExit(sessionID: id, exitCode: 128 + SIGKILL)
+            guard let self, sessions[id] === session else { return }
+            handleExit(sessionID: id, exitCode: 128 + SIGKILL)
         }
     }
 

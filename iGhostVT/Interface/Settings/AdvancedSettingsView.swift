@@ -50,7 +50,7 @@ struct AdvancedSettingsView: View {
                     Leave this empty to use your login shell.
                     """
                 )
-                    .font(DS.Font.detail)
+                .font(DS.Font.detail)
             #else
                 Text(
                     """
@@ -60,7 +60,7 @@ struct AdvancedSettingsView: View {
                     the next jailbreak.
                     """
                 )
-                    .font(DS.Font.detail)
+                .font(DS.Font.detail)
             #endif
         }
     }
@@ -94,7 +94,7 @@ struct AdvancedSettingsView: View {
                         iGhostVT off under Login Items in System Settings.
                         """
                     )
-                        .font(DS.Font.detail)
+                    .font(DS.Font.detail)
                 }
             }
         #endif
@@ -139,8 +139,7 @@ struct AdvancedSettingsView: View {
                 including every keystroke, while this is on.
                 """
             )
-                .font(DS.Font.detail)
+            .font(DS.Font.detail)
         }
     }
-
 }

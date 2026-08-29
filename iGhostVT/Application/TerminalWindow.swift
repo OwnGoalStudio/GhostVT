@@ -71,9 +71,13 @@ final class TerminalWindow: UIWindow, AppCommandResponder {
         rootViewController?.presentedViewController != nil
     }
 
-    private var activeTab: TerminalTab? { tabManager.activeTab }
+    private var activeTab: TerminalTab? {
+        tabManager.activeTab
+    }
 
-    private var hasActiveTab: Bool { !isShowingModal && activeTab != nil }
+    private var hasActiveTab: Bool {
+        !isShowingModal && activeTab != nil
+    }
 
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         switch action {
@@ -213,11 +217,10 @@ final class TerminalWindow: UIWindow, AppCommandResponder {
     func selectTab(_ sender: Any?) {
         guard let index = Self.tabIndex(of: sender) else { return }
         let tabs = tabManager.tabs
-        let tab: TerminalTab?
-        if index == AppMenus.lastTabIndex {
-            tab = tabs.last
+        let tab: TerminalTab? = if index == AppMenus.lastTabIndex {
+            tabs.last
         } else {
-            tab = tabs.indices.contains(index) ? tabs[index] : nil
+            tabs.indices.contains(index) ? tabs[index] : nil
         }
         guard let tab else { return }
         tabManager.activeTabID = tab.id

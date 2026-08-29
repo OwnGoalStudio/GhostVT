@@ -1,0 +1,4 @@
+# os.Logger builds its message in an autoclosure, so `self` inside a log
+# interpolation is not redundant: the compiler requires it, and stripping it
+# breaks the build. Tell redundantSelf which calls take one.
+--selfrequired log,trace,debug,info,notice,warning,error,critical,fault

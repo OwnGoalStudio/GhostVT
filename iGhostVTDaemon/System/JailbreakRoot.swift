@@ -52,9 +52,9 @@ enum JailbreakRoot {
         /// The install root, or `nil` when there is no prefix.
         var prefix: String? {
             switch self {
-            case .none: return nil
-            case let .rootless(prefix): return prefix
-            case let .roothide(jbroot): return jbroot
+            case .none: nil
+            case let .rootless(prefix): prefix
+            case let .roothide(jbroot): jbroot
             }
         }
 
@@ -64,8 +64,8 @@ enum JailbreakRoot {
         /// itself, and prefixing here would resolve the jbroot twice.
         func bootstrapPath(_ path: String) -> String {
             switch self {
-            case .none, .roothide: return path
-            case let .rootless(prefix): return prefix + path
+            case .none, .roothide: path
+            case let .rootless(prefix): prefix + path
             }
         }
 
@@ -73,8 +73,8 @@ enum JailbreakRoot {
         /// filesystem, which roothide bridges back in at `/rootfs`.
         func systemPath(_ path: String) -> String {
             switch self {
-            case .none, .rootless: return path
-            case .roothide: return "/rootfs" + path
+            case .none, .rootless: path
+            case .roothide: "/rootfs" + path
             }
         }
 
@@ -82,8 +82,8 @@ enum JailbreakRoot {
         /// wants. This is roothide's `jbroot()`, and a no-op everywhere else.
         func resolve(_ path: String) -> String {
             switch self {
-            case .none, .rootless: return path
-            case let .roothide(jbroot): return path.hasPrefix("/") ? jbroot + path : path
+            case .none, .rootless: path
+            case let .roothide(jbroot): path.hasPrefix("/") ? jbroot + path : path
             }
         }
     }
@@ -91,11 +91,21 @@ enum JailbreakRoot {
     static let bootstrap: Bootstrap = detect()
 
     /// The install root, or `nil` when running without one.
-    static var path: String? { bootstrap.prefix }
+    static var path: String? {
+        bootstrap.prefix
+    }
 
-    static func bootstrapPath(_ path: String) -> String { bootstrap.bootstrapPath(path) }
-    static func systemPath(_ path: String) -> String { bootstrap.systemPath(path) }
-    static func resolve(_ path: String) -> String { bootstrap.resolve(path) }
+    static func bootstrapPath(_ path: String) -> String {
+        bootstrap.bootstrapPath(path)
+    }
+
+    static func systemPath(_ path: String) -> String {
+        bootstrap.systemPath(path)
+    }
+
+    static func resolve(_ path: String) -> String {
+        bootstrap.resolve(path)
+    }
 
     /// True when a path in the bootstrap's vocabulary exists and is executable.
     static func isExecutable(_ bootstrapPath: String) -> Bool {
@@ -116,7 +126,9 @@ enum JailbreakRoot {
         // and hang `/var/jb` off it as a symlink, and `currentExecutablePath`
         // is canonical — so compare canonical against canonical, and keep the
         // literal prefix, which is the one its binaries were built against.
-        if canonicalPath(rootlessPrefix) == root { return .rootless(prefix: rootlessPrefix) }
+        if canonicalPath(rootlessPrefix) == root {
+            return .rootless(prefix: rootlessPrefix)
+        }
         return .roothide(jbroot: root)
     }
 

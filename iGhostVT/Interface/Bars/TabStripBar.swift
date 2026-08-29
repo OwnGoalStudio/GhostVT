@@ -78,7 +78,6 @@ struct TabStripBar: View {
         #endif
     }
 
-    @ViewBuilder
     private var windowMenu: some View {
         Button(action: { TerminalWindow.requestNewWindow() }) {
             Label("New Window", systemImage: "macwindow.badge.plus")

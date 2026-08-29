@@ -103,9 +103,9 @@ final class SessionActivityController {
         for status: TerminalSessionStore.Status
     ) -> TerminalSessionAttributes.Session.Status {
         switch status {
-        case .idle, .connecting: return .starting
-        case .connected: return .live
-        case .failed: return .failed
+        case .idle, .connecting: .starting
+        case .connected: .live
+        case .failed: .failed
         }
     }
 
