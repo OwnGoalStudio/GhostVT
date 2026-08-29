@@ -82,6 +82,15 @@ struct RootView: View {
                 KeyboardBarStore.shared.apply(to: tab.terminal)
             }
         }
+        // The cards' pictures are taken here, on the flip that opens the
+        // cover, whichever control flipped it (the bar's button, the menu
+        // command): the panes are still on screen at this point, and a
+        // capture from inside the cover would be too late for any card the
+        // grid lays out after the transition has removed them.
+        .onChange(of: interface.showsSwitcher) { shows in
+            guard shows else { return }
+            tabManager.capturePreviews()
+        }
         .fullScreenCover(isPresented: $interface.showsSwitcher, onDismiss: refocus) {
             TabSwitcherView(tabManager: tabManager)
         }

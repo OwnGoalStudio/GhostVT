@@ -82,12 +82,27 @@ final class TabManager: ObservableObject {
     /// display link, rendering frames nobody sees; marking them invisible
     /// keeps grid, scrollback, and session while rendering stops
     /// (`TerminalViewState.isSurfaceVisible`).
+    ///
+    /// A tab on its way out of view has its preview taken first: once its
+    /// surface is paused there is no frame to capture, and the switcher's
+    /// card would show nothing.
     private func syncSurfaceVisibility() {
         for tab in tabs {
             let visible = tab.id == activeTabID
             if tab.terminal.isSurfaceVisible != visible {
+                if !visible { tab.capturePreview() }
                 tab.terminal.isSurfaceVisible = visible
             }
+        }
+    }
+
+    /// Brings the visible tab's preview up to date — the switcher calls it
+    /// as it opens, while the panes are still in the window (a full-screen
+    /// cover takes them out once its transition completes). The hidden
+    /// tabs already hold the frame from when they were last seen.
+    func capturePreviews() {
+        for tab in tabs {
+            tab.capturePreview()
         }
     }
 

@@ -1,7 +1,8 @@
 import SwiftUI
 import UIKit
 
-/// Safari-style tab overview: a grid of live snapshot cards.
+/// Safari-style tab overview: a grid of cards, each showing its tab's
+/// surface as it was last seen (`TerminalTab.previewImage`).
 struct TabSwitcherView: View {
     @ObservedObject var tabManager: TabManager
     @Environment(\.dismiss) private var dismiss
@@ -164,7 +165,9 @@ private struct TabCard: View {
     let window: UIWindow?
     @ObservedObject private var theme = AppTheme.shared
     @Environment(\.colorScheme) private var colorScheme
-    @State private var preview = ""
+    @State private var textPreview = ""
+
+    private static let previewHeight: CGFloat = 156
 
     var body: some View {
         VStack(spacing: 0) {
@@ -186,7 +189,14 @@ private struct TabCard: View {
             TabContextMenu(tab: tab, tabManager: tabManager, window: window)
         }
         .onTapGesture(perform: onSelect)
-        .onAppear { preview = tab.snapshotPreview() }
+        .onAppear {
+            // Read only for the card with no picture; the viewport text is
+            // a synchronous read of the surface, not worth doing for every
+            // card in the grid.
+            if tab.previewImage == nil {
+                textPreview = tab.snapshotPreview()
+            }
+        }
     }
 
     private var header: some View {
@@ -224,14 +234,35 @@ private struct TabCard: View {
         .background(Color.primary.opacity(0.06))
     }
 
+    /// The picture is a still: what the surface showed when this tab was
+    /// last on screen (or as the switcher opened, for the active one). It
+    /// is not retaken on redraws behind the cover — toggling the appearance
+    /// from the switcher's settings recolours the card, not the picture.
+    @ViewBuilder
     private var previewBody: some View {
-        Text(preview.isEmpty ? " " : preview)
-            .font(.system(size: 7, design: .monospaced))
-            .lineSpacing(1)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(DS.Padding.s)
-            .clipped()
-            .frame(height: 156)
-            .accessibilityHidden(true)
+        if let image = tab.previewImage {
+            // Scaled to the card's width and anchored at the top, the way
+            // Safari shows a page: the prompt's neighbourhood is the part
+            // that identifies a terminal, and the frame keeps the grid's
+            // row height whatever the surface's aspect.
+            Color.clear
+                .frame(height: Self.previewHeight)
+                .overlay(alignment: .top) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFill()
+                }
+                .clipped()
+                .accessibilityHidden(true)
+        } else {
+            Text(textPreview.isEmpty ? " " : textPreview)
+                .font(.system(size: 7, design: .monospaced))
+                .lineSpacing(1)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(DS.Padding.s)
+                .clipped()
+                .frame(height: Self.previewHeight)
+                .accessibilityHidden(true)
+        }
     }
 }

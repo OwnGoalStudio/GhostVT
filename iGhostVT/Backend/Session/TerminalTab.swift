@@ -7,6 +7,7 @@ import Combine
 import Foundation
 import GhosttyTerminal
 import SwiftUI
+import UIKit
 
 /// One terminal session: its own surface state and its own connection.
 /// Tabs stay alive (and connected) while in the background; only the active
@@ -220,7 +221,30 @@ final class TerminalTab: ObservableObject, Identifiable {
         return !(store.status == .connected && store.isShellInForeground)
     }
 
-    /// Viewport text for the tab-switcher card preview.
+    /// The surface as last seen — the tab-switcher card's picture. Taken
+    /// from the real pixels (`snapshotImage()`), so it is what the user
+    /// saw, not a re-typeset: a redraw that happens after the capture (an
+    /// appearance toggle over the switcher, output into a hidden tab) is
+    /// not in it until the next capture. `nil` for a tab that has never
+    /// drawn (a reattached session not yet selected); the card falls back
+    /// to `snapshotPreview()` then.
+    @Published private(set) var previewImage: UIImage?
+
+    /// Records the surface's current frame as the preview. Only a
+    /// rendering surface has one to give: a paused one
+    /// (`isSurfaceVisible == false`) may never have presented a frame, and
+    /// `snapshotImage()` of that is an empty image, not `nil` — so the
+    /// capture happens on the way *out* of visibility (`TabManager`
+    /// hides a tab) and when the switcher opens on the visible tab.
+    func capturePreview() {
+        guard terminal.isSurfaceVisible,
+              let image = terminal.attachedPlatformView?.snapshotImage()
+        else { return }
+        previewImage = image
+    }
+
+    /// Viewport text: the page export, and the card preview of a tab that
+    /// has no `previewImage` yet.
     func snapshotPreview() -> String {
         store.session.readViewportText() ?? ""
     }
