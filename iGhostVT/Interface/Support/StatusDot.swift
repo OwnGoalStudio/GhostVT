@@ -1,12 +1,17 @@
 import SwiftUI
 
+/// Connection state as a filled circle glyph. It is an SF Symbol rather than a
+/// `Circle` shape so it sits on the same baseline and scales with the text
+/// beside it — pass the neighbouring title's font.
 struct StatusDot: View {
     let status: TerminalSessionStore.Status
+    var font: DS.Font = .label
 
     var body: some View {
-        Circle()
-            .fill(color)
-            .frame(width: 8, height: 8)
+        Image(systemName: "circle.fill")
+            .font(font)
+            .imageScale(.small)
+            .foregroundColor(color)
             .accessibilityLabel(accessibilityDescription)
     }
 

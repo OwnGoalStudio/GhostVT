@@ -123,15 +123,21 @@ private struct SidebarRow: View {
     let tabManager: TabManager
     let window: UIWindow?
 
+    private var titleFont: DS.Font {
+        isActive ? .labelEmphasis : .label
+    }
+
     var body: some View {
         Button(action: onSelect) {
             HStack(spacing: DS.Padding.s) {
-                ObservedStatusDot(store: tab.store)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(tab.displayTitle)
-                        .font(isActive ? DS.Font.labelEmphasis : DS.Font.label)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
+                    HStack(spacing: DS.Padding.s) {
+                        ObservedStatusDot(store: tab.store, font: titleFont)
+                        Text(tab.displayTitle)
+                            .font(titleFont)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
                     Text(tab.secondaryTitle)
                         .font(DS.Font.caption)
                         .foregroundColor(.secondary)
