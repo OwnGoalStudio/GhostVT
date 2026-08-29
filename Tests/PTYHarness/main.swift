@@ -506,32 +506,47 @@ do {
         session.foregroundProcessName == "sh",
         "the initial foreground name is the spawned executable"
     )
+    check(session.isForegroundShell, "a fresh session has its shell in the foreground")
     let namesLock = NSLock()
-    var reportedNames: [String] = []
+    var reports: [(name: String, isShell: Bool)] = []
     session.start(
         onOutput: { _, _ in },
         onExit: { _, _ in },
-        onProcessName: { _, name in
+        onProcessName: { _, name, isShell in
             namesLock.lock()
-            reportedNames.append(name)
+            reports.append((name, isShell))
             namesLock.unlock()
         }
     )
+    func waitForReport(_ predicate: ((name: String, isShell: Bool)) -> Bool) -> Bool {
+        let deadline = Date().addingTimeInterval(5)
+        while Date() < deadline {
+            namesLock.lock()
+            let hit = reports.contains(where: predicate)
+            namesLock.unlock()
+            if hit { return true }
+            usleep(100_000)
+        }
+        return false
+    }
     // An interactive sh has job control, so the sleep runs in its own
     // foreground process group; the poll must notice within a second or so.
-    session.write(Data("sleep 3\n".utf8))
-    let deadline = Date().addingTimeInterval(5)
-    var sawSleep = false
-    while Date() < deadline, !sawSleep {
-        namesLock.lock()
-        sawSleep = reportedNames.contains("sleep")
-        namesLock.unlock()
-        usleep(100_000)
-    }
+    session.write(Data("sleep 1\n".utf8))
+    let sawSleep = waitForReport { $0.name == "sleep" && !$0.isShell }
     namesLock.lock()
-    let names = reportedNames
+    var names = reports.map(\.name)
     namesLock.unlock()
-    check(sawSleep, "a foreground command is reported by name (saw: \(names))")
+    check(sawSleep, "a foreground command is reported by name, not as the shell (saw: \(names))")
+    // When it ends the shell takes the terminal back, and the report says
+    // so. Keyed on the flag, not the name: `proc_name` of the leader reads
+    // "bash" for macOS's /bin/sh, and a nested shell would keep the name
+    // anyway — the flag is what carries the change.
+    let sawPrompt = waitForReport(\.isShell)
+    namesLock.lock()
+    names = reports.map(\.name)
+    namesLock.unlock()
+    check(sawPrompt, "the shell is reported back in the foreground once the command ends (saw: \(names))")
+    check(session.isForegroundShell, "the session records the shell as foreground again")
     session.invalidate()
 } catch {
     check(false, "a process-name session spawns")

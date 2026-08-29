@@ -131,8 +131,8 @@ final class TabManager: ObservableObject {
         }
         // A finished shell is nearly always a finished tab. With the setting
         // on, skip the Session Ended card and close outright — straight to
-        // `close`, not `requestClose`: the confirmation guards a live shell,
-        // and this one is already gone. On a dead session `close` only
+        // `close`, not `requestClose`: the confirmation guards a running
+        // program, and this one is already gone. On a dead session `close` only
         // clears the daemon's record of it.
         tab.onSessionExit = { [weak self, weak tab] in
             guard SessionAutoClose.isEnabled, let self, let tab else { return }
@@ -181,10 +181,11 @@ final class TabManager: ObservableObject {
         SessionActivityController.shared.refresh()
     }
 
-    /// The path every close control takes: ask first when a live shell would
-    /// die with the tab, close straight away when there is nothing to lose.
+    /// The path every close control takes: ask first when a running program
+    /// would die with the tab, close straight away when there is nothing to
+    /// lose — no session, or a shell idling at its prompt.
     func requestClose(_ tab: TerminalTab) {
-        if tab.hasLiveSession {
+        if tab.hasRunningProgram {
             closeRequest = tab
         } else {
             close(tab)
@@ -217,10 +218,11 @@ final class TabManager: ObservableObject {
         SessionActivityController.shared.refresh()
     }
 
-    /// Whether closing everything would kill a live shell — the case worth a
-    /// confirmation, mirroring `requestClose(_:)` for a single tab.
-    var hasLiveSessions: Bool {
-        tabs.contains { $0.hasLiveSession }
+    /// Whether closing everything would interrupt a running program — the
+    /// case worth a confirmation, mirroring `requestClose(_:)` for a single
+    /// tab.
+    var hasRunningPrograms: Bool {
+        tabs.contains { $0.hasRunningProgram }
     }
 
     func activateAdjacentTab(offset: Int) {

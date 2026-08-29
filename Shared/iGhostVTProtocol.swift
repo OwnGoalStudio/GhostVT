@@ -64,9 +64,10 @@ enum iGhostVTEvent: UInt64, Sendable {
     case output = 100
     case sessionExit = 101
     /// The foreground process on the session's terminal changed; carries
-    /// its name (`processName`). Also stated once in every open/attach
-    /// reply, so a client knows the current name without waiting for a
-    /// change.
+    /// its name (`processName`) and whether that process is the shell the
+    /// session spawned (`foregroundIsShell`) — true at the prompt, false
+    /// while a command runs. Also stated once in every open/attach reply,
+    /// so a client knows the current state without waiting for a change.
     case processName = 102
 }
 
@@ -97,6 +98,9 @@ enum iGhostVTWireKey {
     static let title = "title"
     static let isAttached = "attached"
     static let processName = "proc"
+    /// Whether the foreground process group is the session's own shell,
+    /// i.e. nothing is running in front of it.
+    static let foregroundIsShell = "fgshell"
     static let exitCode = "exit"
     static let reason = "reason"
     /// Why a request failed, in words, when the reply code alone would lose

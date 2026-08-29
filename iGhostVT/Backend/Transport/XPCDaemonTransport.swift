@@ -344,9 +344,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                 if self.replyCode(reply) == .success {
                     self.lock.locked { self.sessionID = resumeSessionID }
                     self.emit(.state(.connected))
-                    if let name = Self.string(iGhostVTWireKey.processName, in: reply) {
-                        self.emit(.processName(name))
-                    }
+                    self.emitForegroundProcess(in: reply)
                     // Replayed scrollback so the surface rebuilds its screen.
                     // Repainted from a clean slate: on an in-app reconnect the
                     // surface still shows the session's last frame, and
@@ -400,9 +398,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                 self.resumeSessionID = sessionID
             }
             self.emit(.state(.connected))
-            if let name = Self.string(iGhostVTWireKey.processName, in: reply) {
-                self.emit(.processName(name))
-            }
+            self.emitForegroundProcess(in: reply)
         }
     }
 
@@ -437,9 +433,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                 emit(.received(data))
             }
         case .processName:
-            if let name = Self.string(iGhostVTWireKey.processName, in: event) {
-                emit(.processName(name))
-            }
+            emitForegroundProcess(in: event)
         case .sessionExit:
             let exitCode = Int32(
                 truncatingIfNeeded: xpc_dictionary_get_int64(event, iGhostVTWireKey.exitCode)
@@ -522,6 +516,16 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
 
     private func emit(_ event: TerminalTransportEvent) {
         onEvent?(event)
+    }
+
+    /// The foreground process as a reply or event 102 states it. An older
+    /// daemon sends no shell flag; `get_bool` reads false for the missing
+    /// key, which the app treats as "something may be running" — the
+    /// safe side.
+    private func emitForegroundProcess(in dictionary: xpc_object_t) {
+        guard let name = Self.string(iGhostVTWireKey.processName, in: dictionary) else { return }
+        let isShell = xpc_dictionary_get_bool(dictionary, iGhostVTWireKey.foregroundIsShell)
+        emit(.processName(name, isShell: isShell))
     }
 
     private static func string(_ key: String, in dictionary: xpc_object_t) -> String? {

@@ -10,7 +10,8 @@ import Foundation
 final class PTYSession {
     typealias OutputHandler = (UInt64, Data) -> Void
     typealias ExitHandler = (UInt64, Int32) -> Void
-    typealias ProcessNameHandler = (UInt64, String) -> Void
+    /// The foreground process's name, and whether it is the shell itself.
+    typealias ProcessNameHandler = (UInt64, String, Bool) -> Void
 
     let id: UInt64
     let command: [String]
@@ -38,6 +39,14 @@ final class PTYSession {
     /// spawned executable's name; kept current by a low-rate poll plus a
     /// rate-limited check as output drains.
     private(set) var foregroundProcessName: String
+
+    /// Whether the foreground process group is the spawned shell's own —
+    /// the shell sits at its prompt (or has only background jobs), with
+    /// nothing running in front of it. The shell is the session leader,
+    /// so its group ID is its pid; a job the shell puts in the foreground
+    /// runs in a group of its own. True from birth: the spawned program
+    /// is the foreground until it hands the terminal to a child.
+    private(set) var isForegroundShell = true
     private var processNamePoll: DispatchSourceTimer?
     private var lastProcessNameCheck = DispatchTime(uptimeNanoseconds: 0)
 
@@ -457,14 +466,18 @@ final class PTYSession {
     }
 
     /// Re-reads which process group is in the foreground on this terminal
-    /// and reports its leader's name when it changed. `tcgetpgrp` on the
-    /// master asks the kernel, so the shell's job control is the source of
-    /// truth; a leader already gone (`proc_name` returns 0) keeps the last
-    /// name until the next change lands.
+    /// and reports its leader's name, and whether it is the shell, when
+    /// either changed. `tcgetpgrp` on the master asks the kernel, so the
+    /// shell's job control is the source of truth; a leader already gone
+    /// (`proc_name` returns 0) keeps the last name until the next change
+    /// lands. The shell flag is checked before the name: a nested shell
+    /// (`zsh` typed into zsh) keeps the name and still means something is
+    /// running.
     private func refreshForegroundProcessName() {
         guard isAlive else { return }
         let processGroup = tcgetpgrp(master)
         guard processGroup > 0 else { return }
+        let isShell = processGroup == childPID
         var buffer = [CChar](repeating: 0, count: 128)
         let length = buffer.withUnsafeMutableBytes { raw -> Int32 in
             guard let base = raw.baseAddress else { return 0 }
@@ -475,9 +488,10 @@ final class PTYSession {
             guard let base = pointer.baseAddress else { return "" }
             return String(cString: base)
         }
-        guard !name.isEmpty, name != foregroundProcessName else { return }
+        guard !name.isEmpty, name != foregroundProcessName || isShell != isForegroundShell else { return }
         foregroundProcessName = name
-        onProcessName?(id, name)
+        isForegroundShell = isShell
+        onProcessName?(id, name, isShell)
     }
 
     /// WNOHANG-polls until the child is reaped, bounded at half a second:

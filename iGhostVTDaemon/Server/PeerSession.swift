@@ -71,14 +71,21 @@ final class PeerSession {
         attachedSessionIDs.remove(sessionID)
     }
 
-    func deliverProcessName(sessionID: UInt64, name: String) {
+    func deliverProcessName(sessionID: UInt64, name: String, isShell: Bool) {
         guard isValid else { return }
         let message = xpc_dictionary_create(nil, nil, 0)
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.version, iGhostVTProtocol.version)
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.event, iGhostVTEvent.processName.rawValue)
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, sessionID)
-        xpc_dictionary_set_string(message, iGhostVTWireKey.processName, name)
+        Self.setForegroundProcess(name: name, isShell: isShell, in: message)
         xpc_connection_send_message(connection, message)
+    }
+
+    /// The foreground process as every open/attach reply and event 102
+    /// state it: the name, and whether it is the shell itself.
+    private static func setForegroundProcess(name: String, isShell: Bool, in message: xpc_object_t) {
+        xpc_dictionary_set_string(message, iGhostVTWireKey.processName, name)
+        xpc_dictionary_set_bool(message, iGhostVTWireKey.foregroundIsShell, isShell)
     }
 
     // MARK: - Requests from the client
@@ -174,10 +181,10 @@ final class PeerSession {
             attachedSessionIDs.insert(session.id)
             if let reply {
                 xpc_dictionary_set_uint64(reply, iGhostVTWireKey.sessionID, session.id)
-                xpc_dictionary_set_string(
-                    reply,
-                    iGhostVTWireKey.processName,
-                    session.foregroundProcessName
+                Self.setForegroundProcess(
+                    name: session.foregroundProcessName,
+                    isShell: session.isForegroundShell,
+                    in: reply
                 )
             }
             return .success
@@ -210,10 +217,10 @@ final class PeerSession {
             if let reply {
                 xpc_dictionary_set_uint64(reply, iGhostVTWireKey.columns, UInt64(session.columns))
                 xpc_dictionary_set_uint64(reply, iGhostVTWireKey.rows, UInt64(session.rows))
-                xpc_dictionary_set_string(
-                    reply,
-                    iGhostVTWireKey.processName,
-                    session.foregroundProcessName
+                Self.setForegroundProcess(
+                    name: session.foregroundProcessName,
+                    isShell: session.isForegroundShell,
+                    in: reply
                 )
                 let replay = session.replayData()
                 replay.withUnsafeBytes { buffer in

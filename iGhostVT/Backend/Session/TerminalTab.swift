@@ -186,14 +186,24 @@ final class TerminalTab: ObservableObject, Identifiable {
         return raw.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    /// Whether closing this tab would kill a real shell — the case the
-    /// interface confirms first, because `close()` has no undo. The box ID is
-    /// the authoritative half: a tab detached in the background is not
-    /// `.connected`, but its shell is alive in the daemon, and that silent
-    /// kill is the one that hurts most. A tab that never got a session has
-    /// nothing to lose.
+    /// Whether closing this tab would kill a real shell. The box ID is the
+    /// authoritative half: a tab detached in the background is not
+    /// `.connected`, but its shell is alive in the daemon. A tab that never
+    /// got a session has nothing to lose.
     var hasLiveSession: Bool {
         daemonSession.id != nil || store.status == .connected
+    }
+
+    /// Whether closing this tab would interrupt something — the case the
+    /// interface confirms first, because `close()` has no undo. A shell
+    /// sitting at its prompt is not it: killing an idle shell loses nothing
+    /// worth an alert, so the close goes straight through. Only a connected
+    /// tab can vouch for that — the daemon states the foreground on every
+    /// attach and pushes each change — so a detached tab, whose last report
+    /// is stale, still asks.
+    var hasRunningProgram: Bool {
+        guard hasLiveSession else { return false }
+        return !(store.status == .connected && store.isShellInForeground)
     }
 
     /// Viewport text for the tab-switcher card preview.

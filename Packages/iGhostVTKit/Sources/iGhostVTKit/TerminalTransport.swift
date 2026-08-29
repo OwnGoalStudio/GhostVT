@@ -30,9 +30,10 @@ public enum TerminalTransportEvent: Sendable {
     case state(TerminalTransportState)
     case received(Data)
     /// The endpoint reports which process is in the foreground on the
-    /// terminal ("zsh", "vim"). A backend that cannot know simply never
-    /// sends it.
-    case processName(String)
+    /// terminal ("zsh", "vim"), and whether that process is the session's
+    /// own shell — nothing running in front of it. A backend that cannot
+    /// know simply never sends it.
+    case processName(String, isShell: Bool)
 }
 
 public enum TerminalTransportState: Sendable, Equatable {

@@ -132,10 +132,10 @@ struct TabSwitcherView: View {
         .buttonStyle(.plain)
     }
 
-    /// Same rule as a single tab's ×: ask first when live shells would die,
-    /// close straight away when there is nothing to lose.
+    /// Same rule as a single tab's ×: ask first when running programs would
+    /// die, close straight away when there is nothing to lose.
     private func requestCloseAll() {
-        guard tabManager.hasLiveSessions else {
+        guard tabManager.hasRunningPrograms else {
             tabManager.closeAll()
             return
         }

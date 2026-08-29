@@ -70,7 +70,12 @@ or no SwiftUI view redraws.
 
 Every presentation of a tab — strip chip, title capsule, sidebar row, switcher
 card — carries the same `TabContextMenu` (copy the page as text or image,
-export it, lock, close). The two locks freeze the *user*, never the program:
+export it, lock, close). Close asks first only when it would interrupt
+something: event 102 also says whether the foreground process group *is* the
+spawned shell (`tcgetpgrp == childPID`, `foregroundIsShell`), and a connected
+tab whose shell is at its prompt closes on the spot (`hasRunningProgram`). A
+detached tab's last report is stale, so it still asks; an unknown state reads
+as running. The two locks freeze the *user*, never the program:
 output keeps flowing and the surface keeps rendering. Both live on
 `LockableTerminalView`, the app's `TerminalView` subclass installed through
 the library's `makePlatformView` seam — refusing `hitTest` and first responder

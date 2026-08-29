@@ -55,6 +55,13 @@ final class TerminalSessionStore: ObservableObject {
     /// report — a transport that cannot know never sends one.
     @Published private(set) var processName: String = ""
 
+    /// Whether the foreground process is the session's own shell — nothing
+    /// running in front of it, as the daemon reports alongside
+    /// `processName`. False until the first report, so an unknown state
+    /// reads as "something may be running". Reset on every connect: a
+    /// reattach restates it, and the value from before a detach is stale.
+    @Published private(set) var isShellInForeground = false
+
     /// Latest grid size reported by the surface; forwarded to the transport,
     /// which decides whether it can carry it.
     private(set) var viewport: (columns: Int, rows: Int)?
@@ -204,8 +211,9 @@ final class TerminalSessionStore: ObservableObject {
         switch event {
         case let .received(data):
             session.receive(data)
-        case let .processName(name):
+        case let .processName(name, isShell):
             processName = name
+            isShellInForeground = isShell
         case let .state(state):
             apply(state)
         }
@@ -214,6 +222,7 @@ final class TerminalSessionStore: ObservableObject {
     private func apply(_ state: TerminalTransportState) {
         switch state {
         case .connecting:
+            isShellInForeground = false
             // No status line: the pill overlay already says connecting, and
             // a clean launch should open on the shell's own first line.
             // Only trouble (interruptions, failures) gets written into the
