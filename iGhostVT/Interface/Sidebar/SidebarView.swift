@@ -12,7 +12,11 @@ struct SidebarView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // The Mac's window carries the product name in its title bar
+            // already; on iPad the sidebar's head is the one place it shows.
+            #if !targetEnvironment(macCatalyst)
             header
+            #endif
 
             ScrollView {
                 LazyVStack(spacing: 2) {
@@ -69,7 +73,7 @@ struct SidebarView: View {
 
     private var header: some View {
         HStack {
-            Text("Tabs")
+            Text(verbatim: "iGhostVT")
                 .font(DS.Font.title)
             Spacer()
             Text(countLabel)
@@ -100,11 +104,6 @@ struct SidebarView: View {
         .padding(.horizontal, DS.Padding.m)
         .padding(.vertical, DS.Padding.s)
         .frame(maxWidth: .infinity)
-        .overlay(alignment: .top) {
-            Rectangle()
-                .fill(theme.hairline(for: colorScheme))
-                .frame(height: 1)
-        }
     }
 
     private var countLabel: String {
