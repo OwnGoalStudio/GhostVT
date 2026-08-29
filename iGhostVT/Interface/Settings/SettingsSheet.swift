@@ -34,17 +34,7 @@ struct SettingsSheet: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "checkmark")
-                            .font(.body.weight(.semibold))
-                            .foregroundColor(.white)
-                    }
-                    .prominentToolbarButton()
-                    .accessibilityLabel("Done")
-                }
-            }
+            .doneToolbarItem { dismiss() }
         }
         .navigationViewStyle(.stack)
     }
@@ -57,7 +47,7 @@ struct SettingsSheet: View {
                 slotRow(
                     title: "Light Theme",
                     icon: "sun.max.fill",
-                    name: theme.selection.lightName ?? Self.defaultLabel("Alabaster")
+                    name: theme.selection.lightName ?? Self.defaultLabel(AppTheme.defaultLightName)
                 )
             }
             NavigationLink {
@@ -66,7 +56,7 @@ struct SettingsSheet: View {
                 slotRow(
                     title: "Dark Theme",
                     icon: "moon.fill",
-                    name: theme.selection.darkName ?? Self.defaultLabel("Afterglow")
+                    name: theme.selection.darkName ?? Self.defaultLabel(AppTheme.defaultDarkName)
                 )
             }
         } header: {
@@ -78,15 +68,13 @@ struct SettingsSheet: View {
         }
     }
 
-    /// One stepper per kind of text: the chrome's, a multiplier on every
-    /// `DS.Font` role, and the terminal's, a point size the surface takes as
-    /// it is. The sheet's own rows carry the roles, so the first stepper
+    /// One stepper per kind of text: the terminal's, a point size the
+    /// surface takes as it is, and the chrome's, a multiplier on every
+    /// `DS.Font` role. The terminal comes first — it is what people came to
+    /// resize; the sheet's own rows carry the roles, so the second stepper
     /// shows its effect as it goes.
     private var textSizeSection: some View {
         Section {
-            Stepper(value: $interfaceTextStep, in: InterfaceTextSize.steps) {
-                slotRow(title: "Interface", icon: "textformat.size", name: interfaceScaleDescription)
-            }
             Stepper(value: $terminalFontSize, in: TerminalFontSize.range) {
                 slotRow(
                     title: "Terminal",
@@ -97,15 +85,18 @@ struct SettingsSheet: View {
                     )
                 )
             }
+            Stepper(value: $interfaceTextStep, in: InterfaceTextSize.steps) {
+                slotRow(title: "Interface", icon: "textformat.size", name: interfaceScaleDescription)
+            }
         } header: {
             Text("Text Size")
                 .font(DS.Font.caption)
         } footer: {
             Text(
                 """
-                The interface size scales every label and control. New \
-                terminals open at the terminal size; a tab that is already \
-                open keeps the size it was zoomed to.
+                New terminals open at the terminal size; a tab that is already \
+                open keeps the size it was zoomed to. The interface size scales \
+                every label and control.
                 """
             )
                 .font(DS.Font.detail)
@@ -304,14 +295,45 @@ struct ThemeListView: View {
 }
 
 private extension View {
-    /// The sheet's one confirming control, filled with the accent: glass on
-    /// iOS 26, the bordered prominent style below.
+    /// The sheet's one confirming control, filled with the accent. On iOS 26
+    /// the toolbar wraps every item in glass of its own, which a prominent
+    /// button would then sit inside — a disc within a disc — so the item's
+    /// shared background is hidden and the button's own glass is the circle.
+    /// Two toolbars rather than one conditional item: `ToolbarContent`
+    /// cannot branch on iOS 15.
     @ViewBuilder
-    func prominentToolbarButton() -> some View {
+    func doneToolbarItem(action: @escaping () -> Void) -> some View {
         if #available(iOS 26.0, *) {
-            buttonStyle(.glassProminent).tint(.accentColor)
+            toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    DoneButton(action: action)
+                        .buttonStyle(.glassProminent)
+                        .buttonBorderShape(.circle)
+                        .tint(.accentColor)
+                }
+                .sharedBackgroundVisibility(.hidden)
+            }
         } else {
-            buttonStyle(.borderedProminent).tint(.accentColor)
+            toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    DoneButton(action: action)
+                        .buttonStyle(.borderedProminent)
+                        .tint(.accentColor)
+                }
+            }
         }
+    }
+}
+
+private struct DoneButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(systemName: "checkmark")
+                .font(.body.weight(.semibold))
+                .foregroundColor(.white)
+        }
+        .accessibilityLabel("Done")
     }
 }

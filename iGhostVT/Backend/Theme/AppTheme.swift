@@ -31,9 +31,15 @@ final class AppTheme: ObservableObject {
     private static let lightKey = "Theme.light"
     private static let darkKey = "Theme.dark"
 
-    /// Built-in fallbacks matching `TerminalTheme.default`.
-    private static let defaultLightBackground = "F7F7F7"
-    private static let defaultDarkBackground = "212121"
+    /// The catalog themes a fresh install runs — Apple's own terminal
+    /// colours, so the app looks like the Mac's Terminal until someone picks
+    /// otherwise. Named here, resolved from the catalog like any selection.
+    static let defaultLightName = "Apple System Colors Light"
+    static let defaultDarkName = "Apple System Colors"
+
+    /// Those themes' backgrounds, for the moment the catalog has no answer.
+    private static let defaultLightBackground = "FEFFFF"
+    private static let defaultDarkBackground = "1E1E1E"
 
     private init() {
         selection = Selection(
@@ -43,11 +49,11 @@ final class AppTheme: ObservableObject {
     }
 
     private var lightDefinition: GhosttyThemeDefinition? {
-        selection.lightName.flatMap { GhosttyThemeCatalog.theme(named: $0) }
+        GhosttyThemeCatalog.theme(named: selection.lightName ?? Self.defaultLightName)
     }
 
     private var darkDefinition: GhosttyThemeDefinition? {
-        selection.darkName.flatMap { GhosttyThemeCatalog.theme(named: $0) }
+        GhosttyThemeCatalog.theme(named: selection.darkName ?? Self.defaultDarkName)
     }
 
     var terminalTheme: TerminalTheme {
