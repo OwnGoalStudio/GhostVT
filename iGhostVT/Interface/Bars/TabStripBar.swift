@@ -21,14 +21,13 @@ struct TabStripBar: View {
     var body: some View {
         GlassBarContainer(spacing: DS.Padding.s) {
             HStack(spacing: DS.Padding.s) {
-                Button(action: { showsSidebar.toggle() }) {
-                    Image(systemName: "sidebar.leading")
-                        .font(DS.Font.control)
-                        .frame(width: Self.controlSize, height: Self.controlSize)
-                        .contentShape(Circle())
+                // With the sidebar open the toggle sits in the sidebar's own
+                // top strip, beside the separator (`SidebarView`).
+                if !showsSidebar {
+                    SidebarToggleButton(showsSidebar: $showsSidebar)
+                        .barGlass(in: Circle())
+                        .transition(.opacity)
                 }
-                .barGlass(in: Circle())
-                .accessibilityLabel("Toggle Sidebar")
 
                 if tabManager.tabs.isEmpty {
                     // With no tabs there is nothing to title or strip: an
@@ -68,10 +67,13 @@ struct TabStripBar: View {
     }
 
     /// With the sidebar hidden, the Mac's traffic lights float over this
-    /// bar's leading end; the sidebar toggle moves out from under them.
+    /// bar's leading end; the sidebar toggle moves out from under them, and
+    /// the bar's horizontal padding is then the gap to the lights — the
+    /// same 8pt the toggle keeps from the capsule on its other side. With
+    /// the sidebar open it clears them itself and the bar starts flush.
     private var windowControlsInset: CGFloat {
         #if targetEnvironment(macCatalyst)
-            showsSidebar ? 0 : CatalystWindowChrome.windowControlsWidth - DS.Padding.l
+            showsSidebar ? 0 : CatalystWindowChrome.windowControlsEnd
         #else
             0
         #endif

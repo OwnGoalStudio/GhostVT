@@ -256,7 +256,8 @@ Gotchas that bit us:
   traffic lights are moved to its vertical centre (`standardWindowButton:`,
   re-done on every `NSWindowDidResizeNotification`, since AppKit re-tiles
   them), the sidebar keeps a strip of the bar's height above its list, and
-  the bar beside a hidden sidebar starts after `windowControlsWidth`. The
+  the bar beside a hidden sidebar starts after `windowControlsEnd`, its own
+  8pt padding being the gap to the lights. The
   lights' geometry is *screen* points and gets converted: the iPad-idiom
   Catalyst app draws at 77%, so a UIKit inset sized in the app's own points
   lands 23% short of the lights. `WindowDragRegion`,

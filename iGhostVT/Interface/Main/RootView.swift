@@ -43,6 +43,7 @@ struct RootView: View {
                 if isRegularWidth, showsSidebar {
                     SidebarView(
                         tabManager: tabManager,
+                        showsSidebar: $showsSidebar,
                         onShowSettings: { interface.showsSettingsSheet = true }
                     )
                     .frame(width: sidebarWidth)

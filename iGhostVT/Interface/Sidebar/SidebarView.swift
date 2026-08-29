@@ -5,6 +5,9 @@ import SwiftUI
 /// and switcher use.
 struct SidebarView: View {
     @ObservedObject var tabManager: TabManager
+    /// The sidebar carries its own toggle while open, at the trailing end
+    /// of its top strip — beside the separator it closes.
+    @Binding var showsSidebar: Bool
     let onShowSettings: () -> Void
     @ObservedObject private var theme = AppTheme.shared
     @Environment(\.colorScheme) private var colorScheme
@@ -18,6 +21,10 @@ struct SidebarView: View {
             #if targetEnvironment(macCatalyst)
                 WindowDragRegion()
                     .frame(height: CatalystWindowChrome.titleBarHeight)
+                    .overlay(alignment: .trailing) {
+                        toggle
+                            .padding(.horizontal, DS.Padding.s)
+                    }
             #else
                 header
             #endif
@@ -82,19 +89,30 @@ struct SidebarView: View {
         }
     }
 
+    /// The top bar's height, so the list starts level with the terminal
+    /// under the bar and the toggle sits at the bar's own inset from the
+    /// window's top, as it does in the bar.
     private var header: some View {
-        HStack {
+        HStack(spacing: DS.Padding.s) {
             Text(verbatim: "iGhostVT")
                 .font(DS.Font.title)
+                .padding(.leading, DS.Padding.s)
             Spacer()
             Text(countLabel)
                 .font(DS.Font.caption)
                 .foregroundColor(.secondary)
+            toggle
         }
-        .padding(.horizontal, DS.Padding.l)
-        .padding(.top, DS.Padding.m)
-        .padding(.bottom, DS.Padding.s)
+        .padding(.horizontal, DS.Padding.s)
+        .padding(.vertical, DS.Padding.s)
         .frame(maxWidth: .infinity)
+    }
+
+    /// Styled like the footer's gear: the sidebar's controls are quiet,
+    /// the glass disc belongs to the bar.
+    private var toggle: some View {
+        SidebarToggleButton(showsSidebar: $showsSidebar)
+            .foregroundColor(.secondary)
     }
 
     /// Settings' home at regular width — the top bar carries no gear, so

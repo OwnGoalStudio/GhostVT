@@ -43,10 +43,10 @@ import UIKit
         /// window without a title bar, in screen points.
         private static let windowControlsHeight: CGFloat = 16
 
-        /// Where content beside the traffic lights may start: the lights end
-        /// 70 screen points in (three 16pt buttons from x = 8, 7pt apart),
-        /// plus the gap a toolbar keeps from them.
-        @MainActor static let windowControlsWidth: CGFloat = 92 * pointsPerScreenPoint
+        /// Where the traffic lights end: three 16pt buttons from x = 8, 7pt
+        /// apart, so 70 screen points in. Content beside them adds its own
+        /// gap — the top bar the same 8pt it keeps between its controls.
+        @MainActor static let windowControlsEnd: CGFloat = 70 * pointsPerScreenPoint
 
         static func install() {
             guard let delegateClass = NSClassFromString("UINSApplicationDelegate") else { return }
