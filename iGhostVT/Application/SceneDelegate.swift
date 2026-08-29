@@ -45,12 +45,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let host = UIHostingController(
             rootView: RootView(tabManager: tabManager, interface: interface).interfaceTextSize()
         )
-        #if targetEnvironment(macCatalyst)
-            // Transparent down to the effect view behind the scene, so the
-            // sidebar's blur is the desktop and not a flat wash.
-            window.backgroundColor = .clear
-            host.view.backgroundColor = .clear
-        #endif
         window.rootViewController = host
         window.makeKeyAndVisible()
         self.window = window

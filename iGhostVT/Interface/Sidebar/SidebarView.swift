@@ -67,8 +67,8 @@ struct SidebarView: View {
         // One standard blur spans the complete sidebar. Keeping it in a
         // single layer avoids the different tints produced when separate
         // materials sample the header, list, and footer independently. On
-        // the Mac the blur is AppKit's, behind the window
-        // (`CatalystWindowChrome`), and the sidebar is transparent to it.
+        // the Mac there is no blur: the sidebar is the terminal's own
+        // background colour, painted once by `RootView`.
         .background {
             #if !targetEnvironment(macCatalyst)
                 Rectangle()
@@ -102,6 +102,7 @@ struct SidebarView: View {
                 .font(DS.Font.caption)
                 .foregroundColor(.secondary)
             toggle
+                .id(-1)
         }
         .padding(.horizontal, DS.Padding.s)
         .padding(.vertical, DS.Padding.s)

@@ -31,13 +31,11 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            // On the Mac the sidebar stays transparent to the blur behind
-            // the window (`CatalystWindowChrome`); only the terminal column
-            // paints (`terminalColumn`).
-            #if !targetEnvironment(macCatalyst)
-                theme.background(for: colorScheme)
-                    .ignoresSafeArea()
-            #endif
+            // The theme's background under everything: on the Mac this is
+            // what the sidebar shows, the same colour as the terminal beside
+            // it (the sidebar paints nothing of its own there).
+            theme.background(for: colorScheme)
+                .ignoresSafeArea()
 
             HStack(spacing: 0) {
                 if isRegularWidth, showsSidebar {

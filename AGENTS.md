@@ -243,15 +243,14 @@ Gotchas that bit us:
   carries a real extension. Links and text snippets paste as text. The
   library's own staging API is internal, so the copy lives in the app; only
   the directory and the stale sweep are shared with pastes.
-- **The Mac window's blur is AppKit's, reached through the ObjC runtime.**
+- **The Mac window's chrome is AppKit's, reached through the ObjC runtime.**
   `CatalystWindowChrome.install()` (called from `main.swift`, before any
-  scene) hooks `UINSApplicationDelegate didCreateUIScene:` and slides an
-  `NSGlassEffectView` (macOS 26) / `NSVisualEffectView` (sidebar material,
-  behind-window) under the scene view — FlowDown's trick; a
-  `UIVisualEffectView` only samples within the window. It shows through
-  whatever stays transparent: the window, the hosting controller, and the
-  sidebar (no material on Catalyst); the terminal column paints the theme
-  itself. The title bar is hidden and `RootView` ignores the top safe area,
+  scene) hooks `UINSApplicationDelegate didCreateUIScene:`. The sidebar has
+  no blur on the Mac — a behind-window `NSVisualEffectView`/`NSGlassEffectView`
+  was tried and taken out (glass under the bar's glass controls, and the
+  toggle transitions across it rendered as black discs): `RootView` paints
+  the theme's background under the whole window, so the sidebar is the
+  terminal's own colour. The title bar is hidden and `RootView` ignores the top safe area,
   so the top bar rides the window's edge and is the title bar now: the
   traffic lights are moved to its vertical centre (`standardWindowButton:`,
   re-done on every `NSWindowDidResizeNotification`, since AppKit re-tiles
