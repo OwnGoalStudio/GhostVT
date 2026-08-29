@@ -26,7 +26,6 @@ struct TabStripBar: View {
                 if !showsSidebar {
                     SidebarToggleButton(showsSidebar: $showsSidebar)
                         .barGlass(in: Circle())
-                        .transition(.opacity)
                 }
 
                 if tabManager.tabs.isEmpty {

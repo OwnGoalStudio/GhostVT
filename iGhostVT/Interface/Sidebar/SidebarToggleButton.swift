@@ -18,7 +18,7 @@ struct SidebarToggleButton: View {
             Image(systemName: "sidebar.leading")
                 .font(DS.Font.control)
                 .frame(width: TabStripBar.controlSize, height: TabStripBar.controlSize)
-                .contentShape(Circle())
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityLabel("Toggle Sidebar")
