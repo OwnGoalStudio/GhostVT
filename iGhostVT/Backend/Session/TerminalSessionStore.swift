@@ -15,8 +15,9 @@ final class TerminalSessionStore: ObservableObject {
     /// The whole session pipeline logs here (`log stream --process iGhostVT`)
     /// because a black surface has no other way to say where it stopped:
     /// no viewport line means the surface never attached, no connect line
-    /// means the transport was never asked.
-    static let logger = Logger(subsystem: "wiki.qaq.iGhostVT", category: "session")
+    /// means the transport was never asked. Nonisolated because the viewport
+    /// line is written from the thread that measured the grid.
+    nonisolated static let logger = Logger(subsystem: "wiki.qaq.iGhostVT", category: "session")
 
     enum Status: Equatable {
         case idle
@@ -62,10 +63,6 @@ final class TerminalSessionStore: ObservableObject {
     /// reattach restates it, and the value from before a detach is stale.
     @Published private(set) var isShellInForeground = false
 
-    /// Latest grid size reported by the surface; forwarded to the transport,
-    /// which decides whether it can carry it.
-    private(set) var viewport: (columns: Int, rows: Int)?
-
     let session: InMemoryTerminalSession
     private let relay = TransportRelay()
     private let titleTracker = CommandTitleTracker()
@@ -106,15 +103,28 @@ final class TerminalSessionStore: ObservableObject {
                 titleTracker.consume(data)
             },
             resize: { viewport in
+                // Logged here, on the reporting thread, rather than from a
+                // main-actor hop: only the grid is consumed, and the relay
+                // needs no help from the main actor to forward it.
+                Self.logger.info(
+                    "surface reported viewport \(viewport.columns)x\(viewport.rows)"
+                )
                 relay.updateViewport(
                     columns: Int(viewport.columns),
                     rows: Int(viewport.rows)
                 )
-            }
+            },
+            // Only columns and rows are consumed; a report whose grid did
+            // not change would only be dropped by the transport anyway.
+            suppressesPixelOnlyResizes: true
         )
-        relay.onViewportChange = { [weak self] columns, rows in
+        // The first viewport report means the surface is attached and
+        // rendering, so bytes fed to the session are no longer dropped — the
+        // earliest safe moment to open the connection. It also means a
+        // transport that negotiates size knows the grid before connecting.
+        relay.onFirstViewport = { [weak self] in
             Task { @MainActor [weak self] in
-                self?.handleViewportChange(columns: columns, rows: rows)
+                self?.connectWhenReady()
             }
         }
         titleTracker.onCommand = { [weak self] command in
@@ -138,16 +148,6 @@ final class TerminalSessionStore: ObservableObject {
         inferredTitle = command
     }
 
-    /// The first viewport report means the surface is attached and rendering,
-    /// so bytes fed to the session are no longer dropped — the earliest safe
-    /// moment to open the connection. It also means a transport that
-    /// negotiates size knows the grid before connecting.
-    private func handleViewportChange(columns: Int, rows: Int) {
-        Self.logger.info("surface reported viewport \(columns)x\(rows)")
-        viewport = (columns, rows)
-        connectWhenReady()
-    }
-
     /// The scene reached foreground-active; the second half of the
     /// auto-connect gate. Signalled by the scene delegate through the
     /// `TabManager`, and again for tabs created while already active.
@@ -164,7 +164,7 @@ final class TerminalSessionStore: ObservableObject {
     /// measures ~49×16, and connecting right then spawned the shell at that
     /// size.
     private func connectWhenReady() {
-        guard !hasAutoConnected, isSceneActive, viewport != nil else { return }
+        guard !hasAutoConnected, isSceneActive, relay.hasViewport else { return }
         hasAutoConnected = true
         connect()
     }
@@ -182,20 +182,30 @@ final class TerminalSessionStore: ObservableObject {
         // editor never saw the bytes that the dropped link ate.
         titleTracker.reset()
         let transport = makeTransport()
+        let relay = relay
         Self.logger.info("connecting via \(transport.endpointDescription)")
         transport.onEvent = { [weak self] event in
+            // Sized here, on the transport's own queue and before the hop
+            // to the main actor: the newest grid has to reach the session
+            // *behind* the open or attach, and only the relay's record is
+            // guaranteed to be the newest. A copy re-sent from the main
+            // actor is the one thing that can arrive behind a fresher
+            // report — at cold launch the main thread is deep in layout
+            // while ghostty's IO thread has already reported the settled
+            // grid, and the stale copy landed last: a 49×16 PTY under a
+            // 93×32 surface, stuck until the next real resize because the
+            // surface reports only changes.
+            if case .state(.connected) = event {
+                relay.resendLatestViewport()
+            }
             Task { @MainActor [weak self] in
                 self?.handle(event)
             }
         }
+        // Installing the transport primes it with the surface's latest grid,
+        // so the open starts at the size the surface has rather than the
+        // 80×24 protocol default.
         relay.transport = transport
-        // A reconnect's transport starts with no viewport of its own, and an
-        // attach sizes the PTY before this store hears `.connected` — without
-        // priming, the daemon briefly gets the 80×24 protocol default and the
-        // shell redraws for a grid nobody has.
-        if let viewport {
-            transport.updateViewport(columns: viewport.columns, rows: viewport.rows)
-        }
         transport.connect()
     }
 
@@ -232,9 +242,6 @@ final class TerminalSessionStore: ObservableObject {
             Self.logger.info("connected to \(self.endpointDescription)")
             status = .connected
             reconnectAttempt = 0
-            if let viewport {
-                relay.updateViewport(columns: viewport.columns, rows: viewport.rows)
-            }
         case let .interrupted(reason):
             Self.logger.error("link lost: \(reason ?? "no reason")")
             printStatusLine(String(localized: "Connection lost. Reconnecting…"))
@@ -290,12 +297,35 @@ final class TerminalSessionStore: ObservableObject {
 /// Thread-safe indirection between the long-lived terminal session and the
 /// transport of the moment. The session's write/resize closures are captured
 /// once at init; reconnects swap the transport behind this relay.
+///
+/// The relay is also the record of the surface's latest grid that outlives
+/// any one transport. Every report passes through `updateViewport` on the
+/// thread that made it; a transport installed later is primed with the
+/// record, and `resendLatestViewport` replays it once a session exists. All
+/// three happen under one lock, so no report can slip between a swap and
+/// its prime, and no transport ever hears an older size after a newer one.
+/// `TerminalTransport.updateViewport` is therefore called with the lock
+/// held, and must neither block nor call back into the store.
 private final class TransportRelay: @unchecked Sendable {
     private let lock = NSLock()
     private var _transport: TerminalTransport?
+    private var _latestViewport: (columns: Int, rows: Int)?
+    private var _onFirstViewport: (@Sendable () -> Void)?
 
-    /// Observes viewport changes regardless of transport presence.
-    var onViewportChange: (@Sendable (Int, Int) -> Void)?
+    /// Fires once, on the first report. Later reports change nothing the
+    /// store tracks — the relay forwards them itself — so they cost no hop
+    /// to the main actor.
+    var onFirstViewport: (@Sendable () -> Void)? {
+        get { lock.lock(); defer { lock.unlock() }; return _onFirstViewport }
+        set { lock.lock(); _onFirstViewport = newValue; lock.unlock() }
+    }
+
+    /// Whether the surface has reported a grid yet.
+    var hasViewport: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return _latestViewport != nil
+    }
 
     var transport: TerminalTransport? {
         get {
@@ -306,6 +336,9 @@ private final class TransportRelay: @unchecked Sendable {
         set {
             lock.lock()
             _transport = newValue
+            if let newValue, let viewport = _latestViewport {
+                newValue.updateViewport(columns: viewport.columns, rows: viewport.rows)
+            }
             lock.unlock()
         }
     }
@@ -315,7 +348,23 @@ private final class TransportRelay: @unchecked Sendable {
     }
 
     func updateViewport(columns: Int, rows: Int) {
-        onViewportChange?(columns, rows)
-        transport?.updateViewport(columns: columns, rows: rows)
+        lock.lock()
+        let isFirst = _latestViewport == nil
+        _latestViewport = (columns, rows)
+        _transport?.updateViewport(columns: columns, rows: rows)
+        let onFirstViewport = isFirst ? _onFirstViewport : nil
+        lock.unlock()
+        onFirstViewport?()
+    }
+
+    /// Hands the current transport the newest grid again — for the moment
+    /// its session comes into being, when the transport itself only knows
+    /// the size the open or attach was sent with.
+    func resendLatestViewport() {
+        lock.lock()
+        if let viewport = _latestViewport {
+            _transport?.updateViewport(columns: viewport.columns, rows: viewport.rows)
+        }
+        lock.unlock()
     }
 }

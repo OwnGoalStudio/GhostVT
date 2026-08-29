@@ -27,7 +27,19 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     private let lock = NSLock()
     private var connection: xpc_connection_t?
     private var sessionID: UInt64?
-    private var pendingViewport: (columns: Int, rows: Int)?
+    /// The grid the host reported most recently, so an open spawns the shell
+    /// at the size the surface has rather than the protocol default. Confined
+    /// to `queue`, as is every size decision below: `updateViewport` hops
+    /// there, and the open/attach replies arrive there.
+    private var latestViewport: (columns: Int, rows: Int)?
+    /// The grid the daemon's session is known to hold — what the open spawned
+    /// at, what the attach reply said, or the last resize sent. A repeat is
+    /// dropped: the host re-sends its newest size on every connect and the
+    /// surface reports again on pixel-only changes, and each would otherwise
+    /// cost a message for a `TIOCSWINSZ` the kernel treats as a no-op.
+    /// Forgotten with the connection, since a new one may reach a session
+    /// this transport never sized.
+    private var appliedViewport: (columns: Int, rows: Int)?
     private var _onEvent: (@Sendable (TerminalTransportEvent) -> Void)?
     private var _onSessionExit: (@Sendable (UInt64, Int32) -> Void)?
 
@@ -124,20 +136,33 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         }
     }
 
+    /// Sizes the session, or records the size for the open to start at
+    /// while there is none yet. The host calls this again on `.connected`,
+    /// which is what carries a size reported during the open or attach
+    /// round trip to the session: this transport never replays a size on
+    /// its own, so a size captured before the trip can never outrank one
+    /// reported during it.
     public func updateViewport(columns: Int, rows: Int) {
         guard columns > 0, rows > 0 else { return }
         queue.async {
-            guard let link = self.attachedLink() else {
-                // Not open yet: remember it so openSession starts at the size
-                // the surface actually has.
-                self.lock.locked { self.pendingViewport = (columns, rows) }
-                return
-            }
-            let message = Self.makeMessage(.resize, sessionID: link.sessionID)
-            xpc_dictionary_set_uint64(message, iGhostVTWireKey.columns, UInt64(columns))
-            xpc_dictionary_set_uint64(message, iGhostVTWireKey.rows, UInt64(rows))
-            xpc_connection_send_message(link.connection, message)
+            self.latestViewport = (columns, rows)
+            guard let link = self.attachedLink() else { return }
+            self.sendResize(columns: columns, rows: rows, over: link)
         }
+    }
+
+    /// Runs on `queue`.
+    private func sendResize(
+        columns: Int, rows: Int, over link: (connection: xpc_connection_t, sessionID: UInt64)
+    ) {
+        if let applied = appliedViewport, applied.columns == columns, applied.rows == rows {
+            return
+        }
+        appliedViewport = (columns, rows)
+        let message = Self.makeMessage(.resize, sessionID: link.sessionID)
+        xpc_dictionary_set_uint64(message, iGhostVTWireKey.columns, UInt64(columns))
+        xpc_dictionary_set_uint64(message, iGhostVTWireKey.rows, UInt64(rows))
+        xpc_connection_send_message(link.connection, message)
     }
 
     /// Detach without killing: the shell keeps running in the daemon.
@@ -332,10 +357,6 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
 
     private func openOrAttachSession() {
         guard let connection = lock.locked({ self.connection }) else { return }
-        let viewport = lock.locked { self.pendingViewport }
-        let columns = UInt64(viewport?.columns ?? Int(iGhostVTProtocol.defaultColumns))
-        let rows = UInt64(viewport?.rows ?? Int(iGhostVTProtocol.defaultRows))
-
         if let resumeSessionID = lock.locked({ self.resumeSessionID }) {
             let message = Self.makeMessage(.attachSession)
             xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, resumeSessionID)
@@ -343,6 +364,12 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                 guard let self else { return }
                 if self.replyCode(reply) == .success {
                     self.lock.locked { self.sessionID = resumeSessionID }
+                    // The attach carried no size; the reply says which one
+                    // the session kept, so the host's re-send on
+                    // `.connected` costs nothing when the grid is unchanged.
+                    let columns = Int(xpc_dictionary_get_uint64(reply, iGhostVTWireKey.columns))
+                    let rows = Int(xpc_dictionary_get_uint64(reply, iGhostVTWireKey.rows))
+                    self.appliedViewport = columns > 0 && rows > 0 ? (columns, rows) : nil
                     self.emit(.state(.connected))
                     self.emitForegroundProcess(in: reply)
                     // Replayed scrollback so the surface rebuilds its screen.
@@ -357,7 +384,6 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                         payload.append(replay)
                         self.emit(.received(payload))
                     }
-                    self.updateViewport(columns: Int(columns), rows: Int(rows))
                 } else {
                     // The session is gone: scrub the dead ID everywhere
                     // before falling back to a fresh shell. Leaving it in
@@ -365,16 +391,21 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                     // detached shell the daemon no longer has.
                     self.lock.locked { self.resumeSessionID = nil }
                     self.onSessionExit?(resumeSessionID, -1)
-                    self.openSession(columns: columns, rows: rows)
+                    self.openSession()
                 }
             }
             return
         }
-        openSession(columns: columns, rows: rows)
+        openSession()
     }
 
-    private func openSession(columns: UInt64, rows: UInt64) {
+    /// Runs on `queue`. Spawns at the grid reported so far — read here, not
+    /// by the caller, since a failed attach reaches this after a round trip
+    /// during which the surface may well have reported again.
+    private func openSession() {
         guard let connection = lock.locked({ self.connection }) else { return }
+        let columns = UInt64(latestViewport?.columns ?? Int(iGhostVTProtocol.defaultColumns))
+        let rows = UInt64(latestViewport?.rows ?? Int(iGhostVTProtocol.defaultRows))
         let message = Self.makeMessage(.openSession)
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.columns, columns)
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.rows, rows)
@@ -397,6 +428,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                 self.sessionID = sessionID
                 self.resumeSessionID = sessionID
             }
+            self.appliedViewport = (Int(columns), Int(rows))
             self.emit(.state(.connected))
             self.emitForegroundProcess(in: reply)
         }
@@ -470,6 +502,10 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             self.sessionID = nil
             return current
         }
+        // Still on `queue`: the connection targets it, so its error events
+        // and every reply arrive there, and each other caller is a block on
+        // it.
+        appliedViewport = nil
         guard let connection else { return false }
         xpc_connection_cancel(connection)
         return true

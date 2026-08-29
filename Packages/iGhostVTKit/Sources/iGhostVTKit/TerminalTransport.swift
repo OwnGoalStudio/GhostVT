@@ -21,6 +21,14 @@ public protocol TerminalTransport: AnyObject {
 
     /// The terminal grid changed size. The daemon transport sends a `resize`;
     /// an SSH transport maps it to a window-change request.
+    ///
+    /// Called before `connect()` with the grid the session should start at,
+    /// on every change after, and once more on `.connected` so a size
+    /// reported during the connection round trip still reaches the session.
+    /// The host makes these calls from the thread that measured the grid,
+    /// under the lock that keeps them in order: the implementation must not
+    /// block and must not call back into the host synchronously. Sizes may
+    /// repeat; one the endpoint already holds should be dropped.
     func updateViewport(columns: Int, rows: Int)
 
     func disconnect()
