@@ -12,11 +12,8 @@ struct SettingsSheet: View {
     @ObservedObject private var agent = MacLaunchAgent.shared
     @Environment(\.dismiss) private var dismiss
 
-    /// Steps from the system's Dynamic Type size; see `InterfaceTextSize`.
-    /// The bounds come from the system size the root modifier recorded,
-    /// since by here `dynamicTypeSize` is already the resolved one.
+    /// Steps around the platform's own text size; see `InterfaceTextSize`.
     @AppStorage(InterfaceTextSize.key) private var interfaceTextStep = 0
-    @Environment(\.systemDynamicTypeSize) private var systemTypeSize
 
     /// Read by `TerminalTab` when a surface is made; open tabs keep theirs.
     @AppStorage(TerminalFontSize.key) private var terminalFontSize = TerminalFontSize.default
@@ -84,17 +81,14 @@ struct SettingsSheet: View {
         }
     }
 
-    /// One stepper per kind of text: the chrome's, which rides Dynamic Type
-    /// and so counts steps, and the terminal's, a point size the surface
-    /// takes as it is. The sheet itself is under the interface override, so
-    /// the first stepper shows its effect as it goes.
+    /// One stepper per kind of text: the chrome's, a multiplier on every
+    /// `DS.Font` role, and the terminal's, a point size the surface takes as
+    /// it is. The sheet's own rows carry the roles, so the first stepper
+    /// shows its effect as it goes.
     private var textSizeSection: some View {
         Section {
-            Stepper(
-                value: $interfaceTextStep,
-                in: InterfaceTextSize.stepRange(from: systemTypeSize)
-            ) {
-                slotRow(title: "Interface", icon: "textformat.size", name: interfaceStepDescription)
+            Stepper(value: $interfaceTextStep, in: InterfaceTextSize.steps) {
+                slotRow(title: "Interface", icon: "textformat.size", name: interfaceScaleDescription)
             }
             Stepper(value: $terminalFontSize, in: TerminalFontSize.range) {
                 slotRow(
@@ -111,23 +105,18 @@ struct SettingsSheet: View {
         } footer: {
             Text(
                 """
-                The interface size steps up or down from the system text \
-                size. New terminals open at the terminal size; a tab that \
-                is already open keeps the size it was zoomed to.
+                The interface size scales every label and control. New \
+                terminals open at the terminal size; a tab that is already \
+                open keeps the size it was zoomed to.
                 """
             )
         }
     }
 
-    private var interfaceStepDescription: String {
-        switch interfaceTextStep {
-        case 0:
-            String(localized: "Default")
-        case ..<0:
-            "\u{2212}\(-interfaceTextStep)"
-        default:
-            "+\(interfaceTextStep)"
-        }
+    /// The multiplier as a percentage; a number needs no translation.
+    private var interfaceScaleDescription: String {
+        let percent = Int((InterfaceTextSize.scale(step: interfaceTextStep) * 100).rounded())
+        return "\(percent)%"
     }
 
     /// The accessory bar is a software-keyboard fixture; a Mac has none.

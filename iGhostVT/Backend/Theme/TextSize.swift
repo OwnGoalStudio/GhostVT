@@ -6,28 +6,20 @@
 import Foundation
 import SwiftUI
 
-/// The interface's text size, kept as steps away from the system's Dynamic
-/// Type setting rather than as a size of its own. Zero follows the system;
-/// each step is one Dynamic Type size, so the chrome keeps riding the text
-/// styles in `DS.Font` and a person who bumps their phone's text size later
-/// still gets the bump.
+/// The interface's text size, kept as steps around the platform's own
+/// size rather than as a size of its own. Zero is the platform default;
+/// each step multiplies every `DS.Font` role by ten percent, on top of
+/// whatever the system's Dynamic Type setting already did on iOS. A
+/// multiplier, not a `dynamicTypeSize` override, because Catalyst never
+/// scales a text style with the content size category.
 enum InterfaceTextSize {
     static let key = "Interface.textSizeStep"
 
-    /// Every size Dynamic Type has, smallest first.
-    static let sizes = DynamicTypeSize.allCases
+    /// Roughly two thirds to double the default size.
+    static let steps = -4 ... 8
 
-    /// The size `step` lands on from `system`, held inside the scale.
-    static func resolve(step: Int, system: DynamicTypeSize) -> DynamicTypeSize {
-        let index = (sizes.firstIndex(of: system) ?? 0) + step
-        return sizes[min(max(index, 0), sizes.count - 1)]
-    }
-
-    /// The steps that stay on the scale from `system` — the stepper's
-    /// bounds, so it stops where the sizes do instead of counting on.
-    static func stepRange(from system: DynamicTypeSize) -> ClosedRange<Int> {
-        let index = sizes.firstIndex(of: system) ?? 0
-        return -index ... sizes.count - 1 - index
+    static func scale(step: Int) -> CGFloat {
+        pow(1.1, CGFloat(min(max(step, steps.lowerBound), steps.upperBound)))
     }
 }
 
@@ -38,9 +30,13 @@ enum InterfaceTextSize {
 enum TerminalFontSize {
     static let key = "Terminal.fontSize"
 
-    /// What the library's default configuration renders on this platform
-    /// today, so an untouched install looks the way it did.
-    static let `default` = 10
+    /// The Mac gets libghostty's own default; the device keeps the smaller
+    /// size the library's default configuration renders there.
+    #if targetEnvironment(macCatalyst)
+        static let `default` = 14
+    #else
+        static let `default` = 10
+    #endif
 
     /// The library's own zoom limits, so the stepper and the pinch agree on
     /// where the ends are.
