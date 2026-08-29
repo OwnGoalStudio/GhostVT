@@ -325,18 +325,18 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         xpc_connection_activate(connection)
         let done = DispatchGroup()
         done.enter()
-        func finish() {
+        @Sendable func finish() {
             xpc_connection_cancel(connection)
             done.leave()
         }
-        func list(_ completion: @escaping ([SessionSummary]?) -> Void) {
+        @Sendable func list(_ completion: @escaping @Sendable ([SessionSummary]?) -> Void) {
             xpc_connection_send_message_with_reply(connection, makeMessage(.listSessions), queue) { reply in
                 completion(Self.sessions(in: reply))
             }
         }
         // Polls the daemon's list until none of `targets` remain, or the
         // deadline passes; hands over the last list either way.
-        func awaitGone(_ targets: Set<UInt64>, then: @escaping ([SessionSummary]) -> Void) {
+        @Sendable func awaitGone(_ targets: Set<UInt64>, then: @escaping @Sendable ([SessionSummary]) -> Void) {
             list { rows in
                 guard let rows else { return finish() }
                 if !rows.contains(where: { targets.contains($0.id) }) || DispatchTime.now() >= deadline {

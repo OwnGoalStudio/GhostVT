@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Check out iGhostVT
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Select newest Xcode
         run: |
@@ -40,8 +40,11 @@ jobs:
           sudo xcode-select -s "$latest/Contents/Developer"
           xcodebuild -version
 
+      # The runner image ships with third-party taps Homebrew no longer trusts
+      # by default and warns about on every invocation; none of them is used.
       - name: Install packaging tools
         run: |
+          brew untap aws/tap 2>/dev/null || true
           brew install ldid dpkg xcbeautify
           ldid -h 2>&1 | head -n1 || true
           dpkg-deb --version | head -n1
@@ -67,7 +70,7 @@ jobs:
           shasum -a 256 *.deb | tee SHA256SUMS
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ighostvt-debs
           path: |
@@ -110,7 +113,7 @@ jobs:
 
     steps:
       - name: Check out iGhostVT
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Select newest Xcode
         run: |
@@ -121,7 +124,9 @@ jobs:
       # No ldid or dpkg here: `make mac-zip` deliberately does not depend on
       # `make check`, so a machine with nothing but Xcode can produce the zip.
       - name: Install build tools
-        run: brew install xcbeautify
+        run: |
+          brew untap aws/tap 2>/dev/null || true
+          brew install xcbeautify
 
       # Same tag and the same run number as the deb job, so the version in the
       # app's About screen matches the one on the packages beside it.
@@ -151,7 +156,7 @@ jobs:
           codesign --verify --deep --strict --verbose=2 "$app"
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ighostvt-macos
           path: |

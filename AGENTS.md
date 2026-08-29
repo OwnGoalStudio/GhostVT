@@ -196,12 +196,25 @@ Gotchas that bit us:
   the overlay asks to be moved instead — do not "fix" that by registering
   anyway. Dragging the app to the Trash also does not unregister the agent,
   which is why Settings ▸ Terminal Helper carries a Turn Off control that
-  surfaces what `unregister()` returns. Replacing the bundle in place (an
-  update, a reinstall) leaves Login Items saying *enabled* while launchd has
-  no job until the next login — `SMAppService.status` reads `.enabled`, so a
-  launch that only registered on `.notRegistered` never fixed it. The app
-  re-registers on every launch while enabled; the call is idempotent and
-  bootstraps the job on the spot.
+  surfaces what `unregister()` returns. **Replacing the bundle in place (an
+  update, a reinstall) breaks the registration, and `register()` alone
+  cannot mend it.** Background Task Management stores a launch constraint
+  with the item, and for an ad-hoc signed helper (no Team ID) it pins that
+  build's cdhash. The next spawn of the new helper — at login, or from the
+  updated app's own `register()`, which reuses the item — dies to AMFI
+  (`Launch Constraint Violation`, an `ighostvtd` crash report with
+  `SIGKILL (Code Signature Invalid)`), launchd removes the service, and
+  BTM's `invalidateLaunchItem` ten seconds later leaves a job whose program
+  is the unresolved relative `Contents/MacOS/ighostvtd`, retried every ten
+  seconds ("Could not find and/or execute program") until something
+  discards the item; a relaunch changes nothing. `SMAppService.status`
+  reads `.enabled` throughout. `MacLaunchAgent` therefore fingerprints the
+  bundled helper (SHA-256, recorded on each successful `register()`) and
+  does `unregister()` + `register()` whenever the helper in the bundle is
+  not the one it registered — a missing record counts, so an update from a
+  build without the check repairs itself once. Do not replace this with a
+  plain re-register, and do not key it on the version: a locally cut zip
+  can carry the same version as the one it replaces.
 - **A drop pastes a path the shell can use, and where that path comes from
   depends on where the item lives.** `TerminalDropDelegate` replaces the
   library's drop interaction on both platforms (it has to *replace* the

@@ -4,6 +4,7 @@
 //
 
 import Combine
+import CryptoKit
 import Foundation
 
 #if targetEnvironment(macCatalyst)
@@ -70,11 +71,11 @@ final class MacLaunchAgent: ObservableObject {
             refresh()
             // First launch registers by itself; a later one does not, because
             // by then `notRegistered` may be a decision somebody made. An
-            // *enabled* helper is re-registered every launch: the call is
-            // idempotent, and it is what bootstraps the job when launchd has
-            // none — the case after the bundle was replaced in place, where
-            // Login Items still says "enabled" but nothing runs until the
-            // next login, and every tab reports a lost connection.
+            // *enabled* helper goes through `activate()` every launch: the
+            // plain register is idempotent and bootstraps the job when launchd
+            // has none, and `activate()` is where a replaced helper is caught
+            // (see `helperDigest`) — the case where Login Items still says
+            // "enabled" but nothing can run.
             if status == .enabled || (status == .notRegistered && !Self.isTurnedOffByUser) {
                 activate()
             }
@@ -125,8 +126,22 @@ final class MacLaunchAgent: ObservableObject {
             }
         }
 
-        /// Registers the bundled agent. Called automatically on a first launch,
-        /// and from Settings after somebody turned it off.
+        /// Registers the bundled agent. Called on every launch while the
+        /// helper is enabled, on a first launch, and from Settings after
+        /// somebody turned it off.
+        ///
+        /// A registration is not just a plist: Background Task Management
+        /// keeps a *launch constraint* for the item, and for an ad-hoc signed
+        /// helper (no Team ID) that constraint pins the exact binary. After an
+        /// update replaces the bundle, `register()` alone is worse than
+        /// useless — BTM reuses the existing item, launchd submits the job,
+        /// AMFI kills the new helper on the spot ("Launch Constraint
+        /// Violation"), launchd drops the service, and BTM's own repair ten
+        /// seconds later leaves a job whose program is the unresolved relative
+        /// `Contents/MacOS/ighostvtd`, retried every ten seconds forever. A
+        /// relaunch finds that item and changes nothing. Only unregistering
+        /// discards the item, so that is what happens whenever the helper in
+        /// the bundle is not the one this app registered last time.
         func activate() {
             guard #available(macCatalyst 16.0, *) else { return }
             guard Self.isInApplications else {
@@ -134,7 +149,15 @@ final class MacLaunchAgent: ObservableObject {
                 return
             }
             Self.isTurnedOffByUser = false
-            register(SMAppService.agent(plistName: Self.plistName))
+            let service = SMAppService.agent(plistName: Self.plistName)
+            let digest = Self.helperDigest
+            if service.status != .notRegistered, digest != Self.registeredHelperDigest {
+                // An unregister that fails leaves the stale item in place and
+                // the register below finds it; the status re-read there is
+                // still the truth, so the error itself has nothing to add.
+                try? service.unregister()
+            }
+            register(service, helperDigest: digest)
         }
 
         /// Removes the agent from Login Items.
@@ -147,6 +170,7 @@ final class MacLaunchAgent: ObservableObject {
             do {
                 try SMAppService.agent(plistName: Self.plistName).unregister()
                 Self.isTurnedOffByUser = true
+                Self.registeredHelperDigest = nil
                 refresh()
             } catch {
                 status = .failed(
@@ -174,10 +198,30 @@ final class MacLaunchAgent: ObservableObject {
             SMAppService.openSystemSettingsLoginItems()
         }
 
+        /// SHA-256 of the helper binary in this bundle, or nil when there is
+        /// none. Content, not version: a locally cut zip can carry the same
+        /// version as the one it replaces and still be a different signature.
+        private static var helperDigest: String? {
+            let helper = Bundle.main.bundleURL.appendingPathComponent("Contents/MacOS/ighostvtd")
+            guard let data = try? Data(contentsOf: helper, options: .mappedIfSafe) else { return nil }
+            return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        }
+
+        /// The digest of the helper the last successful `register()` was for.
+        /// Absent on installs older than this check, which reads as "unknown"
+        /// and re-registers once — the state an update from such a version
+        /// leaves behind is exactly the one this exists to repair.
+        private static let registeredHelperDigestKey = "MacLaunchAgent.registeredHelperDigest"
+        private static var registeredHelperDigest: String? {
+            get { UserDefaults.standard.string(forKey: registeredHelperDigestKey) }
+            set { UserDefaults.standard.set(newValue, forKey: registeredHelperDigestKey) }
+        }
+
         @available(macCatalyst 16.0, *)
-        private func register(_ service: SMAppService) {
+        private func register(_ service: SMAppService, helperDigest: String?) {
             do {
                 try service.register()
+                Self.registeredHelperDigest = helperDigest
             } catch {
                 // A registration that fails because approval is pending is not
                 // an error worth showing; the status re-read below tells the
