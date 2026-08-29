@@ -141,7 +141,12 @@ Gotchas that bit us:
   the overlay asks to be moved instead — do not "fix" that by registering
   anyway. Dragging the app to the Trash also does not unregister the agent,
   which is why Settings ▸ Terminal Helper carries a Turn Off control that
-  surfaces what `unregister()` returns.
+  surfaces what `unregister()` returns. Replacing the bundle in place (an
+  update, a reinstall) leaves Login Items saying *enabled* while launchd has
+  no job until the next login — `SMAppService.status` reads `.enabled`, so a
+  launch that only registered on `.notRegistered` never fixed it. The app
+  re-registers on every launch while enabled; the call is idempotent and
+  bootstraps the job on the spot.
 - **A drop pastes a path the shell can use, and where that path comes from
   depends on where the item lives.** `TerminalDropDelegate` replaces the
   library's drop interaction on both platforms (it has to *replace* the

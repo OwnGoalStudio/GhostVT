@@ -69,8 +69,13 @@ final class MacLaunchAgent: ObservableObject {
             status = .unsupported
             refresh()
             // First launch registers by itself; a later one does not, because
-            // by then `notRegistered` may be a decision somebody made.
-            if status == .notRegistered, !Self.isTurnedOffByUser {
+            // by then `notRegistered` may be a decision somebody made. An
+            // *enabled* helper is re-registered every launch: the call is
+            // idempotent, and it is what bootstraps the job when launchd has
+            // none — the case after the bundle was replaced in place, where
+            // Login Items still says "enabled" but nothing runs until the
+            // next login, and every tab reports a lost connection.
+            if status == .enabled || (status == .notRegistered && !Self.isTurnedOffByUser) {
                 activate()
             }
         #else
