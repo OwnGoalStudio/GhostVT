@@ -129,6 +129,15 @@ final class TabManager: ObservableObject {
         tab.terminal.onTextSelectionRequest = { [weak self] request in
             self?.selectionRequest = TerminalSelectionRequestBox(request: request)
         }
+        // A finished shell is nearly always a finished tab. With the setting
+        // on, skip the Session Ended card and close outright — straight to
+        // `close`, not `requestClose`: the confirmation guards a live shell,
+        // and this one is already gone. On a dead session `close` only
+        // clears the daemon's record of it.
+        tab.onSessionExit = { [weak self, weak tab] in
+            guard SessionAutoClose.isEnabled, let self, let tab else { return }
+            self.close(tab)
+        }
         return tab
     }
 
@@ -229,4 +238,16 @@ final class TabManager: ObservableObject {
 struct TerminalSelectionRequestBox: Identifiable {
     let id = UUID()
     let request: TerminalTextSelectionRequest
+}
+
+/// Whether a tab closes by itself when its session ends. Off by default:
+/// the Session Ended card leaves the scrollback on screen, and a shell that
+/// died unexpectedly is exactly when someone wants to read it. On is for the
+/// workflow where every tab is a one-shot command whose end means "done".
+enum SessionAutoClose {
+    static let key = "Session.autoCloseTab"
+
+    static var isEnabled: Bool {
+        UserDefaults.standard.bool(forKey: key)
+    }
 }

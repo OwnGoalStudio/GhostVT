@@ -43,6 +43,13 @@ final class TerminalTab: ObservableObject, Identifiable {
         }
     }
 
+    /// The session's process ended — on its own, or because someone asked
+    /// it to. Installed by `TabManager.makeTab`, so the auto-close policy
+    /// lives with the tab list rather than in every tab. Runs after the
+    /// store has recorded the exit, so a presenter that reads the status
+    /// sees a finished session, never a live one.
+    var onSessionExit: (() -> Void)?
+
     /// Mutable so a reconnect after an in-app detach reattaches to the same
     /// shell instead of spawning a fresh one. Shared with the transport
     /// factory, which reads it at every connect.
@@ -80,7 +87,9 @@ final class TerminalTab: ObservableObject, Identifiable {
         })
         exitRelay.handler = { [weak self] status in
             Task { @MainActor [weak self] in
-                self?.store.noteProcessExit(status: status)
+                guard let self else { return }
+                self.store.noteProcessExit(status: status)
+                self.onSessionExit?()
             }
         }
         terminal.configuration = TerminalSurfaceOptions(
