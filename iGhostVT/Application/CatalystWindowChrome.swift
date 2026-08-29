@@ -50,23 +50,34 @@ import UIKit
             typealias Original = @convention(c) (AnyObject, Selector, UIScene, AnyObject) -> Void
             let block: @convention(block) (AnyObject, UIScene, AnyObject) -> Void = { target, scene, context in
                 unsafeBitCast(original, to: Original.self)(target, selector, scene, context)
-                guard let nsWindow = hostWindow(for: scene) else { return }
-                positionWindowControls(in: nsWindow)
-                // AppKit tiles the title bar again on every resize, putting
-                // the lights back where a title bar would want them.
-                NotificationCenter.default.addObserver(
-                    forName: Notification.Name("NSWindowDidResizeNotification"),
-                    object: nsWindow,
-                    queue: .main
-                ) { notification in
-                    guard let window = notification.object as? NSObject else { return }
-                    positionWindowControls(in: window)
+                // AppKit runs its scene hook on the main thread; the window
+                // scene and the metrics both want the main actor.
+                MainActor.assumeIsolated {
+                    guard let nsWindow = hostWindow(for: scene) else { return }
+                    positionWindowControls(in: nsWindow)
+                    // AppKit tiles the title bar again on every resize, putting
+                    // the lights back where a title bar would want them. The
+                    // observer is delivered on the main queue.
+                    NotificationCenter.default.addObserver(
+                        forName: Notification.Name("NSWindowDidResizeNotification"),
+                        object: nsWindow,
+                        queue: .main
+                    ) { notification in
+                        // Delivered on the main queue, so the window can be
+                        // handed to the main actor without a hop.
+                        nonisolated(unsafe) let window = notification.object as? NSObject
+                        MainActor.assumeIsolated {
+                            guard let window else { return }
+                            positionWindowControls(in: window)
+                        }
+                    }
                 }
             }
             method_setImplementation(method, imp_implementationWithBlock(block as Any))
         }
 
         /// The `NSWindow` (a `UINSWindow`) AppKit built for the scene.
+        @MainActor
         private static func hostWindow(for scene: UIScene) -> NSObject? {
             guard let windowScene = scene as? UIWindowScene,
                   let uiWindow = windowScene.windows.first,
@@ -87,6 +98,7 @@ import UIKit
         /// Centres the close, minimize, and zoom buttons on the top bar. With
         /// no title bar AppKit leaves them at a title bar's height, a few
         /// points above the bar's own controls; the bar is the title bar now.
+        @MainActor
         private static func positionWindowControls(in nsWindow: NSObject) {
             typealias StandardButton = @convention(c) (AnyObject, Selector, Int) -> Unmanaged<AnyObject>?
             typealias SetOrigin = @convention(c) (AnyObject, Selector, CGPoint) -> Void
@@ -94,12 +106,7 @@ import UIKit
             let originSelector = NSSelectorFromString("setFrameOrigin:")
             guard nsWindow.responds(to: buttonSelector) else { return }
             let standardButton = unsafeBitCast(nsWindow.method(for: buttonSelector), to: StandardButton.self)
-            // Called on the main thread (AppKit's window hook and its resize
-            // notification, delivered on the main queue), which the metrics
-            // require.
-            let topInset = MainActor.assumeIsolated {
-                (titleBarHeight / 2) / pointsPerScreenPoint - windowControlsHeight / 2
-            }
+            let topInset = (titleBarHeight / 2) / pointsPerScreenPoint - windowControlsHeight / 2
             for kind in 0 ... 2 { // close, miniaturize, zoom
                 guard let button = standardButton(nsWindow, buttonSelector, kind)?.takeUnretainedValue() as? NSObject,
                       let frame = (button.value(forKey: "frame") as? NSValue)?.cgRectValue,
