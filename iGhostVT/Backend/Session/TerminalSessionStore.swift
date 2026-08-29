@@ -182,9 +182,12 @@ final class TerminalSessionStore: ObservableObject {
         // editor never saw the bytes that the dropped link ate.
         titleTracker.reset()
         let transport = makeTransport()
-        let relay = relay
         Self.logger.info("connecting via \(transport.endpointDescription)")
-        transport.onEvent = { [weak self] event in
+        // `relay` weak as well: the relay retains the transport, which
+        // retains this closure. A strong capture would close that cycle and
+        // defeat the transport's deinit, whose job is to cancel an XPC
+        // connection its owner dropped without disconnecting.
+        transport.onEvent = { [weak self, weak relay] event in
             // Sized here, on the transport's own queue and before the hop
             // to the main actor: the newest grid has to reach the session
             // *behind* the open or attach, and only the relay's record is
@@ -196,7 +199,7 @@ final class TerminalSessionStore: ObservableObject {
             // 93×32 surface, stuck until the next real resize because the
             // surface reports only changes.
             if case .state(.connected) = event {
-                relay.resendLatestViewport()
+                relay?.resendLatestViewport()
             }
             Task { @MainActor [weak self] in
                 self?.handle(event)

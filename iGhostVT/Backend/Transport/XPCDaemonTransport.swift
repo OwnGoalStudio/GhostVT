@@ -34,9 +34,10 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     private var latestViewport: (columns: Int, rows: Int)?
     /// The grid the daemon's session is known to hold — what the open spawned
     /// at, what the attach reply said, or the last resize sent. A repeat is
-    /// dropped: the host re-sends its newest size on every connect and the
-    /// surface reports again on pixel-only changes, and each would otherwise
-    /// cost a message for a `TIOCSWINSZ` the kernel treats as a no-op.
+    /// dropped: the host re-sends its newest size on every connect (and one
+    /// that does not suppress them reports again on pixel-only changes), and
+    /// each would otherwise cost a message for a `TIOCSWINSZ` the kernel
+    /// treats as a no-op.
     /// Forgotten with the connection, since a new one may reach a session
     /// this transport never sized.
     private var appliedViewport: (columns: Int, rows: Int)?

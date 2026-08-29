@@ -10,6 +10,10 @@ import Foundation
 public protocol TerminalTransport: AnyObject {
     /// Single event stream. Delivered on an arbitrary transport-owned queue;
     /// hop to the main actor before touching UI state.
+    ///
+    /// Delivering `.connected` re-enters the transport on the same call
+    /// stack: the host answers it with `updateViewport` before returning.
+    /// Emit it outside any lock `updateViewport` takes.
     var onEvent: (@Sendable (TerminalTransportEvent) -> Void)? { get set }
 
     var endpointDescription: String { get }
@@ -23,12 +27,14 @@ public protocol TerminalTransport: AnyObject {
     /// an SSH transport maps it to a window-change request.
     ///
     /// Called before `connect()` with the grid the session should start at,
-    /// on every change after, and once more on `.connected` so a size
-    /// reported during the connection round trip still reaches the session.
-    /// The host makes these calls from the thread that measured the grid,
-    /// under the lock that keeps them in order: the implementation must not
-    /// block and must not call back into the host synchronously. Sizes may
-    /// repeat; one the endpoint already holds should be dropped.
+    /// on every change after, and once more from inside the delivery of
+    /// `.connected`, so a size reported during the connection round trip
+    /// still reaches the session. The host makes these calls from whatever
+    /// thread it is on — the one that measured the grid, or the transport's
+    /// own emitting thread — under the lock that keeps them in order: the
+    /// implementation must not block and must not call back into the host
+    /// synchronously. Sizes may repeat; one the endpoint already holds
+    /// should be dropped.
     func updateViewport(columns: Int, rows: Int)
 
     func disconnect()
