@@ -1,18 +1,29 @@
-# Tag vX.Y.Z → override Configuration/Version.xcconfig with the tag, build the
-# roothide and rootless debs and the macOS app, and attach all of them to a
-# GitHub Release.
+# Tag vX.Y.Z → three independent package jobs, then one merge job that
+# attaches every artifact to a GitHub Release.
+#
+# The three package jobs share nothing: each is a machine recipe, and they
+# run in parallel so a roothide box, a rootless box, and a Mac box can all
+# work at once. They communicate only by `upload-artifact`. The `release`
+# job is the merge — it downloads those artifacts and publishes. The same
+# merge is available locally as `Scripts/publish-release.sh` when the files
+# arrived some other way.
+#
+# workflow_dispatch can run all three or just one (`platform`), and can
+# pin each job to a runner label so the three machines do not have to be
+# GitHub-hosted. A dispatch without a tag still packages; it does not
+# publish. Publishing is the tag.
 #
 # The terminal core comes from the released Lakr233/libghostty-spm package
-# (resolved by xcodebuild from Package.resolved), so this checkout is all the
-# build needs.
+# (resolved by xcodebuild from Package.resolved), so this checkout is all
+# the build needs.
 #
-# The macOS zip is ad-hoc signed. A runner has no Developer ID certificate and
-# nothing here should invent one, so the artifact is exactly what
-# `make mac-zip` produces on a checkout with no signing identity: a universal,
-# hardened-runtime bundle that Gatekeeper will not trust on sight. Whoever
-# installs it clears the quarantine bit once — the release notes say so, and so
-# does the packager. Signing it properly is a local `make mac-zip
-# MAC_ZIP_IDENTITY=...` away.
+# The macOS zip is ad-hoc signed. A runner has no Developer ID certificate
+# and nothing here should invent one, so the artifact is exactly what
+# `make mac-zip` produces on a checkout with no signing identity: a
+# universal, hardened-runtime bundle that Gatekeeper will not trust on
+# sight. Whoever installs it clears the quarantine bit once — the release
+# notes say so, and so does the packager. Signing it properly is a local
+# `make mac-zip MAC_ZIP_IDENTITY=...` away.
 
 name: Release
 
@@ -21,13 +32,36 @@ on:
     tags:
       - "v[0-9]*.[0-9]*.[0-9]*"
   workflow_dispatch:
+    inputs:
+      platform:
+        description: Which package to build
+        type: choice
+        options:
+          - all
+          - roothide
+          - rootless
+          - macos
+        default: all
+      runner_roothide:
+        description: Runner label for the roothide .deb
+        type: string
+        default: macos-26
+      runner_rootless:
+        description: Runner label for the rootless .deb
+        type: string
+        default: macos-26
+      runner_macos:
+        description: Runner label for the macOS zip
+        type: string
+        default: macos-26
 
 permissions:
   contents: write
 
 jobs:
-  deb:
-    runs-on: macos-26
+  package-roothide:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'roothide'
+    runs-on: ${{ github.event.inputs.runner_roothide || 'macos-26' }}
     timeout-minutes: 60
 
     steps:
@@ -55,11 +89,48 @@ jobs:
         if: github.ref_type == 'tag'
         run: make set-version VERSION="${GITHUB_REF_NAME}" BUILD="${{ github.run_number }}"
 
-      # deb → build → check + test (PTY harness), so validation and the test
-      # suite gate the packages. The second flavor reuses the incremental build
-      # — the binaries are identical, only layout and architecture label differ.
       - name: Build roothide package (iphoneos-arm64e)
         run: make deb-roothide
+
+      - name: Checksums
+        run: |
+          cd build/Packages
+          shasum -a 256 *.deb | tee SHA256SUMS.roothide
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ighostvt-roothide
+          path: |
+            build/Packages/*.deb
+            build/Packages/SHA256SUMS.roothide
+          if-no-files-found: error
+
+  package-rootless:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'rootless'
+    runs-on: ${{ github.event.inputs.runner_rootless || 'macos-26' }}
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out iGhostVT
+        uses: actions/checkout@v7
+
+      - name: Select newest Xcode
+        run: |
+          latest="$(ls -d /Applications/Xcode*.app | sort -V | tail -n1)"
+          sudo xcode-select -s "$latest/Contents/Developer"
+          xcodebuild -version
+
+      - name: Install packaging tools
+        run: |
+          brew untap aws/tap 2>/dev/null || true
+          brew install ldid dpkg xcbeautify
+          ldid -h 2>&1 | head -n1 || true
+          dpkg-deb --version | head -n1
+
+      - name: Override version from tag
+        if: github.ref_type == 'tag'
+        run: make set-version VERSION="${GITHUB_REF_NAME}" BUILD="${{ github.run_number }}"
 
       - name: Build rootless package (iphoneos-arm64)
         run: make deb-rootless
@@ -67,48 +138,20 @@ jobs:
       - name: Checksums
         run: |
           cd build/Packages
-          shasum -a 256 *.deb | tee SHA256SUMS
+          shasum -a 256 *.deb | tee SHA256SUMS.rootless
 
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: ighostvt-debs
+          name: ighostvt-rootless
           path: |
             build/Packages/*.deb
-            build/Packages/SHA256SUMS
+            build/Packages/SHA256SUMS.rootless
           if-no-files-found: error
 
-      # Create-or-upload with retries: a transient API failure (v0.2.3 died to
-      # a 503 here) must not be mistaken for "the release already exists" —
-      # only `gh release view` decides which of the two verbs applies.
-      - name: Create GitHub Release
-        if: github.ref_type == 'tag'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          assets=(build/Packages/*.deb build/Packages/SHA256SUMS)
-          for attempt in 1 2 3 4 5; do
-            if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
-              gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber && exit 0
-            else
-              gh release create "${GITHUB_REF_NAME}" \
-                --title "iGhostVT ${GITHUB_REF_NAME}" \
-                --generate-notes \
-                "${assets[@]}" && exit 0
-            fi
-            echo "publish attempt ${attempt} failed; retrying in 20s" >&2
-            sleep 20
-          done
-          echo "could not publish the release after 5 attempts" >&2
-          exit 1
-
-  # Runs after `deb` rather than beside it, only so the release already exists
-  # by the time this job has something to attach. Two jobs racing to be the one
-  # that calls `gh release create` is how you get a release with half its
-  # assets. The build itself shares nothing with the deb job.
-  macos:
-    needs: deb
-    runs-on: macos-26
+  package-macos:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'macos'
+    runs-on: ${{ github.event.inputs.runner_macos || 'macos-26' }}
     timeout-minutes: 60
 
     steps:
@@ -128,8 +171,8 @@ jobs:
           brew untap aws/tap 2>/dev/null || true
           brew install xcbeautify
 
-      # Same tag and the same run number as the deb job, so the version in the
-      # app's About screen matches the one on the packages beside it.
+      # Same tag and the same run number as the .deb jobs, so the version in
+      # the app's About screen matches the one on the packages beside it.
       - name: Override version from tag
         if: github.ref_type == 'tag'
         run: make set-version VERSION="${GITHUB_REF_NAME}" BUILD="${{ github.run_number }}"
@@ -155,7 +198,7 @@ jobs:
           lipo -info "$app/Contents/MacOS/ighostvtd"
           codesign --verify --deep --strict --verbose=2 "$app"
 
-      - name: Upload artifacts
+      - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: ighostvt-macos
@@ -164,17 +207,47 @@ jobs:
             build/Packages/SHA256SUMS.macos
           if-no-files-found: error
 
-      # The release was created by the `deb` job, so this only ever uploads.
-      - name: Attach to the GitHub Release
-        if: github.ref_type == 'tag'
+  # Merge. Needs every platform job; a skipped sibling (workflow_dispatch of a
+  # single platform) skips this too, which is what we want — a partial set of
+  # artifacts is not a release. Tag pushes run all three, then this.
+  release:
+    if: github.ref_type == 'tag'
+    needs: [package-roothide, package-rootless, package-macos]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out iGhostVT
+        uses: actions/checkout@v7
+
+      - name: Download platform artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: artifacts
+          pattern: ighostvt-*
+          merge-multiple: false
+
+      - name: Stage release assets
+        run: |
+          mkdir -p dist
+          find artifacts -type f \( -name '*.deb' -o -name '*.zip' -o -name 'SHA256SUMS*' \) -exec cp {} dist/ \;
+          ls -l dist
+          test -f dist/SHA256SUMS.roothide || { echo "roothide checksums missing" >&2; exit 1; }
+          test -f dist/SHA256SUMS.rootless || { echo "rootless checksums missing" >&2; exit 1; }
+          test -f dist/SHA256SUMS.macos || { echo "macos checksums missing" >&2; exit 1; }
+          # One file for both .debs, matching the layout previous releases
+          # attached, plus the macOS checksums beside the zip.
+          cat dist/SHA256SUMS.roothide dist/SHA256SUMS.rootless > dist/SHA256SUMS
+          rm -f dist/SHA256SUMS.roothide dist/SHA256SUMS.rootless
+          shopt -s nullglob
+          debs=(dist/*.deb)
+          zips=(dist/*.zip)
+          [[ "${#debs[@]}" -eq 2 ]] || { echo "expected 2 debs, got ${#debs[@]}" >&2; exit 1; }
+          [[ "${#zips[@]}" -eq 1 ]] || { echo "expected 1 zip, got ${#zips[@]}" >&2; exit 1; }
+
+      - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          assets=(build/Packages/*.zip build/Packages/SHA256SUMS.macos)
-          for attempt in 1 2 3 4 5; do
-            gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber && exit 0
-            echo "upload attempt ${attempt} failed; retrying in 20s" >&2
-            sleep 20
-          done
-          echo "could not attach the macOS build after 5 attempts" >&2
-          exit 1
+          chmod +x Scripts/publish-release.sh
+          Scripts/publish-release.sh "${GITHUB_REF_NAME}" dist/*
