@@ -36,6 +36,17 @@ struct AlertAction: Identifiable {
     }
 }
 
+extension Array where Element == AlertAction {
+    /// Return's target: the only action when there is one, otherwise the
+    /// filled button the card already emphasizes — destructive if any,
+    /// otherwise accent.
+    var defaultAction: AlertAction? {
+        if count == 1 { return first }
+        return last { $0.kind == .destructive }
+            ?? last { $0.kind == .accent }
+    }
+}
+
 /// The app's one alert design, a SwiftUI rendition of Lakr233/AlertController:
 /// centered glass card (material below iOS 26), app-icon header, and a button row whose emphasized
 /// action fills with its tint. Shown inline by `SessionStatusOverlay` and
@@ -71,10 +82,7 @@ struct AlertCardView: View {
 
             HStack(spacing: DS.Padding.s) {
                 ForEach(actions) { action in
-                    Button(action: action.handler) {
-                        Text(action.title)
-                    }
-                    .buttonStyle(AlertButtonStyle(kind: action.kind))
+                    actionButton(action)
                 }
             }
         }
@@ -82,6 +90,19 @@ struct AlertCardView: View {
         .frame(maxWidth: 350)
         .cardGlass(in: RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous))
         .fixedSize(horizontal: false, vertical: true)
+    }
+
+    @ViewBuilder
+    private func actionButton(_ action: AlertAction) -> some View {
+        let button = Button(action: action.handler) {
+            Text(action.title)
+        }
+        .buttonStyle(AlertButtonStyle(kind: action.kind))
+        if action.id == actions.defaultAction?.id {
+            button.keyboardShortcut(.defaultAction)
+        } else {
+            button
+        }
     }
 }
 
