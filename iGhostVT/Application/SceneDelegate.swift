@@ -24,9 +24,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(
         _ scene: UIScene,
         willConnectTo _: UISceneSession,
-        options _: UIScene.ConnectionOptions
+        options: UIScene.ConnectionOptions
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
+        tabManager.windowScene = windowScene
         #if targetEnvironment(macCatalyst)
             // No title bar: the app draws to the top edge and the traffic
             // lights float over its chrome (`CatalystWindowChrome`).
@@ -50,6 +51,16 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.makeKeyAndVisible()
         self.window = window
         observeLaunchAgent()
+        for context in options.urlContexts {
+            ShortcutBridge.handle(context.url)
+        }
+    }
+
+    /// An `ighostvt://` link while the app is running.
+    func scene(_: UIScene, openURLContexts contexts: Set<UIOpenURLContext>) {
+        for context in contexts {
+            ShortcutBridge.handle(context.url)
+        }
     }
 
     #if targetEnvironment(macCatalyst)

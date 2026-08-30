@@ -17,6 +17,7 @@ iGhostVT/                    the app, one folder-synchronized Xcode group
 └── Resources/               Assets.xcassets, Info.plist
 Shared/Protocol/             XPC wire protocol, compiled into app + daemon + CLI
 Shared/Activity/             ActivityAttributes, compiled into app + appex
+Shared/Screen/               ScreenRenderer + KeyNames, compiled into app + CLI
 iGhostVTDaemon/              ighostvtd: the XPC proxy launchd starts
 iGhostVTIO/                  ighostvtd-io: the PTYs, buffers, and shells
 iGhostVTDaemonShared/        bootstrap paths, logging, the proxy <-> io wire

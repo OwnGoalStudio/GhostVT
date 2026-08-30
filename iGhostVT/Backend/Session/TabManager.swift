@@ -79,6 +79,34 @@ final class TabManager: ObservableObject {
         tabs.first { $0.id == activeTabID }
     }
 
+    /// The scene these tabs belong to, for a request that has to bring the
+    /// window forward (`ShortcutBridge`). Set by the scene delegate.
+    weak var windowScene: UIWindowScene?
+
+    func activate(_ tab: TerminalTab) {
+        guard tabs.contains(where: { $0.id == tab.id }) else { return }
+        activeTabID = tab.id
+    }
+
+    /// A tab for a session the daemon already holds — one a Shortcut or the
+    /// CLI opened — attached and brought to the front. The cold-launch
+    /// resume batch is the other caller of this shape; the difference is
+    /// that this one names the session instead of taking every unattached
+    /// one.
+    @discardableResult
+    func openTab(attachingTo sessionID: UInt64) -> TerminalTab {
+        let tab = makeTab(resume: sessionID)
+        withAnimation(Self.tabTransition) {
+            tabs.append(tab)
+            activeTabID = tab.id
+        }
+        if isSceneActive {
+            tab.store.noteSceneActive()
+        }
+        SessionActivityController.shared.refresh()
+        return tab
+    }
+
     /// Only the active tab's surface draws. The panes keep every tab mounted
     /// behind an opacity flip, and without this the hidden ones keep a live
     /// display link, rendering frames nobody sees; marking them invisible

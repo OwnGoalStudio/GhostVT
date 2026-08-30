@@ -167,8 +167,8 @@ harness:
 	IGHOSTVT_IO_BINARY="$$harness_dir/ighostvtd-io" "$$harness_dir/harness"; \
 	xcrun --sdk macosx swiftc -swift-version 5 \
 		"$(ROOT_DIR)/Shared/Protocol/iGhostVTProtocol.swift" \
-		"$(ROOT_DIR)/iGhostVTCLI/ScreenRenderer.swift" \
-		"$(ROOT_DIR)/iGhostVTCLI/KeyNames.swift" \
+		"$(ROOT_DIR)/Shared/Screen/ScreenRenderer.swift" \
+		"$(ROOT_DIR)/Shared/Screen/KeyNames.swift" \
 		$$(find "$(ROOT_DIR)/Tests/CLIRenderer" -name '*.swift' | sort) \
 		-o "$$harness_dir/cli-renderer"; \
 	"$$harness_dir/cli-renderer"

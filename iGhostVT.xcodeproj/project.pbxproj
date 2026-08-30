@@ -127,6 +127,11 @@
 			path = iGhostVTCLI;
 			sourceTree = "<group>";
 		};
+		AA0000000000000000000509 /* Shared/Screen */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared/Screen;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -153,6 +158,7 @@
 				AA0000000000000000000504 /* iGhostVTWidgets */,
 				AA0000000000000000000505 /* Shared/Activity */,
 				AA0000000000000000000502 /* Shared/Protocol */,
+				AA0000000000000000000509 /* Shared/Screen */,
 				84D1AEEE304298C300894548 /* Configuration */,
 				AA0000000000000000000802 /* Products */,
 			);
@@ -191,6 +197,7 @@
 				AA0000000000000000000501 /* iGhostVT */,
 				AA0000000000000000000502 /* Shared/Protocol */,
 				AA0000000000000000000505 /* Shared/Activity */,
+				AA0000000000000000000509 /* Shared/Screen */,
 			);
 			name = iGhostVT;
 			packageProductDependencies = (
@@ -282,6 +289,7 @@
 			fileSystemSynchronizedGroups = (
 				AA0000000000000000000502 /* Shared/Protocol */,
 				AA0000000000000000000508 /* iGhostVTCLI */,
+				AA0000000000000000000509 /* Shared/Screen */,
 			);
 			name = "ighostvt-cli";
 			packageProductDependencies = (

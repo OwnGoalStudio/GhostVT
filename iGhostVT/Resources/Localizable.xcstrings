@@ -691,6 +691,17 @@
         }
       }
     },
+    "A program to run instead of the shell, with its arguments. Leave empty for the default shell." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A program to run instead of the shell, with its arguments. Leave empty for the default shell."
+          }
+        }
+      }
+    },
     "About" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1613,6 +1624,17 @@
         }
       }
     },
+    "At Prompt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "At Prompt"
+          }
+        }
+      }
+    },
     "Bigger" : {
       "comment" : "Menu item: increases the terminal font size",
       "extractionState" : "manual",
@@ -2464,6 +2486,17 @@
         }
       }
     },
+    "Columns" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Columns"
+          }
+        }
+      }
+    },
     "Command" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2961,6 +2994,94 @@
         }
       }
     },
+    "Control-A (Line Start)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control-A (Line Start)"
+          }
+        }
+      }
+    },
+    "Control-C (Interrupt)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control-C (Interrupt)"
+          }
+        }
+      }
+    },
+    "Control-D (End of Input)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control-D (End of Input)"
+          }
+        }
+      }
+    },
+    "Control-E (Line End)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control-E (Line End)"
+          }
+        }
+      }
+    },
+    "Control-L (Clear Screen)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control-L (Clear Screen)"
+          }
+        }
+      }
+    },
+    "Control-R (Search History)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control-R (Search History)"
+          }
+        }
+      }
+    },
+    "Control-U (Clear Line)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control-U (Clear Line)"
+          }
+        }
+      }
+    },
+    "Control-Z (Suspend)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Control-Z (Suspend)"
+          }
+        }
+      }
+    },
     "Copied" : {
       "localizations" : {
         "de" : {
@@ -3239,6 +3360,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "拷貝文字"
+          }
+        }
+      }
+    },
+    "Current Directory" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current Directory"
           }
         }
       }
@@ -3523,6 +3655,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "預設 Shell"
+          }
+        }
+      }
+    },
+    "Delete (Backspace)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete (Backspace)"
           }
         }
       }
@@ -4093,6 +4236,72 @@
         }
       }
     },
+    "End" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End"
+          }
+        }
+      }
+    },
+    "End ${session}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End ${session}"
+          }
+        }
+      }
+    },
+    "End a session in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End a session in ${applicationName}"
+          }
+        }
+      }
+    },
+    "End Session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End Session"
+          }
+        }
+      }
+    },
+    "End Terminal Session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End Terminal Session"
+          }
+        }
+      }
+    },
+    "Ends a terminal session and whatever is running in it. A tab showing it closes." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ends a terminal session and whatever is running in it. A tab showing it closes."
+          }
+        }
+      }
+    },
     "Escape" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4307,6 +4516,83 @@
         }
       }
     },
+    "Foreground Program" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foreground Program"
+          }
+        }
+      }
+    },
+    "Forward Delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forward Delete"
+          }
+        }
+      }
+    },
+    "Get Terminal Directory" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Terminal Directory"
+          }
+        }
+      }
+    },
+    "Get Terminal Screen Text" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Terminal Screen Text"
+          }
+        }
+      }
+    },
+    "Get the current directory of ${session}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get the current directory of ${session}"
+          }
+        }
+      }
+    },
+    "Get the screen text from ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get the screen text from ${applicationName}"
+          }
+        }
+      }
+    },
+    "Get the screen text of ${session}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get the screen text of ${session}"
+          }
+        }
+      }
+    },
     "Go to Tab" : {
       "comment" : "Menu: submenu listing tab positions",
       "extractionState" : "manual",
@@ -4451,6 +4737,17 @@
         }
       }
     },
+    "Home" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home"
+          }
+        }
+      }
+    },
     "iGhostVT and its terminal helper are different versions. Reinstall iGhostVT to update both." : {
       "localizations" : {
         "de" : {
@@ -4589,6 +4886,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "無法將 iGhostVT 移到「應用程式」。%@"
+          }
+        }
+      }
+    },
+    "iGhostVT has no window to show the session in." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT has no window to show the session in."
           }
         }
       }
@@ -4803,6 +5111,28 @@
         }
       }
     },
+    "Include Scrollback" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Include Scrollback"
+          }
+        }
+      }
+    },
+    "Input" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Input"
+          }
+        }
+      }
+    },
     "Interface" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4874,6 +5204,28 @@
         }
       }
     },
+    "Is ${session} running a program" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is ${session} running a program"
+          }
+        }
+      }
+    },
+    "Is Terminal Busy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Is Terminal Busy"
+          }
+        }
+      }
+    },
     "Keep Alive" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4941,6 +5293,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "保持執行"
+          }
+        }
+      }
+    },
+    "Keep New Session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep New Session"
           }
         }
       }
@@ -5083,6 +5446,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "保留分頁"
+          }
+        }
+      }
+    },
+    "Key" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Key"
           }
         }
       }
@@ -5300,6 +5674,17 @@
         }
       }
     },
+    "Kill a terminal session in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kill a terminal session in ${applicationName}"
+          }
+        }
+      }
+    },
     "Last Tab" : {
       "comment" : "Menu item: switches to the last tab",
       "extractionState" : "manual",
@@ -5368,6 +5753,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最後一個分頁"
+          }
+        }
+      }
+    },
+    "Leave empty to run in a new shell." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave empty to run in a new shell."
           }
         }
       }
@@ -5514,6 +5910,61 @@
         }
       }
     },
+    "List Sessions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List Sessions"
+          }
+        }
+      }
+    },
+    "List sessions in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List sessions in ${applicationName}"
+          }
+        }
+      }
+    },
+    "List Terminal Sessions" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "List Terminal Sessions"
+          }
+        }
+      }
+    },
+    "Lock" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock"
+          }
+        }
+      }
+    },
+    "Lock Interaction" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock Interaction"
+          }
+        }
+      }
+    },
     "Lock Keyboard" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5656,6 +6107,17 @@
         }
       }
     },
+    "Lock Terminal Session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lock Terminal Session"
+          }
+        }
+      }
+    },
     "Locked" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5723,6 +6185,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已鎖定"
+          }
+        }
+      }
+    },
+    "Locks or unlocks the tab showing a session. A lock stops the user, never the program: output keeps flowing." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locks or unlocks the tab showing a session. A lock stops the user, never the program: output keeps flowing."
           }
         }
       }
@@ -6079,6 +6552,17 @@
         }
       }
     },
+    "New Session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Session"
+          }
+        }
+      }
+    },
     "New Tab" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6146,6 +6630,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新增分頁"
+          }
+        }
+      }
+    },
+    "New Terminal Session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New Terminal Session"
+          }
+        }
+      }
+    },
+    "New terminal tab in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New terminal tab in ${applicationName}"
           }
         }
       }
@@ -6785,6 +7291,39 @@
         }
       }
     },
+    "Open a new tab in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open a new tab in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Open a terminal session in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open a terminal session in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Open iGhostVT" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open iGhostVT"
+          }
+        }
+      }
+    },
     "Open Login Items" : {
       "localizations" : {
         "de" : {
@@ -6851,6 +7390,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打開「登入項目」"
+          }
+        }
+      }
+    },
+    "Open New Terminal Tab" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open New Terminal Tab"
+          }
+        }
+      }
+    },
+    "Opens iGhostVT on a terminal session, attaching it to a new tab if no tab is showing it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens iGhostVT on a terminal session, attaching it to a new tab if no tab is showing it."
+          }
+        }
+      }
+    },
+    "Opens iGhostVT with a new tab. With a program given, the tab runs it instead of the shell; otherwise the shell starts where the current tab is, as New Tab does." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens iGhostVT with a new tab. With a program given, the tab runs it instead of the shell; otherwise the shell starts where the current tab is, as New Tab does."
+          }
+        }
+      }
+    },
+    "Opens iGhostVT." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opens iGhostVT."
           }
         }
       }
@@ -6922,6 +7505,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Option"
+          }
+        }
+      }
+    },
+    "Output" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Output"
           }
         }
       }
@@ -6998,6 +7592,28 @@
         }
       },
       "shouldTranslate" : false
+    },
+    "Page Down" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Page Down"
+          }
+        }
+      }
+    },
+    "Page Up" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Page Up"
+          }
+        }
+      }
     },
     "Part of iGhostVT is missing, so it cannot open a terminal. Download iGhostVT again and replace this copy." : {
       "localizations" : {
@@ -7210,6 +7826,39 @@
         }
       }
     },
+    "Press ${key} in ${session}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press ${key} in ${session}"
+          }
+        }
+      }
+    },
+    "Press Return" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Press Return"
+          }
+        }
+      }
+    },
+    "Presses one key in a terminal session — Return, Escape, an arrow, or a control combination such as Control-C." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presses one key in a terminal session — Return, Escape, an arrow, or a control combination such as Control-C."
+          }
+        }
+      }
+    },
     "Preview" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7277,6 +7926,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "預覽"
+          }
+        }
+      }
+    },
+    "Program" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Program"
           }
         }
       }
@@ -7635,6 +8295,50 @@
         }
       }
     },
+    "Return" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Return"
+          }
+        }
+      }
+    },
+    "Returns every terminal session iGhostVT is holding, whether or not a tab is showing it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Returns every terminal session iGhostVT is holding, whether or not a tab is showing it."
+          }
+        }
+      }
+    },
+    "Returns the directory a terminal session's shell is in." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Returns the directory a terminal session's shell is in."
+          }
+        }
+      }
+    },
+    "Returns what a terminal session is showing, as plain text. Optionally includes the scrollback the service still holds." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Returns what a terminal session is showing, as plain text. Optionally includes the scrollback the service still holds."
+          }
+        }
+      }
+    },
     "Right Arrow" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7706,6 +8410,94 @@
         }
       }
     },
+    "Rows" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rows"
+          }
+        }
+      }
+    },
+    "Run ${command} in ${session}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run ${command} in ${session}"
+          }
+        }
+      }
+    },
+    "Run ${command} in a new shell" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run ${command} in a new shell"
+          }
+        }
+      }
+    },
+    "Run a command in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run a command in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Run a terminal command in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run a terminal command in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Run Command" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run Command"
+          }
+        }
+      }
+    },
+    "Run Terminal Command" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Run Terminal Command"
+          }
+        }
+      }
+    },
+    "Screen Text" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Screen Text"
+          }
+        }
+      }
+    },
     "Select Text" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7773,6 +8565,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "選取文字"
+          }
+        }
+      }
+    },
+    "Send ${text} to ${session}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send ${text} to ${session}"
+          }
+        }
+      }
+    },
+    "Send Key to Terminal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send Key to Terminal"
+          }
+        }
+      }
+    },
+    "Send Text" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send Text"
+          }
+        }
+      }
+    },
+    "Send text to ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send text to ${applicationName}"
+          }
+        }
+      }
+    },
+    "Send Text to Terminal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Send Text to Terminal"
+          }
+        }
+      }
+    },
+    "Session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session"
           }
         }
       }
@@ -7920,6 +8778,17 @@
         }
       }
     },
+    "Session ID" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session ID"
+          }
+        }
+      }
+    },
     "Sessions" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8058,6 +8927,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "有程式正在執行的工作階段會在 App 結束後繼續執行，並在下次啟動時恢復；停在提示字元的 shell 會被關閉。關閉此項後，結束 App 時將關閉所有工作階段。"
+          }
+        }
+      }
+    },
+    "Set ${session} to ${lock}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set ${session} to ${lock}"
           }
         }
       }
@@ -8201,6 +9081,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "設定…"
+          }
+        }
+      }
+    },
+    "Show ${session}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show ${session}"
+          }
+        }
+      }
+    },
+    "Show a session in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show a session in ${applicationName}"
           }
         }
       }
@@ -8421,6 +9323,17 @@
         }
       }
     },
+    "Show Session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Session"
+          }
+        }
+      }
+    },
     "Show Sidebar" : {
       "comment" : "Menu item: shows the tab sidebar",
       "extractionState" : "manual",
@@ -8564,6 +9477,28 @@
         }
       }
     },
+    "Show Terminal Session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Terminal Session"
+          }
+        }
+      }
+    },
+    "Shown in a Tab" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shown in a Tab"
+          }
+        }
+      }
+    },
     "Smaller" : {
       "comment" : "Menu item: decreases the terminal font size",
       "extractionState" : "manual",
@@ -8632,6 +9567,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "縮小"
+          }
+        }
+      }
+    },
+    "Space" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Space"
+          }
+        }
+      }
+    },
+    "Start a new session in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a new session in ${applicationName}"
+          }
+        }
+      }
+    },
+    "Start a shell in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start a shell in ${applicationName}"
           }
         }
       }
@@ -8774,6 +9742,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在啟動…"
+          }
+        }
+      }
+    },
+    "Starts a shell in the background and returns the session. Show it later with Show Terminal Session, or drive it with Send Text." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starts a shell in the background and returns the session. Show it later with Show Terminal Session, or drive it with Send Text."
           }
         }
       }
@@ -9274,6 +10253,17 @@
         }
       }
     },
+    "Terminal Session" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminal Session"
+          }
+        }
+      }
+    },
     "Terminal Unavailable" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9345,6 +10335,17 @@
         }
       }
     },
+    "Text" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text"
+          }
+        }
+      }
+    },
     "Text Size" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9412,6 +10413,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "文字大小"
+          }
+        }
+      }
+    },
+    "That terminal session is already open in another window." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That terminal session is already open in another window."
+          }
+        }
+      }
+    },
+    "That terminal session no longer exists." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That terminal session no longer exists."
           }
         }
       }
@@ -9553,6 +10576,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "鍵盤上方的快捷列將按此順序顯示這些按鍵。若無法全部顯示，可左右滑動查看。"
+          }
+        }
+      }
+    },
+    "The command did not finish before the time limit." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The command did not finish before the time limit."
           }
         }
       }
@@ -9764,6 +10798,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每個新終端機執行的程式，例如 /bin/zsh。留空則使用你的登入 shell。"
+          }
+        }
+      }
+    },
+    "The session did not exit in time." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The session did not exit in time."
+          }
+        }
+      }
+    },
+    "The session limit has been reached. Close a session and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The session limit has been reached. Close a session and try again."
+          }
+        }
+      }
+    },
+    "The shell could not be started. Check the default shell in iGhostVT Settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The shell could not be started. Check the default shell in iGhostVT Settings."
           }
         }
       }
@@ -10263,6 +11330,28 @@
         }
       }
     },
+    "The terminal service did not respond in time." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The terminal service did not respond in time."
+          }
+        }
+      }
+    },
+    "The terminal service is not running. Open iGhostVT and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The terminal service is not running. Open iGhostVT and try again."
+          }
+        }
+      }
+    },
     "Themes come from the Ghostty theme catalog and apply to every tab in every window." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10687,6 +11776,28 @@
         }
       }
     },
+    "Time Limit (seconds)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Time Limit (seconds)"
+          }
+        }
+      }
+    },
+    "Title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Title"
+          }
+        }
+      }
+    },
     "Toggle Sidebar" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10965,6 +12076,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "開啟終端機助手"
+          }
+        }
+      }
+    },
+    "Type into ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Type into ${applicationName}"
+          }
+        }
+      }
+    },
+    "Types a command into a terminal session, waits for the shell to return to its prompt, and returns the output. With no session, a new shell is started for the command and ended afterwards." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Types a command into a terminal session, waits for the shell to return to its prompt, and returns the output. With no session, a new shell is started for the command and ended afterwards."
+          }
+        }
+      }
+    },
+    "Types text into a terminal session, as if entered on its keyboard." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Types text into a terminal session, as if entered on its keyboard."
           }
         }
       }
@@ -11392,6 +12536,17 @@
         }
       }
     },
+    "Unlocked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlocked"
+          }
+        }
+      }
+    },
     "Up Arrow" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11605,6 +12760,28 @@
         }
       }
     },
+    "Wait for ${session} to return to its prompt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wait for ${session} to return to its prompt"
+          }
+        }
+      }
+    },
+    "Wait for Terminal Prompt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wait for Terminal Prompt"
+          }
+        }
+      }
+    },
     "Waiting for Approval" : {
       "localizations" : {
         "de" : {
@@ -11671,6 +12848,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "等待批准"
+          }
+        }
+      }
+    },
+    "Waits until the session's shell is back at its prompt. Returns false if the time limit passes first." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Waits until the session's shell is back at its prompt. Returns false if the time limit passes first."
+          }
+        }
+      }
+    },
+    "What is on the screen in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What is on the screen in ${applicationName}"
+          }
+        }
+      }
+    },
+    "What is running in ${applicationName}" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What is running in ${applicationName}"
+          }
+        }
+      }
+    },
+    "When the command ran in a new shell, leave that shell running instead of ending it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When the command ran in a new shell, leave that shell running instead of ending it."
+          }
+        }
+      }
+    },
+    "Whether a program is running in front of the session's shell. False when the shell is waiting at its prompt." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Whether a program is running in front of the session's shell. False when the shell is waiting at its prompt."
+          }
+        }
+      }
+    },
+    "Window" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Window"
           }
         }
       }

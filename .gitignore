@@ -6,3 +6,4 @@ build/
 .swiftpm/
 Configuration/Developer*.xcconfig
 !Configuration/Developer.xcconfig.example
+__pycache__/

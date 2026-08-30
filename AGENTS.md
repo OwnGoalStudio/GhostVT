@@ -129,6 +129,27 @@ shell's `cwd` (the same kernel read `inheritDirectoryFrom` uses) so a
 session can be named by something better than its id. The app sends neither
 op; the daemon's `write` and attach paths are untouched.
 
+The app's Shortcuts actions (`iGhostVT/Backend/Shortcuts/`, iOS 16+ behind
+`#available`) are the CLI's verbs a third time. `ShortcutDaemonClient` is
+the CLI's one-shot client with `async` in place of the semaphore — every
+headless intent opens a connection, makes its requests, and cancels; none
+attaches. One thing to know: the daemon attaches a *new* session to the
+peer that opened it, so an intent that opens a session for a tab must
+cancel its connection before `TabManager.openTab(attachingTo:)` — that is
+why `OpenNewTabIntent` goes through `withConnection` first. Foreground
+intents (`openAppWhenRun`) go through `ShortcutBridge`, which picks a
+scene (the one showing the session, else the frontmost) because there is
+one `TabManager` per window; it also answers `ighostvt://session/<id>` and
+`ighostvt://new`, and nothing in a URL ever reaches a shell. Run Terminal
+Command decides "done" as *foreground is the shell again and the transcript
+changed* — a fast command can finish between two polls, so the shell flag
+alone would report the old prompt as the result. Intent strings live in
+`Localizable.xcstrings` like every other string (keys are the English text;
+parameter summaries keep their `${param}` placeholders);
+`Scripts/xcstrings-dump.py` writes the catalog in Xcode's own layout so a
+scripted edit diffs as its additions only. `ScreenRenderer` and `KeyNames`
+moved to `Shared/Screen/` for this, synced into the app and the CLI.
+
 `capture` renders the replay itself (`ScreenRenderer`): the daemon keeps
 bytes, not a grid, and libghostty could only turn them into a screen through
 a live surface with a renderer attached. It is the subset that decides where

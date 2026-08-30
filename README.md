@@ -23,6 +23,7 @@ still running.
 | `iGhostVTWidgets/`       | WidgetKit appex: the Dynamic Island Live Activity                |
 | `Shared/Protocol/`       | XPC wire protocol, compiled into the app, the daemon, and the CLI |
 | `Shared/Activity/`       | `ActivityAttributes`, compiled into the app and the appex        |
+| `Shared/Screen/`         | The replay-to-text renderer and key names, in the app and the CLI |
 | `Configuration/`         | xcconfig files; `Version.xcconfig` holds the version number      |
 | `Packaging/`             | Debian control, maintainer scripts, ldid entitlements            |
 | `Packaging/macOS/`       | Bundled LaunchAgent and the (empty) entitlements for the Mac app |
@@ -73,6 +74,20 @@ ighostvt-cli kill 1
 On the Mac it is `/Applications/iGhostVT.app/Contents/MacOS/ighostvt-cli`;
 symlink it onto your `PATH` if you want it there. Exit codes: 0 success,
 1 the daemon refused (no such session), 64 bad usage, 69 no daemon.
+
+## Shortcuts
+
+Every CLI verb is also a Shortcuts action (iOS 16 and later, and the Mac),
+under the same rules: an action opens its own connection to the daemon,
+never attaches, and closes it when done, so a session a tab is showing keeps
+its tab. Run Terminal Command types a line, waits for the prompt to return,
+and hands back what was printed; New Terminal Session, Send Text, Send Key,
+Get Terminal Screen Text, Get Terminal Directory, Is Terminal Busy, Wait for
+Terminal Prompt, and End Terminal Session are the pieces it is built from.
+Show Terminal Session, Open New Terminal Tab, and Lock Terminal Session bring
+the app forward and act on its tabs. Sessions are picked from a list that
+names them by their foreground program and directory, and `ighostvt://session/<id>`
+opens one from any URL.
 
 ## macOS
 
