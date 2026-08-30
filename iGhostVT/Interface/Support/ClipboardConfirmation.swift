@@ -37,7 +37,7 @@ enum ClipboardConfirmation {
         switch kind {
         case .osc52Read: "Allow Clipboard Access?"
         case .osc52Write: "Allow Clipboard Change?"
-        case .paste: "Paste Multiple Lines?"
+        case .paste: "Paste Unsafe Text?"
         }
     }
 

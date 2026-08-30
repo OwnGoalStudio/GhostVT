@@ -125,7 +125,7 @@ final class IOSupervisor {
     ) {
         guard let channel else {
             if wantsReply {
-                completion(Self.composeFailure(.operationFailed, "The terminal service is restarting. Try again."))
+                completion(Self.composeFailure(.operationFailed, "The terminal helper is restarting. Try again."))
             }
             return
         }
@@ -141,7 +141,7 @@ final class IOSupervisor {
         guard channel.send(.request, peer: peer.peerID, tag: tag, object: message) else {
             pending.removeValue(forKey: tag)
             if wantsReply {
-                completion(Self.composeFailure(.invalidRequest, "The request could not be forwarded."))
+                completion(Self.composeFailure(.invalidRequest, "Unable to reach the terminal helper. Try again."))
             }
             return
         }
@@ -265,7 +265,7 @@ final class IOSupervisor {
         case .reply:
             guard let entry = pending.removeValue(forKey: header.tag) else { return }
             let reply = IOCodec.decode(payload)
-                ?? Self.composeFailure(.operationFailed, "The terminal service sent an unreadable reply.")
+                ?? Self.composeFailure(.operationFailed, "The terminal helper sent an unexpected response. Try again.")
             entry.completion(reply)
         case .event:
             guard let peer = peers[header.peer], let event = IOCodec.decode(payload) else { return }
@@ -292,7 +292,7 @@ final class IOSupervisor {
         let unanswered = pending
         pending.removeAll()
         for entry in unanswered.values {
-            entry.completion(Self.composeFailure(.operationFailed, "The terminal service restarted. Try again."))
+            entry.completion(Self.composeFailure(.operationFailed, "The terminal helper restarted. Try again."))
         }
         for peer in Array(peers.values) {
             peer.cutConnection(reason: "io link closed")

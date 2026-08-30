@@ -658,7 +658,7 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             String(localized: "iGhostVT and its terminal helper are different versions. Reinstall iGhostVT to update both.")
         case .handshakeRequired: String(localized: "The terminal connection is not ready. Try again.")
         case .sessionLimitReached: String(localized: "Too many terminals are open. Close one and try again.")
-        case .unknownSession: String(localized: "This terminal no longer exists.")
+        case .unknownSession: String(localized: "This terminal is no longer available.")
         case .sessionBusy: String(localized: "This terminal is already open in another window.")
         case .spawnFailed: String(localized: "No usable shell was found. Check the default shell in Settings.")
         }

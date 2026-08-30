@@ -35,24 +35,24 @@ enum CLIError: Error {
         case let .usage(text):
             return text
         case .daemonUnreachable:
-            return "the terminal daemon is not running"
-        case let .timedOut(operation):
-            return "the terminal daemon did not answer \(operation) in time"
-        case let .daemonTooOld(operation):
-            return "the terminal daemon is too old to answer \(operation); update iGhostVT"
+            return "The terminal daemon is not running. Open iGhostVT and try again."
+        case .timedOut:
+            return "The terminal daemon did not respond in time. Try again."
+        case .daemonTooOld:
+            return "The terminal daemon is out of date. Update iGhostVT and try again."
         case let .refused(code, detail):
             if let detail, !detail.isEmpty { return detail }
             switch code {
-            case .unknownSession: return "no such session"
-            case .sessionBusy: return "the session is in use"
-            case .sessionLimitReached: return "the daemon is holding as many sessions as it can"
-            case .spawnFailed: return "the shell could not be started"
-            case .handshakeRequired, .unsupportedVersion: return "the daemon refused the connection"
-            case .invalidRequest: return "the daemon refused the request"
-            case .operationFailed, .success: return "the daemon could not do that"
+            case .unknownSession: return "No session with that id. Run `ighostvt-cli list` to see them."
+            case .sessionBusy: return "The session is already open in another window."
+            case .sessionLimitReached: return "The session limit has been reached. Close a session and try again."
+            case .spawnFailed: return "The shell could not be started. Check the default shell in iGhostVT Settings."
+            case .handshakeRequired, .unsupportedVersion: return "Unable to connect to the terminal daemon. Restart iGhostVT and try again."
+            case .invalidRequest: return "The terminal daemon did not accept the request. Try again."
+            case .operationFailed, .success: return "The terminal daemon could not complete the request. Try again."
             }
         case let .sessionLingered(id):
-            return "session \(id) did not exit"
+            return "Session \(id) did not exit. Try again."
         }
     }
 }

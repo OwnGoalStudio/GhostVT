@@ -36,7 +36,7 @@ struct EmptyTabsView: View {
         .overlay(alignment: .bottom) {
             // Regular width only: on a phone the bottom bar owns that edge.
             if horizontalSizeClass == .regular {
-                Text("An OwnGoal Studio Project with AI")
+                Text("OwnGoal Studio × AI")
                     .font(DS.Font.caption)
                     .foregroundColor(theme.foreground(for: colorScheme).opacity(0.4))
                     .multilineTextAlignment(.center)

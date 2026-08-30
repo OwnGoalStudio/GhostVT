@@ -108,7 +108,7 @@ import SwiftUI
                     KeyboardBarKeyGlyph(key: .divider, size: 28)
                     Text("Divider")
                     Spacer()
-                    Text("Multiple Allowed")
+                    Text("Multiple allowed")
                         .font(DS.Font.detail)
                         .foregroundColor(.secondary)
                 }

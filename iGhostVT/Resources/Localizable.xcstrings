@@ -1542,78 +1542,6 @@
         }
       }
     },
-    "An OwnGoal Studio Project with AI" : {
-      "comment" : "Footnote at the bottom of the empty window",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ein Projekt von OwnGoal Studio mit KI"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "An OwnGoal Studio Project with AI"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un proyecto de OwnGoal Studio con IA"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un projet OwnGoal Studio avec l’IA"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Un progetto OwnGoal Studio con l’IA"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OwnGoal Studio と AI によるプロジェクト"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "AI와 함께하는 OwnGoal Studio 프로젝트"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Um projeto OwnGoal Studio com IA"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Проект OwnGoal Studio с ИИ"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OwnGoal Studio 与 AI 共同打造"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OwnGoal Studio 與 AI 共同打造"
-          }
-        }
-      }
-    },
     "Appearance" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6080,7 +6008,8 @@
         }
       }
     },
-    "Multiple Allowed" : {
+    "Multiple allowed" : {
+      "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -6091,7 +6020,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Multiple Allowed"
+            "value" : "Multiple allowed"
           }
         },
         "es" : {
@@ -6358,78 +6287,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新增視窗"
-          }
-        }
-      }
-    },
-    "No configuration file yet. It will be saved to %@." : {
-      "comment" : "Settings footer when the rendered ghostty config is missing; %@ is a directory path",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Noch keine Konfigurationsdatei. Sie wird unter %@ gesichert."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No configuration file yet. It will be saved to %@."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aún no hay archivo de configuración. Se guardará en %@."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun fichier de configuration pour l’instant. Il sera enregistré dans %@."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Non c’è ancora un file di configurazione. Verrà salvato in %@."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "設定ファイルはまだありません。%@ に保存されます。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "아직 구성 파일이 없습니다. %@에 저장됩니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ainda não há arquivo de configuração. Ele será salvo em %@."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Файла конфигурации пока нет. Он будет сохранён в %@."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "尚无配置文件。它将保存到 %@。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "尚無設定檔。它將儲存到 %@。"
           }
         }
       }
@@ -7069,6 +6926,79 @@
         }
       }
     },
+    "OwnGoal Studio × AI" : {
+      "comment" : "Footnote at the bottom of the empty window",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OwnGoal Studio × AI"
+          }
+        }
+      },
+      "shouldTranslate" : false
+    },
     "Part of iGhostVT is missing, so it cannot open a terminal. Download iGhostVT again and replace this copy." : {
       "localizations" : {
         "de" : {
@@ -7210,73 +7140,72 @@
         }
       }
     },
-    "Paste Multiple Lines?" : {
-      "extractionState" : "manual",
+    "Paste Unsafe Text?" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Mehrere Zeilen einsetzen?"
+            "value" : "Unsicheren Text einsetzen?"
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Paste Multiple Lines?"
+            "value" : "Paste Unsafe Text?"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "¿Pegar varias líneas?"
+            "value" : "¿Pegar texto no seguro?"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Coller plusieurs lignes ?"
+            "value" : "Coller un texte non sécurisé ?"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Incollare più righe?"
+            "value" : "Incollare testo non sicuro?"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "複数行を貼り付けますか？"
+            "value" : "安全でないテキストをペーストしますか？"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "여러 줄을 붙여넣으시겠습니까?"
+            "value" : "안전하지 않은 텍스트를 붙여넣으시겠습니까?"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Colar várias linhas?"
+            "value" : "Colar texto não seguro?"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Вставить несколько строк?"
+            "value" : "Вставить небезопасный текст?"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "粘贴多行内容？"
+            "value" : "粘贴不安全的文本？"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "貼上多行內容？"
+            "value" : "貼上不安全的文字？"
           }
         }
       }
@@ -7489,148 +7418,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "移除 %@"
-          }
-        }
-      }
-    },
-    "Repeatable" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mehrfach möglich"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repeatable"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repetible"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Répétable"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ripetibile"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "複数追加可"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "여러 개 추가 가능"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repetível"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Можно несколько"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "可重复添加"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "可重複加入"
-          }
-        }
-      }
-    },
-    "Reset Themes" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Themes zurücksetzen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reset Themes"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restablecer temas"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Réinitialiser les thèmes"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ripristina i temi"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "テーマをリセット"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "테마 재설정"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Redefinir temas"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сбросить темы"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重置主题"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重置主題"
           }
         }
       }
@@ -9558,77 +9345,6 @@
         }
       }
     },
-    "The app and the terminal daemon are different versions. Reinstall iGhostVT to update both." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App und Terminal-Daemon haben unterschiedliche Versionen. Installiere iGhostVT neu, um beide zu aktualisieren."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The app and the terminal daemon are different versions. Reinstall iGhostVT to update both."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La app y el daemon del terminal tienen versiones distintas. Reinstala iGhostVT para actualizar ambos."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’app et le démon du terminal n’ont pas la même version. Réinstallez iGhostVT pour mettre à jour les deux."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’app e il daemon del terminale hanno versioni diverse. Reinstalla iGhostVT per aggiornare entrambi."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アプリとターミナルデーモンのバージョンが異なります。iGhostVT を再インストールして、両方を更新してください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "앱과 터미널 데몬의 버전이 다릅니다. iGhostVT를 다시 설치하여 둘 다 업데이트하세요."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O app e o daemon do terminal estão em versões diferentes. Reinstale o iGhostVT para atualizar os dois."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Версии приложения и службы терминала не совпадают. Переустановите iGhostVT, чтобы обновить обе."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App 与终端守护进程版本不一致。请重新安装 iGhostVT 以同时更新两者。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App 與終端機常駐程式版本不一致。請重新安裝 iGhostVT 以同時更新兩者。"
-          }
-        }
-      }
-    },
     "The background helper that runs your terminals is switched off. Turn it back on to open a terminal." : {
       "localizations" : {
         "de" : {
@@ -9695,77 +9411,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "執行終端機的背景助手已關閉。請重新開啟後再開啟終端機。"
-          }
-        }
-      }
-    },
-    "The bar above the keyboard shows these keys in this order. If they do not all fit, you can scroll it sideways." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Leiste über der Tastatur zeigt diese Tasten in dieser Reihenfolge. Passen nicht alle, kannst du sie seitwärts scrollen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The bar above the keyboard shows these keys in this order. If they do not all fit, you can scroll it sideways."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La barra sobre el teclado muestra estas teclas en este orden. Si no caben todas, puedes desplazarla lateralmente."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La barre au-dessus du clavier affiche ces touches dans cet ordre. Si elles ne tiennent pas toutes, vous pouvez la faire défiler latéralement."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La barra sopra la tastiera mostra questi tasti in quest’ordine. Se non entrano tutti, puoi farla scorrere lateralmente."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ショートカットバーには、この順番でキーが表示されます。収まらない場合は横にスクロールできます。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "키보드 위 막대에 이 순서대로 키가 표시됩니다. 모두 들어가지 않으면 옆으로 스크롤할 수 있습니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A barra acima do teclado mostra estas teclas nesta ordem. Se não couberem todas, você pode rolá-la para o lado."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Панель над клавиатурой показывает эти клавиши в этом порядке. Если помещаются не все, её можно прокрутить вбок."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "键盘上方的快捷栏将按此顺序显示按键。若无法全部显示，可左右滑动查看。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "鍵盤上方的快捷列將按此順序顯示按鍵。若無法完全顯示，可左右滑動查看。"
           }
         }
       }
@@ -9837,290 +9482,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "鍵盤上方的快捷列將按此順序顯示這些按鍵。若無法全部顯示，可左右滑動查看。"
-          }
-        }
-      }
-    },
-    "The connection to the terminal daemon could not be restored." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Verbindung zum Terminal-Daemon konnte nicht wiederhergestellt werden."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The connection to the terminal daemon could not be restored."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se pudo restablecer la conexión con el daemon del terminal."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La connexion au démon du terminal n’a pas pu être rétablie."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Non è stato possibile ripristinare la connessione al daemon del terminale."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルデーモンとの接続を復旧できませんでした。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널 데몬과의 연결을 복구하지 못했습니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível restabelecer a conexão com o daemon do terminal."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не удалось восстановить подключение к службе терминала."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法恢复与终端守护进程的连接。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無法復原與終端機常駐程式的連線。"
-          }
-        }
-      }
-    },
-    "The connection to the terminal daemon is not ready. Try again." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Verbindung zum Terminal-Daemon ist noch nicht bereit. Versuche es erneut."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The connection to the terminal daemon is not ready. Try again."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La conexión con el daemon del terminal aún no está lista. Inténtalo de nuevo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La connexion au démon du terminal n’est pas prête. Réessayez."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La connessione al daemon del terminale non è pronta. Riprova."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルデーモンとの接続がまだ準備できていません。もう一度お試しください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널 데몬과의 연결이 아직 준비되지 않았습니다. 다시 시도하세요."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A conexão com o daemon do terminal ainda não está pronta. Tente novamente."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подключение к службе терминала ещё не готово. Повторите попытку."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "与终端守护进程的连接尚未就绪。请重试。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "與終端機常駐程式的連線尚未就緒。請重試。"
-          }
-        }
-      }
-    },
-    "The connection to the terminal daemon was interrupted." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Verbindung zum Terminal-Daemon wurde unterbrochen."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The connection to the terminal daemon was interrupted."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Se interrumpió la conexión con el daemon del terminal."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La connexion au démon du terminal a été interrompue."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La connessione al daemon del terminale è stata interrotta."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルデーモンとの接続が中断されました。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널 데몬과의 연결이 중단되었습니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A conexão com o daemon do terminal foi interrompida."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подключение к службе терминала прервано."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "与终端守护进程的连接已中断。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "與終端機常駐程式的連線已中斷。"
-          }
-        }
-      }
-    },
-    "The connection to the terminal daemon was not set up." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Verbindung zum Terminal-Daemon wurde nicht hergestellt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The connection to the terminal daemon was not set up."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se estableció la conexión con el daemon del terminal."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La connexion au démon du terminal n’a pas été établie."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La connessione al daemon del terminale non è stata stabilita."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルデーモンとの接続が確立されていません。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널 데몬과의 연결이 설정되지 않았습니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A conexão com o daemon do terminal não foi estabelecida."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подключение к службе терминала не было установлено."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "尚未与终端守护进程建立连接。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "尚未與終端機常駐程式建立連線。"
           }
         }
       }
@@ -10332,148 +9693,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每個新終端機執行的程式，例如 /bin/zsh。留空則使用你的登入 shell。"
-          }
-        }
-      }
-    },
-    "The program every new terminal runs, for example /bin/zsh. Use a plain path inside the jailbreak root: a path that starts with jbroot stops working after the next jailbreak. Leave this empty to use the default login shell." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Verwende einen einfachen Pfad innerhalb des Jailbreak-Roots: Ein Pfad, der mit jbroot beginnt, funktioniert nach dem nächsten Jailbreak nicht mehr. Leer lassen, um die Standard-Login-Shell zu verwenden."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The program every new terminal runs, for example /bin/zsh. Use a plain path inside the jailbreak root: a path that starts with jbroot stops working after the next jailbreak. Leave this empty to use the default login shell."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Usa una ruta simple dentro de la raíz del jailbreak: una ruta que empiece por jbroot dejará de funcionar tras el próximo jailbreak. Déjalo vacío para usar el shell de inicio de sesión predeterminado."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le programme que lance chaque nouveau terminal, par exemple /bin/zsh. Utilisez un chemin simple à l’intérieur de la racine du jailbreak : un chemin commençant par jbroot cessera de fonctionner après le prochain jailbreak. Laissez ce champ vide pour utiliser le shell de connexion par défaut."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il programma che ogni nuovo terminale esegue, ad esempio /bin/zsh. Usa un percorso semplice all’interno della root del jailbreak: un percorso che inizia con jbroot smette di funzionare dopo il prossimo jailbreak. Lascia vuoto per usare la shell di login predefinita."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "新しいターミナルが実行するプログラムです（例: /bin/zsh）。ジェイルブレイクルート内の通常のパスを指定してください。jbroot で始まるパスは、次回のジェイルブレイク後に使えなくなります。空欄のままにすると、デフォルトのログインシェルを使用します。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "새 터미널이 실행할 프로그램입니다(예: /bin/zsh). 탈옥 루트 안의 일반 경로를 사용하세요. jbroot로 시작하는 경로는 다음 탈옥 후에 작동하지 않습니다. 비워 두면 기본 로그인 셸을 사용합니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O programa que cada novo terminal executa, por exemplo /bin/zsh. Use um caminho simples dentro da raiz do jailbreak: um caminho que começa com jbroot deixa de funcionar após o próximo jailbreak. Deixe vazio para usar o shell de login padrão."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Программа, которую запускает каждый новый терминал, например /bin/zsh. Укажите обычный путь внутри корня джейлбрейка: путь, начинающийся с jbroot, перестанет работать после следующего джейлбрейка. Оставьте поле пустым, чтобы использовать стандартную оболочку входа."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "新建终端时运行的程序，例如 /bin/zsh。请使用越狱根目录内的常规路径；以 jbroot 开头的路径在重新越狱后将失效。若留空，则使用默认登录 Shell。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "新增終端機時執行的程式，例如 /bin/zsh。請使用越獄根目錄內的一般路徑；以 jbroot 開頭的路徑在重新越獄後將失效。若留空，則使用預設登入 Shell。"
-          }
-        }
-      }
-    },
-    "The program every new terminal runs, for example /bin/zsh. Use a plain path; one that includes the jailbreak root stops working after the next jailbreak. Leave this empty to use the default login shell." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Verwende einen einfachen Pfad; ein Pfad mit dem Jailbreak-Root funktioniert nach dem nächsten Jailbreak nicht mehr. Leer lassen, um die Standard-Login-Shell zu verwenden."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The program every new terminal runs, for example /bin/zsh. Use a plain path; one that includes the jailbreak root stops working after the next jailbreak. Leave this empty to use the default login shell."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Usa una ruta simple; una que incluya la raíz del jailbreak deja de funcionar tras el siguiente jailbreak. Déjalo vacío para usar el shell de inicio de sesión predeterminado."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le programme que lance chaque nouveau terminal, par exemple /bin/zsh. Utilisez un chemin simple ; un chemin contenant la racine du jailbreak cessera de fonctionner après le prochain jailbreak. Laissez vide pour utiliser le shell de connexion par défaut."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il programma che ogni nuovo terminale esegue, ad esempio /bin/zsh. Usa un percorso semplice; uno che include la radice del jailbreak smette di funzionare dopo il prossimo jailbreak. Lascia vuoto per usare la shell di login predefinita."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "新しいターミナルが実行するプログラム（例：/bin/zsh）。通常のパスを指定してください。ジェイルブレイクのルートを含むパスは、次回のジェイルブレイク後に使えなくなります。空欄にすると、デフォルトのログインシェルを使用します。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "새 터미널이 실행하는 프로그램입니다(예: /bin/zsh). 일반 경로를 사용하세요. 탈옥 루트가 포함된 경로는 다음 탈옥 이후 작동하지 않습니다. 비워 두면 기본 로그인 셸을 사용합니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O programa que cada novo terminal executa, por exemplo /bin/zsh. Use um caminho simples; um que inclua a raiz do jailbreak deixa de funcionar após o próximo jailbreak. Deixe vazio para usar o shell de login padrão."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Программа, которую запускает каждый новый терминал, например /bin/zsh. Указывайте обычный путь: путь с корнем джейлбрейка перестанет работать после следующего джейлбрейка. Оставьте поле пустым, чтобы использовать оболочку входа по умолчанию."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每个新终端运行的程序，例如 /bin/zsh。请使用常规路径；包含越狱根目录的路径在下次越狱后将失效。留空则使用默认登录 Shell。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每個新終端機執行的程式，例如 /bin/zsh。請使用一般路徑；包含越獄根目錄的路徑在下次越獄後將失效。留空則使用預設登入 Shell。"
           }
         }
       }
@@ -10832,77 +10051,6 @@
         }
       }
     },
-    "The terminal daemon could not complete this action. Try again." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Terminal-Daemon konnte diese Aktion nicht abschließen. Versuche es erneut."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The terminal daemon could not complete this action. Try again."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El daemon del terminal no pudo completar esta acción. Inténtalo de nuevo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le démon du terminal n’a pas pu effectuer cette action. Réessayez."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il daemon del terminale non ha potuto completare questa azione. Riprova."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルデーモンがこの操作を完了できませんでした。もう一度お試しください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널 데몬이 이 작업을 완료하지 못했습니다. 다시 시도하세요."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O daemon do terminal não conseguiu concluir esta ação. Tente novamente."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Служба терминала не смогла выполнить это действие. Повторите попытку."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "终端守护进程无法完成此操作。请重试。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "終端機常駐程式無法完成此操作。請重試。"
-          }
-        }
-      }
-    },
     "The terminal daemon is not running." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10970,148 +10118,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "終端機常駐程式未執行。"
-          }
-        }
-      }
-    },
-    "The terminal daemon refused the connection." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Terminal-Daemon hat die Verbindung abgelehnt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The terminal daemon refused the connection."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El daemon del terminal rechazó la conexión."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le démon du terminal a refusé la connexion."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il daemon del terminale ha rifiutato la connessione."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルデーモンが接続を拒否しました。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널 데몬이 연결을 거부했습니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O daemon do terminal recusou a conexão."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Служба терминала отклонила подключение."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "终端守护进程拒绝连接。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "終端機常駐程式拒絕連線。"
-          }
-        }
-      }
-    },
-    "The terminal daemon rejected this action." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Terminal-Daemon hat diese Aktion abgelehnt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The terminal daemon rejected this action."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El daemon del terminal rechazó esta acción."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le démon du terminal a refusé cette action."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il daemon del terminale ha rifiutato questa azione."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルデーモンがこの操作を拒否しました。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널 데몬이 이 작업을 거부했습니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O daemon do terminal recusou esta ação."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Служба терминала отклонила это действие."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "终端守护进程拒绝了此操作。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "終端機常駐程式拒絕了此操作。"
           }
         }
       }
@@ -11470,144 +10476,72 @@
         }
       }
     },
-    "This terminal no longer exists." : {
-      "extractionState" : "manual",
+    "This terminal is no longer available." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dieses Terminal existiert nicht mehr."
+            "value" : "Dieses Terminal ist nicht mehr verfügbar."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This terminal no longer exists."
+            "value" : "This terminal is no longer available."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este terminal ya no existe."
+            "value" : "Este terminal ya no está disponible."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce terminal n’existe plus."
+            "value" : "Ce terminal n’est plus disponible."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Questo terminale non esiste più."
+            "value" : "Questo terminale non è più disponibile."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このターミナルは存在しません。"
+            "value" : "このターミナルは利用できなくなりました。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이 터미널은 더 이상 존재하지 않습니다."
+            "value" : "이 터미널은 더 이상 사용할 수 없습니다."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Este terminal não existe mais."
+            "value" : "Este terminal não está mais disponível."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Этот терминал больше не существует."
+            "value" : "Этот терминал больше недоступен."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "该终端已不存在。"
+            "value" : "该终端已不可用。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "該終端機已不存在。"
-          }
-        }
-      }
-    },
-    "This text contains line breaks or control characters the program may run as commands: %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dieser Text enthält Zeilenumbrüche oder Steuerzeichen, die das Programm als Befehle ausführen kann: %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "This text contains line breaks or control characters the program may run as commands: %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este texto contiene saltos de línea o caracteres de control que el programa puede ejecutar como comandos: %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ce texte contient des sauts de ligne ou des caractères de contrôle que le programme peut exécuter comme des commandes : %@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Questo testo contiene interruzioni di riga o caratteri di controllo che il programma potrebbe eseguire come comandi: %@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "このテキストには、プログラムがコマンドとして実行する可能性のある改行や制御文字が含まれています：%@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이 텍스트에는 프로그램이 명령으로 실행할 수 있는 줄바꿈이나 제어 문자가 있습니다: %@"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Este texto contém quebras de linha ou caracteres de controle que o programa pode executar como comandos: %@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Этот текст содержит переносы строк или управляющие символы, которые программа может выполнить как команды: %@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "此文本包含换行符或控制字符，程序可能会将其作为命令执行：%@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "此文字包含換行符或控制字元，程式可能會將其作為指令執行：%@"
+            "value" : "該終端機已不可用。"
           }
         }
       }
@@ -12525,148 +11459,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最多 3 個字元，按原樣傳送。單一字母也可與 Control 鍵組合使用。"
-          }
-        }
-      }
-    },
-    "Up to three characters, sent exactly as typed. A single letter works with Control just like a letter on the keyboard." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bis zu drei Zeichen, genau so gesendet, wie sie eingegeben werden. Ein einzelner Buchstabe funktioniert mit Control genau wie ein Buchstabe auf der Tastatur."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Up to three characters, sent exactly as typed. A single letter works with Control just like a letter on the keyboard."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hasta tres caracteres, enviados tal como se escriben. Una sola letra funciona con Control igual que una letra del teclado."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Jusqu’à trois caractères, envoyés tels qu’ils sont saisis. Une seule lettre fonctionne avec Contrôle comme une lettre du clavier."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fino a tre caratteri, inviati esattamente come vengono digitati. Una singola lettera funziona con Control proprio come una lettera della tastiera."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "最大 3 文字を、入力したとおりに送信します。1 文字のときは、キーボードの文字と同じように Control と組み合わせて使えます。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "최대 3자를 입력한 그대로 보냅니다. 한 글자일 때는 키보드의 글자와 똑같이 Control과 함께 사용할 수 있습니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Até três caracteres, enviados exatamente como digitados. Uma única letra funciona com Control como qualquer letra do teclado."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "До трёх символов, отправляются ровно так, как введены. Одна буква работает с Control так же, как буква на клавиатуре."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "最多输入 3 个字符，按原样发送。单个字母可与 Control 键组合使用，效果与键盘上的字母键相同。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "最多輸入 3 個字元，並將按原樣送出。單一字母可與 Control 鍵組合使用，效果與鍵盤上的字母按鍵相同。"
-          }
-        }
-      }
-    },
-    "Verbose Terminal Log" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ausführliches Terminalprotokoll"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verbose Terminal Log"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registro detallado del terminal"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Journal détaillé du terminal"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Log dettagliato del terminale"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "詳細なターミナルログ"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "자세한 터미널 로그"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Log detalhado do terminal"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Подробный журнал терминала"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "详细终端日志"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "詳細終端機日誌"
           }
         }
       }

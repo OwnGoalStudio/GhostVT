@@ -50,10 +50,7 @@ struct SessionSummaryCard: View {
                         if state.detachedCount > 0 {
                             InfoPair(
                                 label: "Detached",
-                                value: String(
-                                    localized: "\(state.detachedCount) detached",
-                                    comment: "Sessions running with no tab attached"
-                                )
+                                value: "\(state.detachedCount)"
                             )
                         }
                     }

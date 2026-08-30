@@ -13,15 +13,15 @@ usage: ighostvt-cli list
        ighostvt-cli new [-- <command> [argument ...]]
        ighostvt-cli kill <sid>
 
-  list          the daemon's sessions: id, foreground process, size,
-                whether something is attached, and the shell's directory
-  capture       the session's screen as text; --full prepends the
+  list          show the daemon's sessions: id, foreground process, size,
+                whether it is attached, and the shell's directory
+  capture       print the session's screen as text; --full prepends the
                 scrollback the daemon still holds
-  send          input for the session, in order. Key names follow tmux's
+  send          send input to the session, in order. Key names follow tmux's
                 send-keys: \(KeyNames.vocabulary)
   new           open a session and print its id (the shell, or the given
                 command); it stays in the daemon for the app to adopt
-  kill          close a session and wait for it to go
+  kill          close a session and wait for it to exit
 """
 
 enum Command {
@@ -51,7 +51,7 @@ func parse(_ arguments: [String]) throws -> Command {
         let id = try parseSessionID(rest.first, "capture")
         let flags = Array(rest.dropFirst())
         guard flags.allSatisfy({ $0 == "--full" }) else {
-            throw CLIError.usage("capture takes a session id and, at most, --full")
+            throw CLIError.usage("capture takes a session id and an optional --full")
         }
         return .capture(sessionID: id, full: flags.contains("--full"))
     case "send":
@@ -59,7 +59,7 @@ func parse(_ arguments: [String]) throws -> Command {
         var input: [UInt8] = []
         var remaining = Array(rest.dropFirst())
         guard !remaining.isEmpty else {
-            throw CLIError.usage("send takes what to send: text <string> or key <name>")
+            throw CLIError.usage("send takes text <string> or key <name>")
         }
         while !remaining.isEmpty {
             let kind = remaining.removeFirst()
@@ -72,7 +72,7 @@ func parse(_ arguments: [String]) throws -> Command {
                 input.append(contentsOf: Array(value.utf8))
             case "key":
                 guard let bytes = KeyNames.bytes(for: value) else {
-                    throw CLIError.usage("no key named \(value). Known keys: \(KeyNames.vocabulary)")
+                    throw CLIError.usage("No key named \(value). Known keys: \(KeyNames.vocabulary)")
                 }
                 input.append(contentsOf: bytes)
             default:
@@ -89,7 +89,7 @@ func parse(_ arguments: [String]) throws -> Command {
     case "-h", "--help", "help":
         return .help
     default:
-        throw CLIError.usage("no command named \(verb)\n\n\(usage)")
+        throw CLIError.usage("No command named \(verb)\n\n\(usage)")
     }
 }
 
