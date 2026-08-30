@@ -60,6 +60,10 @@ struct AlertCardView: View {
     let title: String
     let message: String
     let actions: [AlertAction]
+    /// Overlay cards of background tabs stay mounted; only the visible one
+    /// may take first responder, or a failed tab in the back would steal
+    /// the keyboard from the one in front.
+    var claimsFirstResponder = true
 
     var body: some View {
         VStack(spacing: DS.Padding.l) {
@@ -82,7 +86,10 @@ struct AlertCardView: View {
 
             HStack(spacing: DS.Padding.s) {
                 ForEach(actions) { action in
-                    actionButton(action)
+                    Button(action: action.handler) {
+                        Text(action.title)
+                    }
+                    .buttonStyle(AlertButtonStyle(kind: action.kind))
                 }
             }
         }
@@ -90,18 +97,122 @@ struct AlertCardView: View {
         .frame(maxWidth: 350)
         .cardGlass(in: RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous))
         .fixedSize(horizontal: false, vertical: true)
+        .background {
+            if claimsFirstResponder {
+                AlertFirstResponder {
+                    actions.defaultAction?.handler()
+                }
+            }
+        }
+    }
+}
+
+/// Becomes first responder for as long as the card is in the window, so the
+/// terminal underneath drops the software keyboard (and its accessory bar)
+/// and Return reaches the card instead of the shell. The hop matches
+/// `TerminalViewState.requestFocus`: becoming first responder writes focus
+/// state and must not happen inside a SwiftUI update.
+private struct AlertFirstResponder: UIViewRepresentable {
+    var onReturn: () -> Void
+
+    func makeUIView(context _: Context) -> ClaimView {
+        let view = ClaimView()
+        view.onReturn = onReturn
+        view.isUserInteractionEnabled = false
+        view.backgroundColor = .clear
+        return view
     }
 
-    @ViewBuilder
-    private func actionButton(_ action: AlertAction) -> some View {
-        let button = Button(action: action.handler) {
-            Text(action.title)
+    func updateUIView(_ view: ClaimView, context _: Context) {
+        view.onReturn = onReturn
+        view.claimIfNeeded()
+    }
+
+    static func dismantleUIView(_ view: ClaimView, coordinator _: ()) {
+        view.wantsFirstResponder = false
+        if view.isFirstResponder {
+            _ = view.resignFirstResponder()
         }
-        .buttonStyle(AlertButtonStyle(kind: action.kind))
-        if action.id == actions.defaultAction?.id {
-            button.keyboardShortcut(.defaultAction)
-        } else {
-            button
+    }
+
+    final class ClaimView: UIView {
+        var onReturn: () -> Void = {}
+        var wantsFirstResponder = true
+        private var isHandlingReturn = false
+
+        override var canBecomeFirstResponder: Bool { wantsFirstResponder }
+
+        override var keyCommands: [UIKeyCommand]? {
+            let command = UIKeyCommand(
+                input: "\r",
+                modifierFlags: [],
+                action: #selector(performDefaultAction)
+            )
+            command.wantsPriorityOverSystemBehavior = true
+            return [command]
+        }
+
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            if window != nil {
+                claimIfNeeded()
+            }
+        }
+
+        func claimIfNeeded() {
+            guard wantsFirstResponder, window != nil, !isFirstResponder else { return }
+            DispatchQueue.main.async { [weak self] in
+                guard let self, self.wantsFirstResponder, self.window != nil else { return }
+                _ = self.becomeFirstResponder()
+            }
+        }
+
+        /// `requestFocus` on the terminal hops the same way; if it wins a
+        /// round, reclaim on the next turn while the card is still up.
+        override func resignFirstResponder() -> Bool {
+            let resigned = super.resignFirstResponder()
+            if resigned, wantsFirstResponder, window != nil {
+                claimIfNeeded()
+            }
+            return resigned
+        }
+
+        override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+            if consumeReturn(presses) { return }
+            super.pressesBegan(presses, with: event)
+        }
+
+        override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+            if isUnmodifiedReturn(presses) { return }
+            super.pressesEnded(presses, with: event)
+        }
+
+        @objc private func performDefaultAction() {
+            fireReturn()
+        }
+
+        private func consumeReturn(_ presses: Set<UIPress>) -> Bool {
+            guard isUnmodifiedReturn(presses) else { return false }
+            fireReturn()
+            return true
+        }
+
+        private func isUnmodifiedReturn(_ presses: Set<UIPress>) -> Bool {
+            presses.contains { press in
+                guard let key = press.key else { return false }
+                let extras = key.modifierFlags.subtracting([.numericPad, .alphaShift])
+                guard extras.isEmpty else { return false }
+                return key.keyCode == .keyboardReturnOrEnter || key.keyCode == .keypadEnter
+            }
+        }
+
+        private func fireReturn() {
+            guard !isHandlingReturn else { return }
+            isHandlingReturn = true
+            onReturn()
+            DispatchQueue.main.async { [weak self] in
+                self?.isHandlingReturn = false
+            }
         }
     }
 }

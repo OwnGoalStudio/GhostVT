@@ -266,6 +266,15 @@ final class TerminalTab: ObservableObject, Identifiable {
         return !(store.status == .connected && store.isShellInForeground)
     }
 
+    /// The overlay card (a failed session, or a Mac helper that is not
+    /// ready) is covering this tab, so the surface must not hold first
+    /// responder — Return and the software keyboard belong to the card.
+    var isCoveredByStatusAlert: Bool {
+        if !MacLaunchAgent.shared.isReady { return true }
+        if case .failed = store.status { return true }
+        return false
+    }
+
     /// The surface as last seen — the tab-switcher card's picture. Taken
     /// from the real pixels (`snapshotImage()`), so it is what the user
     /// saw, not a re-typeset: a redraw that happens after the capture (an

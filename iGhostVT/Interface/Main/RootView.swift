@@ -14,6 +14,7 @@ struct RootView: View {
     /// The presentations the window's menu commands can open.
     @ObservedObject var interface: WindowInterfaceState
     @ObservedObject private var theme = AppTheme.shared
+    @ObservedObject private var agent = MacLaunchAgent.shared
     @StateObject private var keyboard = KeyboardState()
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -73,6 +74,9 @@ struct RootView: View {
             guard phase == .active else { return }
             refocus()
         }
+        .onChange(of: agent.status) { _ in refocus() }
+        .onChange(of: tabManager.closeRequest != nil) { _ in refocus() }
+        .onChange(of: tabManager.clipboardRequests.isEmpty) { _ in refocus() }
         .onChange(of: theme.selection) { _ in
             for tab in tabManager.tabs {
                 tab.terminal.controller.setTheme(theme.terminalTheme)
@@ -166,8 +170,17 @@ struct RootView: View {
     private func refocus() {
         // A locked tab must not hold keyboard focus: its surface ignores
         // touches, and hardware keys reaching it anyway would defeat the
-        // lock.
+        // lock. An overlay or modal alert owns first responder instead;
+        // handing it to the terminal would leave the accessory bar up
+        // under the card.
         guard let tab = tabManager.activeTab, !tab.isLocked else {
+            focusedTabID = nil
+            return
+        }
+        if tabManager.closeRequest != nil
+            || !tabManager.clipboardRequests.isEmpty
+            || tab.isCoveredByStatusAlert
+        {
             focusedTabID = nil
             return
         }
@@ -195,7 +208,11 @@ private struct TerminalPane: View {
         TerminalSurfaceView(context: tab.terminal)
             .terminalFocused(focusedTabID, equals: tab.id)
             .overlay {
-                SessionStatusOverlay(store: tab.store, onCloseTab: onCloseTab)
+                SessionStatusOverlay(
+                    store: tab.store,
+                    isActive: isActive,
+                    onCloseTab: onCloseTab
+                )
             }
             .overlay(alignment: .topTrailing) {
                 if let lock = tab.lock {
@@ -219,6 +236,7 @@ private struct TerminalPane: View {
             .allowsHitTesting(isActive)
             .accessibilityHidden(!isActive)
             .onChange(of: tab.lock) { _ in onLockChange() }
+            .onReceive(tab.store.$status) { _ in onLockChange() }
     }
 }
 

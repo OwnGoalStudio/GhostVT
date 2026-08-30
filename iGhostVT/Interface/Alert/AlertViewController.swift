@@ -39,24 +39,6 @@ final class AlertViewController: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
-    /// The terminal under an over-fullscreen presentation keeps first
-    /// responder otherwise, so Return would go to the shell instead of the
-    /// card.
-    override var canBecomeFirstResponder: Bool { true }
-
-    /// Return fires the only action, or the filled one when there are several
-    /// (destructive, else accent) — the button the card already emphasizes.
-    override var keyCommands: [UIKeyCommand]? {
-        guard defaultAction != nil else { return super.keyCommands }
-        let command = UIKeyCommand(
-            input: "\r",
-            modifierFlags: [],
-            action: #selector(performDefaultAction)
-        )
-        command.wantsPriorityOverSystemBehavior = true
-        return (super.keyCommands ?? []) + [command]
-    }
-
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .clear
@@ -66,7 +48,7 @@ final class AlertViewController: UIViewController {
                 self?.answer(action)
             }
         }
-        let host = Host(
+        let host = UIHostingController(
             rootView: AlertPane(
                 title: alertTitle,
                 message: alertMessage,
@@ -74,7 +56,6 @@ final class AlertViewController: UIViewController {
             )
             .interfaceTextSize()
         )
-        host.owner = self
         host.view.backgroundColor = .clear
         addChild(host)
         view.addSubview(host.view)
@@ -86,21 +67,6 @@ final class AlertViewController: UIViewController {
             host.view.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
         host.didMove(toParent: self)
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        becomeFirstResponder()
-    }
-
-    override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-        if consumeReturn(presses) { return }
-        super.pressesBegan(presses, with: event)
-    }
-
-    override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-        if isUnmodifiedReturn(presses) { return }
-        super.pressesEnded(presses, with: event)
     }
 
     /// Presents on the window's front-most presentation context, so an alert
@@ -116,52 +82,10 @@ final class AlertViewController: UIViewController {
         presenter.present(self, animated: true)
     }
 
-    private var defaultAction: AlertAction? { actions.defaultAction }
-
-    @objc private func performDefaultAction() {
-        _ = performDefaultActionIfNeeded()
-    }
-
-    fileprivate func consumeReturn(_ presses: Set<UIPress>) -> Bool {
-        guard isUnmodifiedReturn(presses) else { return false }
-        return performDefaultActionIfNeeded()
-    }
-
-    fileprivate func isUnmodifiedReturn(_ presses: Set<UIPress>) -> Bool {
-        presses.contains { press in
-            guard let key = press.key else { return false }
-            let extras = key.modifierFlags.subtracting([.numericPad, .alphaShift])
-            guard extras.isEmpty else { return false }
-            return key.keyCode == .keyboardReturnOrEnter || key.keyCode == .keypadEnter
-        }
-    }
-
-    private func performDefaultActionIfNeeded() -> Bool {
-        guard let action = defaultAction else { return false }
-        answer(action)
-        return hasAnswered
-    }
-
     private func answer(_ action: AlertAction) {
         guard !hasAnswered else { return }
         hasAnswered = true
         dismiss(animated: true, completion: action.handler)
-    }
-
-    /// Forwards Return before SwiftUI can give it to a focused (often Cancel)
-    /// button. The host is typically first responder, not the alert itself.
-    private final class Host<Content: View>: UIHostingController<Content> {
-        weak var owner: AlertViewController?
-
-        override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-            if owner?.consumeReturn(presses) == true { return }
-            super.pressesBegan(presses, with: event)
-        }
-
-        override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
-            if owner?.isUnmodifiedReturn(presses) == true { return }
-            super.pressesEnded(presses, with: event)
-        }
     }
 }
 

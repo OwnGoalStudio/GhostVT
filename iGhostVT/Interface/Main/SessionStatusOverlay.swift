@@ -25,6 +25,9 @@ import UIKit
 struct SessionStatusOverlay: View {
     @ObservedObject var store: TerminalSessionStore
     @ObservedObject private var agent = MacLaunchAgent.shared
+    /// Background tabs keep their overlay mounted; only the front tab's
+    /// card may steal first responder.
+    var isActive: Bool
 
     /// Closes the tab this session belongs to; provided by the pane's owner.
     var onCloseTab: () -> Void
@@ -51,8 +54,7 @@ struct SessionStatusOverlay: View {
                     .padding(DS.Padding.l)
             }
             // Under the bars too: they are glass, and a dim that stops at
-            // their edge reads as a second pane. The keyboard still pushes
-            // the card up.
+            // their edge reads as a second pane.
             .ignoresSafeArea(.container)
             .transition(.opacity)
         }
@@ -77,7 +79,8 @@ struct SessionStatusOverlay: View {
                     off. Turn it back on to open a terminal.
                     """
                 ),
-                actions: [AlertAction("Turn On Helper", kind: .accent) { agent.activate() }]
+                actions: [AlertAction("Turn On Helper", kind: .accent) { agent.activate() }],
+                claimsFirstResponder: isActive
             )
         case .needsApproval:
             AlertCardView(
@@ -94,7 +97,8 @@ struct SessionStatusOverlay: View {
                     AlertAction("Open Login Items", kind: .accent) {
                         agent.openLoginItemsSettings()
                     },
-                ]
+                ],
+                claimsFirstResponder: isActive
             )
         case .brokenInstallation:
             // Nothing in the app can repair a bundle with pieces missing, so
@@ -113,7 +117,8 @@ struct SessionStatusOverlay: View {
                     AlertAction("Download", kind: .accent) {
                         UIApplication.shared.open(MacLaunchAgent.downloadPageURL)
                     },
-                ]
+                ],
+                claimsFirstResponder: isActive
             )
         case let .failed(reason):
             AlertCardView(
@@ -122,7 +127,8 @@ struct SessionStatusOverlay: View {
                 actions: [
                     AlertAction("Check Again") { agent.refresh() },
                     AlertAction("Turn On Helper", kind: .accent) { agent.activate() },
-                ]
+                ],
+                claimsFirstResponder: isActive
             )
         case .notApplicable, .unsupported, .enabled:
             EmptyView()
@@ -162,10 +168,8 @@ struct SessionStatusOverlay: View {
         }
     }
 
-    /// The dim reaches under the keyboard as well as the bars: the keyboard
-    /// bar's corners are clear, and a dim that stops at the keyboard's edge
-    /// leaves the pane showing white through them. Only the dim ignores the
-    /// keyboard — the card stays above it, where its buttons can be pressed.
+    /// The dim reaches under the bars: they are glass, and a dim that
+    /// stops at their edge reads as a second pane.
     private var dim: some View {
         Color.black.opacity(0.25)
             .ignoresSafeArea(.all)
@@ -197,7 +201,8 @@ struct SessionStatusOverlay: View {
                     AlertAction("Retry", kind: .accent) {
                         store.connect()
                     },
-                ]
+                ],
+            claimsFirstResponder: isActive
         )
     }
 }
