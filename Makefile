@@ -11,6 +11,7 @@ DERIVED_DATA        ?= /private/tmp/ighostvt-deriveddata
 APP_BUNDLE          := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/iGhostVT.app
 DAEMON_BINARY       := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/ighostvtd
 DAEMON_IO_BINARY    := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/ighostvtd-io
+CLI_BINARY          := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/ighostvt-cli
 DAEMON_SCHEME       := ighostvtd
 PACKAGE_ID          ?= wiki.qaq.ighostvt
 BUNDLE_ID           := wiki.qaq.iGhostVT
@@ -47,6 +48,7 @@ MAC_UPDATE_FROM_GITHUB := $(ROOT_DIR)/Scripts/mac-update-from-github.sh
 CONTROL_TEMPLATE    := $(ROOT_DIR)/Packaging/DEBIAN/control
 ENTITLEMENTS        := $(ROOT_DIR)/Packaging/iGhostVT.entitlements
 DAEMON_ENTITLEMENTS := $(ROOT_DIR)/Packaging/iGhostVTDaemon.entitlements
+CLI_ENTITLEMENTS    := $(ROOT_DIR)/Packaging/iGhostVTCLI.entitlements
 APPEX_ENTITLEMENTS  := $(ROOT_DIR)/Packaging/iGhostVTWidgets.entitlements
 LAUNCH_DAEMON       := $(ROOT_DIR)/Packaging/wiki.qaq.ighostvtd.plist
 
@@ -131,11 +133,15 @@ check:
 	@[[ "$(APP_VERSION)" =~ ^[0-9]+\.[0-9]+\.[0-9]+$$ ]] || { echo "error: MARKETING_VERSION must look like 1.2.3, got '$(APP_VERSION)'" >&2; exit 65; }
 	@[[ "$(BUILD_NUMBER)" =~ ^[0-9]+$$ ]] || { echo "error: CURRENT_PROJECT_VERSION must be an integer, got '$(BUILD_NUMBER)'" >&2; exit 65; }
 	@plutil -lint "$(ENTITLEMENTS)"
-	@plutil -lint "$(DAEMON_ENTITLEMENTS)" "$(APPEX_ENTITLEMENTS)" "$(LAUNCH_DAEMON)"
+	@plutil -lint "$(DAEMON_ENTITLEMENTS)" "$(CLI_ENTITLEMENTS)" "$(APPEX_ENTITLEMENTS)" "$(LAUNCH_DAEMON)"
 	@[[ "$$(/usr/libexec/PlistBuddy -c 'Print :SoftResourceLimits:NumberOfFiles' "$(LAUNCH_DAEMON)")" == "10240" ]] || { echo "error: the daemon and its shells require a 10240 soft file-descriptor limit" >&2; exit 65; }
 	@targets="$$(xcodebuild -project "$(PROJECT)" -list)"; \
 		grep -F "ighostvtd" <<<"$$targets" >/dev/null || { echo "error: the ighostvtd target is missing from the project" >&2; exit 65; }; \
-		grep -F "ighostvtd-io" <<<"$$targets" >/dev/null || { echo "error: the ighostvtd-io target is missing from the project" >&2; exit 65; }
+		grep -F "ighostvtd-io" <<<"$$targets" >/dev/null || { echo "error: the ighostvtd-io target is missing from the project" >&2; exit 65; }; \
+		grep -F "ighostvt-cli" <<<"$$targets" >/dev/null || { echo "error: the ighostvt-cli target is missing from the project" >&2; exit 65; }
+	@grep -qF 'wiki.qaq.ighostvt-cli' "$(ROOT_DIR)/iGhostVTDaemon/Server/PeerAuthenticator.swift" \
+		&& grep -qF 'wiki.qaq.ighostvt-cli' "$(MAC_PACKAGER)" \
+		|| { echo "error: the CLI's signing identifier must match in PeerAuthenticator.swift and package-mac.sh" >&2; exit 65; }
 
 # iGhostVTKit is protocol-only since the TCP transport left; the harness is
 # the whole suite until it grows tests again.
@@ -158,7 +164,14 @@ harness:
 		$$(find "$(ROOT_DIR)/iGhostVTDaemonShared" "$(ROOT_DIR)/iGhostVTIO" "$(ROOT_DIR)/iGhostVTDaemon" -name '*.swift' ! -name 'main.swift' | sort) \
 		$$(find "$(ROOT_DIR)/Tests/PTYHarness" -name '*.swift' | sort) \
 		-o "$$harness_dir/harness"; \
-	IGHOSTVT_IO_BINARY="$$harness_dir/ighostvtd-io" "$$harness_dir/harness"
+	IGHOSTVT_IO_BINARY="$$harness_dir/ighostvtd-io" "$$harness_dir/harness"; \
+	xcrun --sdk macosx swiftc -swift-version 5 \
+		"$(ROOT_DIR)/Shared/iGhostVTProtocol.swift" \
+		"$(ROOT_DIR)/iGhostVTCLI/ScreenRenderer.swift" \
+		"$(ROOT_DIR)/iGhostVTCLI/KeyNames.swift" \
+		$$(find "$(ROOT_DIR)/Tests/CLIRenderer" -name '*.swift' | sort) \
+		-o "$$harness_dir/cli-renderer"; \
+	"$$harness_dir/cli-renderer"
 
 build: check test
 	XCBUILD_LABEL=build-ios $(DEVICE_XCODEBUILD) \
@@ -177,9 +190,11 @@ deb: build
 		"$(APP_BUNDLE)" \
 		"$(DAEMON_BINARY)" \
 		"$(DAEMON_IO_BINARY)" \
+		"$(CLI_BINARY)" \
 		"$(CONTROL_TEMPLATE)" \
 		"$(ENTITLEMENTS)" \
 		"$(DAEMON_ENTITLEMENTS)" \
+		"$(CLI_ENTITLEMENTS)" \
 		"$(APPEX_ENTITLEMENTS)" \
 		"$(LAUNCH_DAEMON)" \
 		"$(DEB_OUTPUT)" \
@@ -213,6 +228,7 @@ MAC_SIGN_IDENTITY   ?= -
 MAC_APP_BUNDLE      := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)-maccatalyst/iGhostVT.app
 MAC_DAEMON_BINARY   := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighostvtd
 MAC_DAEMON_IO_BINARY := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighostvtd-io
+MAC_DAEMON_CLI_BINARY := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighostvt-cli
 MAC_LAUNCH_AGENT    := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighostvtd.plist
 
 mac-app:
@@ -239,7 +255,9 @@ mac-daemon:
 		-destination "platform=macOS" \
 		build
 	@test -x "$(MAC_DAEMON_IO_BINARY)" || { echo "error: $(MAC_DAEMON_IO_BINARY) was not built; ighostvtd spawns it from beside itself" >&2; exit 66; }
+	@test -x "$(MAC_DAEMON_CLI_BINARY)" || { echo "error: $(MAC_DAEMON_CLI_BINARY) was not built; ighostvtd depends on it" >&2; exit 66; }
 	"$(MAC_DAEMON_LOADER)" install "$(MAC_DAEMON_BINARY)" "$(MAC_LAUNCH_AGENT)"
+	@echo "Command line: $(MAC_DAEMON_CLI_BINARY) list"
 
 mac-daemon-uninstall:
 	"$(MAC_DAEMON_LOADER)" uninstall
@@ -278,6 +296,7 @@ MAC_AGENT_PLIST     := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighostvtd.agent.plis
 MAC_ZIP_APP_BUNDLE  := $(DERIVED_DATA)/Build/Products/$(MAC_RELEASE_CONFIGURATION)-maccatalyst/iGhostVT.app
 MAC_ZIP_DAEMON      := $(DERIVED_DATA)/Build/Products/$(MAC_RELEASE_CONFIGURATION)/ighostvtd
 MAC_ZIP_DAEMON_IO   := $(DERIVED_DATA)/Build/Products/$(MAC_RELEASE_CONFIGURATION)/ighostvtd-io
+MAC_ZIP_CLI         := $(DERIVED_DATA)/Build/Products/$(MAC_RELEASE_CONFIGURATION)/ighostvt-cli
 MAC_ZIP_OUTPUT      ?= $(ROOT_DIR)/build/Packages/iGhostVT-$(APP_VERSION)-macos.zip
 
 MAC_XCODEBUILD := $(UNSIGNED_XCODEBUILD) \
@@ -331,6 +350,7 @@ mac-zip: mac-zip-check
 		"$(MAC_ZIP_APP_BUNDLE)" \
 		"$(MAC_ZIP_DAEMON)" \
 		"$(MAC_ZIP_DAEMON_IO)" \
+		"$(MAC_ZIP_CLI)" \
 		"$(MAC_AGENT_PLIST)" \
 		"$(MAC_APP_ENTITLEMENTS)" \
 		"$(MAC_DAEMON_ENTITLEMENTS)" \

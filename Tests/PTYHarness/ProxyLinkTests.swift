@@ -129,6 +129,47 @@ func replyCode(_ reply: xpc_object_t?) -> iGhostVTReplyCode? {
     reply.flatMap { iGhostVTReplyCode(rawValue: xpc_dictionary_get_int64($0, iGhostVTWireKey.code)) }
 }
 
+/// The `listSessions` row for `sessionID` as `peer` sees it right now.
+func listedRow(_ supervisor: IOSupervisor, from peer: HarnessPeer, sessionID: UInt64) -> xpc_object_t? {
+    guard let listed = request(supervisor, from: peer, .listSessions),
+          let sessions = xpc_dictionary_get_value(listed, iGhostVTWireKey.sessions)
+    else { return nil }
+    for index in 0 ..< xpc_array_get_count(sessions) {
+        let row = xpc_array_get_value(sessions, index)
+        if xpc_dictionary_get_uint64(row, iGhostVTWireKey.sessionID) == sessionID {
+            return row
+        }
+    }
+    return nil
+}
+
+/// A string field of a `listSessions` row. `xpc_dictionary_get_string`
+/// hands back a pointer the dictionary owns, so the conversion happens
+/// while the reply is still alive — reading it afterwards yields whatever
+/// the freed allocation now holds.
+func listedString(
+    _ supervisor: IOSupervisor,
+    from peer: HarnessPeer,
+    sessionID: UInt64,
+    _ key: String
+) -> String? {
+    guard let row = listedRow(supervisor, from: peer, sessionID: sessionID) else { return nil }
+    return withExtendedLifetime(row) {
+        xpc_dictionary_get_string(row, key).map { String(cString: $0) }
+    }
+}
+
+func setInput(_ message: xpc_object_t, _ text: String) {
+    let bytes = Array(text.utf8)
+    bytes.withUnsafeBytes { xpc_dictionary_set_data(message, iGhostVTWireKey.data, $0.baseAddress!, $0.count) }
+}
+
+func dataText(_ reply: xpc_object_t?) -> String {
+    var length = 0
+    guard let bytes = reply.flatMap({ xpc_dictionary_get_data($0, iGhostVTWireKey.data, &length) }) else { return "" }
+    return String(decoding: UnsafeRawBufferPointer(start: bytes, count: length), as: UTF8.self)
+}
+
 func waitUntil(_ timeout: TimeInterval = 5, _ condition: () -> Bool) -> Bool {
     let deadline = Date().addingTimeInterval(timeout)
     while Date() < deadline {
@@ -305,6 +346,113 @@ func runProxyLinkTests() {
             xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, sessionID)
         }) == .sessionBusy,
         "a session attached elsewhere is busy"
+    )
+
+    // The CLI's requests hold nothing: a snapshot reads the replay and
+    // injected input reaches the PTY while the first peer keeps the session.
+    print("proxy snapshot and inject")
+    // The foreground-name poll runs every 500 ms, so wait for it to settle
+    // on `cat` (through the list) before asserting the snapshot names it.
+    _ = waitUntil {
+        listedRow(supervisor, from: second, sessionID: sessionID).map {
+            xpc_dictionary_get_string($0, iGhostVTWireKey.processName).map { String(cString: $0) } == "cat"
+        } == true
+    }
+    let snapshot = request(supervisor, from: second, .snapshotSession) {
+        xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, sessionID)
+    }
+    check(replyCode(snapshot) == .success, "a snapshot needs no attachment")
+    let snapshotText = dataText(snapshot)
+    check(
+        snapshotText.contains("hello-from-io") && snapshotText.contains("ping-through-proxy"),
+        "the snapshot carries the replay"
+    )
+    check(
+        snapshot.map { xpc_dictionary_get_uint64($0, iGhostVTWireKey.columns) } == 80
+            && snapshot.map { xpc_dictionary_get_uint64($0, iGhostVTWireKey.rows) } == 24,
+        "the snapshot states the size"
+    )
+    check(
+        snapshot.flatMap { xpc_dictionary_get_string($0, iGhostVTWireKey.processName) }.map { String(cString: $0) } == "cat",
+        "the snapshot states the foreground process"
+    )
+    check(
+        listedRow(supervisor, from: second, sessionID: sessionID)
+            .map { xpc_dictionary_get_bool($0, iGhostVTWireKey.isAttached) } == true,
+        "the snapshot left the session attached to its peer"
+    )
+    check(
+        replyCode(request(supervisor, from: second, .injectInput) {
+            xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, sessionID)
+            setInput($0, "from-second\n")
+        }) == .success,
+        "injected input needs no attachment"
+    )
+    check(waitUntil { peer.output(of: sessionID).contains("from-second") }, "injected input reaches the attached peer")
+    check(!second.output(of: sessionID).contains("from-second"), "and nothing comes back to the peer that injected it")
+    check(
+        replyCode(request(supervisor, from: second, .injectInput) {
+            xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, sessionID)
+        }) == .invalidRequest,
+        "injected input without data is refused"
+    )
+    check(
+        replyCode(request(supervisor, from: second, .snapshotSession) {
+            xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, 999)
+        }) == .unknownSession,
+        "a snapshot of an unknown session is refused"
+    )
+    check(
+        replyCode(request(supervisor, from: second, .injectInput) {
+            xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, 999)
+            setInput($0, "x")
+        }) == .unknownSession,
+        "input into an unknown session is refused"
+    )
+    check(
+        waitUntil {
+            listedRow(supervisor, from: second, sessionID: sessionID).map {
+                xpc_dictionary_get_string($0, iGhostVTWireKey.processName).map { String(cString: $0) } == "cat"
+                    && xpc_dictionary_get_bool($0, iGhostVTWireKey.foregroundIsShell)
+            } == true
+        },
+        "a listed row names the foreground process"
+    )
+    let listedDirectory = listedString(
+        supervisor,
+        from: second,
+        sessionID: sessionID,
+        iGhostVTWireKey.currentDirectory
+    )
+    check(
+        listedDirectory?.hasPrefix("/") == true,
+        "a listed row states the shell's directory (got \(listedDirectory ?? "nil"))"
+    )
+    let placed = request(supervisor, from: second, .openSession) { message in
+        let command = xpc_array_create(nil, 0)
+        for argument in ["/bin/sh", "-c", "cd /private/tmp && exec cat"] {
+            xpc_array_append_value(command, xpc_string_create(argument))
+        }
+        xpc_dictionary_set_value(message, iGhostVTWireKey.command, command)
+    }
+    let placedID = placed.map { xpc_dictionary_get_uint64($0, iGhostVTWireKey.sessionID) } ?? 0
+    check(replyCode(placed) == .success && placedID > 0, "a session opens in a chosen directory")
+    check(
+        waitUntil {
+            listedString(supervisor, from: second, sessionID: placedID, iGhostVTWireKey.currentDirectory)
+                == "/private/tmp"
+        },
+        "and its row states that directory as the kernel spells it"
+    )
+    check(
+        replyCode(request(supervisor, from: second, .closeSession) {
+            xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, placedID)
+        }) == .success,
+        "the placed session closes"
+    )
+    check(
+        waitUntil { listedRow(supervisor, from: second, sessionID: placedID) == nil },
+        "and leaves the list"
     )
 
     // The first peer's connection drops: its sessions are detached, not

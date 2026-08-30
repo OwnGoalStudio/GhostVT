@@ -215,7 +215,12 @@ anyway would hand over the root shell that was just refused.
   and package metadata, then emits the `.deb`:
   `/Applications/iGhostVT.app`, `/usr/libexec/ighostvtd`, and
   `/Library/LaunchDaemons/wiki.qaq.ighostvtd.plist`. `postinst` bootstraps the
-  daemon, `prerm` boots it out.
+  daemon, `prerm` boots it out. `ighostvt-cli` is installed inside the app
+  bundle (`/Applications/iGhostVT.app/ighostvt-cli`, its own entitlements:
+  the client marker and the mach lookup, nothing else) with
+  `/usr/bin/ighostvt-cli` as a **relative** symlink to it — an absolute one
+  would resolve against iOS's `/Applications` under roothide, not the
+  bootstrap's.
 - `make deb-rootless` (`PACKAGE_FLAVOR=rootless`) packages the same binaries
   with `/var/jb` in front of those three paths. The prefix is substituted for
   `@PREFIX@` in the launch daemon plist and the maintainer scripts, and the
@@ -234,6 +239,7 @@ ship as one bundle and the app installs its own helper:
 iGhostVT.app
   Contents/MacOS/iGhostVT                  Catalyst GUI, unsandboxed
   Contents/MacOS/ighostvtd                 the only process that forks
+  Contents/MacOS/ighostvt-cli              the command-line client
   Contents/Library/LaunchAgents/wiki.qaq.ighostvtd.plist   BundleProgram
 ```
 
