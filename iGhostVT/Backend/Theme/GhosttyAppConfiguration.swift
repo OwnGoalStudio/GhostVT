@@ -8,18 +8,44 @@ import GhosttyTerminal
 /// overlay has no earlier family, and PingFang is proportional, so every
 /// cell is stretched (ghostty#12694). iOS already falls back to PingFang
 /// stably; it does not need the map.
+///
+/// The font size is written here as well as into the surface options. The
+/// library's base config carries its own `font-size` (10 on every iOS-family
+/// build, Catalyst included), and the surface option only overrides it at
+/// the surface's birth: every later config reload — the colour scheme the
+/// view reports on mount, a theme change — reapplies the *file* to the
+/// surface, and a file without the preference reset the first terminal to
+/// the library's size. A later line wins in ghostty, so this one does.
 enum GhosttyAppConfiguration {
     static var terminal: TerminalConfiguration {
-        #if targetEnvironment(macCatalyst)
-            TerminalConfiguration {
-                $0.withCustom("font-codepoint-map", "U+4E00-U+9FFF=PingFang SC")
-                $0.withCustom("font-codepoint-map", "U+3400-U+4DBF=PingFang SC")
-                $0.withCustom("font-codepoint-map", "U+F900-U+FAFF=PingFang SC")
-                $0.withCustom("font-codepoint-map", "U+3000-U+303F=PingFang SC")
-                $0.withCustom("font-codepoint-map", "U+FF00-U+FFEF=PingFang SC")
-            }
-        #else
-            TerminalConfiguration()
-        #endif
+        TerminalConfiguration { builder in
+            builder.withFontSize(TerminalFontSize.preferred)
+            #if targetEnvironment(macCatalyst)
+                builder.withCustom("font-codepoint-map", "U+4E00-U+9FFF=PingFang SC")
+                builder.withCustom("font-codepoint-map", "U+3400-U+4DBF=PingFang SC")
+                builder.withCustom("font-codepoint-map", "U+F900-U+FAFF=PingFang SC")
+                builder.withCustom("font-codepoint-map", "U+3000-U+303F=PingFang SC")
+                builder.withCustom("font-codepoint-map", "U+FF00-U+FFEF=PingFang SC")
+            #endif
+        }
+    }
+
+    /// The configuration file a terminal opened now would run, as ghostty
+    /// reads it: the library's base, this overlay, then the theme for
+    /// `colorScheme` — the same order the library's renderer joins them in,
+    /// so what Settings shows is what a surface gets. Purely informational;
+    /// the library writes the real file itself when a tab is made.
+    @MainActor
+    static func renderedConfig(for colorScheme: TerminalColorScheme) -> String {
+        let theme = AppTheme.shared.terminalTheme
+        let themeConfiguration = colorScheme == .dark ? theme.dark : theme.light
+        return [
+            TerminalConfiguration.default.rendered,
+            terminal.rendered,
+            themeConfiguration.rendered,
+        ]
+        .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+        .filter { !$0.isEmpty }
+        .joined(separator: "\n") + "\n"
     }
 }
