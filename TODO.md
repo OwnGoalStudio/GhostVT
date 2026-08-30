@@ -9,4 +9,4 @@
 - [x] `make check` + `make test`; commit; push
 - [x] `/ui-copy-polish` on the intent changes only (translate all 11 languages, clean stale text)
 - [x] `make set-version` 0.5.3 (0.5.2 was tagged mid-flight without the polish), tag, release
-- [ ] Ask `../owngoalpackages` to update the repo entry
+- [x] Dispatched OwnGoalPackages' APT build for 0.5.3 (manifest already tracks GhostVT)
