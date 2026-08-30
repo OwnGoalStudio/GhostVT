@@ -23,7 +23,7 @@ private struct InterfaceTextSizeModifier: ViewModifier {
 }
 
 extension EnvironmentValues {
-    // The multiplier `DS.Font` roles apply; 1 is the platform's own size.
+    /// The multiplier `DS.Font` roles apply; 1 is the platform's own size.
     @Entry var interfaceTextScale: CGFloat = 1
 }
 

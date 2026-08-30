@@ -330,7 +330,9 @@ final class IOSupervisor {
         repeat {
             result = waitpid(childPID, &status, WNOHANG)
         } while result < 0 && errno == EINTR
-        guard result != 0 else { return }
+        guard result != 0 else {
+            return
+        }
         exitStatus = if result < 0 {
             -1
         } else if status & 0x7F == 0 {

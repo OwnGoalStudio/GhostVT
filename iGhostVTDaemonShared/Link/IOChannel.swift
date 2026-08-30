@@ -233,7 +233,9 @@ final class IOChannel {
                 }
             }
         }
-        if malformed { return false }
+        if malformed {
+            return false
+        }
         if consumed > 0 {
             if consumed == inbound.count {
                 inbound.removeAll(keepingCapacity: inbound.capacity <= Self.retainedCapacity)

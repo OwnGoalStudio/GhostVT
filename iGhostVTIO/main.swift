@@ -23,6 +23,7 @@ while let argument = arguments.popFirst() {
         exit(64)
     }
 }
+
 guard fcntl(socketDescriptor, F_GETFD) >= 0 else {
     fputs("\(IOWire.executableName): descriptor \(socketDescriptor) is not open; ighostvtd starts this program\n", stderr)
     exit(64)

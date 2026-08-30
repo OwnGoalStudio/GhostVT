@@ -192,7 +192,9 @@ enum IOCodec {
         let bytes: UnsafeRawBufferPointer
         var offset = 0
 
-        var remaining: Int { bytes.count - offset }
+        var remaining: Int {
+            bytes.count - offset
+        }
 
         mutating func takeUInt8() -> UInt8? {
             guard remaining >= 1 else { return nil }

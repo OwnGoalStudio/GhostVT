@@ -64,10 +64,14 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
             // Resolved together, pasted in drop order.
             let resolved = await withTaskGroup(of: (Int, Resolved?).self) { group in
                 for (index, payload) in payloads.enumerated() {
-                    group.addTask { await (index, payload.resolve(stagingIn: directory)) }
+                    group.addTask {
+                        let resolved = await payload.resolve(stagingIn: directory)
+                        return (index, resolved)
+                    }
                 }
                 var results = [Resolved?](repeating: nil, count: payloads.count)
-                for await (index, result) in group {
+                for await pair in group {
+                    let (index, result) = pair
                     results[index] = result
                 }
                 return results.compactMap(\.self)

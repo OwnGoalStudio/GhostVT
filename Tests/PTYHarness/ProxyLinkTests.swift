@@ -132,7 +132,9 @@ func replyCode(_ reply: xpc_object_t?) -> iGhostVTReplyCode? {
 func waitUntil(_ timeout: TimeInterval = 5, _ condition: () -> Bool) -> Bool {
     let deadline = Date().addingTimeInterval(timeout)
     while Date() < deadline {
-        if condition() { return true }
+        if condition() {
+            return true
+        }
         usleep(50000)
     }
     return condition()
