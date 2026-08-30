@@ -175,10 +175,8 @@ private struct SidebarRow: View {
                         .truncationMode(.middle)
                 }
                 Spacer(minLength: 8)
-                if tab.isLocked {
-                    Image(systemName: "lock.fill")
-                        .font(DS.Font.captionEmphasis)
-                        .foregroundColor(.secondary)
+                if let lock = tab.lock {
+                    TabLockBadge(lock: lock)
                 }
                 Button(action: onClose) {
                     Image(systemName: "xmark")

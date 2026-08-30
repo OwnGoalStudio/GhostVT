@@ -199,15 +199,18 @@ private struct TerminalPane: View {
                 SessionStatusOverlay(store: tab.store, onCloseTab: onCloseTab)
             }
             .overlay(alignment: .topTrailing) {
-                if tab.isLocked {
-                    Label("Locked", systemImage: "lock.fill")
-                        .font(DS.Font.caption)
-                        .foregroundColor(.secondary)
-                        .padding(.horizontal, DS.Padding.m)
-                        .padding(.vertical, DS.Padding.xs)
-                        .background(.thinMaterial, in: Capsule())
-                        .padding(DS.Padding.m)
-                        .transition(.opacity)
+                if let lock = tab.lock {
+                    HStack(spacing: DS.Padding.xs) {
+                        TabLockBadge(lock: lock, font: DS.Font.caption)
+                        Text(lock.badgeTitle)
+                            .font(DS.Font.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal, DS.Padding.m)
+                    .padding(.vertical, DS.Padding.xs)
+                    .background(.thinMaterial, in: Capsule())
+                    .padding(DS.Padding.m)
+                    .transition(.opacity)
                 }
             }
             .opacity(isActive ? 1 : 0)
@@ -216,7 +219,7 @@ private struct TerminalPane: View {
             // input path closes in one place while output keeps rendering.
             .allowsHitTesting(isActive)
             .accessibilityHidden(!isActive)
-            .onChange(of: tab.isLocked) { _ in onLockChange() }
+            .onChange(of: tab.lock) { _ in onLockChange() }
     }
 }
 

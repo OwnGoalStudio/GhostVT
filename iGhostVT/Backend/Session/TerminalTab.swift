@@ -16,6 +16,15 @@ enum TabLock: Equatable {
     case interaction
     /// Only the software keyboard is refused.
     case keyboard
+
+    /// The word every presentation labels this lock with — the badge's
+    /// accessibility text, and the overlay capsule's caption.
+    var badgeTitle: String {
+        switch self {
+        case .interaction: String(localized: "Locked")
+        case .keyboard: String(localized: "Keyboard Locked")
+        }
+    }
 }
 
 /// One terminal session: its own surface state and its own connection.
