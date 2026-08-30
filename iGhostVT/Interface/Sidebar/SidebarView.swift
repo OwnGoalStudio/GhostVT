@@ -175,18 +175,23 @@ private struct SidebarRow: View {
                         .truncationMode(.middle)
                 }
                 Spacer(minLength: 8)
+                // A locked row spends the close slot on the padlock — a
+                // second glyph beside the × crowds a title that is already
+                // two lines. Close stays on the context menu.
                 if let lock = tab.lock {
                     TabLockBadge(lock: lock)
-                }
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(DS.Font.captionEmphasis)
-                        .foregroundColor(.secondary)
                         .frame(width: 24, height: 24)
-                        .contentShape(Circle())
+                } else {
+                    Button(action: onClose) {
+                        Image(systemName: "xmark")
+                            .font(DS.Font.captionEmphasis)
+                            .foregroundColor(.secondary)
+                            .frame(width: 24, height: 24)
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Close Tab")
                 }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Close Tab")
             }
             .padding(.horizontal, DS.Padding.m)
             .padding(.vertical, DS.Padding.s)

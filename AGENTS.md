@@ -223,9 +223,10 @@ one choice (`TerminalTab.lock`, at most one of `.interaction` /
 `.keyboard`): picking the other lock switches, picking the one that is on
 clears it, and the `isLocked` / `isKeyboardLocked` flags the menus toggle
 are views of that. Every presentation wears a `TabLockBadge` off the same
-`tab.lock` — a filled padlock for `.interaction`, a slashed keyboard for
-`.keyboard` (composed: SF Symbols has no `keyboard.slash` on the iOS 15
-floor, so a diagonal is knocked through the glyph with `.destinationOut`).
+`tab.lock` — the filled padlock for both kinds; the overlay caption still
+names which freeze is on. A sidebar row spends the close slot on that
+padlock while locked (the × is gone, not a second glyph); close stays on
+the context menu.
 Both locks live on
 `LockableTerminalView`, the app's `TerminalView` subclass installed through
 the library's `makePlatformView` seam — refusing `hitTest` and first responder
@@ -244,6 +245,14 @@ status, so hardware keys still arrive. Empty the `inputAssistantItem` groups
 along with it: the iPad shortcuts bar is not part of `inputAccessoryView`, and
 it stays floating over the terminal with a dictation button, costing 40pt of
 grid.
+
+A tab switch on iOS does not raise the software keyboard unless it was
+already up (`KeyboardState.isVisible`; the switcher snapshots that as it
+opens, because the cover resigns the terminal). `requestFocus` is
+`becomeFirstResponder`, which pops it; the previous surface already
+resigned when the user tapped it away. A tap on the new terminal still
+toggles it. Catalyst always hands focus over — there is no software
+keyboard.
 
 Every keyboard shortcut is a `UIKeyCommand` in the main menu — `AppMenus`,
 installed from `AppDelegate.buildMenu` — never a SwiftUI `keyboardShortcut`.

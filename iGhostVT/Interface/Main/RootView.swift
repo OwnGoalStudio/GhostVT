@@ -20,6 +20,11 @@ struct RootView: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.scenePhase) private var scenePhase
     @FocusState private var focusedTabID: UUID?
+    /// Snapshot of the software keyboard as the tab switcher opened. The
+    /// cover resigns the terminal, so `keyboard.isVisible` is already false
+    /// by the time a card is picked; without this, leaving the overview
+    /// would always look like "keyboard was down".
+    @State private var keyboardVisibleBeforeSwitcher = false
 
     /// See `SidebarVisibility`; a UserDefaults value so View ▸ Show Sidebar
     /// can flip it from UIKit.
@@ -66,7 +71,9 @@ struct RootView: View {
             .catalystIgnoresTitleBar()
         }
         .onAppear(perform: refocus)
-        .onChange(of: tabManager.activeTabID) { _ in refocus() }
+        .onChange(of: tabManager.activeTabID) { _ in
+            refocusAfterTabSwitch(softwareKeyboardWasVisible: keyboardVisibleForTabSwitch)
+        }
         // Backgrounding resigns the surface's first responder (which clears
         // the FocusState through the bridge), so coming back needs the focus
         // handed out again — typing should work the moment the app does.
@@ -93,10 +100,16 @@ struct RootView: View {
         // capture from inside the cover would be too late for any card the
         // grid lays out after the transition has removed them.
         .onChange(of: interface.showsSwitcher) { shows in
-            guard shows else { return }
-            tabManager.capturePreviews()
+            if shows {
+                keyboardVisibleBeforeSwitcher = keyboard.isVisible
+                tabManager.capturePreviews()
+            }
         }
-        .fullScreenCover(isPresented: $interface.showsSwitcher, onDismiss: refocus) {
+        .fullScreenCover(isPresented: $interface.showsSwitcher, onDismiss: {
+            refocusAfterTabSwitch(
+                softwareKeyboardWasVisible: keyboardVisibleBeforeSwitcher
+            )
+        }) {
             TabSwitcherView(tabManager: tabManager)
         }
         .sheet(isPresented: $interface.showsSettingsSheet, onDismiss: refocus) {
@@ -164,6 +177,49 @@ struct RootView: View {
                     removal: .scale(scale: 0.92).combined(with: .opacity)
                 ))
             }
+        }
+    }
+
+    /// Whether the software keyboard was up as this tab switch began. The
+    /// switcher's cover has already dismissed it, so that path uses the
+    /// snapshot taken when the cover opened.
+    private var keyboardVisibleForTabSwitch: Bool {
+        interface.showsSwitcher ? keyboardVisibleBeforeSwitcher : keyboard.isVisible
+    }
+
+    /// Tab switch on iOS: raise the software keyboard only when it was
+    /// already up. `requestFocus` is `becomeFirstResponder`, which pops it;
+    /// the previous surface already resigned when the user tapped it away.
+    /// A tap on the new terminal still toggles it. Catalyst always hands
+    /// focus over — there is no software keyboard.
+    private func refocusAfterTabSwitch(softwareKeyboardWasVisible: Bool) {
+        #if targetEnvironment(macCatalyst)
+            refocus()
+        #else
+            guard let tab = tabManager.activeTab, !tab.isLocked else {
+                focusedTabID = nil
+                resignInactiveTerminals()
+                return
+            }
+            if softwareKeyboardWasVisible || tab.isKeyboardLocked {
+                refocus()
+                return
+            }
+            focusedTabID = nil
+            resignInactiveTerminals()
+        #endif
+    }
+
+    /// A hidden tab that still holds first responder (keyboard lock, or a
+    /// hardware accessory that is not a software keyboard) would eat keys
+    /// after a switch that did not acquire the new surface.
+    private func resignInactiveTerminals() {
+        let active = tabManager.activeTabID
+        for tab in tabManager.tabs where tab.id != active {
+            guard let view = tab.terminal.attachedPlatformView, view.isFirstResponder else {
+                continue
+            }
+            _ = view.resignFirstResponder()
         }
     }
 
