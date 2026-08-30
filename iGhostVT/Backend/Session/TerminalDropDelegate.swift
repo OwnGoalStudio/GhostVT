@@ -4,6 +4,7 @@
 //
 
 import GhosttyTerminal
+import ImageIO
 import os
 import UIKit
 import UniformTypeIdentifiers
@@ -28,6 +29,11 @@ import UniformTypeIdentifiers
 ///   a Mail attachment): the bytes, written under the same directory and
 ///   named for their type, so the path ends in an extension a program can
 ///   go by.
+/// - **An image, on iOS and iPadOS**: a PNG or JPEG is stored as it came;
+///   anything else `UIImage` can decode — the HEIC every photo is — is
+///   re-encoded as PNG first, because the programs a path gets pasted into
+///   (an AI agent, mostly) read PNG and JPEG and nothing else. The Mac
+///   pastes the file's own path and is left alone.
 /// - **A link or a snippet of text**: pasted as it is, the way the library
 ///   did.
 ///
@@ -134,6 +140,11 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
                 }
             #endif
             if let fileType {
+                #if !targetEnvironment(macCatalyst)
+                    if fileType.conforms(to: .image), let path = await stagedImage(of: fileType, in: directory) {
+                        return .path(path)
+                    }
+                #endif
                 if let path = await stagedCopy(of: fileType, in: directory) {
                     return .path(path)
                 }
@@ -196,7 +207,13 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
                         continuation.resume(returning: nil)
                         return
                     }
-                    let name = Self.fileName(suggested: suggested ?? url.lastPathComponent, type: type)
+                    // Named for the file's own type when the one asked for is
+                    // abstract (`public.image`, `public.data`) and so has no
+                    // extension to give.
+                    let actual = type.preferredFilenameExtension == nil
+                        ? (try? url.resourceValues(forKeys: [.contentTypeKey]).contentType).flatMap { $0.conforms(to: type) ? $0 : nil }
+                        : nil
+                    let name = Self.fileName(suggested: suggested ?? url.lastPathComponent, type: actual ?? type)
                     continuation.resume(returning: Self.store(name: name, in: directory) {
                         try FileManager.default.copyItem(at: url, to: $0)
                     })
@@ -223,6 +240,74 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
             }
         }
 
+        #if !targetEnvironment(macCatalyst)
+            /// The provider's image, as a file a program can read: PNG and
+            /// JPEG bytes as they are, anything else re-encoded as PNG when
+            /// `UIImage` decodes it. Names go by the bytes, not by the type
+            /// the provider was asked for — a drag can register the abstract
+            /// `public.image`, which has no extension of its own. Returns
+            /// `nil` when the data cannot be loaded or decoded, and the copy
+            /// path takes over with whatever the provider has.
+            private func stagedImage(of type: UTType, in directory: URL) async -> String? {
+                let suggested = provider.suggestedName
+                return await withCheckedContinuation { continuation in
+                    _ = provider.loadDataRepresentation(forTypeIdentifier: type.identifier) { data, error in
+                        guard let data, !data.isEmpty else {
+                            logger.info("image load failed for \(type.identifier, privacy: .public): \(String(describing: error))")
+                            continuation.resume(returning: nil)
+                            return
+                        }
+                        let actual = Self.imageType(of: data) ?? type
+                        if actual.conforms(to: .png) || actual.conforms(to: .jpeg) {
+                            let name = Self.fileName(suggested: suggested, type: actual)
+                            continuation.resume(returning: Self.store(name: name, in: directory) {
+                                try data.write(to: $0, options: .atomic)
+                            })
+                            return
+                        }
+                        guard let image = UIImage(data: data), let png = Self.upright(image).pngData() else {
+                            logger.info("image decode failed for \(actual.identifier, privacy: .public); storing the bytes as they are")
+                            continuation.resume(returning: nil)
+                            return
+                        }
+                        logger.info("re-encoding \(actual.identifier, privacy: .public) as PNG")
+                        let name = Self.fileName(suggested: Self.strippingImageExtension(suggested), type: .png)
+                        continuation.resume(returning: Self.store(name: name, in: directory) {
+                            try png.write(to: $0, options: .atomic)
+                        })
+                    }
+                }
+            }
+
+            /// The concrete type of image bytes, read from the bytes.
+            private static func imageType(of data: Data) -> UTType? {
+                guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+                      let identifier = CGImageSourceGetType(source) as String?,
+                      let type = UTType(identifier), !type.isDynamic
+                else { return nil }
+                return type
+            }
+
+            /// The image drawn the way up it is meant to be seen. PNG has no
+            /// orientation tag, so a photo whose pixels are stored sideways
+            /// has to be turned before it is encoded.
+            private static func upright(_ image: UIImage) -> UIImage {
+                guard image.imageOrientation != .up else { return image }
+                let format = UIGraphicsImageRendererFormat.default()
+                format.scale = image.scale
+                return UIGraphicsImageRenderer(size: image.size, format: format).image { _ in
+                    image.draw(in: CGRect(origin: .zero, size: image.size))
+                }
+            }
+
+            /// `IMG_0001.HEIC` → `IMG_0001`, so the PNG the bytes became is
+            /// not named for the format they left behind.
+            private static func strippingImageExtension(_ name: String?) -> String? {
+                guard let name, extensionMatches((name as NSString).pathExtension, .image) else { return name }
+                return (name as NSString).deletingPathExtension
+            }
+        #endif
+
         private func loadURL() async -> URL? {
             guard provider.canLoadObject(ofClass: NSURL.self) else { return nil }
             return await withCheckedContinuation { continuation in
@@ -246,15 +331,30 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
         /// `image`, `folder`, or `file` — always ending in the type's
         /// extension unless the name brought its own. Path separators and
         /// control characters become `_`; the shell escape covers the rest.
+        ///
+        /// A name "brought its own" only when what follows its last dot is
+        /// an extension the type would wear: `IMG_0001.HEIC` for an image,
+        /// yes; `Screenshot 2026-08-30 at 10.23.45` — the name iPadOS gives
+        /// a screenshot — no, or the `.png` would be lost to the seconds.
         static func fileName(suggested: String?, type: UTType) -> String {
             let fallback = type.conforms(to: .image) ? "image" : type.conforms(to: .directory) ? "folder" : "file"
             let raw = (suggested?.isEmpty == false ? suggested : nil) ?? fallback
             let safe = String(raw.map { $0 == "/" || $0.isNewline || $0.asciiValue.map { $0 < 0x20 } == true ? "_" : $0 })
-            let hasExtension = !(safe as NSString).pathExtension.isEmpty
-            guard !hasExtension, !type.conforms(to: .directory), let ext = type.preferredFilenameExtension else {
+            guard !type.conforms(to: .directory),
+                  !extensionMatches((safe as NSString).pathExtension, type),
+                  let ext = type.preferredFilenameExtension
+            else {
                 return safe
             }
             return "\(safe).\(ext)"
+        }
+
+        /// Whether `ext` is a real file extension for `type`: one the system
+        /// knows (not a dynamic `dyn.*` it made up on the spot) and whose
+        /// type conforms to the one being written.
+        static func extensionMatches(_ ext: String, _ type: UTType) -> Bool {
+            guard !ext.isEmpty, let known = UTType(filenameExtension: ext), !known.isDynamic else { return false }
+            return known.conforms(to: type)
         }
 
         /// Serialises name choice and write: provider completions arrive on
