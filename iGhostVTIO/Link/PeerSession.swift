@@ -143,6 +143,10 @@ final class PeerSession {
             return Outcome(resize(message))
         case .closeSession:
             return Outcome(closeSession(message))
+        case .snapshotSession:
+            return Outcome(snapshotSession(message, reply: reply))
+        case .injectInput:
+            return Outcome(injectInput(message))
         case .goodbye:
             return Outcome(.success, then: .closePeer)
         case .shutdown:
@@ -166,6 +170,14 @@ final class PeerSession {
             xpc_dictionary_set_uint64(entry, iGhostVTWireKey.columns, UInt64(summary.columns))
             xpc_dictionary_set_uint64(entry, iGhostVTWireKey.rows, UInt64(summary.rows))
             xpc_dictionary_set_bool(entry, iGhostVTWireKey.isAttached, summary.isAttached)
+            Self.setForegroundProcess(
+                name: summary.processName,
+                isShell: summary.isForegroundShell,
+                in: entry
+            )
+            if let directory = summary.currentDirectory {
+                xpc_dictionary_set_string(entry, iGhostVTWireKey.currentDirectory, directory)
+            }
             xpc_array_append_value(array, entry)
         }
         xpc_dictionary_set_value(reply, iGhostVTWireKey.sessions, array)
@@ -229,19 +241,7 @@ final class PeerSession {
             let session = try registry.attach(id, to: self)
             attachedSessionIDs.insert(id)
             if let reply {
-                xpc_dictionary_set_uint64(reply, iGhostVTWireKey.columns, UInt64(session.columns))
-                xpc_dictionary_set_uint64(reply, iGhostVTWireKey.rows, UInt64(session.rows))
-                Self.setForegroundProcess(
-                    name: session.foregroundProcessName,
-                    isShell: session.isForegroundShell,
-                    in: reply
-                )
-                let replay = session.replayData()
-                replay.withUnsafeBytes { buffer in
-                    if let base = buffer.baseAddress, !replay.isEmpty {
-                        xpc_dictionary_set_data(reply, iGhostVTWireKey.data, base, buffer.count)
-                    }
-                }
+                Self.describe(session, into: reply)
             }
             DaemonLog.sessions.info("peer \(self.peerID) attached session \(id)")
             DaemonFileLog.log("peer \(peerID) attached session \(id)")
@@ -270,14 +270,64 @@ final class PeerSession {
         guard attachedSessionIDs.contains(id), let session = registry.session(id) else {
             return .unknownSession
         }
+        guard let input = Self.inputData(in: message) else { return .invalidRequest }
+        session.write(input)
+        return .success
+    }
+
+    /// `write` for a peer that holds nothing: the CLI's `send`. Not gated
+    /// on attachment, like `closeSession` and for the same reason — every
+    /// peer here passed audit-token authentication and can list every
+    /// session. The peer attached to it sees the echo like any other
+    /// keystroke; this peer receives nothing.
+    private func injectInput(_ message: xpc_object_t) -> iGhostVTReplyCode {
+        let id = xpc_dictionary_get_uint64(message, iGhostVTWireKey.sessionID)
+        guard let session = registry.session(id) else { return .unknownSession }
+        guard let input = Self.inputData(in: message) else { return .invalidRequest }
+        DaemonFileLog.log("peer \(peerID) injectInput \(input.count) byte(s) into session \(id)")
+        session.write(input)
+        return .success
+    }
+
+    /// An attach reply without the attach: the CLI's `capture`. Whoever
+    /// holds the session keeps holding it.
+    private func snapshotSession(_ message: xpc_object_t, reply: xpc_object_t?) -> iGhostVTReplyCode {
+        let id = xpc_dictionary_get_uint64(message, iGhostVTWireKey.sessionID)
+        guard let session = registry.session(id) else { return .unknownSession }
+        if let reply {
+            Self.describe(session, into: reply)
+        }
+        return .success
+    }
+
+    /// The size, the foreground process, and the replay buffer — what an
+    /// attach and a snapshot both answer with.
+    private static func describe(_ session: PTYSession, into reply: xpc_object_t) {
+        xpc_dictionary_set_uint64(reply, iGhostVTWireKey.columns, UInt64(session.columns))
+        xpc_dictionary_set_uint64(reply, iGhostVTWireKey.rows, UInt64(session.rows))
+        setForegroundProcess(
+            name: session.foregroundProcessName,
+            isShell: session.isForegroundShell,
+            in: reply
+        )
+        let replay = session.replayData()
+        replay.withUnsafeBytes { buffer in
+            if let base = buffer.baseAddress, !replay.isEmpty {
+                xpc_dictionary_set_data(reply, iGhostVTWireKey.data, base, buffer.count)
+            }
+        }
+    }
+
+    /// The `data` a `write` or `injectInput` carries, `nil` when absent or
+    /// over the per-message cap.
+    private static func inputData(in message: xpc_object_t) -> Data? {
         var count = 0
         guard let bytes = xpc_dictionary_get_data(message, iGhostVTWireKey.data, &count),
               count <= iGhostVTProtocol.maximumMessageDataByteCount
         else {
-            return .invalidRequest
+            return nil
         }
-        session.write(Data(bytes: bytes, count: count))
-        return .success
+        return Data(bytes: bytes, count: count)
     }
 
     private func resize(_ message: xpc_object_t) -> iGhostVTReplyCode {

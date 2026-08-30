@@ -38,18 +38,41 @@ final class SessionRegistry {
         childExitSignal = signalSource
     }
 
-    var summaries: [(id: UInt64, title: String, columns: UInt16, rows: UInt16, isAttached: Bool)] {
+    /// One `listSessions` row. A struct rather than a tuple so the peer that
+    /// serialises it and this registry cannot drift apart on a field.
+    struct Summary {
+        var id: UInt64
+        /// The spawned program's name — what the session *is*, fixed at
+        /// birth; the live foreground process is `processName`.
+        var title: String
+        var columns: UInt16
+        var rows: UInt16
+        var isAttached: Bool
+        var processName: String
+        var isForegroundShell: Bool
+        /// The shell's current directory as the kernel spells it, `nil`
+        /// once the child is gone. The raw read, not `inheritableDirectory`:
+        /// that one's `stat` exists to refuse a `chdir` target, and for
+        /// display the kernel's answer is the truth even for a directory
+        /// that has since been removed.
+        var currentDirectory: String?
+    }
+
+    var summaries: [Summary] {
         sessions.values
             .sorted { $0.id < $1.id }
             .map {
-                (
+                Summary(
                     id: $0.id,
                     title: $0.command.first.map { path in
                         (path as NSString).lastPathComponent
                     } ?? "shell",
                     columns: $0.columns,
                     rows: $0.rows,
-                    isAttached: attachments[$0.id] != nil
+                    isAttached: attachments[$0.id] != nil,
+                    processName: $0.foregroundProcessName,
+                    isForegroundShell: $0.isForegroundShell,
+                    currentDirectory: $0.currentDirectory
                 )
             }
     }

@@ -5,7 +5,10 @@
 /// buffer. The app is a view onto that state — it may attach to a session,
 /// send keystrokes, and resize, but it never forks or execs anything itself.
 /// Sessions therefore outlive the app: relaunching reattaches to the daemon's
-/// live shells instead of starting new ones.
+/// live shells instead of starting new ones. `ighostvt-cli` is a second
+/// client of the same service — one-shot commands that read a session's
+/// screen or type into it without attaching, so nothing it does disturbs
+/// the tab the app holds.
 enum iGhostVTProtocol {
     static let version: UInt64 = 1
     static let serviceName = "wiki.qaq.ighostvt.service"
@@ -14,8 +17,12 @@ enum iGhostVTProtocol {
     /// Root-owned executables permitted to open a session. Written relative to
     /// the bootstrap's root and checked against the caller's real executable
     /// path, so a roothide jbroot or a rootless `/var/jb` prefix stays intact.
+    /// The CLI lives inside the app bundle so that this one rule admits both
+    /// clients; the `/usr/bin` symlink the package adds is transparent here,
+    /// because the kernel reports the target it executed.
     static let clientPaths = [
         "/Applications/iGhostVT.app/iGhostVT",
+        "/Applications/iGhostVT.app/ighostvt-cli",
     ]
 
     static let maximumMessageDataByteCount = 1 << 20
@@ -61,6 +68,16 @@ enum iGhostVTOperation: UInt64, Sendable {
     /// the Mac's agent restarts only on a crash, the device daemon is kept
     /// alive regardless, so the app only asks on the Mac.
     case shutdown = 10
+    /// The session's screen without attaching: replies with `columns`,
+    /// `rows`, the foreground process, and `data` = the replay buffer, the
+    /// same as an attach reply — but the peer holding the session keeps
+    /// it. The CLI's `capture`; the app never sends it.
+    case snapshotSession = 11
+    /// `data` typed into the session's PTY by a peer that is not attached
+    /// to it — `write` without the attachment gate. The CLI's `send`; the
+    /// app never sends it. No new trust: any admitted peer can already
+    /// `closeSession` anything it can list.
+    case injectInput = 12
 }
 
 /// Daemon-initiated pushes on an attached connection. These carry no reply.
@@ -110,6 +127,10 @@ enum iGhostVTWireKey {
     /// i.e. nothing is running in front of it.
     static let foregroundIsShell = "fgshell"
     static let exitCode = "exit"
+    /// On a `listSessions` row: the session shell's current directory as the
+    /// kernel spells it. Absent once the child is gone or when the kernel
+    /// refuses to say.
+    static let currentDirectory = "cwd"
     static let reason = "reason"
     /// Why a request failed, in words, when the reply code alone would lose
     /// the detail — the failing step and its `errno`, mainly.

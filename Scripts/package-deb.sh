@@ -2,8 +2,8 @@
 
 set -Eeuo pipefail
 
-if [[ "$#" -ne 13 ]]; then
-    echo "usage: $0 <app> <daemon> <daemon-io> <control> <app-entitlements> <daemon-entitlements> <appex-entitlements> <launch-plist> <output-deb> <package-id> <version> <architecture> <install-prefix>" >&2
+if [[ "$#" -ne 15 ]]; then
+    echo "usage: $0 <app> <daemon> <daemon-io> <cli> <control> <app-entitlements> <daemon-entitlements> <cli-entitlements> <appex-entitlements> <launch-plist> <output-deb> <package-id> <version> <architecture> <install-prefix>" >&2
     exit 64
 fi
 
@@ -13,26 +13,32 @@ daemon_binary="$2"
 # lives under launchd's jetsam limit, so the PTYs and their buffers live in
 # ighostvtd-io, which it spawns.
 daemon_io_binary="$3"
-control_template="$4"
-app_entitlements="$5"
-daemon_entitlements="$6"
-appex_entitlements="$7"
-launch_plist="$8"
-output_deb="$9"
-package_id="${10}"
-version="${11}"
-architecture="${12}"
+# The command-line client. It ships *inside* the app bundle, beside the app
+# binary, because the daemon admits a peer by its executable path and one
+# rule then covers both clients; /usr/bin gets a symlink to it.
+cli_binary="$4"
+control_template="$5"
+app_entitlements="$6"
+daemon_entitlements="$7"
+cli_entitlements="$8"
+appex_entitlements="$9"
+launch_plist="${10}"
+output_deb="${11}"
+package_id="${12}"
+version="${13}"
+architecture="${14}"
 # Empty for roothide, which installs into the jbroot it picked this boot, and
 # "/var/jb" for a rootless bootstrap, which has to be named in every path the
 # package ships — including the ones inside the launch daemon and the
 # maintainer scripts.
-install_prefix="${13}"
+install_prefix="${15}"
 
 [[ -d "$app_bundle" && -f "$app_bundle/Info.plist" ]] || { echo "error: incomplete app bundle" >&2; exit 66; }
 [[ -x "$daemon_binary" ]] || { echo "error: daemon binary is missing" >&2; exit 66; }
 [[ -x "$daemon_io_binary" ]] || { echo "error: daemon io binary is missing" >&2; exit 66; }
+[[ -x "$cli_binary" ]] || { echo "error: cli binary is missing" >&2; exit 66; }
 for input in "$control_template" "$app_entitlements" "$daemon_entitlements" \
-    "$appex_entitlements" "$launch_plist"; do
+    "$cli_entitlements" "$appex_entitlements" "$launch_plist"; do
     [[ -f "$input" ]] || { echo "error: missing packaging input: $input" >&2; exit 66; }
 done
 [[ "$output_deb" == *.deb ]] || { echo "error: output must end in .deb" >&2; exit 64; }
@@ -65,7 +71,8 @@ temporary_deb="$output_directory/.$output_name.tmp.$$"
 app_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-app-entitlements.XXXXXX.plist")"
 daemon_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-daemon-entitlements.XXXXXX.plist")"
 appex_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-appex-entitlements.XXXXXX.plist")"
-trap 'rm -rf "$staging"; rm -f "$temporary_deb" "$app_signed_entitlements" "$daemon_signed_entitlements" "$appex_signed_entitlements"' EXIT
+cli_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-cli-entitlements.XXXXXX.plist")"
+trap 'rm -rf "$staging"; rm -f "$temporary_deb" "$app_signed_entitlements" "$daemon_signed_entitlements" "$appex_signed_entitlements" "$cli_signed_entitlements"' EXIT
 chmod 0755 "$staging"
 
 debian="$staging/DEBIAN"
@@ -73,11 +80,20 @@ installed_root="$staging$install_prefix"
 installed_app="$installed_root/Applications/iGhostVT.app"
 installed_daemon="$installed_root/usr/libexec/ighostvtd"
 installed_daemon_io="$installed_root/usr/libexec/ighostvtd-io"
+installed_cli="$installed_app/ighostvt-cli"
+installed_cli_link="$installed_root/usr/bin/ighostvt-cli"
 installed_plist="$installed_root/Library/LaunchDaemons/wiki.qaq.ighostvtd.plist"
 mkdir -p "$debian" "$(dirname "$installed_app")" "$(dirname "$installed_daemon")" "$(dirname "$installed_plist")"
 /usr/bin/ditto "$app_bundle" "$installed_app"
 /usr/bin/ditto "$daemon_binary" "$installed_daemon"
 /usr/bin/ditto "$daemon_io_binary" "$installed_daemon_io"
+/usr/bin/ditto "$cli_binary" "$installed_cli"
+# A relative link, and it has to stay one: under roothide the bootstrap's
+# /Applications is reached through the jbroot this boot, and an absolute
+# /Applications/... would resolve against iOS's own. The kernel reports the
+# target it executed, so PeerAuthenticator sees the bundle path either way.
+mkdir -p "$(dirname "$installed_cli_link")"
+ln -sfn ../../Applications/iGhostVT.app/ighostvt-cli "$installed_cli_link"
 sed -e "s|@PREFIX@|$install_prefix|g" "$launch_plist" >"$installed_plist"
 # The daemon recovers its install root by stripping this suffix off its own
 # executable path, so the plist has to launch it by the path it is installed
@@ -88,7 +104,7 @@ sed -e "s|@PREFIX@|$install_prefix|g" "$launch_plist" >"$installed_plist"
 }
 rm -rf "$installed_app/_CodeSignature"
 rm -f "$installed_app/embedded.mobileprovision"
-chmod 0755 "$installed_daemon" "$installed_daemon_io"
+chmod 0755 "$installed_daemon" "$installed_daemon_io" "$installed_cli"
 chmod 0644 "$installed_plist"
 
 # Ghostty's shell integration, which is what makes a session report its title,
@@ -114,6 +130,9 @@ ldid -S"$daemon_entitlements" -Cadhoc "$installed_daemon"
 # The same entitlements as its parent: it is the process that forks as root
 # and drops to mobile, so it needs everything the daemon used to.
 ldid -S"$daemon_entitlements" -Cadhoc "$installed_daemon_io"
+# The client marker and the mach lookup, and nothing else — see the
+# entitlements file for why `no-sandbox` is not among them.
+ldid -S"$cli_entitlements" -Cadhoc "$installed_cli"
 ldid -e "$installed_app/$app_executable" >"$app_signed_entitlements"
 ldid -e "$installed_daemon" >"$daemon_signed_entitlements"
 
@@ -220,6 +239,21 @@ for entitlement in platform-application com.apple.private.security.no-sandbox; d
 done
 require_false "$daemon_signed_entitlements" com.apple.private.security.container-required
 
+# The CLI is the second peer the daemon admits by path. It needs the marker
+# and the lookup; everything the app or the daemon carry would be privilege
+# it has no use for, so the absence is asserted too.
+ldid -e "$installed_cli" >"$cli_signed_entitlements"
+require_true "$cli_signed_entitlements" wiki.qaq.ighostvt.client
+[[ "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.exception.mach-lookup.global-name:0' "$cli_signed_entitlements")" == wiki.qaq.ighostvt.service ]] || {
+    echo "error: the CLI is missing the daemon mach lookup entitlement" >&2
+    exit 65
+}
+require_unprivileged "$cli_signed_entitlements" ighostvt-cli
+[[ -z "$(/usr/libexec/PlistBuddy -c 'Print :com.apple.security.iokit-user-client-class' "$cli_signed_entitlements" 2>/dev/null || true)" ]] || {
+    echo "error: the CLI must not carry the GPU iokit-user-client-class list" >&2
+    exit 65
+}
+
 # Spawning belongs to the daemon alone: fail the build if the app ever picks
 # up the client entitlement's counterpart on the daemon side by mistake.
 [[ "$(/usr/libexec/PlistBuddy -c 'Print :wiki.qaq.ighostvt.client' "$daemon_signed_entitlements" 2>/dev/null || true)" != true ]] || {
@@ -268,6 +302,8 @@ contents="$(dpkg-deb --contents "$temporary_deb")"
 grep -F ".$install_prefix/Applications/iGhostVT.app/$app_executable" <<<"$contents" >/dev/null
 grep -F ".$install_prefix/usr/libexec/ighostvtd" <<<"$contents" >/dev/null
 grep -F ".$install_prefix/usr/libexec/ighostvtd-io" <<<"$contents" >/dev/null
+grep -F ".$install_prefix/Applications/iGhostVT.app/ighostvt-cli" <<<"$contents" >/dev/null
+grep -F ".$install_prefix/usr/bin/ighostvt-cli -> ../../Applications/iGhostVT.app/ighostvt-cli" <<<"$contents" >/dev/null
 grep -F ".$install_prefix/Library/LaunchDaemons/wiki.qaq.ighostvtd.plist" <<<"$contents" >/dev/null
 [[ -z "$integration_source" ]] || grep -F ".$install_prefix/usr/share/ighostvt/shell-integration/zsh/.zshenv" <<<"$contents" >/dev/null
 

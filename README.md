@@ -17,6 +17,7 @@ still running.
 | ---------------------- | ---------------------------------------------------------------- |
 | `iGhostVT/`            | The app: `main.swift`, `Application/`, `Backend/`, `Interface/`, `Resources/` |
 | `iGhostVTDaemon/`       | `ighostvtd`: the only process that spawns terminal sessions      |
+| `iGhostVTCLI/`         | `ighostvt-cli`: the command-line client for those sessions       |
 | `Shared/`              | XPC wire protocol, compiled into both targets                    |
 | `Packages/iGhostVTKit/` | Transport layer: the `TerminalTransport` protocol                |
 | `Configuration/`       | xcconfig files; `Version.xcconfig` holds the version number      |
@@ -44,7 +45,29 @@ Requires `ldid` and `dpkg-deb` (Homebrew). Both packages carry the same
 `/usr/libexec/ighostvtd` and the LaunchDaemon plist unprefixed, for the
 bootstrap to relocate into the jbroot chosen at this boot; the rootless one
 declares `iphoneos-arm64` and installs the same three paths under `/var/jb`.
-`postinst` bootstraps the daemon either way.
+`postinst` bootstraps the daemon either way. `ighostvt-cli` ships inside the
+app bundle, with `/usr/bin/ighostvt-cli` as a relative symlink to it.
+
+## Command line
+
+`ighostvt-cli` drives the daemon's sessions from a shell — the same sessions
+the app's tabs are showing. Every command is one shot; it never attaches, so
+it neither takes a session from the app nor takes over your terminal.
+
+```sh
+ighostvt-cli list                       # id, foreground process, size, attached, directory
+ighostvt-cli capture 1                  # what that session's screen is showing, as text
+ighostvt-cli capture 1 --full           # with the scrollback the daemon still holds
+ighostvt-cli send 1 text "ls -la" key Enter
+ighostvt-cli send 1 key C-c             # key names follow tmux's send-keys
+ighostvt-cli new                        # open a session, print its id
+ighostvt-cli new -- /bin/sh -l          # or run something other than the shell
+ighostvt-cli kill 1
+```
+
+On the Mac it is `/Applications/iGhostVT.app/Contents/MacOS/ighostvt-cli`;
+symlink it onto your `PATH` if you want it there. Exit codes: 0 success,
+1 the daemon refused (no such session), 64 bad usage, 69 no daemon.
 
 ## macOS
 
@@ -95,14 +118,16 @@ Requires macOS 13 or later.
 ## Tests
 
 ```sh
-make test          # the PTY harness
+make test          # the PTY harness and the CLI's screen-renderer tests
 make harness       # just the daemon's spawn path, on macOS
 make mac-run       # the whole stack on a Mac: daemon as a LaunchAgent + Mac Catalyst app
 ```
 
 The harness covers what is hardest to debug on a device: `forkpty`/`execve`,
 the read loop, exit-status decoding, `TIOCSWINSZ`, descriptor hygiene, and the
-path resolution of each jailbreak layout. `make mac-run` builds `ighostvtd` for
+path resolution of each jailbreak layout. It also drives the two requests the
+CLI adds — reading a session's buffer and typing into it without attaching —
+and `Tests/CLIRenderer` checks the screen model `capture` renders with. `make mac-run` builds `ighostvtd` for
 macOS, loads it as a per-user LaunchAgent (`make mac-daemon-uninstall` removes
 it), and opens the app built as Mac Catalyst against it — every part of the
 product except what only the device has (GPU entitlement, bootstrap layouts,

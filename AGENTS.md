@@ -63,6 +63,19 @@ FlowDown-style: `iGhostVT/main.swift` (manual `UIApplicationMain`) +
   the XPC ⇄ bytes codec) and `IOChannel` (the framed non-blocking socket with
   the read-pause / write-backpressure hooks flow control needs).
 
+`iGhostVTCLI/` builds `ighostvt-cli`, a second *client* of the daemon —
+one-shot commands (`list`, `capture`, `send`, `new`, `kill`), never an
+interactive attach, so it neither holds a session nor touches the terminal
+it was run from. It compiles `Shared/` and nothing else the daemon uses: its
+own XPC client (`DaemonClient`), the `capture` screen model
+(`ScreenRenderer`), and the `send` key vocabulary (`KeyNames`). `ighostvtd`
+depends on it, so every `-scheme ighostvtd` build produces it beside
+`ighostvtd-io`. It ships *inside the app bundle* on both platforms
+(`/Applications/iGhostVT.app/ighostvt-cli`, with a relative `/usr/bin`
+symlink in the deb; `Contents/MacOS/ighostvt-cli` on the Mac) because the
+daemon admits a peer by its executable path, and one rule then covers both
+clients.
+
 Shared XPC protocol in `Shared/`, transport seam in `Packages/iGhostVTKit`.
 The `ighostvtd` target depends on `ighostvtd-io`, so `-scheme ighostvtd`
 builds both and they land side by side (`/usr/libexec` on device,
@@ -86,6 +99,27 @@ each `TerminalTab` owns a `TerminalSessionStore`, which drives a
 persists session IDs so a cold launch reattaches (256 KiB replay).
 SSH later = another `TerminalTransport` implementation; don't collapse the
 seam.
+
+The CLI reaches those same sessions without disturbing them. Attach is
+exclusive — one peer per session, a second gets `sessionBusy` — so
+`ighostvt-cli` never attaches: `snapshotSession` (op 11) answers with the
+size, the foreground process, and the replay buffer, exactly as an attach
+reply does but leaving the attachment alone, and `injectInput` (op 12) is
+`write` without the attachment gate. Neither is any new trust — every peer
+is already past audit-token authentication and can `closeSession` anything
+it can list. `listSessions` rows carry the live `proc`/`fgshell` and the
+shell's `cwd` (the same kernel read `inheritDirectoryFrom` uses) so a
+session can be named by something better than its id. The app sends neither
+op; the daemon's `write` and attach paths are untouched.
+
+`capture` renders the replay itself (`ScreenRenderer`): the daemon keeps
+bytes, not a grid, and libghostty could only turn them into a screen through
+a live surface with a renderer attached. It is the subset that decides where
+text lands — cursor, scroll region, erase, insert/delete, alternate screen,
+character width — with attributes parsed and dropped, no reflow, and a
+resync at the first byte that cannot continue a sequence (the replay buffer
+is trimmed from the front, so its first bytes are routinely a fragment).
+`Tests/CLIRenderer` is its own harness, run by `make test`.
 
 Quitting is the app's decision, made in `applicationWillTerminate` from the
 tabs of every connected scene: a tab whose shell is at its prompt
@@ -198,7 +232,8 @@ the catalog's generated symbols, which is why the menu's entry is keyed
 ## Build & verify
 
 - `make check` — project/packaging validation
-- `make test` — the PTY harness (`make harness` builds `ighostvtd-io` and
+- `make test` — the PTY harness *and* the CLI's screen-renderer tests
+  (`make harness` builds `ighostvtd-io` and
   spawns it as the proxy's child over a real socket, then drives the whole
   stack — the codec, a session's lifecycle, output routing, the flow-control
   pause and peer-cut, an io crash → respawn, and the shutdown-follow — plus
@@ -214,7 +249,11 @@ the catalog's generated symbols, which is why the menu's entry is keyed
   loop: the Simulator has no daemon, so nothing connects there. Device-only
   behaviour (the GPU entitlement, the bootstrap layouts, privilege drop,
   Live Activities, the software keyboard's accessory bar) is still debugged
-  on the jailbroken device with the installed deb.
+  on the jailbroken device with the installed deb. `make mac-daemon` prints
+  where it left `ighostvt-cli`; run it from there
+  (`…/Debug/ighostvt-cli list`) — the daemon's DEBUG admission accepts the
+  CLI built beside it, and the app itself only opens sessions from
+  `/Applications`, so a CLI-opened session is the quickest way to have one.
 - `make mac-zip` — the *distributable* Mac build, a separate path from
   `make mac-run` (`mac-zip-check` validates its inputs; `Scripts/package-mac.sh`
   stages, signs, zips). Universal Release, ad-hoc signed by default, Developer
@@ -346,6 +385,18 @@ Gotchas that bit us:
   signal (the note and the PTY's EOF), and `SessionRegistry` sweeps every
   session on `SIGCHLD`, the one notice sent after `SZOMB`. `SIGCHLD` stays
   `SIG_DFL`: `SIG_IGN` auto-reaps and a `waitpid` racing that can block.
+- **The CLI's macOS signing identifier is a contract with the daemon.** A
+  bare Mach-O is signed under its file name unless told otherwise, and
+  `MacPeerPolicy` requires `identifier "wiki.qaq.ighostvt-cli"` — so
+  `package-mac.sh` signs it with an explicit `--identifier`, and `make check`
+  fails if the two strings drift apart. Each client is judged against *its
+  own* identifier-and-sibling pair, never the union, so a binary signed as
+  one and placed where the other belongs satisfies neither. On the device the
+  rule has the same shape: a second entry in `clientPaths`. The deb's
+  `/usr/bin/ighostvt-cli` must stay a **relative** symlink — under roothide
+  an absolute `/Applications/...` resolves against iOS's filesystem, not the
+  bootstrap's — and `proc_pidpath` reports the target it executed, so
+  admission sees the bundle path either way.
 - **A Catalyst app cannot carry the client entitlement.** It is an
   iOS-family binary, and macOS refuses to launch one with an entitlement no
   provisioning profile granted ("Launchd job spawn failed"), ad-hoc signed

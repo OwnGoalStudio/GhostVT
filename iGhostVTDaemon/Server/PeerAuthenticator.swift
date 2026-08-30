@@ -14,9 +14,10 @@ import XPC
 /// policies, and they never mix — a peer is judged by exactly one of them:
 ///
 /// - **On the device** the daemon is root under a jailbreak's launchd. A peer
-///   must carry the client entitlement, run as root or mobile, and *be* the
-///   installed, root-owned app binary; a copied or rewritten client fails the
-///   path and ownership checks.
+///   must carry the client entitlement, run as root or mobile, and *be* one of
+///   the installed, root-owned client binaries — the app, or the
+///   `ighostvt-cli` beside it in the bundle; a copied or rewritten client
+///   fails the path and ownership checks.
 /// - **On macOS** the daemon is a per-user LaunchAgent and the client is a Mac
 ///   Catalyst app, which cannot carry the client entitlement at all (AGENTS.md:
 ///   an iOS-family binary with an entitlement no profile granted will not
@@ -150,12 +151,17 @@ final class PeerAuthenticator {
     ///   user dragged the app.
     /// - **Ad-hoc signed** (`make mac-zip` with no identity, and every CI
     ///   build): there is no certificate to pin, so identity is established by
-    ///   *location* instead — the peer must be the `iGhostVT` binary sitting
-    ///   beside this daemon in the same `Contents/MacOS`. The bundled agent is
+    ///   *location* instead — the peer must be the binary sitting beside this
+    ///   daemon in the same `Contents/MacOS`. The bundled agent is
     ///   launched from inside the app bundle by `BundleProgram`, so that
     ///   sibling is definitionally the app that shipped with us, and an
     ///   attacker who can write there can replace the daemon itself. The
     ///   identifier check still runs; it just is not what is load-bearing.
+    ///
+    /// Two clients ship in that bundle — the app and `ighostvt-cli` — and each
+    /// is judged against *its own* pair of identifier and sibling path, never
+    /// against the union. A binary signed as the CLI sitting where the app
+    /// belongs satisfies neither.
     ///
     /// Both branches sit behind the uid check in the caller, so the residual
     /// threat is another process of the same user — which can already spawn
@@ -163,35 +169,59 @@ final class PeerAuthenticator {
     final class MacPeerPolicy {
         static let shared = MacPeerPolicy()
 
-        private static let clientIdentifier = "wiki.qaq.iGhostVT"
+        /// A client the Mac bundle ships: how it is signed, and what it is
+        /// called in `Contents/MacOS`. `package-mac.sh` signs the CLI with
+        /// `--identifier` explicitly, because codesign would otherwise name
+        /// a bare Mach-O after its file — the string there and the string
+        /// here are one contract.
+        private struct Client {
+            let identifier: String
+            let executableName: String
+        }
+
+        private static let clients = [
+            Client(identifier: "wiki.qaq.iGhostVT", executableName: "iGhostVT"),
+            Client(identifier: "wiki.qaq.ighostvt-cli", executableName: "ighostvt-cli"),
+        ]
+
+        /// One client's admission test: the signature it must satisfy, and
+        /// where it must live when there is no certificate to pin.
+        private struct Admission {
+            let requirement: SecRequirement
+            let siblingPath: String?
+        }
 
         /// Team identifier of the daemon's own signature, `nil` when ad-hoc.
         private let teamIdentifier: String?
-        /// The app binary that shipped in the same bundle as this daemon.
-        private let siblingClientPath: String?
-        private let requirement: SecRequirement?
+        private let admissions: [Admission]
 
         private init() {
             let team = Self.ownTeamIdentifier()
             teamIdentifier = team
-            siblingClientPath = Self.ownSiblingClientPath()
 
-            let text = if let team {
-                "identifier \"\(Self.clientIdentifier)\" and anchor apple generic "
-                    + "and certificate leaf[subject.OU] = \"\(team)\""
-            } else {
-                "identifier \"\(Self.clientIdentifier)\""
+            var built: [Admission] = []
+            for client in Self.clients {
+                let text = if let team {
+                    "identifier \"\(client.identifier)\" and anchor apple generic "
+                        + "and certificate leaf[subject.OU] = \"\(team)\""
+                } else {
+                    "identifier \"\(client.identifier)\""
+                }
+                var compiled: SecRequirement?
+                guard SecRequirementCreateWithString(text as CFString, [], &compiled) == errSecSuccess,
+                      let compiled
+                else {
+                    DaemonFileLog.log("mac peer policy: could not compile requirement '\(text)'")
+                    continue
+                }
+                let sibling = Self.ownSiblingPath(named: client.executableName)
+                built.append(Admission(requirement: compiled, siblingPath: sibling))
+                DaemonFileLog.log(
+                    "mac peer policy: requirement '\(text)'"
+                        + (team == nil ? ", sibling \(sibling ?? "unresolved")" : "")
+                )
             }
-            var compiled: SecRequirement?
-            if SecRequirementCreateWithString(text as CFString, [], &compiled) != errSecSuccess {
-                DaemonFileLog.log("mac peer policy: could not compile requirement '\(text)'")
-                compiled = nil
-            }
-            requirement = compiled
-            DaemonFileLog.log(
-                "mac peer policy: requirement '\(text)'"
-                    + (team == nil ? ", sibling \(siblingClientPath ?? "unresolved")" : "")
-            )
+            admissions = built
         }
 
         /// `nil` means the peer is accepted; a string is the denial reason.
@@ -203,30 +233,47 @@ final class PeerAuthenticator {
                 // anything, so the same-user check is the whole gate — which
                 // off-device, where the daemon spawns as that user, is the
                 // whole threat model. No Release build knows this peer.
-                if clientPath.hasSuffix("/iGhostVT.app/Contents/MacOS/iGhostVT") {
+                if clientPath.hasSuffix("/iGhostVT.app/Contents/MacOS/iGhostVT")
+                    || clientPath.hasSuffix("/iGhostVT.app/Contents/MacOS/ighostvt-cli")
+                {
+                    return nil
+                }
+                // `make mac-run` builds the CLI into the same DerivedData
+                // products directory as this daemon, under no app bundle at
+                // all, so no suffix would ever name it.
+                if let own = JailbreakRoot.currentExecutablePath(),
+                   let slash = own.lastIndex(of: "/"),
+                   clientPath == String(own[...slash]) + "ighostvt-cli"
+                {
                     return nil
                 }
             #endif
 
-            guard let requirement else {
-                return "the code-signing requirement could not be compiled"
+            guard !admissions.isEmpty else {
+                return "no code-signing requirement could be compiled"
             }
             guard let code = Self.copyCode(token: &token) else {
                 return "the kernel named no code for the caller's audit token"
             }
-            let status = SecCodeCheckValidity(code, [], requirement)
-            guard status == errSecSuccess else {
-                return "code signature check failed (OSStatus \(status))"
+            var lastStatus: OSStatus = errSecSuccess
+            for admission in admissions {
+                let status = SecCodeCheckValidity(code, [], admission.requirement)
+                guard status == errSecSuccess else {
+                    lastStatus = status
+                    continue
+                }
+                guard teamIdentifier == nil else { return nil }
+                guard let siblingPath = admission.siblingPath else {
+                    return "this daemon is ad-hoc signed and is not inside an app bundle"
+                }
+                // The signature named this client; it has to be where that
+                // client lives, not merely somewhere in the bundle.
+                guard JailbreakRoot.canonicalPath(clientPath) == siblingPath else {
+                    return "\(clientPath) is ad-hoc signed and is not \(siblingPath)"
+                }
+                return nil
             }
-            guard teamIdentifier == nil else { return nil }
-
-            guard let siblingClientPath else {
-                return "this daemon is ad-hoc signed and is not inside an app bundle"
-            }
-            guard JailbreakRoot.canonicalPath(clientPath) == siblingClientPath else {
-                return "\(clientPath) is ad-hoc signed and is not \(siblingClientPath)"
-            }
-            return nil
+            return "the code signature matches no shipped client (last OSStatus \(lastStatus))"
         }
 
         private static func copyCode(token: inout audit_token_t) -> SecCode? {
@@ -257,14 +304,14 @@ final class PeerAuthenticator {
             return entries[kSecCodeInfoTeamIdentifier as String] as? String
         }
 
-        /// `<bundle>/Contents/MacOS/iGhostVT`, when this daemon is itself at
+        /// `<bundle>/Contents/MacOS/<name>`, when this daemon is itself at
         /// `<bundle>/Contents/MacOS/ighostvtd`. `nil` for the harness build,
         /// which lives in DerivedData beside nothing.
-        private static func ownSiblingClientPath() -> String? {
+        private static func ownSiblingPath(named name: String) -> String? {
             guard let own = JailbreakRoot.currentExecutablePath() else { return nil }
             let directory = (own as NSString).deletingLastPathComponent
             guard directory.hasSuffix("/Contents/MacOS") else { return nil }
-            return JailbreakRoot.canonicalPath(directory + "/iGhostVT")
+            return JailbreakRoot.canonicalPath(directory + "/" + name)
         }
     }
 

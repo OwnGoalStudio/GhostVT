@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+	`ighostvt-cli` on the device.
+
+	Two keys, and they are the whole of its privilege: the marker the daemon
+	authenticates against (`PeerAuthenticator` also requires the caller to be
+	one of `iGhostVTProtocol.clientPaths`, root-owned) and permission to look
+	the daemon's mach service up. It draws nothing, so it needs none of the
+	app's GPU IOKit list; it owns no container, so none of the storage keys;
+	it spawns nothing, so nothing the daemon carries.
+
+	`com.apple.private.security.no-sandbox` is deliberately absent. The app
+	needs it because FrontBoard launches an app bundle into a container
+	profile; this program is exec'd by a shell — the daemon's own sessions or
+	sshd, neither of them sandboxed — and inherits no profile to be excepted
+	from. If a device ever logs `deny(1) mach-lookup wiki.qaq.ighostvt.service`
+	for it, add the key here and relax the matching assertion in
+	Scripts/package-deb.sh in the same change.
+-->
+<plist version="1.0">
+<dict>
+	<key>wiki.qaq.ighostvt.client</key>
+	<true/>
+	<key>com.apple.security.exception.mach-lookup.global-name</key>
+	<array>
+		<string>wiki.qaq.ighostvt.service</string>
+	</array>
+</dict>
+</plist>
