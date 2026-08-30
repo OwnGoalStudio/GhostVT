@@ -353,9 +353,14 @@ func runProxyLinkTests() {
     stuck.acknowledgesOutput = false
     harnessQueue.sync { supervisor.register(stuck) }
     check(replyCode(request(supervisor, from: stuck, .hello)) == .success, "a stuck peer says hello")
+    // Enough to overrun the in-flight cap several times (so the pause and
+    // the peer-cut both fire), then a sentinel, then a sleep that keeps the
+    // shell alive so its exit does not race the assertions. Kept small on
+    // purpose: the point is that the shell reaches its end once someone
+    // reads, not how fast a slow runner can move fifty megabytes.
     let flood = request(supervisor, from: stuck, .openSession) { message in
         let command = xpc_array_create(nil, 0)
-        for argument in ["/bin/sh", "-c", "yes | head -c 50000000; echo flood-done; sleep 30"] {
+        for argument in ["/bin/sh", "-c", "yes | head -c 3000000; echo flood-done; sleep 30"] {
             xpc_array_append_value(command, xpc_string_create(argument))
         }
         xpc_dictionary_set_value(message, iGhostVTWireKey.command, command)
@@ -385,13 +390,18 @@ func runProxyLinkTests() {
         xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, floodID)
     }
     check(replyCode(reattached) == .success, "the flooding session survives its peer being cut")
+    // The reattach reply's replay covers the tail already produced; the rest
+    // arrives live now that a reader is draining. Either way the sentinel at
+    // the shell's end reaches the observer, which is the proof the shell was
+    // never blocked or killed by its first peer going away.
+    let reattachReplay: String = {
+        var length = 0
+        guard let bytes = reattached.flatMap({ xpc_dictionary_get_data($0, iGhostVTWireKey.data, &length) }) else { return "" }
+        return String(decoding: UnsafeRawBufferPointer(start: bytes, count: length), as: UTF8.self)
+    }()
     check(
-        waitUntil(20) {
-            var length = 0
-            _ = request(supervisor, from: observer, .listSessions)
-            return observer.output(of: floodID).contains("flood-done")
-                || (reattached.flatMap { xpc_dictionary_get_data($0, iGhostVTWireKey.data, &length) } != nil
-                    && String(decoding: UnsafeRawBufferPointer(start: xpc_dictionary_get_data(reattached!, iGhostVTWireKey.data, &length)!, count: length), as: UTF8.self).contains("flood-done"))
+        waitUntil(15) {
+            reattachReplay.contains("flood-done") || observer.output(of: floodID).contains("flood-done")
         },
         "the shell ran to completion while nobody was reading"
     )
