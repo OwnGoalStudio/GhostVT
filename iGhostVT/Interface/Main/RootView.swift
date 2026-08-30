@@ -123,9 +123,8 @@ struct RootView: View {
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                // The bar stays up with no tabs: its `+` is the only way to
-                // open one at this width, and the gear is settings' home
-                // when the title capsule (and its long-press) is gone.
+                // The bar stays up with no tabs: `+` and settings. With a
+                // tab it is the title, the iPad ⋯ menu, and the switcher.
                 if !isRegularWidth, !keyboard.isVisible {
                     BottomBar(
                         tabManager: tabManager,

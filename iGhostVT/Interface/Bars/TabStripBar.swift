@@ -43,16 +43,7 @@ struct TabStripBar: View {
                 // doubles as the tab overview at this width, so the strip
                 // carries neither entry.
                 Menu {
-                    Button(action: { tabManager.newTab() }) {
-                        Label("New Tab", systemImage: "plus")
-                    }
-                    Button(action: { TerminalWindow.requestNewWindow() }) {
-                        Label("New Window", systemImage: "macwindow.badge.plus")
-                    }
-                    if let tab = tabManager.activeTab {
-                        Divider()
-                        TabContextMenu(tab: tab, tabManager: tabManager, window: window)
-                    }
+                    TabOverflowMenuContent(tabManager: tabManager, window: window)
                 } label: {
                     Image(systemName: "ellipsis")
                         .font(DS.Font.control)

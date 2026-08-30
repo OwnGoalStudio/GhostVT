@@ -136,3 +136,23 @@ struct TabContextMenu: View {
         TabPageExport.exportText(of: tab, in: window)
     }
 }
+
+/// New Tab / New Window, then the active tab's own menu. The iPad strip
+/// and the compact bar both open this from their trailing ⋯.
+struct TabOverflowMenuContent: View {
+    @ObservedObject var tabManager: TabManager
+    let window: UIWindow?
+
+    var body: some View {
+        Button(action: { tabManager.newTab() }) {
+            Label("New Tab", systemImage: "plus")
+        }
+        Button(action: { TerminalWindow.requestNewWindow() }) {
+            Label("New Window", systemImage: "macwindow.badge.plus")
+        }
+        if let tab = tabManager.activeTab {
+            Divider()
+            TabContextMenu(tab: tab, tabManager: tabManager, window: window)
+        }
+    }
+}

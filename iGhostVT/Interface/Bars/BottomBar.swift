@@ -1,72 +1,83 @@
 import SwiftUI
 import UIKit
 
-/// Safari-style floating bottom cluster for compact width: settings, the
-/// title capsule (swipe horizontally to switch tabs), a new-tab button,
-/// and the tab switcher. The gear is the visible settings home — a long
-/// press on the title still opens it, but an empty window has no title.
+/// Safari-style floating bottom cluster for compact width. Empty: `+`
+/// and settings. With a tab: the title capsule, the same ⋯ menu as the
+/// iPad strip, and the tab switcher.
 struct BottomBar: View {
     @ObservedObject var tabManager: TabManager
     let onShowSettings: () -> Void
     let onShowSwitcher: () -> Void
+    @State private var window: UIWindow?
 
     var body: some View {
         GlassBarContainer(spacing: DS.Padding.m) {
             HStack(spacing: DS.Padding.m) {
-                Button(action: onShowSettings) {
-                    Image(systemName: "gearshape")
-                        .font(DS.Font.control)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Circle())
-                }
-                .barGlass(in: Circle())
-                .accessibilityLabel("Settings")
-
                 if let tab = tabManager.activeTab {
-                    // A long press still opens settings: the high-priority
-                    // drag would eat a context menu, and a sheet from a
-                    // menu action races the menu's dismissal.
                     TitleCapsule(tab: tab)
                         .highPriorityGesture(switchTabGesture)
-                        .onLongPressGesture {
-                            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                            onShowSettings()
-                        }
-                }
+                    overflowMenu
+                    switcherButton
+                } else {
+                    Button(action: { tabManager.newTab() }) {
+                        Image(systemName: "plus")
+                            .font(DS.Font.control)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Circle())
+                    }
+                    .barGlass(in: Circle())
+                    .accessibilityLabel("New Tab")
 
-                Button(action: { tabManager.newTab() }) {
-                    Image(systemName: "plus")
-                        .font(DS.Font.control)
-                        .frame(width: 44, height: 44)
-                        .contentShape(Circle())
+                    Button(action: onShowSettings) {
+                        Image(systemName: "gearshape")
+                            .font(DS.Font.control)
+                            .frame(width: 44, height: 44)
+                            .contentShape(Circle())
+                    }
+                    .barGlass(in: Circle())
+                    .accessibilityLabel("Settings")
                 }
-                .barGlass(in: Circle())
-                .accessibilityLabel("New Tab")
-
-                Button(action: onShowSwitcher) {
-                    Image(systemName: "square.on.square")
-                        .font(DS.Font.control)
-                        .frame(width: 44, height: 44)
-                        .overlay(alignment: .topTrailing) {
-                            if tabManager.tabs.count > 1 {
-                                Text("\(tabManager.tabs.count)")
-                                    .font(DS.Font.captionEmphasis)
-                                    .padding(DS.Padding.xs)
-                                    .background(Color.accentColor, in: Circle())
-                                    .foregroundColor(.white)
-                                    .offset(x: 2, y: 2)
-                            }
-                        }
-                        .contentShape(Circle())
-                }
-                .barGlass(in: Circle())
-                .accessibilityLabel("Show Tabs")
             }
             .padding(.horizontal, DS.Padding.l)
             .padding(.top, DS.Padding.s)
             .padding(.bottom, DS.Padding.xs)
         }
         .buttonStyle(.plain)
+        .background(WindowReader(window: $window))
+    }
+
+    private var overflowMenu: some View {
+        Menu {
+            TabOverflowMenuContent(tabManager: tabManager, window: window)
+        } label: {
+            Image(systemName: "ellipsis")
+                .font(DS.Font.control)
+                .frame(width: 44, height: 44)
+                .contentShape(Circle())
+        }
+        .barGlass(in: Circle())
+        .accessibilityLabel("Tab Menu")
+    }
+
+    private var switcherButton: some View {
+        Button(action: onShowSwitcher) {
+            Image(systemName: "square.on.square")
+                .font(DS.Font.control)
+                .frame(width: 44, height: 44)
+                .overlay(alignment: .topTrailing) {
+                    if tabManager.tabs.count > 1 {
+                        Text("\(tabManager.tabs.count)")
+                            .font(DS.Font.captionEmphasis)
+                            .padding(DS.Padding.xs)
+                            .background(Color.accentColor, in: Circle())
+                            .foregroundColor(.white)
+                            .offset(x: 2, y: 2)
+                    }
+                }
+                .contentShape(Circle())
+        }
+        .barGlass(in: Circle())
+        .accessibilityLabel("Show Tabs")
     }
 
     private var switchTabGesture: some Gesture {
