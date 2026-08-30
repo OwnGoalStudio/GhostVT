@@ -13,8 +13,9 @@ import UIKit
     /// title bar. `install()` hooks the point where UIKit's AppKit side has
     /// just built the `NSWindow` for a scene
     /// (`UINSApplicationDelegate didCreateUIScene:transitionContext:`) to
-    /// place the traffic lights on that bar. The window carries no
-    /// behind-window blur: the sidebar is the terminal's background colour.
+    /// place the traffic lights on that bar and to stop AppKit drawing a
+    /// titlebar fill over it. The window carries no behind-window blur: the
+    /// sidebar is the terminal's background colour.
     ///
     /// All AppKit is reached through the ObjC runtime: a Catalyst target
     /// cannot import it. Every step is guarded, so an AppKit that no longer
@@ -37,6 +38,14 @@ import UIKit
         /// window without a title bar, in screen points.
         private static let windowControlsHeight: CGFloat = 16
 
+        /// `NSWindowStyleMaskFullSizeContentView`. Content already draws
+        /// under the lights; the flag is required for
+        /// `titlebarAppearsTransparent` to mean anything.
+        private static let fullSizeContentViewMask: UInt = 1 << 15
+
+        /// `NSTitlebarSeparatorStyleNone`.
+        private static let titlebarSeparatorStyleNone = 1
+
         /// Where the traffic lights end: three 16pt buttons from x = 8, 7pt
         /// apart, so 70 screen points in. Content beside them adds its own
         /// gap — the top bar the same 8pt it keeps between its controls.
@@ -54,10 +63,18 @@ import UIKit
                 // scene and the metrics both want the main actor.
                 MainActor.assumeIsolated {
                     guard let nsWindow = hostWindow(for: scene) else { return }
-                    positionWindowControls(in: nsWindow)
+                    dress(nsWindow)
+                    // The visual-effect views are not always in the theme
+                    // frame at the scene hook; one extra pass after AppKit
+                    // finishes attaching them.
+                    nonisolated(unsafe) let window = nsWindow
+                    DispatchQueue.main.async {
+                        MainActor.assumeIsolated { dress(window) }
+                    }
                     // AppKit tiles the title bar again on every resize, putting
-                    // the lights back where a title bar would want them. The
-                    // observer is delivered on the main queue.
+                    // the lights back where a title bar would want them and
+                    // often recreating the fill. The observer is delivered
+                    // on the main queue.
                     NotificationCenter.default.addObserver(
                         forName: Notification.Name("NSWindowDidResizeNotification"),
                         object: nsWindow,
@@ -68,7 +85,7 @@ import UIKit
                         nonisolated(unsafe) let window = notification.object as? NSObject
                         MainActor.assumeIsolated {
                             guard let window else { return }
-                            positionWindowControls(in: window)
+                            dress(window)
                         }
                     }
                 }
@@ -93,6 +110,85 @@ import UIKit
                   let windowClass = NSClassFromString("UINSWindow"), nsWindow.isKind(of: windowClass)
             else { return nil }
             return nsWindow
+        }
+
+        @MainActor
+        private static func dress(_ nsWindow: NSObject) {
+            clearTitlebarFill(in: nsWindow)
+            positionWindowControls(in: nsWindow)
+        }
+
+        /// Hiding the Catalyst title (`titleVisibility` + nil toolbar) still
+        /// leaves AppKit's titlebar `NSVisualEffectView` compositing over
+        /// the content. `UITitlebar` does not expose
+        /// `titlebarAppearsTransparent`; Tahoe also draws
+        /// `NSTitlebarBackgroundView` and `NSScrollPocket` on top of that.
+        /// The traffic lights live in `NSTitlebarContainerView`, so that
+        /// container stays visible.
+        @MainActor
+        private static func clearTitlebarFill(in nsWindow: NSObject) {
+            if nsWindow.responds(to: NSSelectorFromString("setTitlebarAppearsTransparent:")) {
+                nsWindow.setValue(true, forKey: "titlebarAppearsTransparent")
+            }
+            if nsWindow.responds(to: NSSelectorFromString("setStyleMask:")),
+               let mask = nsWindow.value(forKey: "styleMask") as? NSNumber
+            {
+                nsWindow.setValue(mask.uintValue | fullSizeContentViewMask, forKey: "styleMask")
+            }
+            if nsWindow.responds(to: NSSelectorFromString("setTitlebarSeparatorStyle:")) {
+                nsWindow.setValue(titlebarSeparatorStyleNone, forKey: "titlebarSeparatorStyle")
+            }
+
+            guard let contentView = nsWindow.value(forKey: "contentView") as? NSObject,
+                  let themeFrame = contentView.value(forKey: "superview") as? NSObject
+            else { return }
+
+            hideDescendants(of: themeFrame, className: "NSTitlebarBackgroundView")
+            hideDescendants(of: themeFrame, className: "NSScrollPocket")
+            guard let container = firstDescendant(of: themeFrame, className: "NSTitlebarContainerView") else {
+                return
+            }
+            hideDescendants(of: container, className: "NSVisualEffectView")
+            guard let titlebarView = firstDescendant(of: container, className: "NSTitlebarView") else {
+                return
+            }
+            titlebarView.setValue(true, forKey: "wantsLayer")
+            if let layer = titlebarView.value(forKey: "layer") as? NSObject {
+                layer.setValue(UIColor.clear.cgColor, forKey: "backgroundColor")
+            }
+        }
+
+        @MainActor
+        private static func firstDescendant(of root: NSObject, className: String) -> NSObject? {
+            guard let cls = NSClassFromString(className) else { return nil }
+            func walk(_ view: NSObject) -> NSObject? {
+                if view.isKind(of: cls) {
+                    return view
+                }
+                guard let subviews = view.value(forKey: "subviews") as? [NSObject] else { return nil }
+                for sub in subviews {
+                    if let found = walk(sub) {
+                        return found
+                    }
+                }
+                return nil
+            }
+            return walk(root)
+        }
+
+        @MainActor
+        private static func hideDescendants(of root: NSObject, className: String) {
+            guard let cls = NSClassFromString(className) else { return }
+            func walk(_ view: NSObject) {
+                if view.isKind(of: cls) {
+                    view.setValue(true, forKey: "hidden")
+                }
+                guard let subviews = view.value(forKey: "subviews") as? [NSObject] else { return }
+                for sub in subviews {
+                    walk(sub)
+                }
+            }
+            walk(root)
         }
 
         /// Centres the close, minimize, and zoom buttons on the top bar. With

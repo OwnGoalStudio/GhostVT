@@ -33,6 +33,7 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             if let titlebar = windowScene.titlebar {
                 titlebar.titleVisibility = .hidden
                 titlebar.toolbar = nil
+                titlebar.separatorStyle = .none
             }
             capInitialWindowSize(windowScene)
         #endif
