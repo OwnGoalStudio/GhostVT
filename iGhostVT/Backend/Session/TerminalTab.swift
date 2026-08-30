@@ -276,11 +276,11 @@ final class TerminalTab: ObservableObject, Identifiable {
     }
 
     /// Milliseconds between grid sizes handed to the surface during a live
-    /// resize: none for a shell at its prompt, 128 for a program in front of
-    /// it — a step above the library's 96 for full-repaint TUIs, traded for
-    /// a steadier picture during the drag.
+    /// resize: none for a shell at its prompt, 200 for a program in front of
+    /// it — well above the library's 96 for full-repaint TUIs: an A12Z iPad
+    /// still collapsed twice at 128 mid-drag.
     private static func resizeThrottle(isShellInForeground: Bool) -> Double {
-        isShellInForeground ? 0 : 128
+        isShellInForeground ? 0 : 200
     }
 
     /// Whether closing this tab would interrupt something — the case the
