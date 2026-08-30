@@ -199,8 +199,8 @@ enum SessionLockMode: String, AppEnum {
 
     static let caseDisplayRepresentations: [SessionLockMode: DisplayRepresentation] = [
         .unlocked: "Unlocked",
-        .interaction: "Lock Interaction",
-        .keyboard: "Lock Keyboard",
+        .interaction: "Locked",
+        .keyboard: "Keyboard Locked",
     ]
 
     var tabLock: TabLock? {

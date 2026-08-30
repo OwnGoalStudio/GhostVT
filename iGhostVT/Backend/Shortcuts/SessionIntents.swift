@@ -17,7 +17,7 @@ import Foundation
 struct ListSessionsIntent: AppIntent {
     static let title: LocalizedStringResource = "List Terminal Sessions"
     static let description = IntentDescription(
-        "Returns every terminal session iGhostVT is holding, whether or not a tab is showing it.",
+        "Returns every terminal session in iGhostVT, whether or not a tab is showing it.",
         categoryName: "Sessions"
     )
 
@@ -33,7 +33,7 @@ struct ListSessionsIntent: AppIntent {
 struct NewSessionIntent: AppIntent {
     static let title: LocalizedStringResource = "New Terminal Session"
     static let description = IntentDescription(
-        "Starts a shell in the background and returns the session. Show it later with Show Terminal Session, or drive it with Send Text.",
+        "Starts a shell in the background and returns the session. Show it in a tab or send text to it later.",
         categoryName: "Sessions"
     )
 
@@ -122,7 +122,7 @@ struct SendKeyIntent: AppIntent {
 struct GetScreenTextIntent: AppIntent {
     static let title: LocalizedStringResource = "Get Terminal Screen Text"
     static let description = IntentDescription(
-        "Returns what a terminal session is showing, as plain text. Optionally includes the scrollback the service still holds.",
+        "Returns what a terminal session is showing, as plain text. Can also include the scrollback iGhostVT still keeps.",
         categoryName: "Output"
     )
     static let authenticationPolicy: IntentAuthenticationPolicy = .requiresAuthentication
@@ -174,7 +174,7 @@ struct GetSessionDirectoryIntent: AppIntent {
 struct IsSessionBusyIntent: AppIntent {
     static let title: LocalizedStringResource = "Is Terminal Busy"
     static let description = IntentDescription(
-        "Whether a program is running in front of the session's shell. False when the shell is waiting at its prompt.",
+        "Checks whether a program is running in a terminal session. A session waiting at its shell prompt is not busy.",
         categoryName: "Output"
     )
 
@@ -199,7 +199,7 @@ struct IsSessionBusyIntent: AppIntent {
 struct WaitForPromptIntent: AppIntent {
     static let title: LocalizedStringResource = "Wait for Terminal Prompt"
     static let description = IntentDescription(
-        "Waits until the session's shell is back at its prompt. Returns false if the time limit passes first.",
+        "Waits until the session's shell is back at its prompt, or until the time limit passes.",
         categoryName: "Output"
     )
 
@@ -227,7 +227,7 @@ struct WaitForPromptIntent: AppIntent {
 struct KillSessionIntent: AppIntent {
     static let title: LocalizedStringResource = "End Terminal Session"
     static let description = IntentDescription(
-        "Ends a terminal session and whatever is running in it. A tab showing it closes.",
+        "Ends a terminal session and the program running in it. Any tab showing the session closes.",
         categoryName: "Sessions"
     )
 
@@ -257,7 +257,7 @@ struct RunCommandIntent: AppIntent {
     )
     static let authenticationPolicy: IntentAuthenticationPolicy = .requiresAuthentication
 
-    @Parameter(title: "Command")
+    @Parameter(title: "Command Line")
     var command: String
 
     @Parameter(title: "Session", description: "Leave empty to run in a new shell.")

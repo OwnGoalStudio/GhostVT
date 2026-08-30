@@ -36,9 +36,9 @@ extension ShortcutError: CustomLocalizedStringResourceConvertible {
     var localizedStringResource: LocalizedStringResource {
         switch self {
         case .daemonUnreachable:
-            "The terminal service is not running. Open iGhostVT and try again."
+            "The terminal helper is not running. Open iGhostVT and try again."
         case .timedOut:
-            "The terminal service did not respond in time."
+            "The terminal helper did not respond in time. Try again."
         case .unknownSession:
             "That terminal session no longer exists."
         case .sessionBusy:
@@ -50,11 +50,11 @@ extension ShortcutError: CustomLocalizedStringResourceConvertible {
         case let .refused(detail):
             "\(detail)"
         case .sessionLingered:
-            "The session did not exit in time."
+            "The terminal session did not end in time. Try again."
         case .commandTimedOut:
             "The command did not finish before the time limit."
         case .noWindow:
-            "iGhostVT has no window to show the session in."
+            "iGhostVT could not open a window. Try again."
         }
     }
 }

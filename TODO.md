@@ -7,6 +7,6 @@
 - [x] `AppShortcutsProvider` with phrases; `ighostvt://` URL scheme
 - [x] Share `ScreenRenderer` / `KeyNames` with the app target
 - [x] `make check` + `make test`; commit; push
-- [ ] `/ui-copy-polish` on the intent changes only (translate all 11 languages, clean stale text)
+- [x] `/ui-copy-polish` on the intent changes only (translate all 11 languages, clean stale text)
 - [ ] `make set-version 0.5.2`, tag, release
 - [ ] Ask `../owngoalpackages` to update the repo entry

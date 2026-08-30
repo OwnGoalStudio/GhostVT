@@ -13,7 +13,7 @@ import Foundation
 struct ShowSessionIntent: AppIntent {
     static let title: LocalizedStringResource = "Show Terminal Session"
     static let description = IntentDescription(
-        "Opens iGhostVT on a terminal session, attaching it to a new tab if no tab is showing it.",
+        "Opens iGhostVT and shows a terminal session, in a new tab if no tab is showing it.",
         categoryName: "Window"
     )
     static let openAppWhenRun = true
@@ -36,7 +36,7 @@ struct ShowSessionIntent: AppIntent {
 struct OpenNewTabIntent: AppIntent {
     static let title: LocalizedStringResource = "Open New Terminal Tab"
     static let description = IntentDescription(
-        "Opens iGhostVT with a new tab. With a program given, the tab runs it instead of the shell; otherwise the shell starts where the current tab is, as New Tab does.",
+        "Opens iGhostVT with a new tab. The tab runs the program you give, or a shell in the current tab's directory.",
         categoryName: "Window"
     )
     static let openAppWhenRun = true
@@ -79,7 +79,7 @@ struct OpenNewTabIntent: AppIntent {
 struct SetSessionLockIntent: AppIntent {
     static let title: LocalizedStringResource = "Lock Terminal Session"
     static let description = IntentDescription(
-        "Locks or unlocks the tab showing a session. A lock stops the user, never the program: output keeps flowing.",
+        "Locks or unlocks the tab showing a session. A locked tab ignores your input, and the program keeps running.",
         categoryName: "Window"
     )
     static let openAppWhenRun = true
