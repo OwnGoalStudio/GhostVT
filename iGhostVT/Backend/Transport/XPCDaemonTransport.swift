@@ -17,7 +17,7 @@ private func ighostvtCreateMachServiceConnection(
 /// session, `connect()` prefers reattaching to a session this transport
 /// already had — relaunching the app restores the running shell, replayed
 /// output and all, rather than starting a fresh one.
-public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
+final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     private let queue = DispatchQueue(
         label: "wiki.qaq.ighostvt.client.xpc",
         qos: .userInitiated,
@@ -57,7 +57,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     /// daemon reads the path from the kernel; the app never names one.
     private let inheritDirectoryFrom: UInt64?
 
-    public var onEvent: (@Sendable (TerminalTransportEvent) -> Void)? {
+    var onEvent: (@Sendable (TerminalTransportEvent) -> Void)? {
         get { lock.locked { _onEvent } }
         set { lock.locked { _onEvent = newValue } }
     }
@@ -72,7 +72,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     /// session ids for reattachment should forget the id here — after this
     /// fires, reattaching to it can only fail. Delivered on the transport
     /// queue, immediately before the matching `.disconnected`.
-    public var onSessionExit: (@Sendable (UInt64, Int32) -> Void)? {
+    var onSessionExit: (@Sendable (UInt64, Int32) -> Void)? {
         get { lock.locked { _onSessionExit } }
         set { lock.locked { _onSessionExit = newValue } }
     }
@@ -80,7 +80,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     /// Shown to the user — a tab's title before the shell sets one, and the
     /// sidebar's subtitle — so it says "Session 7", not "ighostvtd session 7".
     /// The daemon-side id is what makes two untitled tabs tell apart.
-    public var endpointDescription: String {
+    var endpointDescription: String {
         lock.locked {
             guard let sessionID else {
                 return String(localized: "Terminal")
@@ -93,11 +93,11 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     }
 
     /// The daemon-side identifier, once open. Persist it to reattach later.
-    public var currentSessionID: UInt64? {
+    var currentSessionID: UInt64? {
         lock.locked { sessionID }
     }
 
-    public init(
+    init(
         shellPath: String? = nil,
         resumeSessionID: UInt64? = nil,
         inheritDirectoryFrom: UInt64? = nil
@@ -126,14 +126,14 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     // strong capture keeps the transport alive exactly until its queued work
     // — ending in `teardown`, which cancels the connection — has run.
 
-    public func connect() {
+    func connect() {
         emit(.state(.connecting))
         queue.async {
             self.establish()
         }
     }
 
-    public func send(_ data: Data) {
+    func send(_ data: Data) {
         guard !data.isEmpty else { return }
         queue.async {
             guard let link = self.attachedLink() else { return }
@@ -153,7 +153,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     /// round trip to the session: this transport never replays a size on
     /// its own, so a size captured before the trip can never outrank one
     /// reported during it.
-    public func updateViewport(columns: Int, rows: Int) {
+    func updateViewport(columns: Int, rows: Int) {
         guard columns > 0, rows > 0 else { return }
         queue.async {
             self.latestViewport = (columns, rows)
@@ -177,7 +177,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     }
 
     /// Detach without killing: the shell keeps running in the daemon.
-    public func disconnect() {
+    func disconnect() {
         queue.async {
             if let link = self.attachedLink() {
                 let message = Self.makeMessage(.detachSession, sessionID: link.sessionID)
@@ -188,7 +188,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     }
 
     /// End the session for good — the daemon terminates the shell.
-    public func closeSession() {
+    func closeSession() {
         queue.async {
             guard let link = self.attachedLink() else { return }
             let message = Self.makeMessage(.closeSession, sessionID: link.sessionID)
@@ -199,19 +199,19 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
 
     /// One daemon-held session, as `listSessions` reports it. The daemon is
     /// the only book of record — the app deliberately persists nothing.
-    public struct SessionSummary: Equatable, Sendable {
-        public let id: UInt64
-        public let title: String
-        public let columns: UInt16
-        public let rows: UInt16
-        public let isAttached: Bool
+    struct SessionSummary: Equatable, Sendable {
+        let id: UInt64
+        let title: String
+        let columns: UInt16
+        let rows: UInt16
+        let isAttached: Bool
     }
 
     /// Ask the daemon what it is holding, over a one-shot connection of its
     /// own. Completion fires exactly once, on an arbitrary queue: rows on
     /// success, nil when the daemon is unreachable or does not answer within
     /// the timeout (a hung daemon must not hang cold launch with it).
-    public static func listSessions(
+    static func listSessions(
         timeout: TimeInterval = 6,
         completion: @escaping @Sendable ([SessionSummary]?) -> Void
     ) {
@@ -279,7 +279,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     /// ceiling. `closeSession` is valid on any session the daemon knows,
     /// attached or not; an `unknownSession` reply means it is already gone,
     /// so no reply needs handling.
-    public static func killSession(_ id: UInt64) {
+    static func killSession(_ id: UInt64) {
         let queue = DispatchQueue(label: "wiki.qaq.ighostvt.client.kill", qos: .utility)
         guard let connection = iGhostVTProtocol.serviceName.withCString({
             ighostvtCreateMachServiceConnection($0, queue, 0)
@@ -310,7 +310,7 @@ public final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     /// this — `closeSession` there is fire-and-forget on a queue the exit
     /// would outrun, and the disconnect that follows drops the connection
     /// the exit event would have arrived on.
-    public static func closeSessionsForQuit(
+    static func closeSessionsForQuit(
         _ ids: [UInt64]?,
         stopDaemonWhenEmpty: Bool,
         timeout: TimeInterval = 3
