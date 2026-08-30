@@ -9,6 +9,15 @@ import GhosttyTerminal
 import SwiftUI
 import UIKit
 
+/// Which of a tab's two locks is on (`TerminalTab.lock`). They are
+/// exclusive: a tab has one lock or none.
+enum TabLock: Equatable {
+    /// The surface refuses every interaction — touches and keyboard focus.
+    case interaction
+    /// Only the software keyboard is refused.
+    case keyboard
+}
+
 /// One terminal session: its own surface state and its own connection.
 /// Tabs stay alive (and connected) while in the background; only the active
 /// tab's surface is visible.
@@ -23,24 +32,44 @@ final class TerminalTab: ObservableObject, Identifiable {
     let terminal: TerminalViewState
     let store: TerminalSessionStore
 
-    /// Interaction lock: the surface's view refuses touches and keyboard
-    /// focus (`LockableTerminalView`) while the session keeps running,
-    /// output keeps flowing, and the surface keeps rendering. The tab's
-    /// context menu is the way in and out.
-    @Published var isLocked = false {
+    /// The tab's lock, if any — one of the two, never both. Either freezes
+    /// the *user*, never the program: the session keeps running, output
+    /// keeps flowing, and the surface keeps rendering. `interaction` makes
+    /// the surface's view refuse touches and keyboard focus
+    /// (`LockableTerminalView.isInteractionLocked`); `keyboard` only keeps
+    /// the software keyboard down (`isSoftwareKeyboardLocked`) while
+    /// touches, scrolling, selection, and hardware keys still work.
+    /// The tab's context menu and the main menu are the ways in and out:
+    /// choosing the lock that is on removes it, choosing the other one
+    /// switches to it.
+    @Published var lock: TabLock? {
         didSet {
-            (terminal.attachedPlatformView as? LockableTerminalView)?
-                .isInteractionLocked = isLocked
+            guard let view = terminal.attachedPlatformView as? LockableTerminalView else { return }
+            view.isInteractionLocked = isLocked
+            view.isSoftwareKeyboardLocked = isKeyboardLocked
         }
     }
 
-    /// Keyboard lock: the software keyboard stays down whatever asks for it
-    /// (`LockableTerminalView.isSoftwareKeyboardLocked`); touches, scrolling,
-    /// selection, and hardware keys still work.
-    @Published var isKeyboardLocked = false {
-        didSet {
-            (terminal.attachedPlatformView as? LockableTerminalView)?
-                .isSoftwareKeyboardLocked = isKeyboardLocked
+    /// The interaction lock as a flag — what the presentations badge and
+    /// what the menus toggle. Setting it on replaces a keyboard lock;
+    /// setting it off clears nothing but itself.
+    var isLocked: Bool {
+        get { lock == .interaction }
+        set { setLock(.interaction, on: newValue) }
+    }
+
+    /// The keyboard lock as a flag, with the same exclusive semantics as
+    /// `isLocked`.
+    var isKeyboardLocked: Bool {
+        get { lock == .keyboard }
+        set { setLock(.keyboard, on: newValue) }
+    }
+
+    private func setLock(_ kind: TabLock, on: Bool) {
+        if on {
+            lock = kind
+        } else if lock == kind {
+            lock = nil
         }
     }
 

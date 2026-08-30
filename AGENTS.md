@@ -107,8 +107,14 @@ something: event 102 also says whether the foreground process group *is* the
 spawned shell (`tcgetpgrp == childPID`, `foregroundIsShell`), and a connected
 tab whose shell is at its prompt closes on the spot (`hasRunningProgram`). A
 detached tab's last report is stale, so it still asks; an unknown state reads
-as running. The two locks freeze the *user*, never the program:
-output keeps flowing and the surface keeps rendering. Both live on
+as running. On the regular-width bar the trailing ⋯ button opens this same
+menu for the active tab with New Tab and New Window at its head — the
+strip has no + of its own. The two locks freeze the *user*, never the
+program: output keeps flowing and the surface keeps rendering. They are
+one choice (`TerminalTab.lock`, at most one of `.interaction` /
+`.keyboard`): picking the other lock switches, picking the one that is on
+clears it, and the `isLocked` / `isKeyboardLocked` flags the menus and
+badges use are views of that. Both live on
 `LockableTerminalView`, the app's `TerminalView` subclass installed through
 the library's `makePlatformView` seam — refusing `hitTest` and first responder
 closes every input path at once, which SwiftUI modifiers could not. That

@@ -38,19 +38,29 @@ struct TabStripBar: View {
                     centerCapsule
                 }
 
-                // The bar's only trailing control: the sidebar owns settings
-                // and doubles as the tab overview at this width, so the strip
-                // carries neither entry. New Window rides the long-press,
-                // Safari-style.
-                Button(action: { tabManager.newTab() }) {
-                    Image(systemName: "plus")
+                // The bar's only trailing control: the active tab's menu,
+                // with New Tab at its head. The sidebar owns settings and
+                // doubles as the tab overview at this width, so the strip
+                // carries neither entry.
+                Menu {
+                    Button(action: { tabManager.newTab() }) {
+                        Label("New Tab", systemImage: "plus")
+                    }
+                    Button(action: { TerminalWindow.requestNewWindow() }) {
+                        Label("New Window", systemImage: "macwindow.badge.plus")
+                    }
+                    if let tab = tabManager.activeTab {
+                        Divider()
+                        TabContextMenu(tab: tab, tabManager: tabManager, window: window)
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
                         .font(DS.Font.control)
                         .frame(width: Self.controlSize, height: Self.controlSize)
                         .contentShape(Circle())
                 }
                 .barGlass(in: Circle())
-                .contextMenu { windowMenu }
-                .accessibilityLabel("New Tab")
+                .accessibilityLabel("Tab Menu")
             }
             // One inset all round: the controls sit as far from the window's
             // side as from its top edge.
@@ -76,12 +86,6 @@ struct TabStripBar: View {
         #else
             0
         #endif
-    }
-
-    private var windowMenu: some View {
-        Button(action: { TerminalWindow.requestNewWindow() }) {
-            Label("New Window", systemImage: "macwindow.badge.plus")
-        }
     }
 
     /// One capsule for both modes. The bar is a glass-effect container, and

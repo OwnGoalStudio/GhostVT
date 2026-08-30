@@ -40,6 +40,9 @@ struct TabContextMenu: View {
     /// Checkmarked toggles where the menu system renders them (iOS 16);
     /// state-named buttons before that, because a pre-16 menu shows no
     /// checkmark and a static "Lock Tab" would read as unlocked forever.
+    /// The two are one choice: `TerminalTab.lock` holds at most one of
+    /// them, so turning on the other lock switches, and turning off the one
+    /// that is on clears it.
     @ViewBuilder
     private var lockControls: some View {
         if #available(iOS 16.0, *) {
