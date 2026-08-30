@@ -113,10 +113,14 @@ final class MacLaunchAgent: ObservableObject {
             case .notRegistered:
                 status = .notRegistered
             case .notFound:
-                // The plist is missing from the bundle. That is a packaging
-                // fault, not something a person can act on, so name it as one
-                // instead of sending them to Login Items.
-                status = .brokenInstallation
+                // Apple's name is broader than a missing file: after
+                // `launchctl bootout` of an SMAppService job — what the zip
+                // update does, and what a replaced-bundle repair does — BTM
+                // has no item and this is the status that comes back even
+                // though the plist is still in the bundle. Treat that as
+                // unregistered so `activate()` runs. Only a bundle that
+                // actually has no helper is a packaging fault.
+                status = Self.bundledHelperIsPresent ? .notRegistered : .brokenInstallation
             @unknown default:
                 status = .needsApproval
             }
@@ -275,6 +279,14 @@ final class MacLaunchAgent: ObservableObject {
             let helper = Bundle.main.bundleURL.appendingPathComponent("Contents/MacOS/ighostvtd")
             guard let data = try? Data(contentsOf: helper, options: .mappedIfSafe) else { return nil }
             return SHA256.hash(data: data).map { String(format: "%02x", $0) }.joined()
+        }
+
+        /// The files `SMAppService.agent(plistName:)` and `BundleProgram` need.
+        /// `.notFound` is not this check — see `refresh()`.
+        private static var bundledHelperIsPresent: Bool {
+            let root = Bundle.main.bundleURL
+            let plist = root.appendingPathComponent("Contents/Library/LaunchAgents/\(plistName)")
+            return FileManager.default.isReadableFile(atPath: plist.path) && helperDigest != nil
         }
 
         /// The digest of the helper the last successful `register()` was for.
