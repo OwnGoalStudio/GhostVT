@@ -13,6 +13,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		AA0000000000000000000C01 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000603;
+			remoteInfo = iGhostVTWidgets;
+		};
 		AA0000000000000000000C02 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AA0000000000000000000001 /* Project object */;
@@ -26,13 +33,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = AA0000000000000000000605;
 			remoteInfo = "ighostvt-cli";
-		};
-		AA0000000000000000000C01 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = AA0000000000000000000001 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = AA0000000000000000000603;
-			remoteInfo = iGhostVTWidgets;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -53,9 +53,9 @@
 /* Begin PBXFileReference section */
 		AA0000000000000000000301 /* iGhostVT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iGhostVT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000306 /* ighostvtd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ighostvtd; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000000000000000000307 /* iGhostVTWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = iGhostVTWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000308 /* ighostvtd-io */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "ighostvtd-io"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000309 /* ighostvt-cli */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "ighostvt-cli"; sourceTree = BUILT_PRODUCTS_DIR; };
-		AA0000000000000000000307 /* iGhostVTWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = iGhostVTWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -89,7 +89,7 @@
 			path = iGhostVT;
 			sourceTree = "<group>";
 		};
-		AA0000000000000000000502 /* Protocol */ = {
+		AA0000000000000000000502 /* Shared/Protocol */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Shared/Protocol;
 			sourceTree = "<group>";
@@ -97,6 +97,19 @@
 		AA0000000000000000000503 /* iGhostVTDaemon */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = iGhostVTDaemon;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000504 /* iGhostVTWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AA0000000000000000000402 /* Exceptions for "iGhostVTWidgets" folder in "iGhostVTWidgets" target */,
+			);
+			path = iGhostVTWidgets;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000505 /* Shared/Activity */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared/Activity;
 			sourceTree = "<group>";
 		};
 		AA0000000000000000000506 /* iGhostVTDaemonShared */ = {
@@ -112,19 +125,6 @@
 		AA0000000000000000000508 /* iGhostVTCLI */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = iGhostVTCLI;
-			sourceTree = "<group>";
-		};
-		AA0000000000000000000504 /* iGhostVTWidgets */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				AA0000000000000000000402 /* Exceptions for "iGhostVTWidgets" folder in "iGhostVTWidgets" target */,
-			);
-			path = iGhostVTWidgets;
-			sourceTree = "<group>";
-		};
-		AA0000000000000000000505 /* Activity */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Shared/Activity;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -151,8 +151,8 @@
 				AA0000000000000000000507 /* iGhostVTIO */,
 				AA0000000000000000000508 /* iGhostVTCLI */,
 				AA0000000000000000000504 /* iGhostVTWidgets */,
-				AA0000000000000000000505 /* Activity */,
-				AA0000000000000000000502 /* Protocol */,
+				AA0000000000000000000505 /* Shared/Activity */,
+				AA0000000000000000000502 /* Shared/Protocol */,
 				84D1AEEE304298C300894548 /* Configuration */,
 				AA0000000000000000000802 /* Products */,
 			);
@@ -189,8 +189,8 @@
 			);
 			fileSystemSynchronizedGroups = (
 				AA0000000000000000000501 /* iGhostVT */,
-				AA0000000000000000000502 /* Protocol */,
-				AA0000000000000000000505 /* Activity */,
+				AA0000000000000000000502 /* Shared/Protocol */,
+				AA0000000000000000000505 /* Shared/Activity */,
 			);
 			name = iGhostVT;
 			packageProductDependencies = (
@@ -214,7 +214,7 @@
 				AA0000000000000000000D03 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				AA0000000000000000000502 /* Protocol */,
+				AA0000000000000000000502 /* Shared/Protocol */,
 				AA0000000000000000000503 /* iGhostVTDaemon */,
 				AA0000000000000000000506 /* iGhostVTDaemonShared */,
 			);
@@ -224,6 +224,28 @@
 			productName = ighostvtd;
 			productReference = AA0000000000000000000306 /* ighostvtd */;
 			productType = "com.apple.product-type.tool";
+		};
+		AA0000000000000000000603 /* iGhostVTWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000904 /* Build configuration list for PBXNativeTarget "iGhostVTWidgets" */;
+			buildPhases = (
+				AA0000000000000000000705 /* Sources */,
+				AA0000000000000000000707 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AA0000000000000000000504 /* iGhostVTWidgets */,
+				AA0000000000000000000505 /* Shared/Activity */,
+			);
+			name = iGhostVTWidgets;
+			packageProductDependencies = (
+			);
+			productName = iGhostVTWidgets;
+			productReference = AA0000000000000000000307 /* iGhostVTWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		AA0000000000000000000604 /* ighostvtd-io */ = {
 			isa = PBXNativeTarget;
@@ -236,7 +258,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AA0000000000000000000502 /* Protocol */,
+				AA0000000000000000000502 /* Shared/Protocol */,
 				AA0000000000000000000506 /* iGhostVTDaemonShared */,
 				AA0000000000000000000507 /* iGhostVTIO */,
 			);
@@ -258,7 +280,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AA0000000000000000000502 /* Protocol */,
+				AA0000000000000000000502 /* Shared/Protocol */,
 				AA0000000000000000000508 /* iGhostVTCLI */,
 			);
 			name = "ighostvt-cli";
@@ -267,28 +289,6 @@
 			productName = "ighostvt-cli";
 			productReference = AA0000000000000000000309 /* ighostvt-cli */;
 			productType = "com.apple.product-type.tool";
-		};
-		AA0000000000000000000603 /* iGhostVTWidgets */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = AA0000000000000000000904 /* Build configuration list for PBXNativeTarget "iGhostVTWidgets" */;
-			buildPhases = (
-				AA0000000000000000000705 /* Sources */,
-				AA0000000000000000000707 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			fileSystemSynchronizedGroups = (
-				AA0000000000000000000504 /* iGhostVTWidgets */,
-				AA0000000000000000000505 /* Activity */,
-			);
-			name = iGhostVTWidgets;
-			packageProductDependencies = (
-			);
-			productName = iGhostVTWidgets;
-			productReference = AA0000000000000000000307 /* iGhostVTWidgets.appex */;
-			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -384,6 +384,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000000000000000000705 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0000000000000000000708 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -398,16 +405,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AA0000000000000000000705 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		AA0000000000000000000D01 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = AA0000000000000000000603 /* iGhostVTWidgets */;
+			targetProxy = AA0000000000000000000C01 /* PBXContainerItemProxy */;
+		};
 		AA0000000000000000000D02 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AA0000000000000000000604 /* ighostvtd-io */;
@@ -417,12 +423,6 @@
 			isa = PBXTargetDependency;
 			target = AA0000000000000000000605 /* ighostvt-cli */;
 			targetProxy = AA0000000000000000000C03 /* PBXContainerItemProxy */;
-		};
-		AA0000000000000000000D01 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			platformFilter = ios;
-			target = AA0000000000000000000603 /* iGhostVTWidgets */;
-			targetProxy = AA0000000000000000000C01 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -611,6 +611,52 @@
 			};
 			name = Release;
 		};
+		AA0000000000000000000B07 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = iGhostVTWidgets/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = wiki.qaq.iGhostVT.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AA0000000000000000000B08 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = iGhostVTWidgets/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = wiki.qaq.iGhostVT.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		AA0000000000000000000B09 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -663,52 +709,6 @@
 			};
 			name = Release;
 		};
-		AA0000000000000000000B07 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_STYLE = Automatic;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = iGhostVTWidgets/Resources/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = wiki.qaq.iGhostVT.widgets;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Debug;
-		};
-		AA0000000000000000000B08 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				APPLICATION_EXTENSION_API_ONLY = YES;
-				CODE_SIGN_STYLE = Automatic;
-				GENERATE_INFOPLIST_FILE = NO;
-				INFOPLIST_FILE = iGhostVTWidgets/Resources/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = wiki.qaq.iGhostVT.widgets;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SKIP_INSTALL = YES;
-				SUPPORTS_MACCATALYST = NO;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -739,6 +739,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		AA0000000000000000000904 /* Build configuration list for PBXNativeTarget "iGhostVTWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000B07 /* Debug */,
+				AA0000000000000000000B08 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AA0000000000000000000905 /* Build configuration list for PBXNativeTarget "ighostvtd-io" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -753,15 +762,6 @@
 			buildConfigurations = (
 				AA0000000000000000000B0B /* Debug */,
 				AA0000000000000000000B0C /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		AA0000000000000000000904 /* Build configuration list for PBXNativeTarget "iGhostVTWidgets" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				AA0000000000000000000B07 /* Debug */,
-				AA0000000000000000000B08 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
