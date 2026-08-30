@@ -96,6 +96,7 @@ final class TerminalTab: ObservableObject, Identifiable {
     private var statusObservation: AnyCancellable?
     private var activityObservation: AnyCancellable?
     private var titleObservation: AnyCancellable?
+    private var resizeThrottleObservation: AnyCancellable?
 
     /// The daemon session this tab is attached to, once it has one. Another
     /// tab opened from this one names it so its shell starts in this shell's
@@ -150,8 +151,28 @@ final class TerminalTab: ObservableObject, Identifiable {
         }
         terminal.configuration = TerminalSurfaceOptions(
             backend: .inMemory(store.session),
-            fontSize: TerminalFontSize.preferred
+            fontSize: TerminalFontSize.preferred,
+            resizeThrottleMilliseconds: Self.resizeThrottle(isShellInForeground: false)
         )
+        // The right resize throttle depends on what is drawing: an
+        // alt-screen program that repaints on every winsize (vim, Claude
+        // Code) needs the stream of sizes bounded or its reflow runs behind
+        // the layer for the whole drag, while a shell at its prompt reads
+        // the same bound as blinking and is best left unthrottled. Event 102
+        // tells the two apart. The throttle is not part of the surface's
+        // identity, so rewriting the configuration changes the pace without
+        // rebuilding the surface.
+        resizeThrottleObservation = Publishers.CombineLatest(
+            store.$status.removeDuplicates(),
+            store.$isShellInForeground.removeDuplicates()
+        )
+        .map { status, isShell in
+            Self.resizeThrottle(isShellInForeground: status == .connected && isShell)
+        }
+        .removeDuplicates()
+        .sink { [weak self] milliseconds in
+            self?.terminal.configuration.resizeThrottleMilliseconds = milliseconds
+        }
         // The user's arrangement of the keyboard accessory bar; later edits
         // reach existing tabs through RootView's store subscription.
         KeyboardBarStore.shared.apply(to: terminal)
@@ -252,6 +273,14 @@ final class TerminalTab: ObservableObject, Identifiable {
     /// got a session has nothing to lose.
     var hasLiveSession: Bool {
         daemonSession.id != nil || store.status == .connected
+    }
+
+    /// Milliseconds between grid sizes handed to the surface during a live
+    /// resize: none for a shell at its prompt, 128 for a program in front of
+    /// it — a step above the library's 96 for full-repaint TUIs, traded for
+    /// a steadier picture during the drag.
+    private static func resizeThrottle(isShellInForeground: Bool) -> Double {
+        isShellInForeground ? 0 : 128
     }
 
     /// Whether closing this tab would interrupt something — the case the

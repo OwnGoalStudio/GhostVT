@@ -35,12 +35,17 @@ which launchd never sized — so a session's buffers cannot jetsam the daemon.
   for exactly this reason.
 - Depends on the **released**
   [libghostty-spm](https://github.com/Lakr233/libghostty-spm) package
-  (`upToNextMajor` from 1.4.11 — below 1.4.9, `TerminalViewState` publishes
+  (`upToNextMajor` from 1.4.12 — below 1.4.9, `TerminalViewState` publishes
   from inside SwiftUI's update pass; below 1.4.10, a hardware Escape drops
   the keyboard on iOS instead of reaching the shell; below 1.4.11 it does
   the same on Catalyst, where it resigns the terminal and every key after
-  it is lost until the next click). Since 1.4.0 the package's
-  bare-semver tags are its own release sequence, decoupled from ghostty's;
+  it is lost until the next click; below 1.4.12 the UIKit view stretches
+  the engine's layer to the new bounds while a resize throttle still
+  holds the surface at the old size, and the whole pane flickers for the
+  length of every throttled resize — which `TerminalTab`'s throttle, on
+  for a tab with a program in front of its shell, opens on every drag).
+  Since 1.4.0 the package's bare-semver tags are its own release sequence,
+  decoupled from ghostty's;
   the `upstream.X.Y.Z` tags hold the XCFramework binaries. Terminal-library
   changes land in that repo and ship via a new package release — don't
   reintroduce a local path reference to a sibling checkout.
