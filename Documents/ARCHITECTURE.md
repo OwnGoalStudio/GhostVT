@@ -15,17 +15,21 @@ iGhostVT/                    the app, one folder-synchronized Xcode group
 │   ├── Settings/            SettingsSheet (themes, default shell)
 │   └── Support/             GlassStyle, StatusDot, KeyboardState
 └── Resources/               Assets.xcassets, Info.plist
-Packages/iGhostVTKit/         transport layer (the TerminalTransport protocol)
-Shared/                      XPC wire protocol, compiled into app + daemon
-iGhostVTDaemon/               ighostvtd: the only process that spawns anything
-iGhostVTWidgets/              WidgetKit appex: the Dynamic Island Live Activity
-ActivityShared/              ActivityAttributes, compiled into app + appex
+Modules/iGhostVTKit/         transport layer (the TerminalTransport protocol)
+Shared/Protocol/             XPC wire protocol, compiled into app + daemon + CLI
+Shared/Activity/             ActivityAttributes, compiled into app + appex
+iGhostVTDaemon/              ighostvtd: the XPC proxy launchd starts
+iGhostVTIO/                  ighostvtd-io: the PTYs, buffers, and shells
+iGhostVTDaemonShared/        bootstrap paths, logging, the proxy <-> io wire
+iGhostVTCLI/                 ighostvt-cli: the one-shot command-line client
+iGhostVTWidgets/             WidgetKit appex: the Dynamic Island Live Activity
+Documents/                   these notes, Research/, and Site/ (the web page)
 ```
 
 `iGhostVT.xcodeproj` is checked in: objectVersion 77 with a
 `PBXFileSystemSynchronizedRootGroup` over the `iGhostVT/` folder (Info.plist
 excluded via membership exception), local package references to
-`../libghostty-spm` and `Packages/iGhostVTKit`. Adding a file to the folder
+`../libghostty-spm` and `Modules/iGhostVTKit`. Adding a file to the folder
 adds it to the target — there is no generator step.
 
 ## Ownership (multi-window)

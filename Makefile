@@ -156,17 +156,17 @@ harness:
 	@harness_dir="$$(mktemp -d /tmp/ighostvt-harness.XXXXXX)"; \
 	trap 'rm -rf "$$harness_dir"' EXIT; \
 	xcrun --sdk macosx swiftc -swift-version 5 \
-		"$(ROOT_DIR)/Shared/iGhostVTProtocol.swift" \
+		"$(ROOT_DIR)/Shared/Protocol/iGhostVTProtocol.swift" \
 		$$(find "$(ROOT_DIR)/iGhostVTDaemonShared" "$(ROOT_DIR)/iGhostVTIO" -name '*.swift' | sort) \
 		-o "$$harness_dir/ighostvtd-io"; \
 	xcrun --sdk macosx swiftc -swift-version 5 -DDEBUG \
-		"$(ROOT_DIR)/Shared/iGhostVTProtocol.swift" \
+		"$(ROOT_DIR)/Shared/Protocol/iGhostVTProtocol.swift" \
 		$$(find "$(ROOT_DIR)/iGhostVTDaemonShared" "$(ROOT_DIR)/iGhostVTIO" "$(ROOT_DIR)/iGhostVTDaemon" -name '*.swift' ! -name 'main.swift' | sort) \
 		$$(find "$(ROOT_DIR)/Tests/PTYHarness" -name '*.swift' | sort) \
 		-o "$$harness_dir/harness"; \
 	IGHOSTVT_IO_BINARY="$$harness_dir/ighostvtd-io" "$$harness_dir/harness"; \
 	xcrun --sdk macosx swiftc -swift-version 5 \
-		"$(ROOT_DIR)/Shared/iGhostVTProtocol.swift" \
+		"$(ROOT_DIR)/Shared/Protocol/iGhostVTProtocol.swift" \
 		"$(ROOT_DIR)/iGhostVTCLI/ScreenRenderer.swift" \
 		"$(ROOT_DIR)/iGhostVTCLI/KeyNames.swift" \
 		$$(find "$(ROOT_DIR)/Tests/CLIRenderer" -name '*.swift' | sort) \

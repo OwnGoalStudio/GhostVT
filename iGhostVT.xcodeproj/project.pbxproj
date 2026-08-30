@@ -90,9 +90,9 @@
 			path = iGhostVT;
 			sourceTree = "<group>";
 		};
-		AA0000000000000000000502 /* Shared */ = {
+		AA0000000000000000000502 /* Protocol */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = Shared;
+			path = Shared/Protocol;
 			sourceTree = "<group>";
 		};
 		AA0000000000000000000503 /* iGhostVTDaemon */ = {
@@ -123,9 +123,9 @@
 			path = iGhostVTWidgets;
 			sourceTree = "<group>";
 		};
-		AA0000000000000000000505 /* ActivityShared */ = {
+		AA0000000000000000000505 /* Activity */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ActivityShared;
+			path = Shared/Activity;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -153,8 +153,8 @@
 				AA0000000000000000000507 /* iGhostVTIO */,
 				AA0000000000000000000508 /* iGhostVTCLI */,
 				AA0000000000000000000504 /* iGhostVTWidgets */,
-				AA0000000000000000000505 /* ActivityShared */,
-				AA0000000000000000000502 /* Shared */,
+				AA0000000000000000000505 /* Activity */,
+				AA0000000000000000000502 /* Protocol */,
 				84D1AEEE304298C300894548 /* Configuration */,
 				AA0000000000000000000802 /* Products */,
 			);
@@ -191,8 +191,8 @@
 			);
 			fileSystemSynchronizedGroups = (
 				AA0000000000000000000501 /* iGhostVT */,
-				AA0000000000000000000502 /* Shared */,
-				AA0000000000000000000505 /* ActivityShared */,
+				AA0000000000000000000502 /* Protocol */,
+				AA0000000000000000000505 /* Activity */,
 			);
 			name = iGhostVT;
 			packageProductDependencies = (
@@ -217,7 +217,7 @@
 				AA0000000000000000000D03 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				AA0000000000000000000502 /* Shared */,
+				AA0000000000000000000502 /* Protocol */,
 				AA0000000000000000000503 /* iGhostVTDaemon */,
 				AA0000000000000000000506 /* iGhostVTDaemonShared */,
 			);
@@ -239,7 +239,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AA0000000000000000000502 /* Shared */,
+				AA0000000000000000000502 /* Protocol */,
 				AA0000000000000000000506 /* iGhostVTDaemonShared */,
 				AA0000000000000000000507 /* iGhostVTIO */,
 			);
@@ -261,7 +261,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				AA0000000000000000000502 /* Shared */,
+				AA0000000000000000000502 /* Protocol */,
 				AA0000000000000000000508 /* iGhostVTCLI */,
 			);
 			name = "ighostvt-cli";
@@ -284,7 +284,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				AA0000000000000000000504 /* iGhostVTWidgets */,
-				AA0000000000000000000505 /* ActivityShared */,
+				AA0000000000000000000505 /* Activity */,
 			);
 			name = iGhostVTWidgets;
 			packageProductDependencies = (
@@ -340,7 +340,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				AA0000000000000000000A01 /* XCRemoteSwiftPackageReference "libghostty-spm" */,
-				AA0000000000000000000A02 /* XCLocalSwiftPackageReference "Packages/iGhostVTKit" */,
+				AA0000000000000000000A02 /* XCLocalSwiftPackageReference "Modules/iGhostVTKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AA0000000000000000000802 /* Products */;
@@ -773,9 +773,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		AA0000000000000000000A02 /* XCLocalSwiftPackageReference "Packages/iGhostVTKit" */ = {
+		AA0000000000000000000A02 /* XCLocalSwiftPackageReference "Modules/iGhostVTKit" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/iGhostVTKit;
+			relativePath = Modules/iGhostVTKit;
 		};
 /* End XCLocalSwiftPackageReference section */
 

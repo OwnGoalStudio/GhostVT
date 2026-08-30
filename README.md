@@ -13,22 +13,28 @@ still running.
 
 ## Layout
 
-| Path                   | Purpose                                                          |
-| ---------------------- | ---------------------------------------------------------------- |
-| `iGhostVT/`            | The app: `main.swift`, `Application/`, `Backend/`, `Interface/`, `Resources/` |
-| `iGhostVTDaemon/`       | `ighostvtd`: the only process that spawns terminal sessions      |
-| `iGhostVTCLI/`         | `ighostvt-cli`: the command-line client for those sessions       |
-| `Shared/`              | XPC wire protocol, compiled into both targets                    |
-| `Packages/iGhostVTKit/` | Transport layer: the `TerminalTransport` protocol                |
-| `Configuration/`       | xcconfig files; `Version.xcconfig` holds the version number      |
-| `Packaging/`           | Debian control, maintainer scripts, ldid entitlements            |
-| `Packaging/macOS/`     | Bundled LaunchAgent and the (empty) entitlements for the Mac app |
-| `Scripts/`             | xcodebuild wrapper, deb and macOS packagers, versioning          |
+| Path                     | Purpose                                                          |
+| ------------------------ | ---------------------------------------------------------------- |
+| `iGhostVT/`              | The app: `main.swift`, `Application/`, `Backend/`, `Interface/`, `Resources/` |
+| `iGhostVTDaemon/`        | `ighostvtd`: the XPC proxy launchd starts                        |
+| `iGhostVTIO/`            | `ighostvtd-io`: the child that owns every PTY, buffer, and shell  |
+| `iGhostVTDaemonShared/`  | Bootstrap paths, logging, and the proxy ⇄ io wire, in both        |
+| `iGhostVTCLI/`           | `ighostvt-cli`: the command-line client for those sessions       |
+| `iGhostVTWidgets/`       | WidgetKit appex: the Dynamic Island Live Activity                |
+| `Shared/Protocol/`       | XPC wire protocol, compiled into the app, the daemon, and the CLI |
+| `Shared/Activity/`       | `ActivityAttributes`, compiled into the app and the appex        |
+| `Modules/iGhostVTKit/`   | Transport layer: the `TerminalTransport` protocol                |
+| `Configuration/`         | xcconfig files; `Version.xcconfig` holds the version number      |
+| `Packaging/`             | Debian control, maintainer scripts, ldid entitlements            |
+| `Packaging/macOS/`       | Bundled LaunchAgent and the (empty) entitlements for the Mac app |
+| `Scripts/`               | xcodebuild wrapper, deb and macOS packagers, versioning          |
+| `Tests/`                 | The PTY harness and the CLI screen-renderer tests                |
+| `Documents/`             | Architecture notes, research, and `Site/` — the published page   |
 
 `iGhostVT.xcodeproj` is checked in (objectVersion 77, folder-synchronized
 groups — adding a file to a synchronized folder adds it to the target).
 libghostty-spm is consumed as a released package, not a sibling checkout.
-See `Documentation/ARCHITECTURE.md` for the ownership and data-flow design,
+See `Documents/ARCHITECTURE.md` for the ownership and data-flow design,
 the jailbreak path rules, and per-window tabs.
 
 ## Packaging

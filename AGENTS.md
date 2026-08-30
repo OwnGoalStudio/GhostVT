@@ -11,7 +11,8 @@ which launchd never sized — so a session's buffers cannot jetsam the daemon.
 
 - **No project generators.** `iGhostVT.xcodeproj/project.pbxproj` is
   hand-written and checked in (objectVersion 77, file-system-synchronized
-  groups — files added under `iGhostVT/`, `iGhostVTDaemon/`, `Shared/` join
+  groups — files added under `iGhostVT/`, `iGhostVTDaemon/`, `Shared/Protocol/`
+  join
   their target automatically). Never introduce XcodeGen/Tuist/etc.
 - **Versions live in `Configuration/Version.xcconfig` only** (edit via
   `make set-version`). xcconfigs attach at project level; a target-level
@@ -71,8 +72,8 @@ FlowDown-style: `iGhostVT/main.swift` (manual `UIApplicationMain`) +
 `iGhostVTCLI/` builds `ighostvt-cli`, a second *client* of the daemon —
 one-shot commands (`list`, `capture`, `send`, `new`, `kill`), never an
 interactive attach, so it neither holds a session nor touches the terminal
-it was run from. It compiles `Shared/` and nothing else the daemon uses: its
-own XPC client (`DaemonClient`), the `capture` screen model
+it was run from. It compiles `Shared/Protocol/` and nothing else the daemon
+uses: its own XPC client (`DaemonClient`), the `capture` screen model
 (`ScreenRenderer`), and the `send` key vocabulary (`KeyNames`). `ighostvtd`
 depends on it, so every `-scheme ighostvtd` build produces it beside
 `ighostvtd-io`. It ships *inside the app bundle* on both platforms
@@ -81,7 +82,15 @@ symlink in the deb; `Contents/MacOS/ighostvt-cli` on the Mac) because the
 daemon admits a peer by its executable path, and one rule then covers both
 clients.
 
-Shared XPC protocol in `Shared/`, transport seam in `Packages/iGhostVTKit`.
+Shared XPC protocol in `Shared/Protocol/`, `ActivityAttributes` in
+`Shared/Activity/`, transport seam in `Modules/iGhostVTKit`. Prose lives in
+`Documents/` — `ARCHITECTURE.md`, `Research/`, and `Site/`, which is the
+GitHub Pages source: `.github/workflows/pages.yml` publishes that folder, so
+the repo's Pages setting is **GitHub Actions**, not the legacy `/docs`
+branch folder. Keep the site's `index.html` and `icon.png` at `Site/` root —
+`manifest.json` and the AltStore-style clients fetch
+`https://owngoalstudio.github.io/GhostVT/icon.png`.
+
 The `ighostvtd` target depends on `ighostvtd-io`, so `-scheme ighostvtd`
 builds both and they land side by side (`/usr/libexec` on device,
 `Contents/MacOS` in the Mac bundle); the proxy finds the child beside its own

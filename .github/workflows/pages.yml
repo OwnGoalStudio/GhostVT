@@ -1,0 +1,38 @@
+# The project page used to be the legacy Pages source (branch main, folder
+# /docs). The folder moved to Documents/Site with the rest of the prose, and
+# legacy Pages only accepts / or /docs — so the site is deployed from here
+# instead, and the repository's Pages source must be set to "GitHub Actions".
+name: Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - Documents/Site/**
+      - .github/workflows/pages.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One live site: let a running deploy finish rather than cancelling it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: Documents/Site
+      - id: deployment
+        uses: actions/deploy-pages@v4
