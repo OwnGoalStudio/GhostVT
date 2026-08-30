@@ -2,30 +2,35 @@
 
 set -Eeuo pipefail
 
-if [[ "$#" -ne 12 ]]; then
-    echo "usage: $0 <app> <daemon> <control> <app-entitlements> <daemon-entitlements> <appex-entitlements> <launch-plist> <output-deb> <package-id> <version> <architecture> <install-prefix>" >&2
+if [[ "$#" -ne 13 ]]; then
+    echo "usage: $0 <app> <daemon> <daemon-io> <control> <app-entitlements> <daemon-entitlements> <appex-entitlements> <launch-plist> <output-deb> <package-id> <version> <architecture> <install-prefix>" >&2
     exit 64
 fi
 
 app_bundle="$1"
 daemon_binary="$2"
-control_template="$3"
-app_entitlements="$4"
-daemon_entitlements="$5"
-appex_entitlements="$6"
-launch_plist="$7"
-output_deb="$8"
-package_id="$9"
-version="${10}"
-architecture="${11}"
+# The daemon's child, installed beside it: ighostvtd is the launchd job and
+# lives under launchd's jetsam limit, so the PTYs and their buffers live in
+# ighostvtd-io, which it spawns.
+daemon_io_binary="$3"
+control_template="$4"
+app_entitlements="$5"
+daemon_entitlements="$6"
+appex_entitlements="$7"
+launch_plist="$8"
+output_deb="$9"
+package_id="${10}"
+version="${11}"
+architecture="${12}"
 # Empty for roothide, which installs into the jbroot it picked this boot, and
 # "/var/jb" for a rootless bootstrap, which has to be named in every path the
 # package ships — including the ones inside the launch daemon and the
 # maintainer scripts.
-install_prefix="${12}"
+install_prefix="${13}"
 
 [[ -d "$app_bundle" && -f "$app_bundle/Info.plist" ]] || { echo "error: incomplete app bundle" >&2; exit 66; }
 [[ -x "$daemon_binary" ]] || { echo "error: daemon binary is missing" >&2; exit 66; }
+[[ -x "$daemon_io_binary" ]] || { echo "error: daemon io binary is missing" >&2; exit 66; }
 for input in "$control_template" "$app_entitlements" "$daemon_entitlements" \
     "$appex_entitlements" "$launch_plist"; do
     [[ -f "$input" ]] || { echo "error: missing packaging input: $input" >&2; exit 66; }
@@ -67,10 +72,12 @@ debian="$staging/DEBIAN"
 installed_root="$staging$install_prefix"
 installed_app="$installed_root/Applications/iGhostVT.app"
 installed_daemon="$installed_root/usr/libexec/ighostvtd"
+installed_daemon_io="$installed_root/usr/libexec/ighostvtd-io"
 installed_plist="$installed_root/Library/LaunchDaemons/wiki.qaq.ighostvtd.plist"
 mkdir -p "$debian" "$(dirname "$installed_app")" "$(dirname "$installed_daemon")" "$(dirname "$installed_plist")"
 /usr/bin/ditto "$app_bundle" "$installed_app"
 /usr/bin/ditto "$daemon_binary" "$installed_daemon"
+/usr/bin/ditto "$daemon_io_binary" "$installed_daemon_io"
 sed -e "s|@PREFIX@|$install_prefix|g" "$launch_plist" >"$installed_plist"
 # The daemon recovers its install root by stripping this suffix off its own
 # executable path, so the plist has to launch it by the path it is installed
@@ -81,7 +88,7 @@ sed -e "s|@PREFIX@|$install_prefix|g" "$launch_plist" >"$installed_plist"
 }
 rm -rf "$installed_app/_CodeSignature"
 rm -f "$installed_app/embedded.mobileprovision"
-chmod 0755 "$installed_daemon"
+chmod 0755 "$installed_daemon" "$installed_daemon_io"
 chmod 0644 "$installed_plist"
 
 # Ghostty's shell integration, which is what makes a session report its title,
@@ -104,6 +111,9 @@ fi
 
 ldid -S"$app_entitlements" -Cadhoc "$installed_app/$app_executable"
 ldid -S"$daemon_entitlements" -Cadhoc "$installed_daemon"
+# The same entitlements as its parent: it is the process that forks as root
+# and drops to mobile, so it needs everything the daemon used to.
+ldid -S"$daemon_entitlements" -Cadhoc "$installed_daemon_io"
 ldid -e "$installed_app/$app_executable" >"$app_signed_entitlements"
 ldid -e "$installed_daemon" >"$daemon_signed_entitlements"
 
@@ -204,6 +214,11 @@ for entitlement in platform-application com.apple.private.security.no-sandbox; d
     require_true "$daemon_signed_entitlements" "$entitlement"
 done
 require_false "$daemon_signed_entitlements" com.apple.private.security.container-required
+ldid -e "$installed_daemon_io" >"$daemon_signed_entitlements"
+for entitlement in platform-application com.apple.private.security.no-sandbox; do
+    require_true "$daemon_signed_entitlements" "$entitlement"
+done
+require_false "$daemon_signed_entitlements" com.apple.private.security.container-required
 
 # Spawning belongs to the daemon alone: fail the build if the app ever picks
 # up the client entitlement's counterpart on the daemon side by mistake.
@@ -252,6 +267,7 @@ dpkg-deb --root-owner-group -Zzstd -b "$staging" "$temporary_deb"
 contents="$(dpkg-deb --contents "$temporary_deb")"
 grep -F ".$install_prefix/Applications/iGhostVT.app/$app_executable" <<<"$contents" >/dev/null
 grep -F ".$install_prefix/usr/libexec/ighostvtd" <<<"$contents" >/dev/null
+grep -F ".$install_prefix/usr/libexec/ighostvtd-io" <<<"$contents" >/dev/null
 grep -F ".$install_prefix/Library/LaunchDaemons/wiki.qaq.ighostvtd.plist" <<<"$contents" >/dev/null
 [[ -z "$integration_source" ]] || grep -F ".$install_prefix/usr/share/ighostvt/shell-integration/zsh/.zshenv" <<<"$contents" >/dev/null
 

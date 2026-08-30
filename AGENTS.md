@@ -2,7 +2,10 @@
 
 Ghostty-powered terminal for jailbroken iOS 15+ — roothide and rootless
 bootstraps both. The app renders; the bundled `ighostvtd` LaunchDaemon owns
-every spawned process.
+every terminal session. `ighostvtd` is a thin XPC proxy under launchd's 6 MB
+jetsam limit; it spawns one child, `ighostvtd-io`, and forwards the wire to
+it. The PTYs, the replay buffers, and every shell live in `ighostvtd-io`,
+which launchd never sized — so a session's buffers cannot jetsam the daemon.
 
 ## Hard rules
 
@@ -15,9 +18,21 @@ every spawned process.
   `MARKETING_VERSION`/`CURRENT_PROJECT_VERSION` in the pbxproj silently
   shadows them and ships the wrong build number. `make check` rejects this —
   keep it that way, and watch for Xcode injecting these keys back.
-- **The app never spawns processes.** Only `ighostvtd` forks
-  (`forkpty`+`execve`), gated by kernel audit-token peer authentication.
-  Keep that boundary; don't add process APIs to the app target.
+- **The app never spawns processes.** Only `ighostvtd-io` forks
+  (`forkpty`+`execve`); `ighostvtd` forks exactly one thing — `ighostvtd-io`
+  itself, via `posix_spawn` (`IOSupervisor`). Peer authentication is still
+  the daemon's, gated by the kernel audit token before a byte is forwarded.
+  Keep that boundary; don't add process APIs to the app or to the proxy.
+- **`ighostvtd` must stay small.** It is the launchd job, and launchd caps a
+  daemon at 6 MB on the device (jetsam) — a replay buffer or an XPC send
+  queue growing there is what this split exists to prevent. Everything with a
+  buffer belongs in `ighostvtd-io`. The proxy interprets no request field but
+  the operation code, so the protocol grows without it changing; it counts
+  output in flight per peer (`xpc_connection_send_barrier`) and stops reading
+  the socket — stalling the io side's PTYs — rather than queue without bound,
+  and cuts a peer that will not drain (the app reconnects and replays). Keep
+  Foundation out of it: `DaemonFileLog` uses `strftime`, not `DateFormatter`,
+  for exactly this reason.
 - Depends on the **released**
   [libghostty-spm](https://github.com/Lakr233/libghostty-spm) package
   (`upToNextMajor` from 1.4.11 — below 1.4.9, `TerminalViewState` publishes
@@ -34,14 +49,35 @@ every spawned process.
 
 FlowDown-style: `iGhostVT/main.swift` (manual `UIApplicationMain`) +
 `Application/` (delegates) + `Backend/` (sessions, theme, transport) +
-`Interface/<feature>/` + `Resources/`. The daemon mirrors that shape:
-`iGhostVTDaemon/main.swift` + `Server/` (listener, peer auth, connections) +
-`Session/` (registry, PTY, descriptor I/O) + `Shell/` (what a session runs) +
-`System/` (bootstrap paths, C shims) + `Logging/`. Shared XPC protocol in
-`Shared/`, transport seam in `Packages/iGhostVTKit`. Both targets use
-file-system-synchronized groups, so a new subfolder joins the target on its
-own — but `make harness` compiles the daemon by hand and has to find them, so
-it globs recursively; keep it that way.
+`Interface/<feature>/` + `Resources/`. The daemon is two programs:
+
+- `iGhostVTDaemon/` builds `ighostvtd`, the proxy: `main.swift` +
+  `Server/` (`DaemonServer` listener, `PeerAuthenticator`, `PeerRelay` per
+  connection, `IOSupervisor` owning the child and the socket).
+- `iGhostVTIO/` builds `ighostvtd-io`, the session host: `main.swift` +
+  `Link/` (`IOHost`, and `PeerSession` — the old connection handler, now
+  reached over the socket) + `Session/` (registry, PTY) + `Shell/`.
+- `iGhostVTDaemonShared/` is compiled into **both**: `System/`
+  (`JailbreakRoot` bootstrap paths, `PrivateSystem` C shims, `DescriptorIO`,
+  `DaemonError`), `Logging/`, and `Link/` — `IOWire` (the frame format and
+  the XPC ⇄ bytes codec) and `IOChannel` (the framed non-blocking socket with
+  the read-pause / write-backpressure hooks flow control needs).
+
+Shared XPC protocol in `Shared/`, transport seam in `Packages/iGhostVTKit`.
+The `ighostvtd` target depends on `ighostvtd-io`, so `-scheme ighostvtd`
+builds both and they land side by side (`/usr/libexec` on device,
+`Contents/MacOS` in the Mac bundle); the proxy finds the child beside its own
+executable. All three folders are file-system-synchronized groups, so a new
+subfolder joins its target on its own — but `make harness` compiles by hand
+and has to find them, so it globs `iGhostVTDaemonShared iGhostVTIO
+iGhostVTDaemon` recursively; keep it that way.
+
+The proxy ⇄ io wire: `[u32 len][u8 kind][u64 peer][u64 tag] payload`, kinds
+request / reply / event / peerGone, payload a self-describing encoding of the
+XPC types the protocol uses (a descriptor or mach port is refused, not
+half-forwarded). `tag` 0 means a request that wants no reply, and every
+event. The proxy stamps a unique peer id per connection; io makes a
+`PeerSession` on first sight of one and retires it on `peerGone`.
 
 Data flow: one `TabManager` per `UIWindowScene` (owned by `SceneDelegate`);
 each `TerminalTab` owns a `TerminalSessionStore`, which drives a
@@ -113,8 +149,12 @@ strip has no + of its own. The two locks freeze the *user*, never the
 program: output keeps flowing and the surface keeps rendering. They are
 one choice (`TerminalTab.lock`, at most one of `.interaction` /
 `.keyboard`): picking the other lock switches, picking the one that is on
-clears it, and the `isLocked` / `isKeyboardLocked` flags the menus and
-badges use are views of that. Both live on
+clears it, and the `isLocked` / `isKeyboardLocked` flags the menus toggle
+are views of that. Every presentation wears a `TabLockBadge` off the same
+`tab.lock` — a filled padlock for `.interaction`, a slashed keyboard for
+`.keyboard` (composed: SF Symbols has no `keyboard.slash` on the iOS 15
+floor, so a diagonal is knocked through the glyph with `.destinationOut`).
+Both locks live on
 `LockableTerminalView`, the app's `TerminalView` subclass installed through
 the library's `makePlatformView` seam — refusing `hitTest` and first responder
 closes every input path at once, which SwiftUI modifiers could not. That
@@ -158,8 +198,12 @@ the catalog's generated symbols, which is why the menu's entry is keyed
 ## Build & verify
 
 - `make check` — project/packaging validation
-- `make test` — the PTY harness (`make harness` runs the daemon's spawn path
-  on macOS; launchd itself is device-only)
+- `make test` — the PTY harness (`make harness` builds `ighostvtd-io` and
+  spawns it as the proxy's child over a real socket, then drives the whole
+  stack — the codec, a session's lifecycle, output routing, the flow-control
+  pause and peer-cut, an io crash → respawn, and the shutdown-follow — plus
+  the daemon's spawn path; launchd and the mach service are the only
+  device-only parts)
 - `make deb` — unsigned iphoneos build, ldid ad-hoc sign, roothide
   `iphoneos-arm64e` package; `make deb-rootless` packages the same binaries
   under `/var/jb` as `iphoneos-arm64` (`PACKAGE_FLAVOR` picks the layout)

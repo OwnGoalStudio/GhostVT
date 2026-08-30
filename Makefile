@@ -10,6 +10,7 @@ CONFIGURATION       ?= Release
 DERIVED_DATA        ?= /private/tmp/ighostvt-deriveddata
 APP_BUNDLE          := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/iGhostVT.app
 DAEMON_BINARY       := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/ighostvtd
+DAEMON_IO_BINARY    := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/ighostvtd-io
 DAEMON_SCHEME       := ighostvtd
 PACKAGE_ID          ?= wiki.qaq.ighostvt
 BUNDLE_ID           := wiki.qaq.iGhostVT
@@ -82,7 +83,7 @@ help:
 	@echo "  deb-roothide  Package for roothide (unprefixed, iphoneos-arm64e)"
 	@echo "  deb-rootless  Package for a rootless bootstrap (/var/jb, iphoneos-arm64)"
 	@echo "  test        Run the PTY harness"
-	@echo "  harness     Run the daemon's PTY spawn tests on macOS"
+	@echo "  harness     Run the daemon on macOS: proxy, ighostvtd-io, and the PTY spawn tests"
 	@echo "  check       Validate the project and packaging inputs"
 	@echo "  mac-run     Build the Mac Catalyst app, load ighostvtd as a LaunchAgent, open the app"
 	@echo "  mac-app     Build the Mac Catalyst app only"
@@ -131,24 +132,31 @@ check:
 	@plutil -lint "$(DAEMON_ENTITLEMENTS)" "$(APPEX_ENTITLEMENTS)" "$(LAUNCH_DAEMON)"
 	@[[ "$$(/usr/libexec/PlistBuddy -c 'Print :SoftResourceLimits:NumberOfFiles' "$(LAUNCH_DAEMON)")" == "10240" ]] || { echo "error: the daemon and its shells require a 10240 soft file-descriptor limit" >&2; exit 65; }
 	@targets="$$(xcodebuild -project "$(PROJECT)" -list)"; \
-		grep -F "ighostvtd" <<<"$$targets" >/dev/null || { echo "error: the ighostvtd target is missing from the project" >&2; exit 65; }
+		grep -F "ighostvtd" <<<"$$targets" >/dev/null || { echo "error: the ighostvtd target is missing from the project" >&2; exit 65; }; \
+		grep -F "ighostvtd-io" <<<"$$targets" >/dev/null || { echo "error: the ighostvtd-io target is missing from the project" >&2; exit 65; }
 
 # iGhostVTKit is protocol-only since the TCP transport left; the harness is
 # the whole suite until it grows tests again.
 test: harness
 
-# The daemon's spawn path on the host, where launchd and the mach service are
-# out of reach but forkpty/execve, the read loop, exit decoding, and
-# TIOCSWINSZ behave exactly as they do on device.
+# The daemon on the host, where launchd and the mach service are out of
+# reach but everything else is real: `ighostvtd-io` is built and spawned as
+# the proxy's child, the socket between them carries the protocol, and
+# forkpty/execve, the read loop, exit decoding, and TIOCSWINSZ behave
+# exactly as they do on device.
 harness:
-	@harness_bin="$$(mktemp /tmp/ighostvt-harness.XXXXXX)"; \
-	trap 'rm -f "$$harness_bin"' EXIT; \
+	@harness_dir="$$(mktemp -d /tmp/ighostvt-harness.XXXXXX)"; \
+	trap 'rm -rf "$$harness_dir"' EXIT; \
 	xcrun --sdk macosx swiftc -swift-version 5 \
 		"$(ROOT_DIR)/Shared/iGhostVTProtocol.swift" \
-		$$(find "$(ROOT_DIR)/iGhostVTDaemon" -name '*.swift' ! -name 'main.swift' | sort) \
-		"$(ROOT_DIR)/Tests/PTYHarness/main.swift" \
-		-o "$$harness_bin"; \
-	"$$harness_bin"
+		$$(find "$(ROOT_DIR)/iGhostVTDaemonShared" "$(ROOT_DIR)/iGhostVTIO" -name '*.swift' | sort) \
+		-o "$$harness_dir/ighostvtd-io"; \
+	xcrun --sdk macosx swiftc -swift-version 5 -DDEBUG \
+		"$(ROOT_DIR)/Shared/iGhostVTProtocol.swift" \
+		$$(find "$(ROOT_DIR)/iGhostVTDaemonShared" "$(ROOT_DIR)/iGhostVTIO" "$(ROOT_DIR)/iGhostVTDaemon" -name '*.swift' ! -name 'main.swift' | sort) \
+		$$(find "$(ROOT_DIR)/Tests/PTYHarness" -name '*.swift' | sort) \
+		-o "$$harness_dir/harness"; \
+	IGHOSTVT_IO_BINARY="$$harness_dir/ighostvtd-io" "$$harness_dir/harness"
 
 build: check test
 	XCBUILD_LABEL=build-ios $(DEVICE_XCODEBUILD) \
@@ -166,6 +174,7 @@ deb: build
 	"$(DEB_PACKAGER)" \
 		"$(APP_BUNDLE)" \
 		"$(DAEMON_BINARY)" \
+		"$(DAEMON_IO_BINARY)" \
 		"$(CONTROL_TEMPLATE)" \
 		"$(ENTITLEMENTS)" \
 		"$(DAEMON_ENTITLEMENTS)" \
@@ -201,6 +210,7 @@ MAC_CONFIGURATION   := Debug
 MAC_SIGN_IDENTITY   ?= -
 MAC_APP_BUNDLE      := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)-maccatalyst/iGhostVT.app
 MAC_DAEMON_BINARY   := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighostvtd
+MAC_DAEMON_IO_BINARY := $(DERIVED_DATA)/Build/Products/$(MAC_CONFIGURATION)/ighostvtd-io
 MAC_LAUNCH_AGENT    := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighostvtd.plist
 
 mac-app:
@@ -226,6 +236,7 @@ mac-daemon:
 		-scheme "$(DAEMON_SCHEME)" \
 		-destination "platform=macOS" \
 		build
+	@test -x "$(MAC_DAEMON_IO_BINARY)" || { echo "error: $(MAC_DAEMON_IO_BINARY) was not built; ighostvtd spawns it from beside itself" >&2; exit 66; }
 	"$(MAC_DAEMON_LOADER)" install "$(MAC_DAEMON_BINARY)" "$(MAC_LAUNCH_AGENT)"
 
 mac-daemon-uninstall:
@@ -264,6 +275,7 @@ MAC_DAEMON_ENTITLEMENTS := $(ROOT_DIR)/Packaging/macOS/iGhostVTDaemon.entitlemen
 MAC_AGENT_PLIST     := $(ROOT_DIR)/Packaging/macOS/wiki.qaq.ighostvtd.agent.plist
 MAC_ZIP_APP_BUNDLE  := $(DERIVED_DATA)/Build/Products/$(MAC_RELEASE_CONFIGURATION)-maccatalyst/iGhostVT.app
 MAC_ZIP_DAEMON      := $(DERIVED_DATA)/Build/Products/$(MAC_RELEASE_CONFIGURATION)/ighostvtd
+MAC_ZIP_DAEMON_IO   := $(DERIVED_DATA)/Build/Products/$(MAC_RELEASE_CONFIGURATION)/ighostvtd-io
 MAC_ZIP_OUTPUT      ?= $(ROOT_DIR)/build/Packages/iGhostVT-$(APP_VERSION)-macos.zip
 
 MAC_XCODEBUILD := $(UNSIGNED_XCODEBUILD) \
@@ -316,6 +328,7 @@ mac-zip: mac-zip-check
 	"$(MAC_PACKAGER)" \
 		"$(MAC_ZIP_APP_BUNDLE)" \
 		"$(MAC_ZIP_DAEMON)" \
+		"$(MAC_ZIP_DAEMON_IO)" \
 		"$(MAC_AGENT_PLIST)" \
 		"$(MAC_APP_ENTITLEMENTS)" \
 		"$(MAC_DAEMON_ENTITLEMENTS)" \

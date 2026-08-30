@@ -1,5 +1,3 @@
-import Foundation
-
 /// Wire contract shared by the app and `ighostvtd`.
 ///
 /// The daemon owns every terminal session: it is the only component allowed

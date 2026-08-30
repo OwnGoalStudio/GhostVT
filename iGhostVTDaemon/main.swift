@@ -1,14 +1,13 @@
 import Darwin
 import Dispatch
-import Foundation
 
-// A dying shell must not take the daemon with it.
+// A dying child must not take the daemon with it.
 signal(SIGPIPE, SIG_IGN)
 // SIGCHLD stays at default on purpose. SIG_IGN makes the kernel auto-reap
 // children, and a `waitpid` racing that auto-reap can block forever — which
 // froze the whole control queue (listener included) the first time a close's
-// grace-kill path waited on a SIGKILLed shell. PTYSession reaps its own
-// children with WNOHANG, so nothing here needs the auto-reap.
+// grace-kill path waited on a SIGKILLed shell. The only child here is
+// `ighostvtd-io`, reaped by IOSupervisor with WNOHANG.
 signal(SIGCHLD, SIG_DFL)
 
 autoreleasepool {
@@ -25,7 +24,7 @@ autoreleasepool {
             break
         } catch {
             DaemonFileLog.log("listener bootstrap attempt \(attempt) failed, retrying")
-            Thread.sleep(forTimeInterval: 1)
+            sleep(1)
         }
     }
     guard started else {

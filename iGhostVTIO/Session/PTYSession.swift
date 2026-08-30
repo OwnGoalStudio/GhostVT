@@ -29,6 +29,10 @@ final class PTYSession {
     private let childPID: pid_t
     private var readSource: DispatchSourceRead?
     private var exitSource: DispatchSourceProcess?
+    /// Output is not being read off the PTY: the proxy is not taking it,
+    /// so the master's buffer fills and the shell blocks on its write —
+    /// what a real terminal does when nobody is reading it.
+    private var isOutputPaused = false
 
     private var onOutput: OutputHandler?
     private var onExit: ExitHandler?
@@ -382,14 +386,37 @@ final class PTYSession {
         replayBuffer
     }
 
+    /// Stops or resumes draining the PTY. Idempotent; the source is
+    /// suspended at most once, and resumed before it is ever cancelled
+    /// (releasing a suspended dispatch object is a crash).
+    func setOutputPaused(_ paused: Bool) {
+        guard paused != isOutputPaused else { return }
+        isOutputPaused = paused
+        guard let readSource else { return }
+        if paused {
+            readSource.suspend()
+        } else {
+            readSource.resume()
+        }
+    }
+
+    private func stopReading() {
+        guard let readSource else { return }
+        if isOutputPaused {
+            readSource.resume()
+            isOutputPaused = false
+        }
+        readSource.cancel()
+        self.readSource = nil
+    }
+
     func terminate() {
         guard isAlive else { return }
         kill(childPID, SIGHUP)
     }
 
     func invalidate() {
-        readSource?.cancel()
-        readSource = nil
+        stopReading()
         exitSource?.cancel()
         exitSource = nil
         processNamePoll?.cancel()
@@ -464,8 +491,7 @@ final class PTYSession {
                 // can slip past both it and the one-shot poll in `start` —
                 // seen on CI as an exit that never arrives. EOF is this
                 // session's own proof the child is going, so poll it reaped.
-                readSource?.cancel()
-                readSource = nil
+                stopReading()
                 pollUntilReaped()
             }
             return
@@ -610,12 +636,8 @@ final class PTYSession {
     }
 
     deinit {
-        readSource?.cancel()
+        stopReading()
         exitSource?.cancel()
         processNamePoll?.cancel()
     }
-}
-
-enum iGhostVTDaemonError: Error {
-    case transportFailure
 }

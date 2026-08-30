@@ -1,6 +1,5 @@
 import Darwin
 import Dispatch
-import Foundation
 import os
 import XPC
 
@@ -22,13 +21,17 @@ import XPC
 /// class of failure. launchd's `KeepAlive` covers what remains, which is a
 /// crash.
 ///
-/// The one exit is the one a client asks for (`shutdown`, answered in
-/// `PeerSession`): the quitting app, once it has closed its tabs and seen
-/// the registry empty. Nobody is reaching for a tab then. Whether the exit
-/// sticks is the plist's business — the Mac agent's `KeepAlive` restarts only
-/// an unsuccessful exit and the mach service demand-launches it when the app
-/// returns; the device daemon is kept alive unconditionally and would come
-/// straight back, so the app never asks there.
+/// The one exit is the one a client asks for (`shutdown`, answered by
+/// `ighostvtd-io` once it holds nothing, and followed by `IOSupervisor` when
+/// the child then exits 0): the quitting app, once it has closed its tabs
+/// and seen the registry empty. Whether the exit sticks is the plist's
+/// business — the Mac agent's `KeepAlive` restarts only an unsuccessful exit
+/// and the mach service demand-launches it when the app returns; the device
+/// daemon is kept alive unconditionally and would come straight back, so the
+/// app never asks there.
+///
+/// This process holds no session: it is the jetsam-limited launchd job, and
+/// everything with a buffer lives in the child (`IOSupervisor`).
 final class DaemonServer {
     private let controlQueue = DispatchQueue(
         label: "wiki.qaq.ighostvt.daemon.control",
@@ -36,13 +39,30 @@ final class DaemonServer {
         autoreleaseFrequency: .workItem
     )
     private let authenticator = PeerAuthenticator()
-    private lazy var registry = SessionRegistry(queue: controlQueue)
+    private lazy var supervisor = IOSupervisor(
+        queue: controlQueue,
+        executablePath: Self.ioExecutablePath()
+    )
 
     private var listener: xpc_connection_t?
-    private var peers: [ObjectIdentifier: PeerSession] = [:]
+    private var peers: [ObjectIdentifier: PeerRelay] = [:]
+    private var nextPeerID: UInt64 = 1
+
+    /// `ighostvtd-io` beside this executable: `/usr/libexec` on the device,
+    /// `Contents/MacOS` in the Mac bundle, the same DerivedData products
+    /// directory for the harness.
+    private static func ioExecutablePath() -> String {
+        guard let own = JailbreakRoot.currentExecutablePath(),
+              let slash = own.lastIndex(of: "/")
+        else { return IOWire.executableName }
+        return String(own[...slash]) + IOWire.executableName
+    }
 
     func start() throws {
         guard listener == nil else { return }
+        if !supervisor.isRunning {
+            try supervisor.start()
+        }
         guard let listener = iGhostVTProtocol.serviceName.withCString({
             ighostvtCreateMachServiceListener(
                 $0,
@@ -76,25 +96,28 @@ final class DaemonServer {
             return
         }
 
-        let peer = PeerSession(
+        let peerID = nextPeerID
+        nextPeerID &+= 1
+        let peer = PeerRelay(
+            peerID: peerID,
             connection: event,
             clientPID: clientPID,
             queue: controlQueue,
-            registry: registry
+            supervisor: supervisor
         ) { [weak self] peer in
             self?.peerInvalidated(peer)
         }
         peers[ObjectIdentifier(peer)] = peer
         peer.activate()
-        DaemonLog.server.info("peer \(clientPID) connected, \(self.peers.count) peer(s)")
-        DaemonFileLog.log("peer \(clientPID) connected, \(peers.count) peer(s)")
+        DaemonLog.server.info("peer \(clientPID) connected as \(peerID), \(self.peers.count) peer(s)")
+        DaemonFileLog.log("peer \(clientPID) connected as peer \(peerID), \(peers.count) peer(s)")
     }
 
     /// The peer went away. Its sessions stay: detaching is not closing, and
     /// the next launch reattaches to them.
-    private func peerInvalidated(_ peer: PeerSession) {
+    private func peerInvalidated(_ peer: PeerRelay) {
         peers.removeValue(forKey: ObjectIdentifier(peer))
         DaemonLog.server.info("peer gone, \(self.peers.count) peer(s) remain")
-        DaemonFileLog.log("peer gone, \(peers.count) peer(s) remain")
+        DaemonFileLog.log("peer \(peer.peerID) gone, \(peers.count) peer(s) remain")
     }
 }

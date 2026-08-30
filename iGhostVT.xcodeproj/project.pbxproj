@@ -14,6 +14,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		AA0000000000000000000C02 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AA0000000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AA0000000000000000000604;
+			remoteInfo = "ighostvtd-io";
+		};
 		AA0000000000000000000C01 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AA0000000000000000000001 /* Project object */;
@@ -40,6 +47,7 @@
 /* Begin PBXFileReference section */
 		AA0000000000000000000301 /* iGhostVT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iGhostVT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000306 /* ighostvtd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = ighostvtd; sourceTree = BUILT_PRODUCTS_DIR; };
+		AA0000000000000000000308 /* ighostvtd-io */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "ighostvtd-io"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA0000000000000000000307 /* iGhostVTWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = iGhostVTWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -84,6 +92,16 @@
 			path = iGhostVTDaemon;
 			sourceTree = "<group>";
 		};
+		AA0000000000000000000506 /* iGhostVTDaemonShared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = iGhostVTDaemonShared;
+			sourceTree = "<group>";
+		};
+		AA0000000000000000000507 /* iGhostVTIO */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = iGhostVTIO;
+			sourceTree = "<group>";
+		};
 		AA0000000000000000000504 /* iGhostVTWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -118,6 +136,8 @@
 			children = (
 				AA0000000000000000000501 /* iGhostVT */,
 				AA0000000000000000000503 /* iGhostVTDaemon */,
+				AA0000000000000000000506 /* iGhostVTDaemonShared */,
+				AA0000000000000000000507 /* iGhostVTIO */,
 				AA0000000000000000000504 /* iGhostVTWidgets */,
 				AA0000000000000000000505 /* ActivityShared */,
 				AA0000000000000000000502 /* Shared */,
@@ -131,6 +151,7 @@
 			children = (
 				AA0000000000000000000301 /* iGhostVT.app */,
 				AA0000000000000000000306 /* ighostvtd */,
+				AA0000000000000000000308 /* ighostvtd-io */,
 				AA0000000000000000000307 /* iGhostVTWidgets.appex */,
 			);
 			name = Products;
@@ -177,16 +198,40 @@
 			buildRules = (
 			);
 			dependencies = (
+				AA0000000000000000000D02 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				AA0000000000000000000502 /* Shared */,
 				AA0000000000000000000503 /* iGhostVTDaemon */,
+				AA0000000000000000000506 /* iGhostVTDaemonShared */,
 			);
 			name = ighostvtd;
 			packageProductDependencies = (
 			);
 			productName = ighostvtd;
 			productReference = AA0000000000000000000306 /* ighostvtd */;
+			productType = "com.apple.product-type.tool";
+		};
+		AA0000000000000000000604 /* ighostvtd-io */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA0000000000000000000905 /* Build configuration list for PBXNativeTarget "ighostvtd-io" */;
+			buildPhases = (
+				AA0000000000000000000708 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				AA0000000000000000000502 /* Shared */,
+				AA0000000000000000000506 /* iGhostVTDaemonShared */,
+				AA0000000000000000000507 /* iGhostVTIO */,
+			);
+			name = "ighostvtd-io";
+			packageProductDependencies = (
+			);
+			productName = "ighostvtd-io";
+			productReference = AA0000000000000000000308 /* ighostvtd-io */;
 			productType = "com.apple.product-type.tool";
 		};
 		AA0000000000000000000603 /* iGhostVTWidgets */ = {
@@ -229,6 +274,9 @@
 					AA0000000000000000000603 = {
 						CreatedOnToolsVersion = 16.0;
 					};
+					AA0000000000000000000604 = {
+						CreatedOnToolsVersion = 16.0;
+					};
 				};
 			};
 			buildConfigurationList = AA0000000000000000000902 /* Build configuration list for PBXProject "iGhostVT" */;
@@ -261,6 +309,7 @@
 			targets = (
 				AA0000000000000000000601 /* iGhostVT */,
 				AA0000000000000000000602 /* ighostvtd */,
+				AA0000000000000000000604 /* ighostvtd-io */,
 				AA0000000000000000000603 /* iGhostVTWidgets */,
 			);
 		};
@@ -298,6 +347,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AA0000000000000000000708 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA0000000000000000000705 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -308,6 +364,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		AA0000000000000000000D02 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AA0000000000000000000604 /* ighostvtd-io */;
+			targetProxy = AA0000000000000000000C02 /* PBXContainerItemProxy */;
+		};
 		AA0000000000000000000D01 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			platformFilter = ios;
@@ -501,6 +562,32 @@
 			};
 			name = Release;
 		};
+		AA0000000000000000000B09 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_NAME = "ighostvtd-io";
+				SUPPORTED_PLATFORMS = "iphoneos macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AA0000000000000000000B0A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_NAME = "ighostvtd-io";
+				SUPPORTED_PLATFORMS = "iphoneos macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		AA0000000000000000000B07 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -573,6 +660,15 @@
 			buildConfigurations = (
 				AA0000000000000000000B05 /* Debug */,
 				AA0000000000000000000B06 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA0000000000000000000905 /* Build configuration list for PBXNativeTarget "ighostvtd-io" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000000000000000000B09 /* Debug */,
+				AA0000000000000000000B0A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

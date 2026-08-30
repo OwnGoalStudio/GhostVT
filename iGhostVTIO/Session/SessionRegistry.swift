@@ -14,6 +14,7 @@ final class SessionRegistry {
     private var attachments: [UInt64: PeerSession] = [:]
     private var nextID: UInt64 = 1
     private var childExitSignal: DispatchSourceSignal?
+    private var isOutputPaused = false
 
     var isEmpty: Bool {
         sessions.isEmpty
@@ -116,7 +117,21 @@ final class SessionRegistry {
                 )
             }
         )
+        if isOutputPaused {
+            session.setOutputPaused(true)
+        }
         return session
+    }
+
+    /// Flow control from the proxy link: while the output already produced
+    /// is not being taken, no session reads more off its PTY. A session
+    /// opened meanwhile starts paused too.
+    func setOutputPaused(_ paused: Bool) {
+        guard paused != isOutputPaused else { return }
+        isOutputPaused = paused
+        for session in sessions.values {
+            session.setOutputPaused(paused)
+        }
     }
 
     func attach(_ id: UInt64, to peer: PeerSession) throws -> PTYSession {

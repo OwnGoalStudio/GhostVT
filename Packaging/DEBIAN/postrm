@@ -18,6 +18,7 @@ if [ "${1:-}" = remove ] || [ "${1:-}" = purge ]; then
     if [ -x "$killall" ]; then
         "$killall" -9 iGhostVT 2>/dev/null || true
         "$killall" -9 ighostvtd 2>/dev/null || true
+        "$killall" -9 ighostvtd-io 2>/dev/null || true
     fi
 
     # The bundle is gone; -u by its old path drops any registration prerm

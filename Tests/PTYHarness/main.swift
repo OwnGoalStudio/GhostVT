@@ -679,6 +679,8 @@ do {
     check(false, "a process-name session spawns")
 }
 
+runProxyLinkTests()
+
 if failures.isEmpty {
     print("\nPTY harness passed")
     exit(EXIT_SUCCESS)

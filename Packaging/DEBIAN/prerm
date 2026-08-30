@@ -23,6 +23,7 @@ if [ "${1:-}" = remove ] || [ "${1:-}" = deconfigure ]; then
     # orphaned children holding PTYs that no longer lead anywhere.
     if [ -x "$killall" ]; then
         "$killall" -9 ighostvtd 2>/dev/null || true
+        "$killall" -9 ighostvtd-io 2>/dev/null || true
     fi
 
     # Unregister while the bundle still exists — uicache -u takes the app

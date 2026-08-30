@@ -4,44 +4,29 @@ import Foundation
 import os
 import XPC
 
-/// One authenticated client connection.
+/// One client connection, as relayed by `ighostvtd`.
 ///
-/// Requests arrive here and are answered on the control queue; output flows
-/// the other way as unsolicited messages on the same connection. A peer holds
-/// no session state of its own — it attaches to sessions the registry owns.
+/// Requests arrive here as XPC dictionaries the proxy forwarded unchanged
+/// and are answered on the control queue; output flows the other way as
+/// unsolicited events stamped with this peer's id. A peer holds no session
+/// state of its own — it attaches to sessions the registry owns. The
+/// proxy's peer ids are unique per connection, so the handshake gate below
+/// means what it did when this object *was* the connection.
 final class PeerSession {
-    private let connection: xpc_connection_t
-    private let clientPID: Int32
+    let peerID: UInt64
     private let queue: DispatchQueue
     private let registry: SessionRegistry
-    private let onInvalidate: (PeerSession) -> Void
+    private unowned let host: IOHost
 
     private var didHandshake = false
     private var attachedSessionIDs: Set<UInt64> = []
     private var isValid = true
 
-    init(
-        connection: xpc_connection_t,
-        clientPID: Int32,
-        queue: DispatchQueue,
-        registry: SessionRegistry,
-        onInvalidate: @escaping (PeerSession) -> Void
-    ) {
-        self.connection = connection
-        self.clientPID = clientPID
+    init(peerID: UInt64, queue: DispatchQueue, registry: SessionRegistry, host: IOHost) {
+        self.peerID = peerID
         self.queue = queue
         self.registry = registry
-        self.onInvalidate = onInvalidate
-    }
-
-    func activate() {
-        xpc_connection_set_target_queue(connection, queue)
-        xpc_connection_set_event_handler(connection) { [weak self] event in
-            autoreleasepool {
-                self?.handle(event)
-            }
-        }
-        xpc_connection_activate(connection)
+        self.host = host
     }
 
     // MARK: - Output toward the client
@@ -57,7 +42,7 @@ final class PeerSession {
                 xpc_dictionary_set_data(message, iGhostVTWireKey.data, base, buffer.count)
             }
         }
-        xpc_connection_send_message(connection, message)
+        host.send(.event, peer: peerID, tag: 0, message: message)
     }
 
     func deliverExit(sessionID: UInt64, exitCode: Int32) {
@@ -67,7 +52,7 @@ final class PeerSession {
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.event, iGhostVTEvent.sessionExit.rawValue)
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, sessionID)
         xpc_dictionary_set_int64(message, iGhostVTWireKey.exitCode, Int64(exitCode))
-        xpc_connection_send_message(connection, message)
+        host.send(.event, peer: peerID, tag: 0, message: message)
         attachedSessionIDs.remove(sessionID)
     }
 
@@ -78,7 +63,7 @@ final class PeerSession {
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.event, iGhostVTEvent.processName.rawValue)
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, sessionID)
         Self.setForegroundProcess(name: name, isShell: isShell, in: message)
-        xpc_connection_send_message(connection, message)
+        host.send(.event, peer: peerID, tag: 0, message: message)
     }
 
     /// The foreground process as every open/attach reply and event 102
@@ -90,64 +75,83 @@ final class PeerSession {
 
     // MARK: - Requests from the client
 
-    private func handle(_ event: xpc_object_t) {
-        let type = xpc_get_type(event)
-        if type == XPC_TYPE_ERROR {
-            invalidate()
-            return
+    /// `tag` is 0 when the client sent the message without expecting a
+    /// reply; the proxy then has nothing to deliver one into.
+    func handle(_ message: xpc_object_t, tag: UInt64) {
+        guard isValid else { return }
+        let reply: xpc_object_t? = tag != 0 ? xpc_dictionary_create(nil, nil, 0) : nil
+        let outcome = process(message, reply: reply)
+        if let reply {
+            xpc_dictionary_set_uint64(reply, iGhostVTWireKey.version, iGhostVTProtocol.version)
+            xpc_dictionary_set_int64(reply, iGhostVTWireKey.code, outcome.code.rawValue)
+            host.send(.reply, peer: peerID, tag: tag, message: reply)
         }
-        guard type == XPC_TYPE_DICTIONARY else { return }
-
-        let reply = xpc_dictionary_create_reply(event)
-        let code = process(event, reply: reply)
-        guard let reply else { return }
-        xpc_dictionary_set_uint64(reply, iGhostVTWireKey.version, iGhostVTProtocol.version)
-        xpc_dictionary_set_int64(reply, iGhostVTWireKey.code, code.rawValue)
-        xpc_connection_send_message(connection, reply)
+        switch outcome.then {
+        case .nothing:
+            break
+        case .closePeer:
+            host.removePeer(peerID)
+        case .exitProcess:
+            host.exitAfterShutdown()
+        }
     }
 
-    private func process(_ message: xpc_object_t, reply: xpc_object_t?) -> iGhostVTReplyCode {
+    private struct Outcome {
+        enum Follow {
+            case nothing
+            case closePeer
+            case exitProcess
+        }
+
+        var code: iGhostVTReplyCode
+        var then: Follow = .nothing
+
+        init(_ code: iGhostVTReplyCode, then: Follow = .nothing) {
+            self.code = code
+            self.then = then
+        }
+    }
+
+    private func process(_ message: xpc_object_t, reply: xpc_object_t?) -> Outcome {
         guard xpc_dictionary_get_uint64(message, iGhostVTWireKey.version) == iGhostVTProtocol.version else {
-            return .unsupportedVersion
+            return Outcome(.unsupportedVersion)
         }
         guard let operation = iGhostVTOperation(
             rawValue: xpc_dictionary_get_uint64(message, iGhostVTWireKey.operation)
         ) else {
-            return .invalidRequest
+            return Outcome(.invalidRequest)
         }
         guard didHandshake || operation == .hello else {
-            return .handshakeRequired
+            return Outcome(.handshakeRequired)
         }
 
         switch operation {
         case .hello:
             didHandshake = true
-            return .success
+            return Outcome(.success)
         case .listSessions:
-            return listSessions(into: reply)
+            return Outcome(listSessions(into: reply))
         case .openSession:
-            return openSession(message, reply: reply)
+            return Outcome(openSession(message, reply: reply))
         case .attachSession:
-            return attachSession(message, reply: reply)
+            return Outcome(attachSession(message, reply: reply))
         case .detachSession:
-            return detachSession(message)
+            return Outcome(detachSession(message))
         case .write:
-            return write(message)
+            return Outcome(write(message))
         case .resize:
-            return resize(message)
+            return Outcome(resize(message))
         case .closeSession:
-            return closeSession(message)
+            return Outcome(closeSession(message))
         case .goodbye:
-            queue.async { [weak self] in self?.invalidate() }
-            return .success
+            return Outcome(.success, then: .closePeer)
         case .shutdown:
             // Only with nothing held: a session the app did not close is a
             // shell someone is coming back for. Replied to before exiting,
             // so the quitting app hears the outcome.
-            guard registry.isEmpty else { return .sessionBusy }
-            DaemonFileLog.log("peer \(clientPID) shutdown with nothing held, exiting")
-            queue.async { exit(EXIT_SUCCESS) }
-            return .success
+            guard registry.isEmpty else { return Outcome(.sessionBusy) }
+            DaemonFileLog.log("peer \(peerID) shutdown with nothing held")
+            return Outcome(.success, then: .exitProcess)
         }
     }
 
@@ -178,7 +182,7 @@ final class PeerSession {
         let rows = UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(message, iGhostVTWireKey.rows))
         let inheritDirectoryFrom = optionalUInt64(message, key: iGhostVTWireKey.inheritDirectoryFrom)
 
-        DaemonFileLog.log("peer \(clientPID) openSession \(columns)x\(rows)")
+        DaemonFileLog.log("peer \(peerID) openSession \(columns)x\(rows)")
         do {
             let session = try registry.open(
                 command: command,
@@ -202,16 +206,16 @@ final class PeerSession {
             // The app shows this verbatim, so a session that never started can
             // say which shell it tried and what the system answered.
             DaemonLog.sessions.error(
-                "open for peer \(self.clientPID) failed: \(failure.message, privacy: .public)"
+                "open for peer \(self.peerID) failed: \(failure.message, privacy: .public)"
             )
-            DaemonFileLog.log("open for peer \(clientPID) failed: \(failure.message)")
+            DaemonFileLog.log("open for peer \(peerID) failed: \(failure.message)")
             if let reply {
                 xpc_dictionary_set_string(reply, iGhostVTWireKey.errorMessage, failure.message)
             }
             return failure.code
         } catch let code as iGhostVTReplyCode {
             DaemonLog.sessions.error(
-                "open for peer \(self.clientPID) failed: reply code \(code.rawValue)"
+                "open for peer \(self.peerID) failed: reply code \(code.rawValue)"
             )
             return code
         } catch {
@@ -239,14 +243,14 @@ final class PeerSession {
                     }
                 }
             }
-            DaemonLog.sessions.info("peer \(self.clientPID) attached session \(id)")
-            DaemonFileLog.log("peer \(clientPID) attached session \(id)")
+            DaemonLog.sessions.info("peer \(self.peerID) attached session \(id)")
+            DaemonFileLog.log("peer \(peerID) attached session \(id)")
             return .success
         } catch let code as iGhostVTReplyCode {
             DaemonLog.sessions.error(
-                "attach session \(id) for peer \(self.clientPID) failed: reply code \(code.rawValue)"
+                "attach session \(id) for peer \(self.peerID) failed: reply code \(code.rawValue)"
             )
-            DaemonFileLog.log("attach session \(id) for peer \(clientPID) failed: reply code \(code.rawValue)")
+            DaemonFileLog.log("attach session \(id) for peer \(peerID) failed: reply code \(code.rawValue)")
             return code
         } catch {
             return .operationFailed
@@ -257,7 +261,7 @@ final class PeerSession {
         let id = xpc_dictionary_get_uint64(message, iGhostVTWireKey.sessionID)
         registry.detach(id, from: self)
         attachedSessionIDs.remove(id)
-        DaemonLog.sessions.info("peer \(self.clientPID) detached session \(id)")
+        DaemonLog.sessions.info("peer \(self.peerID) detached session \(id)")
         return .success
     }
 
@@ -301,7 +305,7 @@ final class PeerSession {
         // session through `listSessions`, so closing one it did not open is
         // no more privilege than it already had.
         let id = xpc_dictionary_get_uint64(message, iGhostVTWireKey.sessionID)
-        DaemonFileLog.log("peer \(clientPID) closeSession \(id)")
+        DaemonFileLog.log("peer \(peerID) closeSession \(id)")
         do {
             try registry.close(id)
             attachedSessionIDs.remove(id)
@@ -313,14 +317,13 @@ final class PeerSession {
         }
     }
 
-    private func invalidate() {
+    /// The connection behind this peer is gone. Sessions survive: the
+    /// client going away is a detach, not a kill.
+    func invalidate() {
         guard isValid else { return }
         isValid = false
-        // Sessions survive: the client going away is a detach, not a kill.
         registry.detachAll(for: self)
         attachedSessionIDs.removeAll()
-        xpc_connection_cancel(connection)
-        onInvalidate(self)
     }
 
     // MARK: - Wire helpers

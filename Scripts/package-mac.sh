@@ -1,7 +1,7 @@
 #!/bin/bash
 # Stages, signs, and zips the distributable macOS build of iGhostVT.
 #
-#   package-mac.sh <app-bundle> <daemon-binary> <agent-plist> \
+#   package-mac.sh <app-bundle> <daemon-binary> <daemon-io-binary> <agent-plist> \
 #                  <app-entitlements> <daemon-entitlements> \
 #                  <output-zip> <version> <sign-identity> [notary-profile]
 #
@@ -13,7 +13,8 @@
 # What comes out is a single app bundle carrying its own helper:
 #
 #   iGhostVT.app/Contents/MacOS/iGhostVT                    Catalyst GUI
-#   iGhostVT.app/Contents/MacOS/ighostvtd                   the only forking process
+#   iGhostVT.app/Contents/MacOS/ighostvtd                   the launch agent, a proxy
+#   iGhostVT.app/Contents/MacOS/ighostvtd-io                its child: the only forking process
 #   iGhostVT.app/Contents/Library/LaunchAgents/wiki.qaq.ighostvtd.plist
 #
 # Neither Mach-O is sandboxed, and that is not a shortcut. Background Task
@@ -23,15 +24,16 @@
 # Hardened Runtime (--options runtime) is applied to both instead.
 set -euo pipefail
 
-app_bundle="${1:?usage: $0 <app-bundle> <daemon> <agent-plist> <app-ents> <daemon-ents> <output-zip> <version> <identity> [notary-profile]}"
+app_bundle="${1:?usage: $0 <app-bundle> <daemon> <daemon-io> <agent-plist> <app-ents> <daemon-ents> <output-zip> <version> <identity> [notary-profile]}"
 daemon_binary="${2:?missing daemon binary}"
-agent_plist="${3:?missing agent plist}"
-app_entitlements="${4:?missing app entitlements}"
-daemon_entitlements="${5:?missing daemon entitlements}"
-output_zip="${6:?missing output zip}"
-version="${7:?missing version}"
-sign_identity="${8:?missing signing identity}"
-notary_profile="${9:-}"
+daemon_io_binary="${3:?missing daemon io binary}"
+agent_plist="${4:?missing agent plist}"
+app_entitlements="${5:?missing app entitlements}"
+daemon_entitlements="${6:?missing daemon entitlements}"
+output_zip="${7:?missing output zip}"
+version="${8:?missing version}"
+sign_identity="${9:?missing signing identity}"
+notary_profile="${10:-}"
 
 # The bundled agent is looked up by file name through
 # SMAppService.agent(plistName:); MacLaunchAgent.swift names the same file.
@@ -49,6 +51,7 @@ die() {
 
 test -d "$app_bundle" || die "$app_bundle is not an app bundle"
 test -f "$daemon_binary" || die "$daemon_binary was not built"
+test -f "$daemon_io_binary" || die "$daemon_io_binary was not built"
 test -f "$agent_plist" || die "$agent_plist is missing"
 test -f "$app_entitlements" || die "$app_entitlements is missing"
 test -f "$daemon_entitlements" || die "$daemon_entitlements is missing"
@@ -76,6 +79,7 @@ rm -rf "$staged_app/Contents/_CodeSignature"
 
 echo "==> staging the helper"
 install -m 0755 "$daemon_binary" "$staged_app/Contents/MacOS/ighostvtd"
+install -m 0755 "$daemon_io_binary" "$staged_app/Contents/MacOS/ighostvtd-io"
 install -d -m 0755 "$staged_app/Contents/Library/LaunchAgents"
 install -m 0644 "$agent_plist" "$staged_app/Contents/Library/LaunchAgents/$agent_plist_name"
 plutil -lint "$staged_app/Contents/Library/LaunchAgents/$agent_plist_name" >/dev/null
@@ -124,12 +128,14 @@ done < <(find "$staged_app/Contents" \
 # The helper carries its own entitlements: it is a separate Mach-O with a
 # separate designated requirement, and PeerAuthenticator's macOS branch reads
 # that signature to decide who may open a session.
+sign "$staged_app/Contents/MacOS/ighostvtd-io" --entitlements "$daemon_entitlements"
 sign "$staged_app/Contents/MacOS/ighostvtd" --entitlements "$daemon_entitlements"
 sign "$staged_app" --entitlements "$app_entitlements"
 
 echo "==> verifying"
 codesign --verify --deep --strict --verbose=2 "$staged_app"
 codesign --display --entitlements - "$staged_app/Contents/MacOS/ighostvtd" >/dev/null
+codesign --display --entitlements - "$staged_app/Contents/MacOS/ighostvtd-io" >/dev/null
 
 if [[ "$sign_identity" == "-" ]]; then
     # Gatekeeper will refuse an ad-hoc bundle that arrived with a quarantine

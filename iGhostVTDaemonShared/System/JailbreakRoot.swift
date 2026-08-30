@@ -1,5 +1,4 @@
 import Darwin
-import Foundation
 
 /// Where the bootstrap is installed, and how a path has to be spelled for
 /// whoever is going to read it.
@@ -18,8 +17,10 @@ import Foundation
 ///   `login` expect, and iOS's own `/usr/bin` is just `/usr/bin`.
 /// - **rootful**, and the macOS harness, have no prefix at all.
 ///
-/// The daemon works out which by stripping its own known install suffix off its
-/// own executable path — no libroothide dependency and no bridging header.
+/// The daemon works out which by stripping its own known install directory off
+/// its own executable path — no libroothide dependency and no bridging header.
+/// `ighostvtd` and `ighostvtd-io` are installed side by side, so the same
+/// rule serves both.
 ///
 /// Mixing the vocabularies up is *the* classic jailbreak-path bug, so each
 /// direction has its own function and every call site names the one it means:
@@ -30,8 +31,9 @@ import Foundation
 ///   programs spell it.
 /// - `resolve(_:)` — either of those, converted to what a syscall wants.
 enum JailbreakRoot {
-    /// This daemon's install location, relative to the bootstrap's root.
-    private static let daemonInstallPath = "/usr/libexec/ighostvtd"
+    /// Where both daemon programs are installed, relative to the
+    /// bootstrap's root.
+    private static let installDirectory = "/usr/libexec"
 
     /// Rootless bootstraps all agree on this prefix, and their binaries carry
     /// it compiled in — so this literal, not whatever it resolves to, is what
@@ -118,9 +120,11 @@ enum JailbreakRoot {
 
     private static func detect() -> Bootstrap {
         guard let executable = currentExecutablePath(),
-              executable.hasSuffix(daemonInstallPath)
+              let slash = executable.lastIndex(of: "/")
         else { return .none }
-        let root = String(executable.dropLast(daemonInstallPath.count))
+        let directory = String(executable[..<slash])
+        guard directory.hasSuffix(installDirectory) else { return .none }
+        let root = String(directory.dropLast(installDirectory.count))
         guard !root.isEmpty else { return .none }
         // A rootless bootstrap may keep its files in a randomly named directory
         // and hang `/var/jb` off it as a symlink, and `currentExecutablePath`
