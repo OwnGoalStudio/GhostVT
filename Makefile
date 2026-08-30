@@ -43,6 +43,7 @@ DEB_PACKAGER        := $(ROOT_DIR)/Scripts/package-deb.sh
 VERSION_APPLIER     := $(ROOT_DIR)/Scripts/apply-version.sh
 MAC_DAEMON_LOADER   := $(ROOT_DIR)/Scripts/mac-daemon.sh
 MAC_PACKAGER        := $(ROOT_DIR)/Scripts/package-mac.sh
+MAC_UPDATE_FROM_GITHUB := $(ROOT_DIR)/Scripts/mac-update-from-github.sh
 CONTROL_TEMPLATE    := $(ROOT_DIR)/Packaging/DEBIAN/control
 ENTITLEMENTS        := $(ROOT_DIR)/Packaging/iGhostVT.entitlements
 DAEMON_ENTITLEMENTS := $(ROOT_DIR)/Packaging/iGhostVTDaemon.entitlements
@@ -72,7 +73,7 @@ ifeq ($(BUILD_NUMBER),)
 $(error CURRENT_PROJECT_VERSION is missing from Configuration/Version.xcconfig)
 endif
 
-.PHONY: all help print-version print-build-number print-deb-path print-mac-zip-path set-version check test harness build deb deb-roothide deb-rootless mac-app mac-daemon mac-daemon-uninstall mac-run mac-zip-check mac-zip clean
+.PHONY: all help print-version print-build-number print-deb-path print-mac-zip-path set-version check test harness build deb deb-roothide deb-rootless mac-app mac-daemon mac-daemon-uninstall mac-run mac-zip-check mac-zip mac-update-from-github clean
 
 all: deb
 
@@ -91,6 +92,7 @@ help:
 	@echo "  mac-daemon-uninstall  Unload and remove the macOS LaunchAgent"
 	@echo "  mac-zip     Build, sign, and zip the distributable macOS app (MAC_ZIP_IDENTITY=$(MAC_ZIP_IDENTITY))"
 	@echo "  mac-zip-check  Validate the macOS packaging inputs"
+	@echo "  mac-update-from-github  Download a GitHub macOS zip and replace /Applications/iGhostVT.app (TAG=vX.Y.Z)"
 	@echo "  set-version Write VERSION=x.y.z [BUILD=n] into Configuration/Version.xcconfig"
 	@echo "  clean       Remove derived data and generated packages"
 
@@ -336,6 +338,15 @@ mac-zip: mac-zip-check
 		"$(APP_VERSION)" \
 		"$(MAC_ZIP_IDENTITY)" \
 		"$(MAC_NOTARY_PROFILE)"
+
+# Install the GitHub Release macOS zip over /Applications/iGhostVT.app.
+# TAG defaults to the latest release. Needs `gh` and sudo (Touch ID here).
+# The script quits the running app, boots out wiki.qaq.ighostvtd — including
+# a leftover `make mac-run` sidecar — then copies the new bundle without
+# xattrs so SIP-protected provenance from the download does not follow it.
+mac-update-from-github:
+	@test -x "$(MAC_UPDATE_FROM_GITHUB)" || { echo "error: mac-update-from-github.sh is not executable" >&2; exit 66; }
+	@"$(MAC_UPDATE_FROM_GITHUB)" $(TAG)
 
 clean:
 	rm -rf "$(DERIVED_DATA)"
