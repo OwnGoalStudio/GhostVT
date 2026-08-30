@@ -125,7 +125,7 @@ struct TabStripBar: View {
             let count = CGFloat(max(tabManager.tabs.count, 1))
             let available = proxy.size.width - DS.Padding.xs * 2 - DS.Padding.xs * (count - 1)
             let width = min(TabChip.widthRange.upperBound, max(TabChip.widthRange.lowerBound, available / count))
-            ScrollView(.horizontal, showsIndicators: false) {
+            ChipScroller {
                 HStack(spacing: DS.Padding.xs) {
                     ForEach(tabManager.tabs) { tab in
                         TabChip(
@@ -239,5 +239,24 @@ private struct TabChip: View {
             // over instead of jumping.
             .animation(DS.Motion.smooth, value: tab.displayTitle)
         }
+    }
+}
+
+/// The chips' horizontal scroller. On the Mac this is a plain clipped row:
+/// a `ScrollView` (a `UIScrollView` underneath) inside the bar's glass
+/// container renders its content *under* the glass on macOS 27 — the chips
+/// came up as a frosted blank capsule — so the chips are laid out directly
+/// and the row clips at the capsule's edge. Elsewhere it scrolls.
+private struct ChipScroller<Content: View>: View {
+    @ViewBuilder var content: () -> Content
+
+    var body: some View {
+        #if targetEnvironment(macCatalyst)
+            content()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .clipped()
+        #else
+            ScrollView(.horizontal, showsIndicators: false, content: content)
+        #endif
     }
 }
