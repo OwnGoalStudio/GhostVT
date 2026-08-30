@@ -1,9 +1,10 @@
 import SwiftUI
 import UIKit
 
-/// Safari-style floating bottom cluster for compact width: the title capsule
-/// (swipe horizontally to switch tabs, long-press for settings), a new-tab
-/// button, and the tab switcher.
+/// Safari-style floating bottom cluster for compact width: settings, the
+/// title capsule (swipe horizontally to switch tabs), a new-tab button,
+/// and the tab switcher. The gear is the visible settings home — a long
+/// press on the title still opens it, but an empty window has no title.
 struct BottomBar: View {
     @ObservedObject var tabManager: TabManager
     let onShowSettings: () -> Void
@@ -12,12 +13,19 @@ struct BottomBar: View {
     var body: some View {
         GlassBarContainer(spacing: DS.Padding.m) {
             HStack(spacing: DS.Padding.m) {
+                Button(action: onShowSettings) {
+                    Image(systemName: "gearshape")
+                        .font(DS.Font.control)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Circle())
+                }
+                .barGlass(in: Circle())
+                .accessibilityLabel("Settings")
+
                 if let tab = tabManager.activeTab {
-                    // A long press opens settings directly: a context menu
-                    // here loses the long press to the high-priority drag,
-                    // and presenting a sheet from a menu action races the
-                    // menu's dismissal animation — both read as a dead
-                    // settings entry on device.
+                    // A long press still opens settings: the high-priority
+                    // drag would eat a context menu, and a sheet from a
+                    // menu action races the menu's dismissal.
                     TitleCapsule(tab: tab)
                         .highPriorityGesture(switchTabGesture)
                         .onLongPressGesture {

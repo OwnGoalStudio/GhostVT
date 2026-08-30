@@ -124,8 +124,8 @@ struct RootView: View {
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 // The bar stays up with no tabs: its `+` is the only way to
-                // open one at this width. The title capsule leaves on its
-                // own with the tab.
+                // open one at this width, and the gear is settings' home
+                // when the title capsule (and its long-press) is gone.
                 if !isRegularWidth, !keyboard.isVisible {
                     BottomBar(
                         tabManager: tabManager,
