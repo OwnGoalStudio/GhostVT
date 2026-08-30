@@ -83,7 +83,10 @@ daemon admits a peer by its executable path, and one rule then covers both
 clients.
 
 Shared XPC protocol in `Shared/Protocol/`, `ActivityAttributes` in
-`Shared/Activity/`, transport seam in `Modules/iGhostVTKit`. Prose lives in
+`Shared/Activity/`, the `TerminalTransport` seam in
+`iGhostVT/Backend/Transport/` beside its XPC implementation (a plain file
+in the app target — it was a local package once, and the module boundary
+bought nothing). Prose lives in
 `Documents/` — `ARCHITECTURE.md`, `Research/`, and `Site/`, which is the
 GitHub Pages source: `.github/workflows/pages.yml` publishes that folder, so
 the repo's Pages setting is **GitHub Actions**, not the legacy `/docs`

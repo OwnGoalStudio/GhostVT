@@ -143,8 +143,8 @@ check:
 		&& grep -qF 'wiki.qaq.ighostvt-cli' "$(MAC_PACKAGER)" \
 		|| { echo "error: the CLI's signing identifier must match in PeerAuthenticator.swift and package-mac.sh" >&2; exit 65; }
 
-# iGhostVTKit is protocol-only since the TCP transport left; the harness is
-# the whole suite until it grows tests again.
+# The app has no unit tests since the TCP transport left; the harness and
+# the CLI renderer tests are the whole suite until it grows some again.
 test: harness
 
 # The daemon on the host, where launchd and the mach service are out of

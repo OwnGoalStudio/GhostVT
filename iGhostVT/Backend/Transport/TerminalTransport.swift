@@ -7,7 +7,7 @@ import Foundation
 /// byte stream to whatever produces it. Today that is the daemon transport
 /// over XPC; an SSH channel implements the same protocol later without
 /// touching the UI or session layers.
-public protocol TerminalTransport: AnyObject {
+protocol TerminalTransport: AnyObject {
     /// Single event stream. Delivered on an arbitrary transport-owned queue;
     /// hop to the main actor before touching UI state.
     ///
@@ -40,7 +40,7 @@ public protocol TerminalTransport: AnyObject {
     func disconnect()
 }
 
-public enum TerminalTransportEvent: Sendable {
+enum TerminalTransportEvent: Sendable {
     case state(TerminalTransportState)
     case received(Data)
     /// The endpoint reports which process is in the foreground on the
@@ -50,7 +50,7 @@ public enum TerminalTransportEvent: Sendable {
     case processName(String, isShell: Bool)
 }
 
-public enum TerminalTransportState: Sendable, Equatable {
+enum TerminalTransportState: Sendable, Equatable {
     case connecting
     case connected
     /// The link died without the session ending — the endpoint may still

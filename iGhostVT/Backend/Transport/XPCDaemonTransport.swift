@@ -1,7 +1,6 @@
 import Darwin
 import Dispatch
 import Foundation
-import iGhostVTKit
 @preconcurrency import XPC
 
 @_silgen_name("xpc_connection_create_mach_service")

@@ -23,7 +23,6 @@ still running.
 | `iGhostVTWidgets/`       | WidgetKit appex: the Dynamic Island Live Activity                |
 | `Shared/Protocol/`       | XPC wire protocol, compiled into the app, the daemon, and the CLI |
 | `Shared/Activity/`       | `ActivityAttributes`, compiled into the app and the appex        |
-| `Modules/iGhostVTKit/`   | Transport layer: the `TerminalTransport` protocol                |
 | `Configuration/`         | xcconfig files; `Version.xcconfig` holds the version number      |
 | `Packaging/`             | Debian control, maintainer scripts, ldid entitlements            |
 | `Packaging/macOS/`       | Bundled LaunchAgent and the (empty) entitlements for the Mac app |

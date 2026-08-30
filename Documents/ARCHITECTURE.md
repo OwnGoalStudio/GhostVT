@@ -15,7 +15,6 @@ iGhostVT/                    the app, one folder-synchronized Xcode group
 │   ├── Settings/            SettingsSheet (themes, default shell)
 │   └── Support/             GlassStyle, StatusDot, KeyboardState
 └── Resources/               Assets.xcassets, Info.plist
-Modules/iGhostVTKit/         transport layer (the TerminalTransport protocol)
 Shared/Protocol/             XPC wire protocol, compiled into app + daemon + CLI
 Shared/Activity/             ActivityAttributes, compiled into app + appex
 iGhostVTDaemon/              ighostvtd: the XPC proxy launchd starts
@@ -28,9 +27,10 @@ Documents/                   these notes, Research/, and Site/ (the web page)
 
 `iGhostVT.xcodeproj` is checked in: objectVersion 77 with a
 `PBXFileSystemSynchronizedRootGroup` over the `iGhostVT/` folder (Info.plist
-excluded via membership exception), local package references to
-`../libghostty-spm` and `Modules/iGhostVTKit`. Adding a file to the folder
-adds it to the target — there is no generator step.
+excluded via membership exception) and a remote package reference to the
+released `libghostty-spm`. Adding a file to the folder adds it to the
+target — there is no generator step. The `TerminalTransport` seam lives in
+`iGhostVT/Backend/Transport/` beside its XPC implementation.
 
 ## Ownership (multi-window)
 

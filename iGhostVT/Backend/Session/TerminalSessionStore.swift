@@ -1,7 +1,6 @@
 import Combine
 import Foundation
 import GhosttyTerminal
-import iGhostVTKit
 import os
 
 /// Glues a `TerminalTransport` to libghostty's host-managed terminal session.
