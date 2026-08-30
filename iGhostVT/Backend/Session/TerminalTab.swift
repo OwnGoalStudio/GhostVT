@@ -113,7 +113,10 @@ final class TerminalTab: ObservableObject, Identifiable {
     init(resumeDaemonSessionID: UInt64? = nil, inheritDirectoryFrom: UInt64? = nil) {
         let daemonSession = DaemonSessionBox(id: resumeDaemonSessionID)
         self.daemonSession = daemonSession
-        terminal = TerminalViewState(theme: AppTheme.shared.terminalTheme)
+        terminal = TerminalViewState(
+            theme: AppTheme.shared.terminalTheme,
+            terminalConfiguration: GhosttyAppConfiguration.terminal
+        )
         // Built before the store exists (the factory closure cannot capture
         // `self` mid-init), armed right after: the exit the transport
         // observes must reach the store that presents it.
