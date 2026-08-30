@@ -131,6 +131,7 @@ struct AdvancedSettingsView: View {
             Toggle("Detailed Terminal Log", isOn: $verboseTerminalLog)
                 .onChange(of: verboseTerminalLog) { enabled in
                     if enabled {
+                        TerminalDebugFileLog.open()
                         TerminalDebugLog.enable(.standard)
                     } else {
                         TerminalDebugLog.enable([.lifecycle, .metrics])

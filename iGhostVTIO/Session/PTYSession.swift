@@ -466,6 +466,8 @@ final class PTYSession {
 
     // MARK: - Internals
 
+    private var hasLoggedFirstOutput = false
+
     private func drainAvailableOutput() {
         var buffer = [UInt8](repeating: 0, count: 64 * 1024)
         while true {
@@ -475,6 +477,10 @@ final class PTYSession {
             }
             if count > 0 {
                 let data = Data(buffer[0 ..< count])
+                if !hasLoggedFirstOutput {
+                    hasLoggedFirstOutput = true
+                    DaemonFileLog.log("session \(id) first output, \(count) byte(s)")
+                }
                 append(data)
                 onOutput?(id, data)
                 // Output is the moment the foreground is most likely to

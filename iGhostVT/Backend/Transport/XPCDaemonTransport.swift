@@ -408,6 +408,8 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         }
     }
 
+    private var hasLoggedFirstOutput = false
+
     private func openOrAttachSession() {
         guard let connection = lock.locked({ self.connection }) else { return }
         if let resumeSessionID = lock.locked({ self.resumeSessionID }) {
@@ -518,6 +520,10 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         switch pushed {
         case .output:
             if let data = Self.data(iGhostVTWireKey.data, in: event), !data.isEmpty {
+                if !hasLoggedFirstOutput {
+                    hasLoggedFirstOutput = true
+                    TerminalDebugFileLog.write("[xpc] first output event bytes=\(data.count) session=\(eventSessionID)")
+                }
                 emit(.received(data))
             }
         case .processName:

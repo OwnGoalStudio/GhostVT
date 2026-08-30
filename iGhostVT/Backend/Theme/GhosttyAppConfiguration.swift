@@ -20,6 +20,12 @@ enum GhosttyAppConfiguration {
     static var terminal: TerminalConfiguration {
         TerminalConfiguration { builder in
             builder.withFontSize(TerminalFontSize.preferred)
+            // Said outright rather than left to the default: a connected
+            // terminal whose shell has yet to print (half a minute for the
+            // first shell after a reboot) has only the cursor to show it
+            // is alive, and a blinking one reads as waiting where a still
+            // one reads as dead. A program that sets DECSCUSR still wins.
+            builder.withCursorStyleBlink(true)
             #if targetEnvironment(macCatalyst)
                 builder.withCustom("font-codepoint-map", "U+4E00-U+9FFF=PingFang SC")
                 builder.withCustom("font-codepoint-map", "U+3400-U+4DBF=PingFang SC")

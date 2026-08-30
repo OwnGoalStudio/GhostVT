@@ -82,6 +82,15 @@ captured once at init, while the transport is replaced on every reconnect.
 - Regular: top tab strip; the sidebar replaces the chips when open.
 - Liquid Glass (`glassEffect`) on iOS 26+, `.ultraThinMaterial` below,
   wrapped once in `Interface/Support/GlassStyle.swift`.
+- `SessionStatusOverlay` covers a pane whose session is not usable: a pill
+  while the surface starts ("Starting…") or the daemon connection opens
+  ("Connecting…"), a card once it failed. Connected shows nothing — with
+  one exception. `TerminalSessionStore.isAwaitingFirstOutput` turns on
+  when a *connected* session has written nothing for a second, and the
+  pill says "Starting shell…" until the first byte (a replay counts).
+  Without it a slow shell is an empty terminal that looks exactly like a
+  broken one; the first zsh after a userspace reboot takes ~30 s
+  (`Research/ipad-first-surface-blank-handoff.md`).
 
 ## Transport contract
 

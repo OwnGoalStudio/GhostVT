@@ -446,6 +446,35 @@ Gotchas that bit us:
   unprefixed and iOS's are reached via `/rootfs`; rootless programs have
   `/var/jb` compiled in and speak real paths. Prefixing the wrong one is
   *the* bug this type exists to prevent.
+- **A connected terminal with nothing on it is not necessarily broken —
+  the first shell after a userspace reboot takes ~30 s to print a byte.**
+  Measured on the iPad (0.5.0, load average 300–500 in the minute after
+  `launchctl reboot userspace`): the daemon reads the session's first
+  bytes 27–32 s after `forkpty`, the app's XPC handler has them 1 ms
+  later, and a session opened by `ighostvt-cli new` at the same moment
+  (no app involved) is just as late. The shell spends that time in its rc
+  files — `listSessions` shows the foreground cycling through `git`,
+  `mkdir`, `grep`, `ls` — on cold caches, and, on a jailbreak, on the
+  first exec of every binary the rc runs (trustcache / AMFI work that a
+  later shell no longer pays). The surface, the session binding, the
+  display link, and the transport were all verified fine throughout; what
+  was wrong was the *presentation*: the "Connecting…" pill left the moment
+  the daemon answered `openSession`, so for half a minute there was an
+  empty pane and no hint that anything was coming, and a second tab
+  opened afterwards "rendered fine" only because the first shell had
+  warmed everything. The fix is `TerminalSessionStore.isAwaitingFirstOutput`
+  ("Starting shell…" pill after a second of silence, cleared by the first
+  byte) plus an explicit `cursor-style-blink = true`. Two lessons for the
+  next "first terminal sits blank" report: (1) check `ighostvt-cli
+  capture` *with a timestamp* before touching the view stack — an empty
+  replay buffer means the shell hasn't spoken, and no surface fix will
+  draw what does not exist; (2) the unified-log relay (`log stream`,
+  Console.app, `pymobiledevice3 syslog`) drops most of the app's lines
+  while the device is that busy, and a userspace reboot kills the tunnel
+  anyway — turn on Settings ▸ Advanced ▸ Detailed Terminal Log and read
+  `Documents/ighostvt-debug.log` from the app's container instead, beside
+  the daemon's own `/var/mobile/Library/Logs/ighostvtd.log`, which now
+  stamps each session's first output.
 - A GUI app ad-hoc signed with ldid MUST carry
   `com.apple.security.iokit-user-client-class` (with `IOUserClient` / the
   AGX + IOGPU + IOSurface + IOAccel leaves, see

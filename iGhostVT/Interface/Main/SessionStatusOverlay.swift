@@ -40,6 +40,7 @@ struct SessionStatusOverlay: View {
     var body: some View {
         content
             .animation(DS.Motion.smooth, value: store.status)
+            .animation(DS.Motion.smooth, value: store.isAwaitingFirstOutput)
             .animation(DS.Motion.smooth, value: agent.status)
     }
 
@@ -138,19 +139,13 @@ struct SessionStatusOverlay: View {
     @ViewBuilder
     private var sessionContent: some View {
         switch store.status {
-        case .idle, .connecting:
+        case .idle:
             // Idle means the surface hasn't reported its grid yet — normally
             // milliseconds, but if it sticks the pill is the only sign the
             // window isn't just an empty terminal.
-            HStack(spacing: DS.Padding.s) {
-                ProgressView()
-                Text(store.status == .idle ? "Starting…" : "Connecting…")
-                    .font(DS.Font.labelEmphasis)
-            }
-            .padding(.horizontal, DS.Padding.l)
-            .padding(.vertical, DS.Padding.m)
-            .barGlass(in: Capsule(), interactive: false)
-            .transition(.opacity)
+            pill("Starting…")
+        case .connecting:
+            pill("Connecting…")
 
         case let .failed(reason):
             if acknowledged != store.status {
@@ -164,8 +159,26 @@ struct SessionStatusOverlay: View {
             }
 
         case .connected:
-            EmptyView()
+            // The session is open but the shell has yet to print a byte —
+            // the first shell after a reboot can take half a minute over
+            // its rc files. Without this the pane is an empty terminal
+            // that looks exactly like a broken one.
+            if store.isAwaitingFirstOutput {
+                pill("Starting shell…")
+            }
         }
+    }
+
+    private func pill(_ title: LocalizedStringKey) -> some View {
+        HStack(spacing: DS.Padding.s) {
+            ProgressView()
+            Text(title)
+                .font(DS.Font.labelEmphasis)
+        }
+        .padding(.horizontal, DS.Padding.l)
+        .padding(.vertical, DS.Padding.m)
+        .barGlass(in: Capsule(), interactive: false)
+        .transition(.opacity)
     }
 
     /// The dim reaches under the bars: they are glass, and a dim that

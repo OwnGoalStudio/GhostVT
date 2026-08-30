@@ -64,6 +64,20 @@ final class TerminalSessionStore: ObservableObject {
     /// reattach restates it, and the value from before a detach is stale.
     @Published private(set) var isShellInForeground = false
 
+    /// Whether a connected session has been silent since it was opened
+    /// for longer than a shell takes to print its prompt. A connected
+    /// terminal with nothing on it is indistinguishable from a broken one
+    /// — the first zsh after a userspace reboot takes ~30 s to say its
+    /// first word (oh-my-zsh on cold caches under a 500 load average),
+    /// and the pane sat empty with no sign anything was coming. True only
+    /// after `firstOutputGrace`, so a shell that prints within the second
+    /// never flashes the pill; cleared by the first byte the session
+    /// writes (a replay counts) and by any state change.
+    @Published private(set) var isAwaitingFirstOutput = false
+    private var hasReceivedOutput = false
+    private var firstOutputGeneration: UInt64 = 0
+    private static let firstOutputGrace: UInt64 = 1_000_000_000
+
     /// Whether the shell is verifiably sitting at its prompt. Only a
     /// connected session can vouch for that — a detached session's last
     /// report is stale, and an unknown state reads as "something may be
@@ -129,6 +143,7 @@ final class TerminalSessionStore: ObservableObject {
                 Self.logger.info(
                     "surface reported viewport \(viewport.columns)x\(viewport.rows)"
                 )
+                TerminalDebugFileLog.write("[session] surface reported viewport \(viewport.columns)x\(viewport.rows)")
                 relay.updateViewport(
                     columns: Int(viewport.columns),
                     rows: Int(viewport.rows)
@@ -174,6 +189,7 @@ final class TerminalSessionStore: ObservableObject {
     func noteSceneActive() {
         guard !isSceneActive else { return }
         isSceneActive = true
+        TerminalDebugFileLog.write("[session] scene active; hasViewport=\(relay.hasViewport) autoConnected=\(hasAutoConnected)")
         connectWhenReady()
     }
 
@@ -203,6 +219,7 @@ final class TerminalSessionStore: ObservableObject {
         titleTracker.reset()
         let transport = makeTransport()
         Self.logger.info("connecting via \(transport.endpointDescription)")
+        TerminalDebugFileLog.write("[session] connecting via \(transport.endpointDescription) sceneActive=\(isSceneActive) hasViewport=\(relay.hasViewport)")
         // `relay` weak as well: the relay retains the transport, which
         // retains this closure. A strong capture would close that cycle and
         // defeat the transport's deinit, whose job is to cancel an XPC
@@ -240,9 +257,16 @@ final class TerminalSessionStore: ObservableObject {
         status = .idle
     }
 
+    private var receivedChunks = 0
+
     private func handle(_ event: TerminalTransportEvent) {
         switch event {
         case let .received(data):
+            receivedChunks += 1
+            if receivedChunks <= 5 || receivedChunks % 50 == 0 {
+                TerminalDebugFileLog.write("[session] received chunk #\(receivedChunks) bytes=\(data.count) status=\(status)")
+            }
+            noteOutput()
             session.receive(data)
         case let .processName(name, isShell):
             processName = name
@@ -256,6 +280,7 @@ final class TerminalSessionStore: ObservableObject {
         switch state {
         case .connecting:
             isShellInForeground = false
+            clearFirstOutputWait()
             // No status line: the pill overlay already says connecting, and
             // a clean launch should open on the shell's own first line.
             // Only trouble (interruptions, failures) gets written into the
@@ -263,14 +288,20 @@ final class TerminalSessionStore: ObservableObject {
             status = .connecting
         case .connected:
             Self.logger.info("connected to \(self.endpointDescription)")
+            TerminalDebugFileLog.write("[session] connected to \(endpointDescription)")
             status = .connected
             reconnectAttempt = 0
+            awaitFirstOutput()
         case let .interrupted(reason):
+            clearFirstOutputWait()
             Self.logger.error("link lost: \(reason ?? "no reason")")
+            TerminalDebugFileLog.write("[session] link lost: \(reason ?? "no reason")")
             printStatusLine(String(localized: "Connection lost. Reconnecting…"))
             scheduleReconnect(lastReason: reason)
         case let .disconnected(reason):
+            clearFirstOutputWait()
             Self.logger.error("disconnected: \(reason ?? "no reason")")
+            TerminalDebugFileLog.write("[session] disconnected: \(reason ?? "no reason")")
             // Mid-cycle this is a reconnect attempt that could not even
             // establish; keep trying until the attempts run out.
             if reconnectAttempt > 0 {
@@ -300,11 +331,41 @@ final class TerminalSessionStore: ObservableObject {
         reconnectGeneration &+= 1
         let generation = reconnectGeneration
         Self.logger.info("reconnect attempt \(self.reconnectAttempt) scheduled")
+        TerminalDebugFileLog.write("[session] reconnect attempt \(reconnectAttempt) scheduled")
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: Self.reconnectDelay)
             guard let self, reconnectGeneration == generation else { return }
             connect()
         }
+    }
+
+    /// Starts the wait for the session's first byte. The grace period is
+    /// the difference between a launch that opens on the prompt and one
+    /// that shows a spinner for a frame; the generation drops a timer
+    /// whose connection has since changed.
+    private func awaitFirstOutput() {
+        hasReceivedOutput = false
+        isAwaitingFirstOutput = false
+        firstOutputGeneration &+= 1
+        let generation = firstOutputGeneration
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: Self.firstOutputGrace)
+            guard let self, firstOutputGeneration == generation,
+                  status == .connected, !hasReceivedOutput else { return }
+            isAwaitingFirstOutput = true
+            TerminalDebugFileLog.write("[session] no output \(Self.firstOutputGrace / 1_000_000) ms after connect; showing the shell pill")
+        }
+    }
+
+    private func clearFirstOutputWait() {
+        firstOutputGeneration &+= 1
+        isAwaitingFirstOutput = false
+    }
+
+    private func noteOutput() {
+        guard !hasReceivedOutput else { return }
+        hasReceivedOutput = true
+        clearFirstOutputWait()
     }
 
     /// Dim, bracketed line rendered by the terminal itself.
@@ -313,6 +374,7 @@ final class TerminalSessionStore: ObservableObject {
     /// already end with a newline, so a leading one puts a blank line between
     /// every pair. The carriage return alone still guarantees column zero.
     private func printStatusLine(_ message: String) {
+        noteOutput()
         session.receive("\r\u{1b}[2m[iGhostVT] \(message)\u{1b}[0m\r\n")
     }
 }

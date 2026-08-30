@@ -20,13 +20,19 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         let ghosttyLog = Logger(subsystem: "wiki.qaq.iGhostVT", category: "ghostty")
         TerminalDebugLog.sink = { message in
             ghosttyLog.info("\(message, privacy: .public)")
+            TerminalDebugFileLog.write(message)
         }
         TerminalDebugLog.enable([.lifecycle, .metrics])
         // Full tracing (input, IME, output) is opt-in because it logs
         // keystrokes. On a jailbroken device:
         //   defaults write wiki.qaq.iGhostVT Debug.verboseTerminalLog -bool true
-        // then relaunch and watch with `idevicesyslog` / `log stream`.
+        // then relaunch and watch with `idevicesyslog` / `log stream`. The
+        // same switch mirrors every line into `Documents/ighostvt-debug.log`
+        // (`TerminalDebugFileLog`): the unified log's relay drops most of a
+        // launch's lines while the device is busy — a post-reboot launch
+        // reached the Mac with none of its lifecycle — and the file does not.
         if UserDefaults.standard.bool(forKey: "Debug.verboseTerminalLog") {
+            TerminalDebugFileLog.open()
             TerminalDebugLog.enable(.standard)
         }
         return true
