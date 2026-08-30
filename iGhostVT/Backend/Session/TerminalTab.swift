@@ -159,19 +159,33 @@ final class TerminalTab: ObservableObject, Identifiable {
         // Code) needs the stream of sizes bounded or its reflow runs behind
         // the layer for the whole drag, while a shell at its prompt reads
         // the same bound as blinking and is best left unthrottled. Event 102
-        // tells the two apart. The throttle is not part of the surface's
-        // identity, so rewriting the configuration changes the pace without
-        // rebuilding the surface.
+        // tells the two apart. The switch must be written in two places: a
+        // *mounted* surface only hears it through the platform view, whose
+        // configuration setter stores straight into the coordinator (its
+        // guard skips only the rebuild, and the throttle is read live from
+        // the stored options) — the representable's `isEquivalent` check
+        // deliberately leaves the throttle out of a surface's identity, so
+        // a throttle-only rewrite of `terminal.configuration` never reaches
+        // a view that is already up. That rewrite still matters for the
+        // view that is not up yet: a freshly made platform view starts from
+        // `terminal.configuration`, so keeping it current is what hands a
+        // remounted surface the right pace.
         resizeThrottleObservation = Publishers.CombineLatest(
             store.$status.removeDuplicates(),
             store.$isShellInForeground.removeDuplicates()
         )
         .map { status, isShell in
-            Self.resizeThrottle(isShellInForeground: status == .connected && isShell)
+            Self.resizeThrottle(
+                isShellInForeground: TerminalSessionStore.isIdleAtPrompt(
+                    status: status, isShellInForeground: isShell
+                )
+            )
         }
         .removeDuplicates()
         .sink { [weak self] milliseconds in
-            self?.terminal.configuration.resizeThrottleMilliseconds = milliseconds
+            guard let self else { return }
+            terminal.configuration.resizeThrottleMilliseconds = milliseconds
+            terminal.attachedPlatformView?.configuration.resizeThrottleMilliseconds = milliseconds
         }
         // The user's arrangement of the keyboard accessory bar; later edits
         // reach existing tabs through RootView's store subscription.
@@ -286,13 +300,13 @@ final class TerminalTab: ObservableObject, Identifiable {
     /// Whether closing this tab would interrupt something — the case the
     /// interface confirms first, because `close()` has no undo. A shell
     /// sitting at its prompt is not it: killing an idle shell loses nothing
-    /// worth an alert, so the close goes straight through. Only a connected
-    /// tab can vouch for that — the daemon states the foreground on every
-    /// attach and pushes each change — so a detached tab, whose last report
-    /// is stale, still asks.
+    /// worth an alert, so the close goes straight through. The trust rule —
+    /// only a connected tab can vouch for the foreground, an unknown state
+    /// reads as running — lives on the store (`isIdleAtPrompt`), shared
+    /// with the resize throttle.
     var hasRunningProgram: Bool {
         guard hasLiveSession else { return false }
-        return !(store.status == .connected && store.isShellInForeground)
+        return !store.isIdleAtPrompt
     }
 
     /// The overlay card (a failed session, or a Mac helper that is not

@@ -65,6 +65,23 @@ final class TerminalSessionStore: ObservableObject {
     /// reattach restates it, and the value from before a detach is stale.
     @Published private(set) var isShellInForeground = false
 
+    /// Whether the shell is verifiably sitting at its prompt. Only a
+    /// connected session can vouch for that — a detached session's last
+    /// report is stale, and an unknown state reads as "something may be
+    /// running". This is the one spelling of that rule: the close
+    /// confirmation (`TerminalTab.hasRunningProgram`) and the resize
+    /// throttle both read it, so a change here changes both.
+    var isIdleAtPrompt: Bool {
+        Self.isIdleAtPrompt(status: status, isShellInForeground: isShellInForeground)
+    }
+
+    /// The rule itself, for judging values still in flight: a `@Published`
+    /// publisher emits *before* the property is written, so a Combine map
+    /// must apply the rule to the emitted pair, not to the stored one.
+    static func isIdleAtPrompt(status: Status, isShellInForeground: Bool) -> Bool {
+        status == .connected && isShellInForeground
+    }
+
     let session: InMemoryTerminalSession
     private let relay = TransportRelay()
     private let titleTracker = CommandTitleTracker()
