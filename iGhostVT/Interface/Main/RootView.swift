@@ -33,8 +33,17 @@ struct RootView: View {
     /// User-dragged sidebar width, remembered like the visibility. The
     /// resize handle clamps it, so a stored value is always presentable.
     @AppStorage("Sidebar.width") private var sidebarWidth = 300.0
+    /// Whether this window shows the regular presentation — sidebar, top
+    /// strip — as opposed to the phone's bottom bar. Hard-true on the Mac:
+    /// a narrow Catalyst window reports a compact width class, and the
+    /// phone layout there meant no top bar at all, the prompt under the
+    /// traffic lights, and a pill bar at the window's foot.
     private var isRegularWidth: Bool {
-        horizontalSizeClass == .regular
+        #if targetEnvironment(macCatalyst)
+            true
+        #else
+            horizontalSizeClass == .regular
+        #endif
     }
 
     var body: some View {
