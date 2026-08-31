@@ -3,8 +3,9 @@
 *2026-08-31. Experiments run on a Mac with Xcode 27.0 beta 6 (visionOS 27.0
 SDK) and Zig 0.15.2, against a scratch copy of this repo and of
 libghostty-spm. The libghostty-spm half has since landed there (`dd2df3f`,
-Phase 1 below); this repo holds this note and the app-side patch files
-beside it in `visionos/`. The target is a **jailbroken Vision Pro** — the
+Phase 1 below), and the app side landed here the same day (Phase 2); this
+repo holds this note and two simulator screenshots beside it in
+`visionos/`. The target is a **jailbroken Vision Pro** — the
 same product as on iOS: the app renders, the bundled `ighostvtd` owns the
 shells.*
 
@@ -19,7 +20,10 @@ installs and launches on the visionOS 27 simulator; its terminal surface
 renders. **Phase 1 has since landed in libghostty-spm** (commit `dd2df3f`,
 2026-08-31): the Ghostty and Zig std patches, the wrapper guards, the
 xros/xrsimulator slices in every build script and CI matrix, and the
-`upstream.1.3.1-2` storage tag, and package release **1.5.0** is out. What is left here is small and specific: the app patch below,
+`upstream.1.3.1-2` storage tag, and package release **1.5.0** is out. **Phase
+2 landed too**: `make deb PLATFORM=xros` builds the app and the daemon
+against the xros SDK and packages `wiki.qaq.ighostvt_<ver>_xros-arm64e.deb`,
+release.yml has a `package-xros` job, and the floor is visionOS 1.0. What is left here is small and specific: the app patch below,
 the jailbreak's own layout and dpkg vocabulary (open questions, listed),
 and a device to run it on.
 
@@ -137,7 +141,8 @@ the CI matrix the `visionos` group. `MSDisplayLink`, `GhosttyKit`,
 
 ### 5. The app
 
-`visionos/app-visionos.patch`, seven files:
+landed as the tree's `#if os(visionOS)` guards (see the visionOS section of
+CLAUDE.md), seven files:
 
 - `project.pbxproj` — app target: `SUPPORTED_PLATFORMS = "iphoneos
   iphonesimulator macosx xros xrsimulator"`, `TARGETED_DEVICE_FAMILY =
@@ -187,7 +192,7 @@ iOS, launchd and the mach service.
 both flavours — `iphoneos-arm64e` unprefixed and `iphoneos-arm64` under
 `/var/jb` — ~5 MB each, `ldid`-signed with the existing entitlement files,
 and the script's own entitlement verification passed. One fix was needed
-(`visionos/package-deb-no-appex.patch`): the appex loop assumed
+(landed in `Scripts/package-deb.sh`): the appex loop assumed
 `PlugIns/*.appex` is non-empty, and the xros bundle has no widget.
 
 What the script cannot know is the visionOS jailbreak's vocabulary:
@@ -257,24 +262,42 @@ Package** cut **1.5.0** (test.sh on eleven destinations, `swift test`
 165/165, `verify-release` against the new asset). This repo now pins
 `upToNextMajor` from 1.5.0.
 
-### Phase 2 — the tree builds and packages for xros (≈1 day)
-1. Apply `app-visionos.patch` (app *and* daemon targets). Put
-   `XROS_DEPLOYMENT_TARGET` in `Configuration/*.xcconfig` beside the iOS
-   one, not in the pbxproj (`make check` policy).
-2. Apply `package-deb-no-appex.patch`.
-3. `Makefile`: a `PLATFORM` axis (`ios` default, `xros`) that picks the
-   `-destination`, the `Build/Products/<config>-<sdk>` directory, and the
-   deb name; `PACKAGE_FLAVOR` stays the layout axis and gains whatever
-   Phase 0 says. `make deb PLATFORM=xros` builds app + daemon scheme for
-   xros and packages. Add the xros build to `make check` so a guard never
-   rots.
-4. `Packaging/DEBIAN/control`: `@DEPENDS@` per platform; description no
-   longer says "iOS" only.
-5. Asset catalog: a visionOS app icon set (three layers; a flat icon
-   builds with a warning only).
-6. CLAUDE.md: a "visionOS" section — which files carry
-   `#if os(visionOS)`, that `platformFilter = ios` keeps the widget out,
-   that the daemon needed nothing, and the Xcode-27 local-build notes.
+### Phase 2 — the tree builds and packages for xros — **done**
+Landed 2026-08-31 in this repo:
+- The six `#if os(visionOS)` guards and the `ActivityKit` `canImport`s;
+  `SUPPORTED_PLATFORMS` gains `xros xrsimulator` on the app and the three
+  daemon targets, `TARGETED_DEVICE_FAMILY` gains `7`;
+  `XROS_DEPLOYMENT_TARGET = 1.0` in `Configuration/Base.xcconfig`. The
+  experiment needed 26.0 because of one `TupleContent` in
+  `TabContextMenu.lockControls`; splitting it into one builder per control
+  takes the floor to the SDK's minimum, and the iOS and Catalyst builds are
+  unchanged by it.
+- `Makefile`: a `PLATFORM` axis (`ios` default, `xros`) picking the
+  destination, the `Build/Products/<config>-xros` directory, the
+  architecture label's OS half and the control file's `Depends`
+  (`firmware (>= 1.0), uikittools` for xros — the iOS `>= 15.0` would refuse
+  a visionOS 1.x/2.x bootstrap). `deb-xros` / `deb-xros-rootless` are the
+  shorthands; `PACKAGE_FLAVOR` stays the layout axis.
+- `Scripts/package-deb.sh`: a `<depends>` argument and the empty-appex fix;
+  `Packaging/DEBIAN/control` says iOS and visionOS and takes `@DEPENDS@`.
+- `.github/workflows/release.yml`: `package-xros` (macos-26, `make deb-xros`),
+  a `xros` choice for a single-platform dispatch, and a merge that expects
+  three debs.
+- No visionOS app icon yet (the catalog has none for iOS either; the build
+  only warns).
+
+Verified: `make deb PLATFORM=xros` end to end (check, harness, app + daemon
+for `generic/platform=visionOS`, ldid, entitlement checks, dpkg-deb) →
+`wiki.qaq.ighostvt_0.5.4_xros-arm64e.deb` whose app and `ighostvtd` are
+`platform VISIONOS minos 1.0`; the same tree still builds for
+`generic/platform=iOS` and Mac Catalyst; the Debug xrsimulator build
+installs and launches on the visionOS 27.0 simulator
+(`visionos/simulator-tree-build.jpg`) — sidebar, tab bar, terminal surface
+rendering, "Connecting…" because the simulator has no daemon.
+
+Still the jailbreak's to answer (Phase 0): the dpkg architecture label
+(`PACKAGE_ARCHITECTURE=` overrides `xros-arm64e`), whether `uikittools`
+exists on that bootstrap, and the GPU user-client classes.
 
 ### Phase 3 — first install on the device (≈1–2 days, device in hand)
 1. Install the deb; `launchctl print system/wiki.qaq.ighostvtd` shows the

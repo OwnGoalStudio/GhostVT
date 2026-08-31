@@ -2,10 +2,11 @@ Package: @PACKAGE_ID@
 Name: iGhostVT
 Version: @VERSION@
 Architecture: @ARCHITECTURE@
-Description: Ghostty-powered terminal for jailbroken iOS
+Description: Ghostty-powered terminal for jailbroken iOS and visionOS
  Terminal emulator built on libghostty's terminal core with a host-managed
- I/O backend. Packaged for both roothide and rootless bootstraps; the
- architecture field says which build this is.
+ I/O backend. Packaged for both roothide and rootless bootstraps, for iOS
+ (iphoneos-*) and for Apple Vision Pro (xros-*); the architecture field says
+ which build this is.
  .
  Shells are spawned by the bundled ighostvtd daemon and survive app
  relaunches; SSH transport is planned on the same transport interface.
@@ -14,5 +15,5 @@ Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Section: Utilities
 Priority: optional
-Depends: firmware (>= 15.0), uikittools
+Depends: @DEPENDS@
 Installed-Size: @INSTALLED_SIZE@

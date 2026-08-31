@@ -43,8 +43,10 @@ final class LockableTerminalView: TerminalView {
             // an empty keyboard leaves it (and its dictation button) floating
             // over the terminal, stealing 40pt of grid. Empty its groups for
             // as long as the lock lasts.
+            #if !os(visionOS)
             inputAssistantItem.leadingBarButtonGroups = []
             inputAssistantItem.trailingBarButtonGroups = []
+            #endif
             guard isFirstResponder else { return }
             // Already first responder: swap the input views in place, so
             // locking drops the keyboard that is up and unlocking brings it
@@ -66,11 +68,13 @@ final class LockableTerminalView: TerminalView {
         isSoftwareKeyboardLocked ? suppressedInputView : super.inputView
     }
 
+    #if !os(visionOS)
     override var inputAccessoryView: UIView? {
         // The bar belongs to the keyboard; leaving it floating over a
         // keyboard that is not there reads as a half-open keyboard.
         isSoftwareKeyboardLocked ? nil : super.inputAccessoryView
     }
+    #endif
 
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         isInteractionLocked ? nil : super.hitTest(point, with: event)

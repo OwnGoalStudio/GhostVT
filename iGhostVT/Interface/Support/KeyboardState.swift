@@ -40,6 +40,10 @@ final class KeyboardState: ObservableObject {
     }
 
     private static func isSoftwareKeyboard(_ notification: Notification) -> Bool {
+        #if os(visionOS)
+        // The visionOS keyboard is its own window; the frame says nothing.
+        return true
+        #else
         guard
             let value = notification
             .userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue
@@ -51,5 +55,6 @@ final class KeyboardState: ObservableObject {
         // (even the floating one collapsed to a toolbar does not post here)
         // is far taller.
         return visibleHeight > 100
+        #endif
     }
 }

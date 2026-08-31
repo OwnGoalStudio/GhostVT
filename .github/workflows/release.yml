@@ -1,9 +1,9 @@
-# Tag vX.Y.Z → three independent package jobs, then one merge job that
+# Tag vX.Y.Z → four independent package jobs, then one merge job that
 # attaches every artifact to a GitHub Release.
 #
-# The three package jobs share nothing: each is a machine recipe, and they
-# run in parallel so a roothide box, a rootless box, and a Mac box can all
-# work at once. They communicate only by `upload-artifact`. The `release`
+# The package jobs share nothing: each is a machine recipe, and they run in
+# parallel so a roothide box, a rootless box, a Vision Pro box, and a Mac box
+# can all work at once. They communicate only by `upload-artifact`. The `release`
 # job is the merge — it downloads those artifacts and publishes. The same
 # merge is available locally as `Scripts/publish-release.sh` when the files
 # arrived some other way.
@@ -40,6 +40,7 @@ on:
           - all
           - roothide
           - rootless
+          - xros
           - macos
         default: all
       runner_roothide:
@@ -48,6 +49,10 @@ on:
         default: macos-26
       runner_rootless:
         description: Runner label for the rootless .deb
+        type: string
+        default: macos-26
+      runner_xros:
+        description: Runner label for the visionOS .deb
         type: string
         default: macos-26
       runner_macos:
@@ -149,6 +154,53 @@ jobs:
             build/Packages/SHA256SUMS.rootless
           if-no-files-found: error
 
+  # The same app and daemon built against the visionOS SDK, for a jailbroken
+  # Apple Vision Pro. roothide layout; the architecture label is xros-arm64e
+  # so the package stays distinct from the iOS one in a shared repository.
+  package-xros:
+    if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'xros'
+    runs-on: ${{ github.event.inputs.runner_xros || 'macos-26' }}
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out iGhostVT
+        uses: actions/checkout@v7
+
+      - name: Select newest Xcode
+        run: |
+          latest="$(ls -d /Applications/Xcode*.app | sort -V | tail -n1)"
+          sudo xcode-select -s "$latest/Contents/Developer"
+          xcodebuild -version
+          xcodebuild -showsdks | grep -- '-sdk xros' || { echo "the selected Xcode has no visionOS SDK" >&2; exit 1; }
+
+      - name: Install packaging tools
+        run: |
+          brew untap aws/tap 2>/dev/null || true
+          brew install ldid dpkg xcbeautify
+          ldid -h 2>&1 | head -n1 || true
+          dpkg-deb --version | head -n1
+
+      - name: Override version from tag
+        if: github.ref_type == 'tag'
+        run: make set-version VERSION="${GITHUB_REF_NAME}" BUILD="${{ github.run_number }}"
+
+      - name: Build visionOS package (xros-arm64e)
+        run: make deb-xros
+
+      - name: Checksums
+        run: |
+          cd build/Packages
+          shasum -a 256 *.deb | tee SHA256SUMS.xros
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ighostvt-xros
+          path: |
+            build/Packages/*.deb
+            build/Packages/SHA256SUMS.xros
+          if-no-files-found: error
+
   package-macos:
     if: github.event_name != 'workflow_dispatch' || github.event.inputs.platform == 'all' || github.event.inputs.platform == 'macos'
     runs-on: ${{ github.event.inputs.runner_macos || 'macos-26' }}
@@ -218,7 +270,7 @@ jobs:
   # artifacts is not a release. Tag pushes run all three, then this.
   release:
     if: github.ref_type == 'tag'
-    needs: [package-roothide, package-rootless, package-macos]
+    needs: [package-roothide, package-rootless, package-xros, package-macos]
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -240,15 +292,16 @@ jobs:
           ls -l dist
           test -f dist/SHA256SUMS.roothide || { echo "roothide checksums missing" >&2; exit 1; }
           test -f dist/SHA256SUMS.rootless || { echo "rootless checksums missing" >&2; exit 1; }
+          test -f dist/SHA256SUMS.xros || { echo "xros checksums missing" >&2; exit 1; }
           test -f dist/SHA256SUMS.macos || { echo "macos checksums missing" >&2; exit 1; }
-          # One file for both .debs, matching the layout previous releases
+          # One file for every .deb, matching the layout previous releases
           # attached, plus the macOS checksums beside the zip.
-          cat dist/SHA256SUMS.roothide dist/SHA256SUMS.rootless > dist/SHA256SUMS
-          rm -f dist/SHA256SUMS.roothide dist/SHA256SUMS.rootless
+          cat dist/SHA256SUMS.roothide dist/SHA256SUMS.rootless dist/SHA256SUMS.xros > dist/SHA256SUMS
+          rm -f dist/SHA256SUMS.roothide dist/SHA256SUMS.rootless dist/SHA256SUMS.xros
           shopt -s nullglob
           debs=(dist/*.deb)
           zips=(dist/*.zip)
-          [[ "${#debs[@]}" -eq 2 ]] || { echo "expected 2 debs, got ${#debs[@]}" >&2; exit 1; }
+          [[ "${#debs[@]}" -eq 3 ]] || { echo "expected 3 debs, got ${#debs[@]}" >&2; exit 1; }
           [[ "${#zips[@]}" -eq 1 ]] || { echo "expected 1 zip, got ${#zips[@]}" >&2; exit 1; }
 
       - name: Publish GitHub Release

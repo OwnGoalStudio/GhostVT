@@ -2,8 +2,8 @@
 
 set -Eeuo pipefail
 
-if [[ "$#" -ne 15 ]]; then
-    echo "usage: $0 <app> <daemon> <daemon-io> <cli> <control> <app-entitlements> <daemon-entitlements> <cli-entitlements> <appex-entitlements> <launch-plist> <output-deb> <package-id> <version> <architecture> <install-prefix>" >&2
+if [[ "$#" -ne 16 ]]; then
+    echo "usage: $0 <app> <daemon> <daemon-io> <cli> <control> <app-entitlements> <daemon-entitlements> <cli-entitlements> <appex-entitlements> <launch-plist> <output-deb> <package-id> <version> <architecture> <install-prefix> <depends>" >&2
     exit 64
 fi
 
@@ -32,6 +32,10 @@ architecture="${14}"
 # package ships — including the ones inside the launch daemon and the
 # maintainer scripts.
 install_prefix="${15}"
+# The control file's Depends line. The firmware floor differs per platform —
+# iOS 15 for iphoneos-*, visionOS 1 for xros-* — and the Makefile knows which
+# it built.
+depends="${16}"
 
 [[ -d "$app_bundle" && -f "$app_bundle/Info.plist" ]] || { echo "error: incomplete app bundle" >&2; exit 66; }
 [[ -x "$daemon_binary" ]] || { echo "error: daemon binary is missing" >&2; exit 66; }
@@ -46,6 +50,8 @@ done
 [[ "$version" =~ ^[0-9A-Za-z.+:~_-]+$ ]] || { echo "error: invalid version" >&2; exit 64; }
 [[ "$architecture" =~ ^[A-Za-z0-9][A-Za-z0-9-]+$ ]] || { echo "error: invalid architecture" >&2; exit 64; }
 [[ "$install_prefix" =~ ^(/[A-Za-z0-9][A-Za-z0-9._-]*)*$ ]] || { echo "error: invalid install prefix" >&2; exit 64; }
+depends_pattern='^[A-Za-z0-9][-A-Za-z0-9+.,()~<>= _]*$'
+[[ "$depends" =~ $depends_pattern ]] || { echo "error: invalid Depends: $depends" >&2; exit 64; }
 
 app_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app_bundle/Info.plist")"
 bundle_identifier="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_bundle/Info.plist")"
@@ -142,7 +148,7 @@ ldid -e "$installed_daemon" >"$daemon_signed_entitlements"
 shopt -s nullglob
 appexes=("$installed_app/PlugIns"/*.appex)
 shopt -u nullglob
-for appex in "${appexes[@]}"; do
+for appex in ${appexes[@]+"${appexes[@]}"}; do
     appex_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$appex/Info.plist")"
     [[ -f "$appex/$appex_executable" ]] || {
         echo "error: appex $(basename "$appex") has no executable" >&2
@@ -265,7 +271,7 @@ require_unprivileged "$cli_signed_entitlements" ighostvt-cli
 # none of its privileges. The daemon authenticates peers by their binary, so an
 # extension carrying the client entitlement would be an entrance nobody
 # designed — check what was actually signed, not what the file asked for.
-for appex in "${appexes[@]}"; do
+for appex in ${appexes[@]+"${appexes[@]}"}; do
     appex_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$appex/Info.plist")"
     ldid -e "$appex/$appex_executable" >"$appex_signed_entitlements"
     require_unprivileged "$appex_signed_entitlements" "$(basename "$appex")"
@@ -285,6 +291,7 @@ sed \
     -e "s/@VERSION@/$version/g" \
     -e "s/@ARCHITECTURE@/$architecture/g" \
     -e "s/@INSTALLED_SIZE@/$installed_size/g" \
+    -e "s/@DEPENDS@/$depends/g" \
     "$control_template" >"$debian/control"
 
 packaging_root="$(cd "$(dirname "$control_template")/.." && pwd -P)"
@@ -298,6 +305,7 @@ dpkg-deb --root-owner-group -Zzstd -b "$staging" "$temporary_deb"
 [[ "$(dpkg-deb -f "$temporary_deb" Package)" == "$package_id" ]]
 [[ "$(dpkg-deb -f "$temporary_deb" Version)" == "$version" ]]
 [[ "$(dpkg-deb -f "$temporary_deb" Architecture)" == "$architecture" ]]
+[[ "$(dpkg-deb -f "$temporary_deb" Depends)" == "$depends" ]]
 contents="$(dpkg-deb --contents "$temporary_deb")"
 grep -F ".$install_prefix/Applications/iGhostVT.app/$app_executable" <<<"$contents" >/dev/null
 grep -F ".$install_prefix/usr/libexec/ighostvtd" <<<"$contents" >/dev/null

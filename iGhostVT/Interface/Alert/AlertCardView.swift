@@ -221,13 +221,19 @@ private extension View {
     /// Liquid Glass on iOS 26+; the material card it replaces below.
     @ViewBuilder
     func cardGlass(in shape: some Shape) -> some View {
-        if #available(iOS 26.0, *) {
-            glassEffect(.regular, in: shape)
-        } else {
+        #if os(visionOS)
             background(.regularMaterial)
                 .background(Color(UIColor.systemBackground).opacity(0.5))
                 .clipShape(shape)
-        }
+        #else
+            if #available(iOS 26.0, *) {
+                glassEffect(.regular, in: shape)
+            } else {
+                background(.regularMaterial)
+                    .background(Color(UIColor.systemBackground).opacity(0.5))
+                    .clipShape(shape)
+            }
+        #endif
     }
 }
 

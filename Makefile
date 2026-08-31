@@ -1,4 +1,5 @@
-# iGhostVT Xcode build and jailbreak Debian packaging (roothide, rootless)
+# iGhostVT Xcode build and jailbreak Debian packaging (roothide, rootless;
+# iOS and visionOS)
 
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c
@@ -8,10 +9,34 @@ PROJECT             := $(ROOT_DIR)/iGhostVT.xcodeproj
 SCHEME              := iGhostVT
 CONFIGURATION       ?= Release
 DERIVED_DATA        ?= /private/tmp/ighostvt-deriveddata
-APP_BUNDLE          := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/iGhostVT.app
-DAEMON_BINARY       := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/ighostvtd
-DAEMON_IO_BINARY    := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/ighostvtd-io
-CLI_BINARY          := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-iphoneos/ighostvt-cli
+
+# Which OS the device build targets. `ios` is the iPhone/iPad package; `xros`
+# is the same app and daemon built for a jailbroken Apple Vision Pro — same
+# sources, same packaging, a different SDK and Mach-O platform. The two axes
+# are independent: PLATFORM picks the binaries, PACKAGE_FLAVOR the layout.
+PLATFORM            ?= ios
+ifeq ($(PLATFORM),ios)
+DEVICE_DESTINATION  := generic/platform=iOS
+PRODUCTS_SDK        := iphoneos
+DEB_ARCH_OS         := iphoneos
+DEB_DEPENDS         := firmware (>= 15.0), uikittools
+else ifeq ($(PLATFORM),xros)
+DEVICE_DESTINATION  := generic/platform=visionOS
+PRODUCTS_SDK        := xros
+# The dpkg architecture a visionOS bootstrap reports is its own to say; xros-*
+# keeps the package distinct from the iOS one in a shared APT repository (same
+# id, same version, different binaries). Override PACKAGE_ARCHITECTURE if the
+# device's dpkg wants another label.
+DEB_ARCH_OS         := xros
+DEB_DEPENDS         := firmware (>= 1.0), uikittools
+else
+$(error PLATFORM must be ios or xros, got '$(PLATFORM)')
+endif
+PRODUCTS_DIR        := $(DERIVED_DATA)/Build/Products/$(CONFIGURATION)-$(PRODUCTS_SDK)
+APP_BUNDLE          := $(PRODUCTS_DIR)/iGhostVT.app
+DAEMON_BINARY       := $(PRODUCTS_DIR)/ighostvtd
+DAEMON_IO_BINARY    := $(PRODUCTS_DIR)/ighostvtd-io
+CLI_BINARY          := $(PRODUCTS_DIR)/ighostvt-cli
 DAEMON_SCHEME       := ighostvtd
 PACKAGE_ID          ?= wiki.qaq.ighostvt
 BUNDLE_ID           := wiki.qaq.iGhostVT
@@ -25,10 +50,10 @@ PROJECT_OBJECT_VERSION := 77
 PACKAGE_FLAVOR      ?= roothide
 ifeq ($(PACKAGE_FLAVOR),roothide)
 PACKAGE_PREFIX      :=
-PACKAGE_ARCHITECTURE ?= iphoneos-arm64e
+PACKAGE_ARCHITECTURE ?= $(DEB_ARCH_OS)-arm64e
 else ifeq ($(PACKAGE_FLAVOR),rootless)
 PACKAGE_PREFIX      := /var/jb
-PACKAGE_ARCHITECTURE ?= iphoneos-arm64
+PACKAGE_ARCHITECTURE ?= $(DEB_ARCH_OS)-arm64
 else
 $(error PACKAGE_FLAVOR must be roothide or rootless, got '$(PACKAGE_FLAVOR)')
 endif
@@ -75,16 +100,18 @@ ifeq ($(BUILD_NUMBER),)
 $(error CURRENT_PROJECT_VERSION is missing from Configuration/Version.xcconfig)
 endif
 
-.PHONY: all help print-version print-build-number print-deb-path print-mac-zip-path set-version check test harness build deb deb-roothide deb-rootless mac-app mac-daemon mac-daemon-uninstall mac-run mac-zip-check mac-zip mac-update-from-github clean
+.PHONY: all help print-version print-build-number print-deb-path print-mac-zip-path set-version check test harness build deb deb-roothide deb-rootless deb-xros deb-xros-rootless mac-app mac-daemon mac-daemon-uninstall mac-run mac-zip-check mac-zip mac-update-from-github clean
 
 all: deb
 
 help:
 	@echo "iGhostVT:"
-	@echo "  build       Build the unsigned iGhostVT.app for iPhoneOS"
-	@echo "  deb         Build, ad-hoc sign, and package the .deb (PACKAGE_FLAVOR=$(PACKAGE_FLAVOR))"
+	@echo "  build       Build the unsigned iGhostVT.app and daemon (PLATFORM=$(PLATFORM): ios or xros)"
+	@echo "  deb         Build, ad-hoc sign, and package the .deb (PLATFORM=$(PLATFORM) PACKAGE_FLAVOR=$(PACKAGE_FLAVOR))"
 	@echo "  deb-roothide  Package for roothide (unprefixed, iphoneos-arm64e)"
 	@echo "  deb-rootless  Package for a rootless bootstrap (/var/jb, iphoneos-arm64)"
+	@echo "  deb-xros    Package the visionOS build for roothide (unprefixed, xros-arm64e)"
+	@echo "  deb-xros-rootless  Package the visionOS build for a rootless bootstrap (/var/jb, xros-arm64)"
 	@echo "  test        Run the PTY harness"
 	@echo "  harness     Run the daemon on macOS: proxy, ighostvtd-io, and the PTY spawn tests"
 	@echo "  check       Validate the project and packaging inputs"
@@ -174,15 +201,15 @@ harness:
 	"$$harness_dir/cli-renderer"
 
 build: check test
-	XCBUILD_LABEL=build-ios $(DEVICE_XCODEBUILD) \
+	XCBUILD_LABEL=build-$(PLATFORM) $(DEVICE_XCODEBUILD) \
 		-configuration "$(CONFIGURATION)" \
 		-scheme "$(SCHEME)" \
-		-destination "generic/platform=iOS" \
+		-destination "$(DEVICE_DESTINATION)" \
 		build
-	XCBUILD_LABEL=build-daemon $(DEVICE_XCODEBUILD) \
+	XCBUILD_LABEL=build-daemon-$(PLATFORM) $(DEVICE_XCODEBUILD) \
 		-configuration "$(CONFIGURATION)" \
 		-scheme "$(DAEMON_SCHEME)" \
-		-destination "generic/platform=iOS" \
+		-destination "$(DEVICE_DESTINATION)" \
 		build
 
 deb: build
@@ -201,7 +228,8 @@ deb: build
 		"$(PACKAGE_ID)" \
 		"$(APP_VERSION)" \
 		"$(PACKAGE_ARCHITECTURE)" \
-		"$(PACKAGE_PREFIX)"
+		"$(PACKAGE_PREFIX)" \
+		"$(DEB_DEPENDS)"
 
 # Both layouts share the build; only the packaging step differs, so these are
 # the same recipe with the flavour switched.
@@ -210,6 +238,15 @@ deb-roothide:
 
 deb-rootless:
 	@$(MAKE) --no-print-directory PACKAGE_FLAVOR=rootless deb
+
+# The visionOS build is a different set of binaries (Mach-O platform xros),
+# so it has its own products directory and its own architecture label; the
+# layout axis is the same as above.
+deb-xros:
+	@$(MAKE) --no-print-directory PLATFORM=xros PACKAGE_FLAVOR=roothide deb
+
+deb-xros-rootless:
+	@$(MAKE) --no-print-directory PLATFORM=xros PACKAGE_FLAVOR=rootless deb
 
 # Mac Catalyst development harness: the whole stack off-device (AGENTS.md,
 # "make mac-run"). The app is signed with *no* entitlements — a Catalyst app

@@ -6,7 +6,9 @@
 //  payload contract between the two.
 //
 
+#if canImport(ActivityKit)
 import ActivityKit
+#endif
 import Foundation
 
 /// The ActivityKit conformance is added below, off Catalyst only: the
@@ -62,7 +64,7 @@ struct TerminalSessionAttributes {
     }
 }
 
-#if !targetEnvironment(macCatalyst)
+#if !targetEnvironment(macCatalyst) && canImport(ActivityKit)
     @available(iOS 16.2, *)
     extension TerminalSessionAttributes: ActivityAttributes {}
 #endif

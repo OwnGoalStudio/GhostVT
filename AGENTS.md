@@ -277,6 +277,46 @@ titles are hand-entered in `Localizable.xcstrings` (eleven languages,
 the catalog's generated symbols, which is why the menu's entry is keyed
 `Settings… (menu)`.
 
+## visionOS
+
+A jailbroken Apple Vision Pro is the same product as a jailbroken iPad — the
+app renders, `ighostvtd` owns the shells — so the tree builds for xros with
+`make deb PLATFORM=xros` (roothide layout, `xros-arm64e`; `deb-xros` and
+`deb-xros-rootless` are the shorthands, and release.yml has a `package-xros`
+job beside the two iOS ones). `PLATFORM` picks the SDK, the destination, the
+`Build/Products/<config>-xros` directory, the architecture label's OS half,
+and the control file's `Depends` (`firmware (>= 1.0)` there — the iOS
+`firmware (>= 15.0)` would refuse to install on a visionOS 1.x/2.x
+bootstrap); `PACKAGE_FLAVOR` stays the layout axis and is independent of it.
+The daemon needed no source change at all; the app needed six guards, all
+`#if os(visionOS)` nested inside code that is already UIKit-only, each around
+one API the xros SDK lacks: `inputAssistantItem` and the `inputAccessoryView`
+override (`LockableTerminalView`), `ActivityKit` (`SessionActivityController`,
+`TerminalSessionAttributes` — the framework is absent from the SDK, so it is
+`canImport`, and the widget target is already `platformFilter = ios`, which
+keeps the appex out of the xros bundle), `glassEffect` /
+`GlassEffectContainer` (`GlassStyle`, `AlertCardView` — visionOS windows are
+glass already, the material fallback is the whole treatment), and the
+keyboard-frame test in `KeyboardState` (the visionOS keyboard is its own
+window; the frame says nothing). `XROS_DEPLOYMENT_TARGET` is 1.0 in
+`Configuration/Base.xcconfig` — the lowest the SDK offers and what
+libghostty-spm declares. The one thing that would raise it: two or more
+children inside a single `#available` branch of a `@ViewBuilder` form a
+`TupleContent`, whose `View` conformance the SDK dates to visionOS 26 with
+no back-deployment (`TabContextMenu.lockControls` is split into one builder
+per control for exactly this). libghostty-spm ships the xros and xrsimulator
+slices since 1.5.0 (`upstream.1.3.1-2`); that repo's `Patches/ghostty/0012`,
+`Patches/zig/` and the wrapper's own `os(visionOS)` guards are the other
+half, and `Documents/Research/visionos-port.md` is the experiment log.
+What is not known yet, because it takes the device: the bootstrap's dpkg
+architecture (override `PACKAGE_ARCHITECTURE=` if it is not `xros-arm64e`),
+whether `uikittools` exists there, and whether the M2's GPU user-client
+classes match the AGX names in `Packaging/iGhostVT.entitlements` — a miss
+is the same silent black terminal as on iOS, and the kernel log names the
+class. Building the xros app locally on Xcode 27 needs nothing special;
+building *libghostty* locally does (see that repo's
+`Script/support/xcode27-sdk-overlay.sh`).
+
 ## Build & verify
 
 - `make check` — project/packaging validation

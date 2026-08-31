@@ -43,14 +43,23 @@ struct TabContextMenu: View {
     /// The two are one choice: `TerminalTab.lock` holds at most one of
     /// them, so turning on the other lock switches, and turning off the one
     /// that is on clears it.
+    ///
+    /// One control per builder, on purpose: two toggles inside one
+    /// `#available` branch make a `TupleContent`, whose `View` conformance
+    /// the visionOS SDK dates to visionOS 26 with no back-deployment, and
+    /// the app's floor there is visionOS 1. A single child per branch never
+    /// forms the tuple.
     @ViewBuilder
     private var lockControls: some View {
+        tabLockControl
+        keyboardLockControl
+    }
+
+    @ViewBuilder
+    private var tabLockControl: some View {
         if #available(iOS 16.0, *) {
             Toggle(isOn: $tab.isLocked) {
                 Label("Lock Tab", systemImage: "lock")
-            }
-            Toggle(isOn: $tab.isKeyboardLocked) {
-                Label("Lock Keyboard", systemImage: "keyboard")
             }
         } else {
             if tab.isLocked {
@@ -62,6 +71,16 @@ struct TabContextMenu: View {
                     Label("Lock Tab", systemImage: "lock")
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var keyboardLockControl: some View {
+        if #available(iOS 16.0, *) {
+            Toggle(isOn: $tab.isKeyboardLocked) {
+                Label("Lock Keyboard", systemImage: "keyboard")
+            }
+        } else {
             if tab.isKeyboardLocked {
                 Button(action: { tab.isKeyboardLocked = false }) {
                     Label("Unlock Keyboard", systemImage: "keyboard")

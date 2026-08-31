@@ -3,7 +3,9 @@
 //  iGhostVT
 //
 
+#if canImport(ActivityKit)
 import ActivityKit
+#endif
 import Foundation
 
 /// Mirrors the open terminal tabs into one Live Activity, so the Dynamic
@@ -122,7 +124,7 @@ final class SessionActivityController {
         return path
     }
 
-    #if !targetEnvironment(macCatalyst)
+    #if !targetEnvironment(macCatalyst) && canImport(ActivityKit)
         @available(iOS 16.2, *)
         private static func apply(_ state: TerminalSessionAttributes.ContentState) async {
             let existing = Activity<TerminalSessionAttributes>.activities
