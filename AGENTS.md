@@ -413,6 +413,18 @@ Gotchas that bit us:
   local Developer ID Application identity when the keychain holds one
   (metadata preserved — the CLI's identifier stays the daemon's contract),
   and an update signed by the same team replaces the helper cleanly.
+  **Never hardcode a Team ID or a person's Developer ID anywhere in the
+  repo** — not in the update script, the packagers, the Makefile, or an
+  entitlements file. The identity is always *discovered*: the keychain
+  (`security find-identity`, matched by the certificate-type prefix
+  `Developer ID Application:` only), the installed bundle's own
+  `TeamIdentifier` (read with `codesign -dv` at run time, to prefer the
+  team the app already carries), or the `MAC_ZIP_IDENTITY` /
+  `MAC_UPDATE_IDENTITY` environment overrides. A literal identity would
+  pin the repo to one person's certificate and silently break every other
+  machine's build and update. `make check` rejects any `Name (TEAMID)`
+  shaped literal in `Scripts/`, the `Makefile`, and `Packaging/` — keep it
+  that way.
 - **A drop pastes a path the shell can use, and where that path comes from
   depends on where the item lives.** `TerminalDropDelegate` replaces the
   library's drop interaction on both platforms (it has to *replace* the

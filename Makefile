@@ -169,6 +169,8 @@ check:
 	@grep -qF 'wiki.qaq.ighostvt-cli' "$(ROOT_DIR)/iGhostVTDaemon/Server/PeerAuthenticator.swift" \
 		&& grep -qF 'wiki.qaq.ighostvt-cli' "$(MAC_PACKAGER)" \
 		|| { echo "error: the CLI's signing identifier must match in PeerAuthenticator.swift and package-mac.sh" >&2; exit 65; }
+	@! grep -rnE '\([A-Z0-9]{10}\)' "$(ROOT_DIR)/Scripts" "$(ROOT_DIR)/Makefile" "$(ROOT_DIR)/Packaging" \
+		|| { echo "error: a signing identity ('Name (TEAMID)') is hardcoded above — identities come from the keychain or MAC_ZIP_IDENTITY/MAC_UPDATE_IDENTITY, never the repo" >&2; exit 65; }
 
 # The app has no unit tests since the TCP transport left; the harness and
 # the CLI renderer tests are the whole suite until it grows some again.
