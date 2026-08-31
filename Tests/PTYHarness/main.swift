@@ -195,11 +195,11 @@ do {
         onExit: { _, _ in }
     )
     Thread.sleep(forTimeInterval: 0.4)
-    check(session.write(Data(bytes)), "the write is accepted")
+    check(harnessQueue.sync { session.write(Data(bytes)) }, "the write is accepted")
     // Chunked exactly as a client sends it, straight after, with no pause:
     // the second write must queue behind the first, not race past it.
     let tail = Array("TAIL-MARKER\n".utf8)
-    check(session.write(Data(tail)), "a write queued behind it is accepted too")
+    check(harnessQueue.sync { session.write(Data(tail)) }, "a write queued behind it is accepted too")
     let deadline = Date().addingTimeInterval(20)
     var settled = Data()
     while Date() < deadline {
@@ -227,8 +227,8 @@ do {
         String(decoding: settled, as: UTF8.self).contains("L0400 中文"),
         "the last line survives, multibyte characters intact"
     )
-    check(session.pendingInputByteCount == 0, "nothing is left pending once it is all in")
-    session.invalidate()
+    check(harnessQueue.sync { session.pendingInputByteCount } == 0, "nothing is left pending once it is all in")
+    harnessQueue.sync { session.invalidate() }
 } catch {
     check(false, "a session for the large write spawns (\(error))")
 }
@@ -252,7 +252,7 @@ do {
     var accepted = 0
     var refused = false
     for _ in 0 ..< 32 {
-        if session.write(chunk) {
+        if harnessQueue.sync(execute: { session.write(chunk) }) {
             accepted += 1
         } else {
             refused = true
@@ -260,12 +260,13 @@ do {
         }
     }
     check(refused, "a session whose program never reads eventually refuses more input")
+    let held = harnessQueue.sync { session.pendingInputByteCount }
     check(
-        session.pendingInputByteCount <= iGhostVTProtocol.sessionPendingInputByteCount,
-        "and holds no more than its cap (\(session.pendingInputByteCount) bytes after \(accepted) chunks)"
+        held <= iGhostVTProtocol.sessionPendingInputByteCount,
+        "and holds no more than its cap (\(held) bytes after \(accepted) chunks)"
     )
-    session.invalidate()
-    check(session.pendingInputByteCount == 0, "invalidating releases the pending input")
+    harnessQueue.sync { session.invalidate() }
+    check(harnessQueue.sync { session.pendingInputByteCount } == 0, "invalidating releases the pending input")
 } catch {
     check(false, "a session for the backlog test spawns (\(error))")
 }

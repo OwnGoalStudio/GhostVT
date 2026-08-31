@@ -471,6 +471,7 @@ final class PTYSession {
             case let .wrote(count):
                 pendingInputOffset += count
             case .wouldBlock:
+                compactPendingInput()
                 return
             case .failed:
                 discardPendingInput()
@@ -478,6 +479,18 @@ final class PTYSession {
             }
         }
         discardPendingInput()
+    }
+
+    /// Drops the already-written prefix once it outweighs what is left.
+    /// Without this the array only resets on a full drain, so a program
+    /// reading slowly under continuous input keeps the *logical* backlog
+    /// under its cap while the dead prefix grows by every byte ever
+    /// drained. Compacting at the halfway mark keeps the array within
+    /// twice the live bytes and moves each byte at most once more.
+    private func compactPendingInput() {
+        guard pendingInputOffset > pendingInput.count - pendingInputOffset else { return }
+        pendingInput.removeFirst(pendingInputOffset)
+        pendingInputOffset = 0
     }
 
     private func discardPendingInput() {
