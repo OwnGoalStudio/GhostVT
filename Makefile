@@ -70,6 +70,7 @@ VERSION_APPLIER     := $(ROOT_DIR)/Scripts/apply-version.sh
 MAC_DAEMON_LOADER   := $(ROOT_DIR)/Scripts/mac-daemon.sh
 MAC_PACKAGER        := $(ROOT_DIR)/Scripts/package-mac.sh
 MAC_UPDATE_FROM_GITHUB := $(ROOT_DIR)/Scripts/mac-update-from-github.sh
+RELEASE_SH          := $(ROOT_DIR)/Scripts/release.sh
 CONTROL_TEMPLATE    := $(ROOT_DIR)/Packaging/DEBIAN/control
 ENTITLEMENTS        := $(ROOT_DIR)/Packaging/iGhostVT.entitlements
 DAEMON_ENTITLEMENTS := $(ROOT_DIR)/Packaging/iGhostVTDaemon.entitlements
@@ -100,7 +101,7 @@ ifeq ($(BUILD_NUMBER),)
 $(error CURRENT_PROJECT_VERSION is missing from Configuration/Version.xcconfig)
 endif
 
-.PHONY: all help print-version print-build-number print-deb-path print-mac-zip-path set-version check test harness build deb deb-roothide deb-rootless deb-xros deb-xros-rootless mac-app mac-daemon mac-daemon-uninstall mac-run mac-zip-check mac-zip mac-update-from-github clean
+.PHONY: all help print-version print-build-number print-deb-path print-mac-zip-path set-version check test harness build deb deb-roothide deb-rootless deb-xros deb-xros-rootless mac-app mac-daemon mac-daemon-uninstall mac-run mac-zip-check mac-zip mac-update-from-github release clean
 
 all: deb
 
@@ -122,6 +123,7 @@ help:
 	@echo "  mac-zip     Build, sign, and zip the distributable macOS app (MAC_ZIP_IDENTITY=$(MAC_ZIP_IDENTITY))"
 	@echo "  mac-zip-check  Validate the macOS packaging inputs"
 	@echo "  mac-update-from-github  Download a GitHub macOS zip, re-sign it with a local Developer ID if one exists, and replace /Applications/iGhostVT.app (TAG=vX.Y.Z)"
+	@echo "  release     Bump, tag, wait for the GitHub Release, dispatch and verify the APT repo (VERSION=x.y.z [BUILD=n] [INSTALL=1])"
 	@echo "  set-version Write VERSION=x.y.z [BUILD=n] into Configuration/Version.xcconfig"
 	@echo "  clean       Remove derived data and generated packages"
 
@@ -406,6 +408,16 @@ mac-zip: mac-zip-check
 mac-update-from-github:
 	@test -x "$(MAC_UPDATE_FROM_GITHUB)" || { echo "error: mac-update-from-github.sh is not executable" >&2; exit 66; }
 	@"$(MAC_UPDATE_FROM_GITHUB)" $(TAG)
+
+# The whole cut, end to end: version bump → commit → tag → the GitHub
+# Release run → all six assets → the APT repository actually serving the
+# version (the APT run's own conclusion is advisory — its verify step has
+# raced the CDN cache). INSTALL=1 finishes by replacing
+# /Applications/iGhostVT.app with the published zip (Touch ID).
+release:
+	@test -x "$(RELEASE_SH)" || { echo "error: release.sh is not executable" >&2; exit 66; }
+	@test -n "$(VERSION)" || { echo "usage: make release VERSION=x.y.z [BUILD=n] [INSTALL=1]" >&2; exit 64; }
+	@INSTALL="$(INSTALL)" "$(RELEASE_SH)" "$(VERSION)" $(BUILD)
 
 clean:
 	rm -rf "$(DERIVED_DATA)"

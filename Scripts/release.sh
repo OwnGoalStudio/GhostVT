@@ -1,0 +1,110 @@
+#!/bin/bash
+# One-command release: version bump → commit → tag → GitHub Release run →
+# asset check → APT repository build → the repo actually serving it.
+#
+#   release.sh <x.y.z> [build]
+#
+# Build defaults to the current build number plus one. INSTALL=1 finishes by
+# replacing /Applications/iGhostVT.app with the freshly published zip
+# (`make mac-update-from-github`, Touch ID for sudo).
+#
+# The APT run's own conclusion is advisory — a run can fail on a trailing
+# step after deploying, and another run can have deployed first — so the
+# acceptance test is what https://apt.owngoal.dev/Packages actually serves.
+set -euo pipefail
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+apt_repo="OwnGoalStudio/OwnGoalPackages"
+apt_workflow="Build and Deploy APT Repository"
+apt_index="https://apt.owngoal.dev/Packages"
+
+die() {
+    echo "error: $*" >&2
+    exit 65
+}
+
+command -v gh >/dev/null || die "gh is required"
+gh auth status >/dev/null 2>&1 || die "gh is not authenticated"
+
+version="${1:-}"
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "usage: release.sh <x.y.z> [build]"
+
+cd "$root"
+[[ -z "$(git status --porcelain)" ]] || die "the tree is dirty; commit or stash first"
+branch="$(git rev-parse --abbrev-ref HEAD)"
+[[ "$branch" == "main" ]] || die "release from main (this is $branch)"
+git fetch origin
+[[ "$(git rev-parse HEAD)" == "$(git rev-parse origin/main)" ]] \
+    || die "main and origin/main differ; pull or push first"
+git rev-parse -q --verify "refs/tags/v$version" >/dev/null \
+    && die "tag v$version already exists"
+
+build="${2:-}"
+if [[ -z "$build" ]]; then
+    current="$(make -s print-build-number)"
+    [[ "$current" =~ ^[0-9]+$ ]] || die "could not read the current build number"
+    build=$((current + 1))
+fi
+
+echo "==> $version (build $build)"
+make set-version VERSION="$version" BUILD="$build"
+make check
+git add Configuration/Version.xcconfig
+git commit -m "$version"
+git tag "v$version"
+git push origin main "v$version"
+
+echo "==> waiting for the Release workflow"
+run_id=""
+for _ in $(seq 1 30); do
+    run_id="$(gh run list --workflow Release --limit 5 \
+        --json databaseId,displayTitle \
+        --jq ".[] | select(.displayTitle == \"$version\") | .databaseId" | head -n 1)"
+    [[ -n "$run_id" ]] && break
+    sleep 5
+done
+[[ -n "$run_id" ]] || die "the Release run for $version never appeared"
+gh run watch "$run_id" --exit-status >/dev/null || die "Release run $run_id failed"
+echo "    run $run_id succeeded"
+
+echo "==> verifying the release assets"
+assets="$(gh release view "v$version" --json assets --jq '.assets[].name')"
+for want in \
+    "iGhostVT-$version-macos.zip" \
+    "wiki.qaq.ighostvt_${version}_iphoneos-arm64.deb" \
+    "wiki.qaq.ighostvt_${version}_iphoneos-arm64e.deb" \
+    "wiki.qaq.ighostvt_${version}_xros-arm64e.deb" \
+    "SHA256SUMS" \
+    "SHA256SUMS.macos"; do
+    grep -qxF "$want" <<<"$assets" || die "release v$version is missing $want"
+done
+echo "    all six assets present"
+
+echo "==> dispatching the APT repository build"
+gh -R "$apt_repo" workflow run "$apt_workflow"
+sleep 10
+apt_run="$(gh -R "$apt_repo" run list --workflow "$apt_workflow" --limit 1 \
+    --json databaseId --jq '.[0].databaseId')"
+if [[ -n "$apt_run" ]]; then
+    gh -R "$apt_repo" run watch "$apt_run" --exit-status >/dev/null \
+        || echo "    note: APT run $apt_run did not succeed; checking what the repo serves anyway" >&2
+fi
+
+echo "==> verifying $apt_index serves $version"
+served=""
+for _ in $(seq 1 30); do
+    served="$(curl -fsSL "$apt_index" 2>/dev/null \
+        | awk '/^Package: wiki.qaq.ighostvt$/{p=1} p&&/^Version:/{print $2; p=0}' \
+        | sort -u)"
+    [[ "$served" == "$version" ]] && break
+    sleep 10
+done
+[[ "$served" == "$version" ]] || die "the APT repository still serves '$served'"
+echo "    served for every architecture"
+
+echo "==> released $version (build $build)"
+if [[ "${INSTALL:-0}" == "1" ]]; then
+    make mac-update-from-github TAG="v$version"
+else
+    echo "    install locally with: make mac-update-from-github TAG=v$version"
+fi
