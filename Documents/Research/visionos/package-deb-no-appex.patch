@@ -1,0 +1,20 @@
+--- a/Scripts/package-deb.sh	2026-08-31 00:51:13
++++ b/Scripts/package-deb.sh	2026-08-31 12:51:59
+@@ -142,7 +142,7 @@
+ shopt -s nullglob
+ appexes=("$installed_app/PlugIns"/*.appex)
+ shopt -u nullglob
+-for appex in "${appexes[@]}"; do
++for appex in ${appexes[@]+"${appexes[@]}"}; do
+     appex_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$appex/Info.plist")"
+     [[ -f "$appex/$appex_executable" ]] || {
+         echo "error: appex $(basename "$appex") has no executable" >&2
+@@ -265,7 +265,7 @@
+ # none of its privileges. The daemon authenticates peers by their binary, so an
+ # extension carrying the client entitlement would be an entrance nobody
+ # designed — check what was actually signed, not what the file asked for.
+-for appex in "${appexes[@]}"; do
++for appex in ${appexes[@]+"${appexes[@]}"}; do
+     appex_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$appex/Info.plist")"
+     ldid -e "$appex/$appex_executable" >"$appex_signed_entitlements"
+     require_unprivileged "$appex_signed_entitlements" "$(basename "$appex")"

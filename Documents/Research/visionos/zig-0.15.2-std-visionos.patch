@@ -1,0 +1,247 @@
+Only in zig-0.15.2/lib/std: BitStack.zig
+Only in zig-0.15.2/lib/std: Build
+Only in zig-0.15.2/lib/std: Build.zig
+Only in zig-0.15.2/lib/std: DoublyLinkedList.zig
+Only in zig-0.15.2/lib/std: Io
+Only in zig-0.15.2/lib/std: Io.zig
+Only in zig-0.15.2/lib/std: Progress.zig
+Only in zig-0.15.2/lib/std: Random
+Only in zig-0.15.2/lib/std: Random.zig
+Only in zig-0.15.2/lib/std: SemanticVersion.zig
+Only in zig-0.15.2/lib/std: SinglyLinkedList.zig
+Only in zig-0.15.2/lib/std: Target
+Only in zig-0.15.2/lib/std: Thread
+Only in zig-0.15.2/lib/std: Thread.zig
+Only in zig-0.15.2/lib/std: Uri.zig
+Only in zig-0.15.2/lib/std: array_hash_map.zig
+Only in zig-0.15.2/lib/std: array_list.zig
+Only in zig-0.15.2/lib/std: ascii.zig
+Only in zig-0.15.2/lib/std: atomic.zig
+Only in zig-0.15.2/lib/std: base64.zig
+Only in zig-0.15.2/lib/std: bit_set.zig
+Only in zig-0.15.2/lib/std: buf_map.zig
+Only in zig-0.15.2/lib/std: buf_set.zig
+Only in zig-0.15.2/lib/std: builtin
+Only in zig-0.15.2/lib/std: builtin.zig
+Only in zig-0.15.2/lib/std: c
+Only in zig-0.15.2/lib/std: c.zig
+Only in zig-0.15.2/lib/std: coff.zig
+Only in zig-0.15.2/lib/std: compress
+Only in zig-0.15.2/lib/std: compress.zig
+Only in zig-0.15.2/lib/std: crypto
+Only in zig-0.15.2/lib/std: crypto.zig
+Only in zig-0.15.2/lib/std/debug: Coverage.zig
+diff --color -ru --ex zig-pristine/lib/std/debug/Dwarf/abi.zig zig-0.15.2/lib/std/debug/Dwarf/abi.zig
+--- zig-pristine/lib/std/debug/Dwarf/abi.zig	2025-10-11 12:53:21
++++ zig-0.15.2/lib/std/debug/Dwarf/abi.zig	2026-08-31 12:31:53
+@@ -245,7 +245,7 @@
+                 // TODO: Extract xmm state from sc_fpstate?
+                 else => error.InvalidRegister,
+             },
+-            .macos, .ios => switch (reg_number) {
++            .macos, .ios, .tvos, .watchos, .visionos => switch (reg_number) {
+                 0 => mem.asBytes(&ucontext_ptr.mcontext.ss.rax),
+                 1 => mem.asBytes(&ucontext_ptr.mcontext.ss.rdx),
+                 2 => mem.asBytes(&ucontext_ptr.mcontext.ss.rcx),
+@@ -291,7 +291,7 @@
+             else => error.UnimplementedOs,
+         },
+         .aarch64, .aarch64_be => switch (builtin.os.tag) {
+-            .macos, .ios, .watchos => switch (reg_number) {
++            .macos, .ios, .tvos, .watchos, .visionos => switch (reg_number) {
+                 0...28 => mem.asBytes(&ucontext_ptr.mcontext.ss.regs[reg_number]),
+                 29 => mem.asBytes(&ucontext_ptr.mcontext.ss.fp),
+                 30 => mem.asBytes(&ucontext_ptr.mcontext.ss.lr),
+Only in zig-0.15.2/lib/std/debug/Dwarf: call_frame.zig
+Only in zig-0.15.2/lib/std/debug/Dwarf: expression.zig
+Only in zig-0.15.2/lib/std/debug: Dwarf.zig
+Only in zig-0.15.2/lib/std/debug: FixedBufferReader.zig
+Only in zig-0.15.2/lib/std/debug: Info.zig
+Only in zig-0.15.2/lib/std/debug: MemoryAccessor.zig
+Only in zig-0.15.2/lib/std/debug: Pdb.zig
+diff --color -ru --ex zig-pristine/lib/std/debug/SelfInfo.zig zig-0.15.2/lib/std/debug/SelfInfo.zig
+--- zig-pristine/lib/std/debug/SelfInfo.zig	2025-10-11 12:53:21
++++ zig-0.15.2/lib/std/debug/SelfInfo.zig	2026-08-31 12:31:53
+@@ -1812,7 +1812,7 @@
+             else => false,
+         },
+         .x86_64 => switch (target.os.tag) {
+-            .linux, .netbsd, .freebsd, .openbsd, .macos, .ios, .solaris, .illumos => true,
++            .linux, .netbsd, .freebsd, .openbsd, .macos, .ios, .tvos, .watchos, .visionos, .solaris, .illumos => true,
+             else => false,
+         },
+         .arm, .armeb, .thumb, .thumbeb => switch (target.os.tag) {
+@@ -1820,7 +1820,7 @@
+             else => false,
+         },
+         .aarch64, .aarch64_be => switch (target.os.tag) {
+-            .linux, .netbsd, .freebsd, .macos, .ios => true,
++            .linux, .netbsd, .freebsd, .macos, .ios, .tvos, .watchos, .visionos => true,
+             else => false,
+         },
+         // Unwinding is possible on other targets but this implementation does
+Only in zig-0.15.2/lib/std/debug: no_panic.zig
+Only in zig-0.15.2/lib/std/debug: simple_panic.zig
+Only in zig-0.15.2/lib/std: debug.zig
+Only in zig-0.15.2/lib/std: dwarf
+Only in zig-0.15.2/lib/std: dwarf.zig
+Only in zig-0.15.2/lib/std: dynamic_library.zig
+Only in zig-0.15.2/lib/std: elf.zig
+Only in zig-0.15.2/lib/std: enums.zig
+Only in zig-0.15.2/lib/std: fmt
+Only in zig-0.15.2/lib/std: fmt.zig
+Only in zig-0.15.2/lib/std/fs: AtomicFile.zig
+diff --color -ru --ex zig-pristine/lib/std/fs/Dir.zig zig-0.15.2/lib/std/fs/Dir.zig
+--- zig-pristine/lib/std/fs/Dir.zig	2025-10-11 12:53:21
++++ zig-0.15.2/lib/std/fs/Dir.zig	2026-08-31 12:35:03
+@@ -39,7 +39,7 @@
+ } || posix.UnexpectedError;
+ 
+ pub const Iterator = switch (native_os) {
+-    .macos, .ios, .freebsd, .netbsd, .dragonfly, .openbsd, .solaris, .illumos => struct {
++    .macos, .ios, .tvos, .watchos, .visionos, .freebsd, .netbsd, .dragonfly, .openbsd, .solaris, .illumos => struct {
+         dir: Dir,
+         seek: i64,
+         buf: [1024]u8 align(@alignOf(posix.system.dirent)),
+@@ -55,7 +55,7 @@
+         /// with subsequent calls to `next`, as well as when this `Dir` is deinitialized.
+         pub fn next(self: *Self) Error!?Entry {
+             switch (native_os) {
+-                .macos, .ios => return self.nextDarwin(),
++                .macos, .ios, .tvos, .watchos, .visionos => return self.nextDarwin(),
+                 .freebsd, .netbsd, .dragonfly, .openbsd => return self.nextBsd(),
+                 .solaris, .illumos => return self.nextSolaris(),
+                 else => @compileError("unimplemented"),
+@@ -615,6 +615,9 @@
+     switch (native_os) {
+         .macos,
+         .ios,
++        .tvos,
++        .watchos,
++        .visionos,
+         .freebsd,
+         .netbsd,
+         .dragonfly,
+@@ -1678,7 +1681,7 @@
+         error.AccessDenied, error.PermissionDenied => |e| switch (native_os) {
+             // non-Linux POSIX systems return permission errors when trying to delete a
+             // directory, so we need to handle that case specifically and translate the error
+-            .macos, .ios, .freebsd, .netbsd, .dragonfly, .openbsd, .solaris, .illumos => {
++            .macos, .ios, .tvos, .watchos, .visionos, .freebsd, .netbsd, .dragonfly, .openbsd, .solaris, .illumos => {
+                 // Don't follow symlinks to match unlinkat (which acts on symlinks rather than follows them)
+                 const fstat = posix.fstatatZ(self.fd, sub_path_c, posix.AT.SYMLINK_NOFOLLOW) catch return e;
+                 const is_dir = fstat.mode & posix.S.IFMT == posix.S.IFDIR;
+Only in zig-0.15.2/lib/std/fs: File.zig
+Only in zig-0.15.2/lib/std/fs: get_app_data_dir.zig
+Only in zig-0.15.2/lib/std/fs: path.zig
+Only in zig-0.15.2/lib/std/fs: test.zig
+Only in zig-0.15.2/lib/std/fs: wasi.zig
+diff --color -ru --ex zig-pristine/lib/std/fs.zig zig-0.15.2/lib/std/fs.zig
+--- zig-pristine/lib/std/fs.zig	2025-10-11 12:53:21
++++ zig-0.15.2/lib/std/fs.zig	2026-08-31 12:31:53
+@@ -50,7 +50,7 @@
+ /// * On other platforms, `[]u8` file paths are opaque sequences of bytes with
+ ///   no particular encoding.
+ pub const max_path_bytes = switch (native_os) {
+-    .linux, .macos, .ios, .freebsd, .openbsd, .netbsd, .dragonfly, .haiku, .solaris, .illumos, .plan9, .emscripten, .wasi, .serenity => posix.PATH_MAX,
++    .linux, .macos, .ios, .tvos, .watchos, .visionos, .freebsd, .openbsd, .netbsd, .dragonfly, .haiku, .solaris, .illumos, .plan9, .emscripten, .wasi, .serenity => posix.PATH_MAX,
+     // Each WTF-16LE code unit may be expanded to 3 WTF-8 bytes.
+     // If it would require 4 WTF-8 bytes, then there would be a surrogate
+     // pair in the WTF-16LE, and we (over)account 3 bytes for it that way.
+@@ -71,7 +71,7 @@
+ /// On WASI, file name components are encoded as valid UTF-8.
+ /// On other platforms, `[]u8` components are an opaque sequence of bytes with no particular encoding.
+ pub const max_name_bytes = switch (native_os) {
+-    .linux, .macos, .ios, .freebsd, .openbsd, .netbsd, .dragonfly, .solaris, .illumos, .serenity => posix.NAME_MAX,
++    .linux, .macos, .ios, .tvos, .watchos, .visionos, .freebsd, .openbsd, .netbsd, .dragonfly, .solaris, .illumos, .serenity => posix.NAME_MAX,
+     // Haiku's NAME_MAX includes the null terminator, so subtract one.
+     .haiku => posix.NAME_MAX - 1,
+     // Each WTF-16LE character may be expanded to 3 WTF-8 bytes.
+Only in zig-0.15.2/lib/std: gpu.zig
+Only in zig-0.15.2/lib/std: hash
+Only in zig-0.15.2/lib/std: hash.zig
+Only in zig-0.15.2/lib/std: hash_map.zig
+Only in zig-0.15.2/lib/std: heap
+Only in zig-0.15.2/lib/std: heap.zig
+Only in zig-0.15.2/lib/std: http
+Only in zig-0.15.2/lib/std: http.zig
+Only in zig-0.15.2/lib/std: json
+Only in zig-0.15.2/lib/std: json.zig
+Only in zig-0.15.2/lib/std: leb128.zig
+Only in zig-0.15.2/lib/std: log.zig
+Only in zig-0.15.2/lib/std: macho.zig
+Only in zig-0.15.2/lib/std: math
+Only in zig-0.15.2/lib/std: math.zig
+Only in zig-0.15.2/lib/std: mem
+Only in zig-0.15.2/lib/std: mem.zig
+Only in zig-0.15.2/lib/std: meta
+Only in zig-0.15.2/lib/std: meta.zig
+Only in zig-0.15.2/lib/std: multi_array_list.zig
+Only in zig-0.15.2/lib/std: net
+Only in zig-0.15.2/lib/std: net.zig
+Only in zig-0.15.2/lib/std: once.zig
+Only in zig-0.15.2/lib/std: os
+Only in zig-0.15.2/lib/std: os.zig
+Only in zig-0.15.2/lib/std: pdb.zig
+Only in zig-0.15.2/lib/std: pie.zig
+Only in zig-0.15.2/lib/std: posix
+Only in zig-0.15.2/lib/std: posix.zig
+Only in zig-0.15.2/lib/std: priority_dequeue.zig
+Only in zig-0.15.2/lib/std: priority_queue.zig
+diff --color -ru --ex zig-pristine/lib/std/process/Child.zig zig-0.15.2/lib/std/process/Child.zig
+--- zig-pristine/lib/std/process/Child.zig	2025-10-11 12:53:21
++++ zig-0.15.2/lib/std/process/Child.zig	2026-08-31 12:31:53
+@@ -134,7 +134,7 @@
+                     return null;
+                 }
+             },
+-            .macos, .ios => {
++            .macos, .ios, .tvos, .watchos, .visionos => {
+                 if (rus.rusage) |ru| {
+                     // Darwin oddly reports in bytes instead of kilobytes.
+                     return @as(usize, @intCast(ru.maxrss));
+@@ -147,7 +147,7 @@
+     }
+ 
+     const rusage_init = switch (native_os) {
+-        .linux, .macos, .ios => @as(?posix.rusage, null),
++        .linux, .macos, .ios, .tvos, .watchos, .visionos => @as(?posix.rusage, null),
+         .windows => @as(?windows.VM_COUNTERS, null),
+         else => {},
+     };
+@@ -477,7 +477,7 @@
+     const res: posix.WaitPidResult = res: {
+         if (self.request_resource_usage_statistics) {
+             switch (native_os) {
+-                .linux, .macos, .ios => {
++                .linux, .macos, .ios, .tvos, .watchos, .visionos => {
+                     var ru: posix.rusage = undefined;
+                     const res = posix.wait4(self.id, 0, &ru);
+                     self.resource_usage_statistics.rusage = ru;
+Only in zig-0.15.2/lib/std: process.zig
+Only in zig-0.15.2/lib/std: segmented_list.zig
+Only in zig-0.15.2/lib/std: simd.zig
+Only in zig-0.15.2/lib/std: sort
+Only in zig-0.15.2/lib/std: sort.zig
+Only in zig-0.15.2/lib/std: start.zig
+Only in zig-0.15.2/lib/std: static_string_map.zig
+Only in zig-0.15.2/lib/std: std.zig
+Only in zig-0.15.2/lib/std: tar
+Only in zig-0.15.2/lib/std: tar.zig
+Only in zig-0.15.2/lib/std: testing
+Only in zig-0.15.2/lib/std: testing.zig
+Only in zig-0.15.2/lib/std: time
+Only in zig-0.15.2/lib/std: time.zig
+Only in zig-0.15.2/lib/std: treap.zig
+Only in zig-0.15.2/lib/std: tz
+Only in zig-0.15.2/lib/std: tz.zig
+Only in zig-0.15.2/lib/std: unicode
+Only in zig-0.15.2/lib/std: unicode.zig
+Only in zig-0.15.2/lib/std: valgrind
+Only in zig-0.15.2/lib/std: valgrind.zig
+Only in zig-0.15.2/lib/std: wasm.zig
+Only in zig-0.15.2/lib/std: zig
+Only in zig-0.15.2/lib/std: zig.zig
+Only in zig-0.15.2/lib/std: zip.zig
+Only in zig-0.15.2/lib/std: zon
+Only in zig-0.15.2/lib/std: zon.zig

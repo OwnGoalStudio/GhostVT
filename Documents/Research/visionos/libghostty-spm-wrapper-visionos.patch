@@ -1,0 +1,80 @@
+diff --color -ru /Users/qaq/Documents/GitHub/libghostty-spm/Sources/GhosttyTerminal/Platform/UIKit/TerminalInputAccessoryView.swift /private/tmp/claude-501/-Users-qaq-Documents-GitHub-iGhostVT/34c8ec20-e9f5-44bb-a88c-63faaff05605/scratchpad/xros-typecheck/spm-src/GhosttyTerminal/Platform/UIKit/TerminalInputAccessoryView.swift
+--- /Users/qaq/Documents/GitHub/libghostty-spm/Sources/GhosttyTerminal/Platform/UIKit/TerminalInputAccessoryView.swift	2026-08-29 03:50:40
++++ /private/tmp/claude-501/-Users-qaq-Documents-GitHub-iGhostVT/34c8ec20-e9f5-44bb-a88c-63faaff05605/scratchpad/xros-typecheck/spm-src/GhosttyTerminal/Platform/UIKit/TerminalInputAccessoryView.swift	2026-08-31 12:35:25
+@@ -283,13 +283,14 @@
+         }
+ 
+         private func makeBarEffect() -> UIVisualEffect {
++            #if !os(visionOS)
+             if #available(iOS 26, *) {
+                 let effect = UIGlassEffect(style: .regular)
+                 effect.isInteractive = true
+                 return effect
+-            } else {
+-                return UIBlurEffect(style: .systemUltraThinMaterial)
+             }
++            #endif
++            return UIBlurEffect(style: .systemUltraThinMaterial)
+         }
+ 
+         private func applyBarChrome() {
+diff --color -ru /Users/qaq/Documents/GitHub/libghostty-spm/Sources/GhosttyTerminal/Platform/UIKit/UITerminalView+InputAccessory.swift /private/tmp/claude-501/-Users-qaq-Documents-GitHub-iGhostVT/34c8ec20-e9f5-44bb-a88c-63faaff05605/scratchpad/xros-typecheck/spm-src/GhosttyTerminal/Platform/UIKit/UITerminalView+InputAccessory.swift
+--- /Users/qaq/Documents/GitHub/libghostty-spm/Sources/GhosttyTerminal/Platform/UIKit/UITerminalView+InputAccessory.swift	2026-08-29 03:50:26
++++ /private/tmp/claude-501/-Users-qaq-Documents-GitHub-iGhostVT/34c8ec20-e9f5-44bb-a88c-63faaff05605/scratchpad/xros-typecheck/spm-src/GhosttyTerminal/Platform/UIKit/UITerminalView+InputAccessory.swift	2026-08-31 12:33:18
+@@ -9,9 +9,11 @@
+     import UIKit
+ 
+     extension UITerminalView {
++        #if !os(visionOS)
+         override open var inputAccessoryView: UIView? {
+             inputAccessoryItems.isEmpty ? nil : terminalInputAccessory
+         }
++        #endif
+ 
+         func handleInputBarKey(_ key: TerminalInputBarKey) {
+             commitMarkedTextIfStickyModifiersAreActive()
+diff --color -ru /Users/qaq/Documents/GitHub/libghostty-spm/Sources/GhosttyTerminal/Platform/UIKit/UITerminalView+Interaction.swift /private/tmp/claude-501/-Users-qaq-Documents-GitHub-iGhostVT/34c8ec20-e9f5-44bb-a88c-63faaff05605/scratchpad/xros-typecheck/spm-src/GhosttyTerminal/Platform/UIKit/UITerminalView+Interaction.swift
+--- /Users/qaq/Documents/GitHub/libghostty-spm/Sources/GhosttyTerminal/Platform/UIKit/UITerminalView+Interaction.swift	2026-08-29 03:37:09
++++ /private/tmp/claude-501/-Users-qaq-Documents-GitHub-iGhostVT/34c8ec20-e9f5-44bb-a88c-63faaff05605/scratchpad/xros-typecheck/spm-src/GhosttyTerminal/Platform/UIKit/UITerminalView+Interaction.swift	2026-08-31 12:34:31
+@@ -659,7 +659,9 @@
+                     "long-press selection dispatch viewPoint=\(NSCoder.string(for: viewPoint)) word=\(TerminalDebugLog.describe(wordResult?.word ?? "nil")) anchor=\(anchorRange.map { NSStringFromRange($0) } ?? "nil")"
+                 )
+ 
++                #if !os(visionOS)
+                 UIImpactFeedbackGenerator(style: .medium).impactOccurred()
++                #endif
+ 
+                 delegate.terminalDidRequestTextSelection(.init(
+                     text: text,
+diff --color -ru /Users/qaq/Documents/GitHub/libghostty-spm/Sources/GhosttyTerminal/Platform/UIKit/UITerminalView+Lifecycle.swift /private/tmp/claude-501/-Users-qaq-Documents-GitHub-iGhostVT/34c8ec20-e9f5-44bb-a88c-63faaff05605/scratchpad/xros-typecheck/spm-src/GhosttyTerminal/Platform/UIKit/UITerminalView+Lifecycle.swift
+--- /Users/qaq/Documents/GitHub/libghostty-spm/Sources/GhosttyTerminal/Platform/UIKit/UITerminalView+Lifecycle.swift	2026-08-31 00:42:12
++++ /private/tmp/claude-501/-Users-qaq-Documents-GitHub-iGhostVT/34c8ec20-e9f5-44bb-a88c-63faaff05605/scratchpad/xros-typecheck/spm-src/GhosttyTerminal/Platform/UIKit/UITerminalView+Lifecycle.swift	2026-08-31 12:33:47
+@@ -127,13 +127,15 @@
+         }
+ 
+         func resolvedDisplayScale() -> CGFloat {
++            #if !os(visionOS)
+             if let screen = window?.screen {
+                 return screen.nativeScale
+             }
++            #endif
+             if traitCollection.displayScale > 0 {
+                 return traitCollection.displayScale
+             }
+-            return UIScreen.main.nativeScale
++            return 2.0
+         }
+ 
+         func updateDisplayScale() {
+diff --color -ru /Users/qaq/Documents/GitHub/libghostty-spm/Sources/GhosttyTerminal/Platform/UIKit/UITerminalView.swift /private/tmp/claude-501/-Users-qaq-Documents-GitHub-iGhostVT/34c8ec20-e9f5-44bb-a88c-63faaff05605/scratchpad/xros-typecheck/spm-src/GhosttyTerminal/Platform/UIKit/UITerminalView.swift
+--- /Users/qaq/Documents/GitHub/libghostty-spm/Sources/GhosttyTerminal/Platform/UIKit/UITerminalView.swift	2026-08-29 03:37:09
++++ /private/tmp/claude-501/-Users-qaq-Documents-GitHub-iGhostVT/34c8ec20-e9f5-44bb-a88c-63faaff05605/scratchpad/xros-typecheck/spm-src/GhosttyTerminal/Platform/UIKit/UITerminalView.swift	2026-08-31 12:30:37
+@@ -135,7 +135,7 @@
+ 
+             core.isAttached = { [weak self] in self?.window != nil }
+             core.scaleFactor = { [weak self] in
+-                Double(self?.resolvedDisplayScale() ?? UIScreen.main.nativeScale)
++                Double(self?.resolvedDisplayScale() ?? (2.0 as CGFloat))
+             }
+             core.viewSize = { [weak self] in
+                 guard let self else { return (0, 0) }
