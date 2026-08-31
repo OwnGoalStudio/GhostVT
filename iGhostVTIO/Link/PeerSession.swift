@@ -271,7 +271,12 @@ final class PeerSession {
             return .unknownSession
         }
         guard let input = Self.inputData(in: message) else { return .invalidRequest }
-        session.write(input)
+        guard session.write(input) else {
+            DaemonFileLog.log(
+                "peer \(peerID) write of \(input.count) byte(s) refused: session \(id) holds \(session.pendingInputByteCount) byte(s) its program has not read"
+            )
+            return .inputBacklog
+        }
         return .success
     }
 
@@ -285,7 +290,7 @@ final class PeerSession {
         guard let session = registry.session(id) else { return .unknownSession }
         guard let input = Self.inputData(in: message) else { return .invalidRequest }
         DaemonFileLog.log("peer \(peerID) injectInput \(input.count) byte(s) into session \(id)")
-        session.write(input)
+        guard session.write(input) else { return .inputBacklog }
         return .success
     }
 

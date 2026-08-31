@@ -63,11 +63,12 @@ enum Commands {
         let client = DaemonClient()
         try client.connect()
         defer { client.cancel() }
-        // One message per cap. Nothing a user types on a command line comes
-        // near it; a `text` argument read from a file might.
+        // One message per chunk, in order — the daemon buffers what the
+        // program has not read yet. Nothing a user types on a command line
+        // comes near one chunk; a `text` argument read from a file might.
         var offset = 0
         repeat {
-            let end = min(input.count, offset + iGhostVTProtocol.maximumMessageDataByteCount)
+            let end = min(input.count, offset + iGhostVTProtocol.inputChunkByteCount)
             let chunk = Array(input[offset ..< end])
             try client.request(.injectInput) { message in
                 xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, sessionID)

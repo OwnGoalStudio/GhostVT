@@ -23,6 +23,9 @@ enum ShortcutError: Error {
     case unknownSession
     case sessionBusy
     case sessionLimitReached
+    /// The session's program is not reading its terminal and the daemon is
+    /// already holding all the input it will hold for it.
+    case inputBacklog
     case spawnFailed
     case refused(String)
     case sessionLingered
@@ -45,6 +48,8 @@ extension ShortcutError: CustomLocalizedStringResourceConvertible {
             "That terminal session is already open in another window."
         case .sessionLimitReached:
             "The session limit has been reached. Close a session and try again."
+        case .inputBacklog:
+            "The session's program is not reading its input. Wait for it to catch up and try again."
         case .spawnFailed:
             "The shell could not be started. Check the default shell in iGhostVT Settings."
         case let .refused(detail):
@@ -171,12 +176,13 @@ final class ShortcutDaemonClient: @unchecked Sendable {
         })
     }
 
-    /// Writes `bytes` to the session's PTY as if typed. Chunked to the
-    /// wire's message cap; nothing an intent parameter carries comes near it.
+    /// Writes `bytes` to the session's PTY as if typed, in order. Chunked
+    /// like every other input path; nothing an intent parameter carries
+    /// comes near one chunk.
     func inject(_ bytes: [UInt8], into id: UInt64) async throws {
         var offset = 0
         repeat {
-            let end = min(bytes.count, offset + iGhostVTProtocol.maximumMessageDataByteCount)
+            let end = min(bytes.count, offset + iGhostVTProtocol.inputChunkByteCount)
             let chunk = Array(bytes[offset ..< end])
             try await request(.injectInput) { message in
                 xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, id)
@@ -306,6 +312,8 @@ final class ShortcutDaemonClient: @unchecked Sendable {
             return .failure(.sessionBusy)
         case .sessionLimitReached:
             return .failure(.sessionLimitReached)
+        case .inputBacklog:
+            return .failure(.inputBacklog)
         case .spawnFailed:
             if let detail = string(reply, iGhostVTWireKey.errorMessage), !detail.isEmpty {
                 return .failure(.refused(detail))

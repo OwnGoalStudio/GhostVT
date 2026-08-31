@@ -34,6 +34,29 @@ final class PTYSession {
     /// what a real terminal does when nobody is reading it.
     private var isOutputPaused = false
 
+    /// Input the kernel has not taken yet, oldest first.
+    ///
+    /// A PTY master accepts about a kilobyte ahead of the program reading the
+    /// terminal (XNU's `TTYHOG - 2`, ~1022 bytes) and answers `EAGAIN` for
+    /// the rest — and a paste is one write of everything. Without this
+    /// buffer the tail was simply dropped: a 13 KB paste reached the shell as
+    /// its first 1022 bytes, cut mid-character, and the bracketed-paste
+    /// terminator that followed it was lost with the rest, leaving the
+    /// program stuck in paste mode.
+    ///
+    /// So the remainder waits here and goes in as the program reads, driven
+    /// by `writeSource` — a PTY master reports writable exactly when the
+    /// slave's input queue has room. Appended to only, in the order writes
+    /// arrive, which is what keeps a chunked paste in sequence.
+    private var pendingInput: [UInt8] = []
+    private var pendingInputOffset = 0
+    private var writeSource: DispatchSourceWrite?
+    private var isWriteArmed = false
+
+    /// Past this the buffer is handed back to the allocator once drained
+    /// rather than kept for the next keystroke.
+    private static let retainedInputCapacity = 64 * 1024
+
     private var onOutput: OutputHandler?
     private var onExit: ExitHandler?
     private var onProcessName: ProcessNameHandler?
@@ -363,14 +386,145 @@ final class PTYSession {
         }
     }
 
-    /// Bytes typed by the user, forwarded to the shell. EAGAIN on a full PTY
-    /// buffer drops the tail: the shell is not draining, and that beats
-    /// blocking the daemon's queue.
-    func write(_ data: Data) {
-        guard isAlive, !data.isEmpty else { return }
-        data.withUnsafeBytes { buffer in
-            _ = writeFully(master, buffer)
+    /// Bytes typed (or pasted) by the user, forwarded to the shell — all of
+    /// them, in the order they were handed over, at the pace the program
+    /// reads them.
+    ///
+    /// Never blocks: the master is non-blocking and this runs on the daemon's
+    /// one control queue. Whatever the kernel will not take now waits in
+    /// ``pendingInput``.
+    ///
+    /// Returns false when the session already holds
+    /// `sessionPendingInputByteCount` of unread input — the program is not
+    /// reading its terminal. Nothing of `data` is queued then: a refusal the
+    /// caller can report beats a paste that silently loses its second half.
+    @discardableResult
+    func write(_ data: Data) -> Bool {
+        guard isAlive, !data.isEmpty else { return true }
+        guard pendingInputByteCount + data.count <= iGhostVTProtocol.sessionPendingInputByteCount else {
+            return false
         }
+        // The common case — a keystroke, a paste small enough for the
+        // kernel — never touches the buffer.
+        if pendingInputByteCount == 0 {
+            switch data.withUnsafeBytes({ Self.writeAvailable(master, $0) }) {
+            case let .wrote(count) where count == data.count:
+                return true
+            case let .wrote(count):
+                pendingInput.append(contentsOf: data[(data.startIndex + count)...])
+            case .wouldBlock:
+                pendingInput.append(contentsOf: data)
+            case .failed:
+                // EIO: the slave is closed, the child is on its way out. The
+                // exit paths report it; there is nothing to hold for.
+                return true
+            }
+        } else {
+            pendingInput.append(contentsOf: data)
+        }
+        armWriteSource()
+        return true
+    }
+
+    /// Input accepted but not yet handed to the kernel.
+    var pendingInputByteCount: Int {
+        pendingInput.count - pendingInputOffset
+    }
+
+    private enum WriteOutcome {
+        case wrote(Int)
+        case wouldBlock
+        case failed
+    }
+
+    /// One non-blocking write, taking as much as the kernel will accept.
+    /// `EAGAIN` with nothing written is `wouldBlock`; a short write is
+    /// `wrote`, since XNU only reports `EWOULDBLOCK` when no byte went in.
+    private static func writeAvailable(
+        _ descriptor: Int32,
+        _ buffer: UnsafeRawBufferPointer
+    ) -> WriteOutcome {
+        guard let base = buffer.baseAddress, !buffer.isEmpty else { return .wrote(0) }
+        while true {
+            let written = Darwin.write(descriptor, base, buffer.count)
+            if written >= 0 {
+                return .wrote(written)
+            }
+            switch errno {
+            case EINTR:
+                continue
+            case EAGAIN:
+                return .wouldBlock
+            default:
+                return .failed
+            }
+        }
+    }
+
+    /// The master has room again: push what is pending until it has none.
+    private func flushPendingInput() {
+        while pendingInputByteCount > 0 {
+            let outcome = pendingInput.withUnsafeBytes { bytes in
+                Self.writeAvailable(master, UnsafeRawBufferPointer(rebasing: bytes[pendingInputOffset...]))
+            }
+            switch outcome {
+            case let .wrote(count):
+                pendingInputOffset += count
+            case .wouldBlock:
+                return
+            case .failed:
+                discardPendingInput()
+                return
+            }
+        }
+        discardPendingInput()
+    }
+
+    private func discardPendingInput() {
+        pendingInput.removeAll(
+            keepingCapacity: pendingInput.capacity <= Self.retainedInputCapacity
+        )
+        pendingInputOffset = 0
+        disarmWriteSource()
+    }
+
+    private func armWriteSource() {
+        guard !isWriteArmed else { return }
+        if let writeSource {
+            writeSource.resume()
+            isWriteArmed = true
+            return
+        }
+        let source = DispatchSource.makeWriteSource(fileDescriptor: master, queue: queue)
+        source.setEventHandler { [weak self] in
+            self?.flushPendingInput()
+        }
+        // Created suspended by libdispatch; `activate` counts as the first
+        // resume, so the arm/disarm pair below stays balanced.
+        writeSource = source
+        isWriteArmed = true
+        source.activate()
+    }
+
+    private func disarmWriteSource() {
+        guard isWriteArmed else { return }
+        writeSource?.suspend()
+        isWriteArmed = false
+    }
+
+    /// Stops feeding the PTY. Resumed before it is cancelled — releasing a
+    /// suspended dispatch object is a crash — and the buffer goes with it.
+    private func stopWriting() {
+        pendingInput = []
+        pendingInputOffset = 0
+        guard let writeSource else { return }
+        if !isWriteArmed {
+            writeSource.resume()
+            isWriteArmed = true
+        }
+        writeSource.cancel()
+        self.writeSource = nil
+        isWriteArmed = false
     }
 
     func resize(columns: UInt16, rows: UInt16) {
@@ -417,6 +571,7 @@ final class PTYSession {
 
     func invalidate() {
         stopReading()
+        stopWriting()
         exitSource?.cancel()
         exitSource = nil
         processNamePoll?.cancel()

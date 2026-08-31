@@ -459,6 +459,30 @@ Gotchas that bit us:
   the settled grid, and — because the library reports only *changes* — leaves
   a 49×16 PTY under a 93×32 surface until the next real resize. That 49×16 is
   the surface's birth size before its first `setSize`, not a transient layout.
+- **A PTY master takes about a kilobyte and no more, so input is buffered,
+  never truncated.** XNU accepts up to `TTYHOG - 2` (~1022 bytes) ahead of
+  the program reading the terminal and answers `EAGAIN` for the rest — and a
+  paste is one write of the whole clipboard. `PTYSession.write` used to hand
+  that to `writeFully` and drop whatever the kernel refused, so a 13 KB paste
+  reached the shell as its first 1022 bytes, cut mid-character, with the
+  bracketed-paste terminator lost behind it: the program stayed in paste mode
+  and ate every key after. It now queues the remainder in `pendingInput` and
+  feeds it from a `DispatchSourceWrite` on the master (a PTY reports writable
+  exactly when the slave's input queue has room), bounded by
+  `sessionPendingInputByteCount` — a request that would pass the cap is
+  refused whole as `inputBacklog`, never trimmed. **Nothing on this path may
+  block**: it runs on the io side's one control queue, so a blocking write is
+  the whole daemon stalled behind a program that is not reading.
+  Correspondingly, every client sends input in `inputChunkByteCount` (512
+  KiB) messages — a single message may only carry
+  `maximumMessageDataByteCount`, and the daemon refuses more outright, which
+  is how a large paste used to vanish entirely. The chunks are **not**
+  acknowledged and must not be: XPC drains one connection's messages FIFO,
+  the proxy forwards frames in the order it reads them, and the session
+  appends them in the order it is handed them, so order is already
+  guaranteed — waiting for a reply per chunk would only pace every paste at a
+  round trip. The harness proves both halves (26 KB byte-for-byte through a
+  raw-mode `cat`, and a chunked paste through the real proxy).
 - A shell inherits both the daemon's resource limits and every descriptor
   that survives `execve`. Keep an explicit launchd `NumberOfFiles` soft limit
   sized for user workloads, and mark every daemon-owned session descriptor

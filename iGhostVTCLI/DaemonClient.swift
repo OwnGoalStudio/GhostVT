@@ -49,6 +49,7 @@ enum CLIError: Error {
             case .spawnFailed: return "The shell could not be started. Check the default shell in iGhostVT Settings."
             case .handshakeRequired, .unsupportedVersion: return "Unable to connect to the terminal daemon. Restart iGhostVT and try again."
             case .invalidRequest: return "The terminal daemon did not accept the request. Try again."
+            case .inputBacklog: return "The session's program is not reading its input. Wait for it to catch up and try again."
             case .operationFailed, .success: return "The terminal daemon could not complete the request. Try again."
             }
         case let .sessionLingered(id):

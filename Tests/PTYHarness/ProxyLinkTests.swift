@@ -329,6 +329,75 @@ func runProxyLinkTests() {
         "input written through the proxy comes back out"
     )
 
+    // A paste: more than one chunk, sent back to back without waiting for
+    // anything, the way the app sends one. It has to come out the far end
+    // whole and in order — the proxy forwards frames as it reads them, and
+    // the session queues them in that order — and none of it may be lost to
+    // a PTY master that only takes about a kilobyte at a time.
+    //
+    // Its own session, in raw mode: a canonical-mode terminal has a line
+    // length of its own and would hold a chunk with no newline in it, which
+    // is the kernel's business and not this test's.
+    print("proxy chunked paste")
+    let pasteOpened = request(supervisor, from: peer, .openSession) { message in
+        let command = xpc_array_create(nil, 0)
+        for argument in ["/bin/sh", "-c", "stty raw -echo; exec cat"] {
+            xpc_array_append_value(command, xpc_string_create(argument))
+        }
+        xpc_dictionary_set_value(message, iGhostVTWireKey.command, command)
+    }
+    let pasteID = pasteOpened.map { xpc_dictionary_get_uint64($0, iGhostVTWireKey.sessionID) } ?? 0
+    check(replyCode(pasteOpened) == .success && pasteID > 0, "a session for the paste opens")
+    // Let `stty` run before anything is typed at it.
+    Thread.sleep(forTimeInterval: 0.5)
+    let pasteChunk = String(repeating: "0123456789abcdef", count: 1024) // 16 KiB
+    let pasteChunkCount = 3
+    harnessQueue.async {
+        for index in 0 ..< pasteChunkCount {
+            let message = makeRequest(.write) { message in
+                xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, pasteID)
+                setInput(message, "<\(index)>" + pasteChunk)
+            }
+            supervisor.forward(from: peer, message: message, wantsReply: false) { _ in }
+        }
+        let terminator = makeRequest(.write) { message in
+            xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, pasteID)
+            setInput(message, "paste-end")
+        }
+        supervisor.forward(from: peer, message: terminator, wantsReply: false) { _ in }
+    }
+    check(
+        waitUntil(20) { peer.output(of: pasteID).contains("paste-end") },
+        "a multi-chunk paste reaches the end of the session's input"
+    )
+    let pasted = peer.output(of: pasteID)
+    let arrived = pasted.components(separatedBy: pasteChunk).count - 1
+    check(
+        arrived == pasteChunkCount,
+        "every chunk of it arrived whole (\(arrived) of \(pasteChunkCount))"
+    )
+    check(
+        pasted.count == pasteChunkCount * (pasteChunk.count + 3) + "paste-end".count,
+        "with nothing added or lost around them (\(pasted.count) characters)"
+    )
+    check(
+        (0 ..< pasteChunkCount).allSatisfy { index in
+            guard let marker = pasted.range(of: "<\(index)>"),
+                  let end = pasted.range(of: "paste-end") else { return false }
+            guard index > 0 else { return marker.lowerBound < end.lowerBound }
+            guard let previous = pasted.range(of: "<\(index - 1)>") else { return false }
+            return previous.lowerBound < marker.lowerBound && marker.lowerBound < end.lowerBound
+        },
+        "and in the order it was sent"
+    )
+    check(
+        replyCode(request(supervisor, from: peer, .closeSession) {
+            xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, pasteID)
+        }) == .success,
+        "the paste session closes"
+    )
+    _ = waitUntil { listedRow(supervisor, from: peer, sessionID: pasteID) == nil }
+
     let listed = request(supervisor, from: peer, .listSessions)
     let sessions = listed.flatMap { xpc_dictionary_get_value($0, iGhostVTWireKey.sessions) }
     check(sessions.map { xpc_array_get_count($0) } == 1, "listSessions sees the one session")

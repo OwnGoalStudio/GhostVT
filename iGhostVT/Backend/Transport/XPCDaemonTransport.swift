@@ -133,17 +133,37 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         }
     }
 
+    /// Keystrokes and pastes, in `inputChunkByteCount` messages.
+    ///
+    /// A paste is one call with the whole clipboard in it and can be any
+    /// size, while a message may only carry `maximumMessageDataByteCount` —
+    /// the daemon refuses more outright, which used to lose a large paste
+    /// entirely. Chunks go out back to back on this one connection and are
+    /// never waited on: XPC drains a connection's messages FIFO, so they
+    /// reach the daemon in the order they are queued here, and the session
+    /// feeds its PTY in that same order. Nothing needs an acknowledgement to
+    /// stay in sequence, and asking for one would pace every paste at a
+    /// round trip per chunk.
     func send(_ data: Data) {
         guard !data.isEmpty else { return }
         queue.async {
             guard let link = self.attachedLink() else { return }
-            let message = Self.makeMessage(.write, sessionID: link.sessionID)
-            data.withUnsafeBytes { buffer in
-                if let base = buffer.baseAddress {
-                    xpc_dictionary_set_data(message, iGhostVTWireKey.data, base, buffer.count)
+            var offset = data.startIndex
+            while offset < data.endIndex {
+                let end = data.index(
+                    offset,
+                    offsetBy: iGhostVTProtocol.inputChunkByteCount,
+                    limitedBy: data.endIndex
+                ) ?? data.endIndex
+                let message = Self.makeMessage(.write, sessionID: link.sessionID)
+                data[offset ..< end].withUnsafeBytes { buffer in
+                    if let base = buffer.baseAddress {
+                        xpc_dictionary_set_data(message, iGhostVTWireKey.data, base, buffer.count)
+                    }
                 }
+                xpc_connection_send_message(link.connection, message)
+                offset = end
             }
-            xpc_connection_send_message(link.connection, message)
         }
     }
 
@@ -654,10 +674,12 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
 
     private static func describe(_ code: iGhostVTReplyCode) -> String {
         switch code {
-        // `.success` never reaches here — both callers describe a failure —
-        // so it takes the generic wording rather than inventing a sentence
-        // that would read as nonsense in an error card.
-        case .success, .operationFailed:
+        // Neither `.success` nor `.inputBacklog` reaches here: both callers
+        // describe a failed open or attach, and a refused write is answered
+        // on a path that asks for no reply at all. They take the generic
+        // wording rather than inventing a sentence that would read as
+        // nonsense in an error card.
+        case .success, .operationFailed, .inputBacklog:
             String(localized: "Unable to complete this action. Try again.")
         case .invalidRequest: String(localized: "Unable to complete this action. Try again.")
         case .unsupportedVersion:

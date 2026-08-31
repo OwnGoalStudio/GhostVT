@@ -160,6 +160,116 @@ if let result = run(command: ["/bin/sh", "-c", "read line; echo GOT:$line"], inp
     check(false, "spawning a reading shell succeeded")
 }
 
+// A paste is one write of far more than a PTY master will take: XNU accepts
+// about `TTYHOG - 2` (~1022) bytes ahead of the program reading the terminal
+// and answers EAGAIN for the rest. That tail used to be dropped on the floor
+// — a 13 KB paste reached the shell as its first kilobyte, cut mid-character.
+// It must now arrive whole, in order, however slowly the program reads.
+print("a large write is not truncated")
+do {
+    let payload = (1 ... 400)
+        .map { String(format: "L%04d 中文　全角空格　abcdefghijklmnopqrstuvwxyz0123456789", $0) }
+        .joined(separator: "\n") + "\n"
+    let bytes = Array(payload.utf8)
+    check(bytes.count > 20 * 1024, "the payload is far past one PTY buffer (\(bytes.count) bytes)")
+    let session = try PTYSession(
+        id: 7,
+        // Raw mode: no line editing on the way in and no LF → CRLF on the
+        // way out, so what comes back is exactly what went in. `cat` reads
+        // it a chunk at a time, which is what makes the master fill up in
+        // the first place.
+        command: ["/bin/sh", "-c", "stty raw -echo; exec cat"],
+        environment: ["TERM": "xterm-256color", "PATH": "/usr/bin:/bin"],
+        columns: 80,
+        rows: 24,
+        queue: harnessQueue
+    )
+    let echoLock = NSLock()
+    var echoed = Data()
+    session.start(
+        onOutput: { _, data in
+            echoLock.lock()
+            echoed.append(data)
+            echoLock.unlock()
+        },
+        onExit: { _, _ in }
+    )
+    Thread.sleep(forTimeInterval: 0.4)
+    check(session.write(Data(bytes)), "the write is accepted")
+    // Chunked exactly as a client sends it, straight after, with no pause:
+    // the second write must queue behind the first, not race past it.
+    let tail = Array("TAIL-MARKER\n".utf8)
+    check(session.write(Data(tail)), "a write queued behind it is accepted too")
+    let deadline = Date().addingTimeInterval(20)
+    var settled = Data()
+    while Date() < deadline {
+        echoLock.lock()
+        settled = echoed
+        echoLock.unlock()
+        if settled.count >= bytes.count + tail.count {
+            break
+        }
+        usleep(50000)
+    }
+    check(
+        settled.count == bytes.count + tail.count,
+        "every byte written comes back (\(settled.count) of \(bytes.count + tail.count))"
+    )
+    check(
+        Array(settled.prefix(bytes.count)) == bytes,
+        "and in the order it was written, byte for byte"
+    )
+    check(
+        Array(settled.suffix(tail.count)) == tail,
+        "with the write that followed it landing after, not interleaved"
+    )
+    check(
+        String(decoding: settled, as: UTF8.self).contains("L0400 中文"),
+        "the last line survives, multibyte characters intact"
+    )
+    check(session.pendingInputByteCount == 0, "nothing is left pending once it is all in")
+    session.invalidate()
+} catch {
+    check(false, "a session for the large write spawns (\(error))")
+}
+
+// The bound on that buffer: a program that never reads its terminal cannot
+// make the daemon hold input without limit. The request past the cap is
+// refused whole — the caller is told, rather than half the paste vanishing.
+print("input for a program that never reads is bounded")
+do {
+    let session = try PTYSession(
+        id: 8,
+        command: ["/bin/sh", "-c", "stty raw -echo; exec sleep 30"],
+        environment: ["TERM": "xterm-256color", "PATH": "/usr/bin:/bin"],
+        columns: 80,
+        rows: 24,
+        queue: harnessQueue
+    )
+    session.start(onOutput: { _, _ in }, onExit: { _, _ in })
+    Thread.sleep(forTimeInterval: 0.4)
+    let chunk = Data(repeating: UInt8(ascii: "x"), count: iGhostVTProtocol.inputChunkByteCount)
+    var accepted = 0
+    var refused = false
+    for _ in 0 ..< 32 {
+        if session.write(chunk) {
+            accepted += 1
+        } else {
+            refused = true
+            break
+        }
+    }
+    check(refused, "a session whose program never reads eventually refuses more input")
+    check(
+        session.pendingInputByteCount <= iGhostVTProtocol.sessionPendingInputByteCount,
+        "and holds no more than its cap (\(session.pendingInputByteCount) bytes after \(accepted) chunks)"
+    )
+    session.invalidate()
+    check(session.pendingInputByteCount == 0, "invalidating releases the pending input")
+} catch {
+    check(false, "a session for the backlog test spawns (\(error))")
+}
+
 print("window size")
 if let result = run(
     command: [shellPath(), "-c", "sleep 0.6; stty size"],

@@ -25,7 +25,32 @@ enum iGhostVTProtocol {
         "/Applications/iGhostVT.app/ighostvt-cli",
     ]
 
+    /// The most `data` one message may carry. A hard cap on a single frame —
+    /// anything larger is `invalidRequest`, never a partial read.
     static let maximumMessageDataByteCount = 1 << 20
+
+    /// How much input a client puts in one `write` / `injectInput`. A paste
+    /// is split into chunks of this size and sent one after another on the
+    /// same connection, which is what makes it arrive whole and in order:
+    /// XPC drains a connection's messages FIFO, the proxy forwards frames in
+    /// the order it reads them, and the session appends each to its pending
+    /// input in the order it is handed them. No acknowledgement is needed
+    /// for that ordering, and none is waited for — a paste is not paced by a
+    /// round trip per chunk.
+    ///
+    /// Half the message cap on purpose: the keys around `data` cost a little,
+    /// and the io side's frame limit has to hold a chunk plus that.
+    static let inputChunkByteCount = 512 * 1024
+
+    /// Input `ighostvtd-io` holds for one session whose program is not
+    /// reading its terminal. The kernel takes about a kilobyte ahead of the
+    /// reader (`TTYHOG`) and refuses the rest with `EAGAIN`, so a paste waits
+    /// here and goes in as the program reads. Generous next to any real
+    /// paste, and a bound all the same: a request that would pass it is
+    /// refused whole (`inputBacklog`) — never trimmed, which is what silently
+    /// truncated pastes before this buffer existed.
+    static let sessionPendingInputByteCount = 4 << 20
+
     static let maximumSessionsPerPeer = 32
     static let maximumCommandArgumentCount = 64
 
@@ -58,6 +83,13 @@ enum iGhostVTOperation: UInt64, Sendable {
     case openSession = 3
     case attachSession = 4
     case detachSession = 5
+    /// `data` typed (or pasted) into the attached session's PTY, in full: the
+    /// session buffers whatever the kernel will not take yet and writes the
+    /// rest as the program reads. Chunks sent back to back on one connection
+    /// arrive in order — see `iGhostVTProtocol.inputChunkByteCount` — so the
+    /// app sends them without waiting for a reply. A reply, when one is
+    /// asked for, says the input was accepted, not that the program has read
+    /// it.
     case write = 6
     case resize = 7
     case closeSession = 8
@@ -74,9 +106,9 @@ enum iGhostVTOperation: UInt64, Sendable {
     /// it. The CLI's `capture`; the app never sends it.
     case snapshotSession = 11
     /// `data` typed into the session's PTY by a peer that is not attached
-    /// to it — `write` without the attachment gate. The CLI's `send`; the
-    /// app never sends it. No new trust: any admitted peer can already
-    /// `closeSession` anything it can list.
+    /// to it — `write` without the attachment gate, and buffered the same
+    /// way. The CLI's `send`; the app never sends it. No new trust: any
+    /// admitted peer can already `closeSession` anything it can list.
     case injectInput = 12
 }
 
@@ -102,6 +134,11 @@ enum iGhostVTReplyCode: Int64, Sendable {
     case sessionBusy = 6
     case spawnFailed = 7
     case operationFailed = 8
+    /// A `write` or `injectInput` refused whole: the session already holds
+    /// `iGhostVTProtocol.sessionPendingInputByteCount` of input its program
+    /// has not read. Nothing of the request was queued, so a client that
+    /// waits for replies can send it again once the program catches up.
+    case inputBacklog = 9
 }
 
 enum iGhostVTWireKey {

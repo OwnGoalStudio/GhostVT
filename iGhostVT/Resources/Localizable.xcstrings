@@ -16584,6 +16584,77 @@
         }
       }
     },
+    "The session's program is not reading its input. Wait for it to catch up and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Programm dieser Sitzung liest seine Eingaben nicht. Warte, bis es aufgeholt hat, und versuche es erneut."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The session's program is not reading its input. Wait for it to catch up and try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El programa de esta sesión no está leyendo su entrada. Espera a que se ponga al día e inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le programme de cette session ne lit pas son entrée. Attendez qu’il rattrape son retard, puis réessayez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il programma di questa sessione non sta leggendo il suo input. Attendi che recuperi e riprova."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このセッションのプログラムが入力を読み取っていません。処理が追いつくまで待ってからもう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 세션의 프로그램이 입력을 읽고 있지 않습니다. 처리가 따라잡을 때까지 기다린 후 다시 시도하십시오."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O programa desta sessão não está lendo sua entrada. Aguarde até que ele se atualize e tente novamente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Программа этого сеанса не читает ввод. Дождитесь, пока она справится, и повторите попытку."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该会话中的程序没有读取输入。请等待它处理完毕后重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該工作階段中的程式沒有讀取輸入。請等待它處理完畢後重試。"
+          }
+        }
+      }
+    },
     "The terminal session did not end in time. Try again." : {
       "extractionState" : "manual",
       "localizations" : {
