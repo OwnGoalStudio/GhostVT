@@ -52,7 +52,12 @@ struct TabContextMenu: View {
     @ViewBuilder
     private var lockControls: some View {
         tabLockControl
-        keyboardLockControl
+        // Not on the Mac: there is no software keyboard to lock, and the
+        // empty-inputView trick deliberately lets hardware keys through —
+        // which is every key a Mac has, so the lock read as broken there.
+        #if !targetEnvironment(macCatalyst)
+            keyboardLockControl
+        #endif
     }
 
     @ViewBuilder
@@ -74,6 +79,7 @@ struct TabContextMenu: View {
         }
     }
 
+    #if !targetEnvironment(macCatalyst)
     @ViewBuilder
     private var keyboardLockControl: some View {
         if #available(iOS 16.0, *) {
@@ -92,6 +98,7 @@ struct TabContextMenu: View {
             }
         }
     }
+    #endif
 
     // MARK: - The page as text
 

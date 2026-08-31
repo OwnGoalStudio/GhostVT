@@ -245,7 +245,13 @@ the lock was on. Handing UIKit an empty `inputView` (and a nil
 status, so hardware keys still arrive. Empty the `inputAssistantItem` groups
 along with it: the iPad shortcuts bar is not part of `inputAccessoryView`, and
 it stays floating over the terminal with a dictation button, costing 40pt of
-grid.
+grid. On the Mac the keyboard lock is **not offered at all** (context menu,
+menu bar and ⌥⌘K are `#if !targetEnvironment(macCatalyst)`, and
+`TerminalWindow` answers the selector as disabled): there is no software
+keyboard there, and hardware keys — every key a Mac has — pass through the
+empty `inputView` by design, so the lock read as broken. The `TabLock.keyboard`
+state and the Shortcuts vocabulary stay, for iOS and for shortcuts that sync
+across platforms.
 
 A tab switch on iOS does not raise the software keyboard unless it was
 already up (`KeyboardState.isVisible`; the switcher snapshots that as it

@@ -256,22 +256,27 @@ enum AppMenus {
                 ),
             ]
         )
+        var lockChildren: [UIMenuElement] = [
+            command(
+                L("Lock Tab", "Menu item: toggles the tab's input lock"),
+                #selector(AppCommandResponder.toggleTabLock(_:)),
+                "l", [.command, .alternate]
+            ),
+        ]
+        // The keyboard lock is not offered on the Mac (`TabContextMenu`
+        // has the reasoning); the menu item and its ⌥⌘K go with it.
+        #if !targetEnvironment(macCatalyst)
+            lockChildren.append(command(
+                L("Lock Keyboard", "Menu item: toggles the tab's keyboard lock"),
+                #selector(AppCommandResponder.toggleKeyboardLock(_:)),
+                "k", [.command, .alternate]
+            ))
+        #endif
         let locks = UIMenu(
             title: "",
             identifier: UIMenu.Identifier("wiki.qaq.iGhostVT.window.locks"),
             options: .displayInline,
-            children: [
-                command(
-                    L("Lock Tab", "Menu item: toggles the tab's input lock"),
-                    #selector(AppCommandResponder.toggleTabLock(_:)),
-                    "l", [.command, .alternate]
-                ),
-                command(
-                    L("Lock Keyboard", "Menu item: toggles the tab's keyboard lock"),
-                    #selector(AppCommandResponder.toggleKeyboardLock(_:)),
-                    "k", [.command, .alternate]
-                ),
-            ]
+            children: lockChildren
         )
         builder.insertChild(navigation, atStartOfMenu: .window)
         builder.insertSibling(locks, afterMenu: navigation.identifier)

@@ -100,9 +100,16 @@ final class TerminalWindow: UIWindow, AppCommandResponder {
              #selector(clearScreen(_:)),
              #selector(showNextTab(_:)),
              #selector(showPreviousTab(_:)),
-             #selector(toggleTabLock(_:)),
-             #selector(toggleKeyboardLock(_:)):
+             #selector(toggleTabLock(_:)):
             return hasActiveTab
+        case #selector(toggleKeyboardLock(_:)):
+            // Not offered on the Mac; anything that still asks (nothing
+            // should) reads it as disabled rather than half-working.
+            #if targetEnvironment(macCatalyst)
+                return false
+            #else
+                return hasActiveTab
+            #endif
         default:
             return super.canPerformAction(action, withSender: sender)
         }
