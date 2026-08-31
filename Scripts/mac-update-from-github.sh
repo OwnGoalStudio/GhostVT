@@ -6,7 +6,12 @@
 # Tag defaults to the latest release. The zip CI attaches is ad-hoc, so
 # Gatekeeper quarantine has to come off; a live helper pins Background Task
 # Management to the old cdhash, so the running app has to quit and the old
-# agent has to go *before* the bundle is swapped. The harness LaunchAgent
+# agent has to go *before* the bundle is swapped. When the keychain holds a
+# Developer ID Application identity the downloaded bundle is re-signed with
+# it first: BTM keys a Team-ID signature's launch constraint on the team,
+# not the cdhash, so the *next* update signed by the same team replaces the
+# helper without tripping the constraint at all. MAC_UPDATE_IDENTITY
+# overrides the choice; MAC_UPDATE_IDENTITY=- keeps the ad-hoc seal. The harness LaunchAgent
 # (`make mac-run`) shares the label `wiki.qaq.ighostvtd` — leaving it loaded
 # is the usual kSMErrorInvalidSignature after an install.
 #
@@ -64,6 +69,46 @@ test -x "$app/Contents/MacOS/ighostvtd" || die "the helper is missing"
 test -f "$app/Contents/Library/LaunchAgents/$label.plist" \
     || die "the bundled agent plist is missing"
 xattr -cr "$app"
+
+# CI signs ad-hoc, and an ad-hoc helper's launch constraint is that build's
+# cdhash — every update then leans on the digest repair. A Developer ID
+# signature is keyed on its Team ID instead, which survives updates. The
+# metadata is preserved on purpose: the CLI's identifier is a contract with
+# PeerAuthenticator, and the empty entitlement sets are deliberate.
+identity="${MAC_UPDATE_IDENTITY:-}"
+if [[ -z "$identity" ]]; then
+    identities="$(security find-identity -v -p codesigning 2>/dev/null \
+        | grep -o '"Developer ID Application: [^"]*"' | tr -d '"' || true)"
+    if [[ -n "$identities" ]]; then
+        # Prefer the team the installed app already carries, so the
+        # constraint BTM recorded keeps matching across this very update.
+        installed_team="$(codesign -dv "$dest" 2>&1 | sed -n 's/^TeamIdentifier=//p' || true)"
+        if [[ -n "$installed_team" && "$installed_team" != "not set" ]]; then
+            identity="$(grep -F "($installed_team)" <<<"$identities" | head -n 1 || true)"
+        fi
+        [[ -n "$identity" ]] || identity="$(head -n 1 <<<"$identities")"
+    fi
+fi
+if [[ -n "$identity" && "$identity" != "-" ]]; then
+    echo "==> re-signing as $identity"
+    resign() {
+        codesign --force --sign "$identity" --options runtime --timestamp \
+            --preserve-metadata=entitlements,identifier,flags "$1"
+    }
+    # Inside out, the order package-mac.sh seals them.
+    while IFS= read -r -d '' nested; do
+        resign "$nested"
+    done < <(find "$app/Contents" \
+        \( -name '*.framework' -o -name '*.appex' -o -name '*.bundle' -o -name '*.dylib' \) \
+        -print0 2>/dev/null)
+    resign "$app/Contents/MacOS/ighostvtd-io"
+    resign "$app/Contents/MacOS/ighostvtd"
+    resign "$app/Contents/MacOS/ighostvt-cli"
+    resign "$app"
+    codesign --verify --deep --strict "$app"
+else
+    echo "==> no Developer ID Application identity; keeping the ad-hoc signature"
+fi
 
 echo "==> quitting the installed app"
 # Path-scoped: a plain killall iGhostVT would also take down the Simulator.

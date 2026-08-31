@@ -406,7 +406,13 @@ Gotchas that bit us:
   `shutdown` went out) kept BTM's pin and the new helper died all the same.
   Quit the app before replacing the bundle; after the fact, `launchctl
   bootout gui/$UID/wiki.qaq.ighostvtd`, delete the
-  `MacLaunchAgent.registeredHelperDigest` default, and relaunch.
+  `MacLaunchAgent.registeredHelperDigest` default, and relaunch. The whole
+  class disappears with a Team ID: BTM keys a Developer ID signature's
+  constraint on the team, not the cdhash, so
+  `Scripts/mac-update-from-github.sh` re-signs the downloaded bundle with a
+  local Developer ID Application identity when the keychain holds one
+  (metadata preserved — the CLI's identifier stays the daemon's contract),
+  and an update signed by the same team replaces the helper cleanly.
 - **A drop pastes a path the shell can use, and where that path comes from
   depends on where the item lives.** `TerminalDropDelegate` replaces the
   library's drop interaction on both platforms (it has to *replace* the

@@ -121,7 +121,7 @@ help:
 	@echo "  mac-daemon-uninstall  Unload and remove the macOS LaunchAgent"
 	@echo "  mac-zip     Build, sign, and zip the distributable macOS app (MAC_ZIP_IDENTITY=$(MAC_ZIP_IDENTITY))"
 	@echo "  mac-zip-check  Validate the macOS packaging inputs"
-	@echo "  mac-update-from-github  Download a GitHub macOS zip and replace /Applications/iGhostVT.app (TAG=vX.Y.Z)"
+	@echo "  mac-update-from-github  Download a GitHub macOS zip, re-sign it with a local Developer ID if one exists, and replace /Applications/iGhostVT.app (TAG=vX.Y.Z)"
 	@echo "  set-version Write VERSION=x.y.z [BUILD=n] into Configuration/Version.xcconfig"
 	@echo "  clean       Remove derived data and generated packages"
 
