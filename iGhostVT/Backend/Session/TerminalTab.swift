@@ -262,14 +262,29 @@ final class TerminalTab: ObservableObject, Identifiable {
 
     /// The line under the process name: what the session says about itself
     /// — the shell-reported title (OSC 2) or the last watched command —
-    /// and the endpoint when it says nothing. Never repeats `displayTitle`:
-    /// with no process name the reported title is already the first line,
-    /// so this yields the endpoint instead.
+    /// and, when it says nothing, the page's own last non-empty row, so an
+    /// untitled session still reads as what it is doing rather than as
+    /// "Terminal" twice. Never repeats `displayTitle`: with no process
+    /// name the reported title is already the first line, so this yields
+    /// the fallback instead.
     var secondaryTitle: String {
         if store.processName.isEmpty {
-            return store.endpointDescription
+            return pageFallbackLine
         }
-        return reportedTitle.isEmpty ? store.endpointDescription : reportedTitle
+        return reportedTitle.isEmpty ? pageFallbackLine : reportedTitle
+    }
+
+    /// The last non-empty row of the viewport, and the endpoint only while
+    /// the page is still blank. Computed on render; `store.pageGeneration`
+    /// is what re-renders the rows while output flows, so this follows the
+    /// page at that pace rather than per chunk.
+    private var pageFallbackLine: String {
+        _ = store.pageGeneration
+        for line in snapshotPreview().split(separator: "\n", omittingEmptySubsequences: false).reversed() {
+            let trimmed = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !trimmed.isEmpty { return trimmed }
+        }
+        return store.endpointDescription
     }
 
     /// The reported title without the endpoint fallback, for the places

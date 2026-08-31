@@ -100,6 +100,12 @@ struct TabSlotShape: InsettableShape {
 /// and the slot's shape clips it, so no corner of it is transparent and
 /// nothing behind the drag shows through — sized to the source. No accent
 /// anywhere in it: the lifted card is neutral whichever tab is active.
+///
+/// Plain values, not the tab: the closure captures what the tab says at
+/// the moment the drag begins, which is all a snapshot needs — the
+/// preview is rendered in a detached hosting where an observed object's
+/// updates have nowhere to land, and rendering through one there came up
+/// as an empty card.
 struct TabDragPreview: View {
     enum Style {
         /// The strip's capsule: one line, the chip's height.
@@ -108,9 +114,19 @@ struct TabDragPreview: View {
         case row
     }
 
-    @ObservedObject var tab: TerminalTab
+    let title: String
+    let subtitle: String
+    let status: TerminalSessionStore.Status
     let style: Style
     let width: CGFloat
+
+    init(tab: TerminalTab, style: Style, width: CGFloat) {
+        title = tab.displayTitle
+        subtitle = tab.secondaryTitle
+        status = tab.store.status
+        self.style = style
+        self.width = width
+    }
 
     var body: some View {
         content
@@ -122,13 +138,32 @@ struct TabDragPreview: View {
 
     private var shape: TabSlotShape { TabSlotShape(style: style) }
 
+    /// The preview, rasterized up front. Handing SwiftUI the view itself
+    /// through `onDrag(_:preview:)` produced an empty card — the detached
+    /// hosting the system renders that closure in drew the background, the
+    /// mask and the hairline but none of the glyphs — so the card is drawn
+    /// into an image through a hosting controller of our own, at drag
+    /// start, and the drag carries the image.
+    @MainActor
+    static func rendered(for tab: TerminalTab, style: Style, width: CGFloat) -> Image {
+        let host = UIHostingController(rootView: TabDragPreview(tab: tab, style: style, width: width))
+        host.view.backgroundColor = .clear
+        let size = host.sizeThatFits(in: CGSize(width: width, height: 1000))
+        host.view.bounds = CGRect(origin: .zero, size: size)
+        host.view.layoutIfNeeded()
+        let image = UIGraphicsImageRenderer(bounds: host.view.bounds).image { context in
+            host.view.layer.render(in: context.cgContext)
+        }
+        return Image(uiImage: image)
+    }
+
     @ViewBuilder
     private var content: some View {
         switch style {
         case .chip:
             HStack(spacing: DS.Padding.xs) {
-                ObservedStatusDot(store: tab.store, font: .label)
-                Text(tab.displayTitle)
+                StatusDot(status: status, font: .label)
+                Text(title)
                     .font(DS.Font.label)
                     .lineLimit(1)
                     .truncationMode(.middle)
@@ -139,13 +174,13 @@ struct TabDragPreview: View {
         case .row:
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: DS.Padding.s) {
-                    ObservedStatusDot(store: tab.store, font: .labelEmphasis)
-                    Text(tab.displayTitle)
+                    StatusDot(status: status, font: .labelEmphasis)
+                    Text(title)
                         .font(DS.Font.labelEmphasis)
                         .lineLimit(1)
                         .truncationMode(.middle)
                 }
-                Text(tab.secondaryTitle)
+                Text(subtitle)
                     .font(DS.Font.caption)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
@@ -180,7 +215,7 @@ extension View {
                     dragged.tab = tab
                     return TabReorder.itemProvider(for: tab)
                 } preview: {
-                    TabDragPreview(tab: tab, style: preview, width: width)
+                    TabDragPreview.rendered(for: tab, style: preview, width: width)
                 }
                 .onDrop(
                     of: [TabReorder.itemType],

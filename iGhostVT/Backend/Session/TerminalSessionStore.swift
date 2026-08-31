@@ -267,6 +267,7 @@ final class TerminalSessionStore: ObservableObject {
                 TerminalDebugFileLog.write("[session] received chunk #\(receivedChunks) bytes=\(data.count) status=\(status)")
             }
             noteOutput()
+            notePageChanged()
             session.receive(data)
         case let .processName(name, isShell):
             processName = name
@@ -362,6 +363,31 @@ final class TerminalSessionStore: ObservableObject {
         isAwaitingFirstOutput = false
     }
 
+    /// Bumped as output arrives, at most once a second with one trailing
+    /// bump after a burst, so a row whose second line mirrors the page
+    /// (`TerminalTab.secondaryTitle`) re-renders while the page changes
+    /// without a redraw per chunk.
+    @Published private(set) var pageGeneration: UInt64 = 0
+    private var lastPageBump = Date.distantPast
+    private var pageBumpScheduled = false
+
+    private func notePageChanged() {
+        let now = Date()
+        if now.timeIntervalSince(lastPageBump) >= 1 {
+            lastPageBump = now
+            pageGeneration &+= 1
+        } else if !pageBumpScheduled {
+            pageBumpScheduled = true
+            Task { [weak self] in
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                guard let self else { return }
+                pageBumpScheduled = false
+                lastPageBump = Date()
+                pageGeneration &+= 1
+            }
+        }
+    }
+
     private func noteOutput() {
         guard !hasReceivedOutput else { return }
         hasReceivedOutput = true
@@ -375,6 +401,10 @@ final class TerminalSessionStore: ObservableObject {
     /// every pair. The carriage return alone still guarantees column zero.
     private func printStatusLine(_ message: String) {
         noteOutput()
+        // The page changed even though no transport event fired: a row whose
+        // second line mirrors the page would otherwise sit on the state from
+        // before this line until the next real output.
+        notePageChanged()
         session.receive("\r\u{1b}[2m[iGhostVT] \(message)\u{1b}[0m\r\n")
     }
 }
