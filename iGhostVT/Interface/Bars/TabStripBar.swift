@@ -17,6 +17,7 @@ struct TabStripBar: View {
     @ObservedObject var tabManager: TabManager
     @Binding var showsSidebar: Bool
     @State private var window: UIWindow?
+    @StateObject private var draggedTab = DraggedTab()
 
     var body: some View {
         GlassBarContainer(spacing: DS.Padding.s) {
@@ -138,9 +139,11 @@ struct TabStripBar: View {
                         .contextMenu {
                             TabContextMenu(tab: tab, tabManager: tabManager, window: window)
                         }
+                        .tabReorderable(tab, in: tabManager, dragged: draggedTab, preview: .chip, width: width)
                     }
                 }
                 .padding(DS.Padding.xs)
+                .tabReorderContainer(dragged: draggedTab)
             }
         }
         // A GeometryReader fills whatever it is given, in both axes; the

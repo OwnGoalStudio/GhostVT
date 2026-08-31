@@ -285,6 +285,22 @@ final class TabManager: ObservableObject {
         tabs.contains { $0.hasRunningProgram }
     }
 
+    /// A drag in the sidebar or the strip carried `tab` over `destination`:
+    /// it takes that slot, and the tabs between shift one place towards
+    /// where it came from — the live reorder `TabReorder` drives from
+    /// `dropEntered`. The order is the window's alone; ⌘1–9 and ⌃Tab
+    /// follow it, the daemon never hears of it.
+    func moveTab(_ tab: TerminalTab, toSlotOf destination: TerminalTab) {
+        guard
+            let from = tabs.firstIndex(where: { $0.id == tab.id }),
+            let to = tabs.firstIndex(where: { $0.id == destination.id }),
+            from != to
+        else { return }
+        withAnimation(DS.Motion.smooth) {
+            tabs.move(fromOffsets: IndexSet(integer: from), toOffset: to > from ? to + 1 : to)
+        }
+    }
+
     func activateAdjacentTab(offset: Int) {
         guard
             let activeTabID,

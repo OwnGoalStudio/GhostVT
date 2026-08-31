@@ -135,6 +135,11 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
                         && !type.conforms(to: .url)
                         && (named || !type.conforms(to: .text))
                 }
+            // An item that is none of these — a tab dragged out of the
+            // sidebar or the strip (`TabReorder.itemType`), which conforms
+            // to nothing — is not a drop the terminal accepts, so the drag
+            // shows no copy badge over it and pastes nothing.
+            guard hasFileURL || isText || isLink || fileType != nil else { return nil }
         }
 
         func resolve(stagingIn directory: URL) async -> Resolved? {

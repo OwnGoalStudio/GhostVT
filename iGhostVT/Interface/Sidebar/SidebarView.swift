@@ -12,6 +12,9 @@ struct SidebarView: View {
     @ObservedObject private var theme = AppTheme.shared
     @Environment(\.colorScheme) private var colorScheme
     @State private var window: UIWindow?
+    @StateObject private var draggedTab = DraggedTab()
+    /// The rows' width, so a row's drag preview is the row's size.
+    @State private var rowWidth: CGFloat = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -30,7 +33,10 @@ struct SidebarView: View {
             #endif
 
             ScrollView {
-                LazyVStack(spacing: 2) {
+                // Not lazy: a window has tens of tabs at most, nothing here
+                // is worth deferring, and a plain stack keeps every row's
+                // drag and drop hooks mounted while a reorder moves them.
+                VStack(spacing: 2) {
                     ForEach(tabManager.tabs) { tab in
                         SidebarRow(
                             tab: tab,
@@ -40,6 +46,7 @@ struct SidebarView: View {
                             tabManager: tabManager,
                             window: window
                         )
+                        .tabReorderable(tab, in: tabManager, dragged: draggedTab, preview: .row, width: rowWidth)
                     }
 
                     Button(action: { tabManager.newTab() }) {
@@ -60,6 +67,17 @@ struct SidebarView: View {
                     .accessibilityLabel("New Tab")
                 }
                 .padding(DS.Padding.m)
+                .frame(maxWidth: .infinity)
+                .background(
+                    GeometryReader { proxy in
+                        Color.clear.preference(
+                            key: SidebarRowWidthKey.self,
+                            value: proxy.size.width - DS.Padding.m * 2
+                        )
+                    }
+                )
+                .onPreferenceChange(SidebarRowWidthKey.self) { rowWidth = $0 }
+                .tabReorderContainer(dragged: draggedTab)
             }
 
             footer
@@ -205,5 +223,12 @@ private struct SidebarRow: View {
         .contextMenu {
             TabContextMenu(tab: tab, tabManager: tabManager, window: window)
         }
+    }
+}
+
+private struct SidebarRowWidthKey: PreferenceKey {
+    static let defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
