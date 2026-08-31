@@ -2,7 +2,8 @@
 
 *2026-08-31. Experiments run on a Mac with Xcode 27.0 beta 6 (visionOS 27.0
 SDK) and Zig 0.15.2, against a scratch copy of this repo and of
-libghostty-spm. Nothing was committed except this note and the patch files
+libghostty-spm. The libghostty-spm half has since landed there (`dd2df3f`,
+Phase 1 below); this repo holds this note and the app-side patch files
 beside it in `visionos/`. The target is a **jailbroken Vision Pro** — the
 same product as on iOS: the app renders, the bundled `ighostvtd` owns the
 shells.*
@@ -15,9 +16,13 @@ the simulator slice), the Swift wrapper, the app, **and the daemon**
 at all), and the existing `package-deb.sh` turns the xros products into a
 roothide-style and a rootless-style `.deb` after a one-line fix. The app
 installs and launches on the visionOS 27 simulator; its terminal surface
-renders. What is left is small and specific: the patches below, the
-jailbreak's own layout and dpkg vocabulary (open questions, listed), and a
-device to run it on.
+renders. **Phase 1 has since landed in libghostty-spm** (commit `dd2df3f`,
+2026-08-31): the Ghostty and Zig std patches, the wrapper guards, the
+xros/xrsimulator slices in every build script and CI matrix, and the
+`upstream.1.3.1-2` storage tag; what remains there is dispatching the two
+workflows. What is left here is small and specific: the app patch below,
+the jailbreak's own layout and dpkg vocabulary (open questions, listed),
+and a device to run it on.
 
 Theos is not involved: the repo builds with `xcodebuild`, signs with `ldid`,
 packages with `dpkg-deb`, and that pipeline already works for xros.
@@ -36,7 +41,8 @@ the macOS 27 (and 26.5) SDK's `libSystem.tbd` lists targets
 (which passes `-syslibroot <SDK>`) links an empty libSystem. An explicit
 `-target aarch64-macos.27.0` works because it skips the syslibroot.
 
-Workaround used here (`visionos/xcrun-overlay-shim.sh`): an `xcrun` shim on
+Workaround used here (now libghostty-spm's
+`Script/support/xcode27-sdk-overlay.sh`): an `xcrun` shim on
 `PATH` that answers `--sdk macosx --show-sdk-path` with an overlay SDK — a
 directory of symlinks into the real SDK plus a copied `usr/lib` whose
 `.tbd` `targets:` lines also name `arm64-macos`/`arm64-maccatalyst`. Zig
@@ -68,8 +74,9 @@ visionOS:
 for visionos". The crash is one line: `SharedDeps.zig:383` unwraps a
 `MetallibStep` that returns `null` for any OS tag but macOS/iOS.
 
-`visionos/0012-visionos.sh` (same style as `Patches/ghostty/*.sh`) fixes
-everything Ghostty-side:
+libghostty-spm's `Patches/ghostty/0012-visionos.sh` (the `LibtoolStep` and
+`libghostty-vt.dylib` changes became `0013-host-toolchain.sh`, since they
+fix iOS on Xcode 27 too) fixes everything Ghostty-side:
 
 1. `MetallibStep.zig` — `xros`/`xrsimulator` SDK names and the version
    flag: the Metal compiler has no `-mxros-version-min`; it takes
@@ -100,10 +107,12 @@ minos 1.0`, 172 archive members (the same count as the iOS slice), with
 `else => @compileError`: `fs.zig` (`max_path_bytes`, `NAME_MAX`),
 `fs/Dir.zig` (three arms of the Darwin directory iterator),
 `process/Child.zig`, `debug/Dwarf/abi.zig` (`mcontext_t` register map),
-`debug/SelfInfo.zig`. `visionos/zig-0.15.2-std-visionos.patch` (27 lines)
-adds `.tvos, .watchos, .visionos` beside `.ios`. Zig ships `lib/std` as
-source, so CI can apply it to `$(zig env | grep lib_dir)` after
-`setup-zig`. Moving to a Ghostty ref that builds with Zig 0.16 would
+`debug/SelfInfo.zig`. libghostty-spm's
+`Patches/zig/0.15.2-visionos-std.patch` adds `.tvos, .watchos, .visionos`
+beside `.ios`; `Script/prepare-zig-lib.sh` applies it to a *copy* of the
+toolchain's `lib/` under the build cache and `build-ghostty.sh` exports that
+copy as `ZIG_LIB_DIR` for `*visionos*` targets only, so the Zig on PATH is
+never edited and no other target changes. Moving to a Ghostty ref that builds with Zig 0.16 would
 retire this patch and the SDK shim at once — but every spm patch
 (`0001`–`0011`) is pinned to 1.3.1, so that is its own project.
 
@@ -111,7 +120,8 @@ retire this patch and the SDK shim at once — but every spm patch
 
 Type-checked against the xros SDK by emitting `.swiftmodule`s by hand
 (the C headers are platform-neutral, so this needed no binary). Six sites
-in five files (`visionos/libghostty-spm-wrapper-visionos.patch`):
+in five files (landed in libghostty-spm `dd2df3f`; the fallback scale is a
+named `UITerminalView.fallbackDisplayScale` there):
 
 | file | site | visionOS |
 |---|---|---|
@@ -234,21 +244,22 @@ iPad's — visionOS's own bar/ornament conventions are untouched.
   budget for moving Ghostty to a 0.16-buildable ref (re-basing eleven
   spm patches).
 
-### Phase 1 — libghostty-spm ships an xros slice (≈1–2 days)
-1. Land `0012-visionos.sh` as `Patches/ghostty/0012-visionos.sh`; keep
-   the `LibtoolStep` llvm-ar change in it or split it out as `0013` —
-   it fixes iOS on Xcode 27 too.
-2. Add the Zig std patch under `Patches/zig/` and apply it in
-   `Script/build-ghostty.sh` after locating `zig env` lib_dir (skip when
-   the file already names visionos, so a newer Zig is a no-op).
-3. `build.yml` matrix: `visionos` group (`xros`, `xrsimulator` variants);
-   `build.sh` usage text; `verify-xcframework.sh` expects `xros-arm64`
-   and `xros-arm64_x86_64-simulator`.
-4. `Package.swift.template` / `Package.local.swift`: `.visionOS(.v1)`.
-5. Apply the wrapper patch; `Script/test.sh` gains
-   `generic/platform=visionOS` and `visionOS Simulator`.
-6. Tag `upstream.1.3.1-…` → new package release (1.5.0: a new platform is
-   a feature); bump `minimumVersion` here.
+### Phase 1 — libghostty-spm ships an xros slice — **done** (`dd2df3f`)
+Landed on 2026-08-31, verified locally with a pristine Zig 0.15.2 through
+the CI code path (fresh checkout of the pinned ref, full patch stack;
+aarch64-visionos, both simulator archs, aarch64-ios, both macOS archs; the
+six-slice XCFramework through `verify-xcframework`, `test.sh` on eleven
+destinations, `swift test` on macOS, the consumer test on all six).
+What remains is two dispatches, in order:
+1. **Build Upstream XCFramework** (build.yml) → publishes
+   `upstream.1.3.1-2` (`Ghostty.build` = 2; the old `upstream.1.3.1`
+   asset stays, every 1.4.x tag pins its checksum).
+2. **Release Package** (release.yml) with `package_version` 1.5.0 (a new
+   platform is a feature) → then bump `minimumVersion` in this repo's
+   pbxproj package reference.
+Until 2 runs, the `visionOS` destinations in libghostty-spm's `test.sh`
+skip themselves (the remote asset has no xros slice yet); nothing else is
+gated.
 
 ### Phase 2 — the tree builds and packages for xros (≈1 day)
 1. Apply `app-visionos.patch` (app *and* daemon targets). Put
