@@ -213,9 +213,12 @@ private struct SidebarRow: View {
             }
             .padding(.horizontal, DS.Padding.m)
             .padding(.vertical, DS.Padding.s)
+            // Neutral, like the strip's chips: an accent-tinted slab is
+            // what the long-press lift used to pick up, and over the
+            // terminal it read as a glitch rather than a highlight.
             .background(
                 RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
-                    .fill(isActive ? Color.accentColor.opacity(0.18) : Color.clear)
+                    .fill(isActive ? Color.primary.opacity(0.12) : Color.clear)
             )
             .contentShape(RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous))
         }

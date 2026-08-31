@@ -9,8 +9,10 @@ import UniformTypeIdentifiers
 
 /// Drag-to-reorder for the tab list, shared by the sidebar's rows and the
 /// strip's chips. The row under the pointer takes the dragged tab's slot as
-/// the drag passes over it (`dropEntered`), so the list reorders live and
-/// the drop itself only ends the gesture.
+/// the drag passes over it (`dropEntered`, re-checked from `dropUpdated` —
+/// a reorder slides rows under a pointer that never crossed their edge, and
+/// the enter event alone missed those), so the list reorders live and the
+/// drop itself only ends the gesture.
 ///
 /// Built on `onDrag`/`onDrop` rather than `List.onMove` because neither
 /// presentation is a `List`, and rather than `draggable`/`dropDestination`
@@ -56,13 +58,48 @@ final class DraggedTab: ObservableObject {
     /// redraw of every row at each `dropEntered` would fight the move
     /// animation.
     var tab: TerminalTab?
+
+    /// When the last live reorder happened. `dropUpdated` fires many times
+    /// a second, and a move mid-animation can land the pointer back in the
+    /// slot it just left — re-moving only after a beat lets the previous
+    /// move settle instead of oscillating.
+    var lastSlotChange = Date.distantPast
+}
+
+/// The slot's outline: the strip's capsule or the sidebar's rounded card.
+/// One shape serves as the drag preview's clip, the hairline's path, and
+/// the corner mask `contentShape(.dragPreview, …)` puts on the lift — the
+/// system's default lift is the view's rectangular snapshot, whose sharp
+/// corners over the terminal read as a glitch.
+struct TabSlotShape: InsettableShape {
+    let style: TabDragPreview.Style
+    var insetAmount: CGFloat = 0
+
+    func path(in rect: CGRect) -> Path {
+        let rect = rect.insetBy(dx: insetAmount, dy: insetAmount)
+        switch style {
+        case .chip:
+            return Capsule().path(in: rect)
+        case .row:
+            return RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous).path(in: rect)
+        }
+    }
+
+    func inset(by amount: CGFloat) -> TabSlotShape {
+        var shape = self
+        shape.insetAmount += amount
+        return shape
+    }
 }
 
 /// What travels under the finger. The system's default is a snapshot of
 /// the source view, and a chip or row that is not the active one has no
 /// background of its own — the snapshot came up as a blank grey slab. So
-/// the preview is drawn on purpose: the tab's dot and name on an opaque
-/// card in the source's own shape, sized to the source.
+/// the preview is drawn on purpose: the tab's dot and name on a card that
+/// is *solid to its edge* — the background colour fills the whole frame
+/// and the slot's shape clips it, so no corner of it is transparent and
+/// nothing behind the drag shows through — sized to the source. No accent
+/// anywhere in it: the lifted card is neutral whichever tab is active.
 struct TabDragPreview: View {
     enum Style {
         /// The strip's capsule: one line, the chip's height.
@@ -76,58 +113,59 @@ struct TabDragPreview: View {
     let width: CGFloat
 
     var body: some View {
-        Group {
-            switch style {
-            case .chip:
-                HStack(spacing: DS.Padding.xs) {
-                    ObservedStatusDot(store: tab.store, font: .label)
-                    Text(tab.displayTitle)
-                        .font(DS.Font.label)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    Spacer(minLength: 0)
-                }
-                .padding(.horizontal, DS.Padding.m)
-                .frame(width: width, height: 32)
-                .background(Capsule().fill(Color(uiColor: .systemBackground)))
-                .overlay(Capsule().strokeBorder(Color.primary.opacity(0.12), lineWidth: 1))
-            case .row:
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: DS.Padding.s) {
-                        ObservedStatusDot(store: tab.store, font: .labelEmphasis)
-                        Text(tab.displayTitle)
-                            .font(DS.Font.labelEmphasis)
-                            .lineLimit(1)
-                            .truncationMode(.middle)
-                    }
-                    Text(tab.secondaryTitle)
-                        .font(DS.Font.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, DS.Padding.m)
-                .padding(.vertical, DS.Padding.s)
-                .frame(width: width)
-                .background(
-                    RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
-                        .fill(Color(uiColor: .systemBackground))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: DS.Radius.m, style: .continuous)
-                        .strokeBorder(Color.primary.opacity(0.12), lineWidth: 1)
-                )
+        content
+            .foregroundColor(.primary)
+            .background(Color(uiColor: .systemBackground))
+            .clipShape(shape)
+            .overlay(shape.strokeBorder(Color.primary.opacity(0.12), lineWidth: 1))
+    }
+
+    private var shape: TabSlotShape { TabSlotShape(style: style) }
+
+    @ViewBuilder
+    private var content: some View {
+        switch style {
+        case .chip:
+            HStack(spacing: DS.Padding.xs) {
+                ObservedStatusDot(store: tab.store, font: .label)
+                Text(tab.displayTitle)
+                    .font(DS.Font.label)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+                Spacer(minLength: 0)
             }
+            .padding(.horizontal, DS.Padding.m)
+            .frame(width: width, height: 32)
+        case .row:
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: DS.Padding.s) {
+                    ObservedStatusDot(store: tab.store, font: .labelEmphasis)
+                    Text(tab.displayTitle)
+                        .font(DS.Font.labelEmphasis)
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
+                Text(tab.secondaryTitle)
+                    .font(DS.Font.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.middle)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, DS.Padding.m)
+            .padding(.vertical, DS.Padding.s)
+            .frame(width: width)
         }
-        .foregroundColor(.primary)
     }
 }
 
 extension View {
     /// Makes this presentation of `tab` a drag source and a drop slot.
     /// Applied outside the context menu, so the lift that opens the menu
-    /// is also the one that starts the drag.
+    /// is also the one that starts the drag. The `dragPreview` and
+    /// `contextMenuPreview` content shapes mask both lifts to the slot's
+    /// own outline — without them the system lifts a sharp-cornered
+    /// rectangle of whatever happened to be behind the row.
     @ViewBuilder
     func tabReorderable(
         _ tab: TerminalTab,
@@ -137,16 +175,17 @@ extension View {
         width: CGFloat
     ) -> some View {
         if TabReorder.isSupported {
-            onDrag {
-                dragged.tab = tab
-                return TabReorder.itemProvider(for: tab)
-            } preview: {
-                TabDragPreview(tab: tab, style: preview, width: width)
-            }
-            .onDrop(
-                of: [TabReorder.itemType],
-                delegate: TabReorderSlotDelegate(tab: tab, tabManager: tabManager, dragged: dragged)
-            )
+            contentShape([.dragPreview, .contextMenuPreview], TabSlotShape(style: preview))
+                .onDrag {
+                    dragged.tab = tab
+                    return TabReorder.itemProvider(for: tab)
+                } preview: {
+                    TabDragPreview(tab: tab, style: preview, width: width)
+                }
+                .onDrop(
+                    of: [TabReorder.itemType],
+                    delegate: TabReorderSlotDelegate(tab: tab, tabManager: tabManager, dragged: dragged)
+                )
         } else {
             self
         }
@@ -175,17 +214,33 @@ private struct TabReorderSlotDelegate: DropDelegate {
     }
 
     func dropEntered(info _: DropInfo) {
-        guard let moving = dragged.tab, moving.id != tab.id else { return }
-        tabManager.moveTab(moving, toSlotOf: tab)
+        moveDraggedTabHere(force: true)
     }
 
     func dropUpdated(info _: DropInfo) -> DropProposal? {
-        DropProposal(operation: .move)
+        // The catch-up path: when a move slides this slot under a pointer
+        // that never crossed its edge, no `dropEntered` fires — the update
+        // stream is what still arrives, so the reorder keeps following the
+        // finger instead of stopping after its first move.
+        moveDraggedTabHere(force: false)
+        return DropProposal(operation: .move)
     }
 
     func performDrop(info _: DropInfo) -> Bool {
         dragged.tab = nil
         return true
+    }
+
+    /// Puts the dragged tab in this slot. An entered slot moves at once;
+    /// the update stream only re-moves after the last move has had a beat
+    /// to settle, so a pointer sitting on a mid-animation boundary does
+    /// not bounce the two tabs back and forth.
+    private func moveDraggedTabHere(force: Bool) {
+        guard let moving = dragged.tab, moving.id != tab.id else { return }
+        let now = Date()
+        guard force || now.timeIntervalSince(dragged.lastSlotChange) > 0.25 else { return }
+        dragged.lastSlotChange = now
+        tabManager.moveTab(moving, toSlotOf: tab)
     }
 }
 
