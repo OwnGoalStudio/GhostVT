@@ -342,6 +342,15 @@ building *libghostty* locally does (see that repo's
   (`…/Debug/ighostvt-cli list`) — the daemon's DEBUG admission accepts the
   CLI built beside it, and the app itself only opens sessions from
   `/Applications`, so a CLI-opened session is the quickest way to have one.
+- `make release VERSION=x.y.z` — the whole cut in one command
+  (`Scripts/release.sh`): clean-tree/main/tag preflight, `set-version`
+  (BUILD defaults to current+1), `make check`, the `x.y.z` commit, the
+  tag, the push, waiting out the GitHub Release run, checking all six
+  assets, dispatching the APT repository build, and polling
+  `https://apt.owngoal.dev/Packages` until the version is served — that
+  poll is the acceptance test, because the APT run's own verify step has
+  raced the CDN cache and reported failure after a successful deploy.
+  `INSTALL=1` ends with `make mac-update-from-github` (Touch ID).
 - `make mac-zip` — the *distributable* Mac build, a separate path from
   `make mac-run` (`mac-zip-check` validates its inputs; `Scripts/package-mac.sh`
   stages, signs, zips). Universal Release, ad-hoc signed by default, Developer
@@ -406,7 +415,12 @@ Gotchas that bit us:
   `shutdown` went out) kept BTM's pin and the new helper died all the same.
   Quit the app before replacing the bundle; after the fact, `launchctl
   bootout gui/$UID/wiki.qaq.ighostvtd`, delete the
-  `MacLaunchAgent.registeredHelperDigest` default, and relaunch. The whole
+  `MacLaunchAgent.registeredHelperDigest` default, and relaunch. The stale
+  item can appear even when everything was done right — helper re-signed
+  by the *same* team, app quit and agent booted out before the swap
+  (seen 2026-08-31 installing 0.6.2) — so `mac-update-from-github.sh`
+  performs exactly that repair itself when the helper is not running and
+  the job reports EX_CONFIG after the install. The whole
   class disappears with a Team ID: BTM keys a Developer ID signature's
   constraint on the team, not the cdhash, so
   `Scripts/mac-update-from-github.sh` re-signs the downloaded bundle with a

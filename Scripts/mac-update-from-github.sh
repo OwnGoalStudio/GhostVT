@@ -152,5 +152,39 @@ fi
 echo "==> launching"
 open "$dest"
 
+# Background Task Management can still hand the fresh registration a stale
+# item: the job comes back with the unresolved relative program
+# `Contents/MacOS/ighostvtd` and dies to EX_CONFIG on every spawn — seen
+# even with the helper re-signed by the same team and the old one quit
+# before the swap. The documented repair (bootout, drop the digest,
+# relaunch) is applied here so an update never leaves it to be done by
+# hand.
+echo "==> waiting for the helper"
+for _ in $(seq 1 10); do
+    pgrep -x ighostvtd >/dev/null && break
+    sleep 2
+done
+if ! pgrep -x ighostvtd >/dev/null \
+    && launchctl print "$domain/$label" 2>/dev/null | grep -q 'last exit code = 78'; then
+    echo "==> repairing the launch registration (EX_CONFIG)"
+    launchctl bootout "$domain/$label" 2>/dev/null || true
+    defaults delete "$bundle_id" "$digest_key" 2>/dev/null || true
+    osascript -e "tell application id \"$bundle_id\" to quit" >/dev/null 2>&1 || true
+    for _ in $(seq 1 10); do
+        pgrep -f "$dest/Contents/MacOS/iGhostVT" >/dev/null || break
+        sleep 1
+    done
+    open "$dest"
+    for _ in $(seq 1 15); do
+        pgrep -x ighostvtd >/dev/null && break
+        sleep 2
+    done
+fi
+if pgrep -x ighostvtd >/dev/null; then
+    echo "    helper is running"
+else
+    echo "    helper still not running; approve it in Login Items, then relaunch the app" >&2
+fi
+
 echo "installed $tag at $dest"
 echo "allow the helper in Login Items if macOS asks; the app registers it on launch"
