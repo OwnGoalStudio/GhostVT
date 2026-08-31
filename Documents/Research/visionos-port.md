@@ -19,8 +19,7 @@ installs and launches on the visionOS 27 simulator; its terminal surface
 renders. **Phase 1 has since landed in libghostty-spm** (commit `dd2df3f`,
 2026-08-31): the Ghostty and Zig std patches, the wrapper guards, the
 xros/xrsimulator slices in every build script and CI matrix, and the
-`upstream.1.3.1-2` storage tag; what remains there is dispatching the two
-workflows. What is left here is small and specific: the app patch below,
+`upstream.1.3.1-2` storage tag, and package release **1.5.0** is out. What is left here is small and specific: the app patch below,
 the jailbreak's own layout and dpkg vocabulary (open questions, listed),
 and a device to run it on.
 
@@ -250,16 +249,13 @@ the CI code path (fresh checkout of the pinned ref, full patch stack;
 aarch64-visionos, both simulator archs, aarch64-ios, both macOS archs; the
 six-slice XCFramework through `verify-xcframework`, `test.sh` on eleven
 destinations, `swift test` on macOS, the consumer test on all six).
-What remains is two dispatches, in order:
-1. **Build Upstream XCFramework** (build.yml) → publishes
-   `upstream.1.3.1-2` (`Ghostty.build` = 2; the old `upstream.1.3.1`
-   asset stays, every 1.4.x tag pins its checksum).
-2. **Release Package** (release.yml) with `package_version` 1.5.0 (a new
-   platform is a feature) → then bump `minimumVersion` in this repo's
-   pbxproj package reference.
-Until 2 runs, the `visionOS` destinations in libghostty-spm's `test.sh`
-skip themselves (the remote asset has no xros slice yet); nothing else is
-gated.
+Both workflows have since run: **Build Upstream XCFramework** published
+`upstream.1.3.1-2` (`Ghostty.build` = 2; the old `upstream.1.3.1` asset
+stays, every 1.4.x tag pins its checksum — all ten targets and the
+six-destination consumer test passed on the runners), and **Release
+Package** cut **1.5.0** (test.sh on eleven destinations, `swift test`
+165/165, `verify-release` against the new asset). This repo now pins
+`upToNextMajor` from 1.5.0.
 
 ### Phase 2 — the tree builds and packages for xros (≈1 day)
 1. Apply `app-visionos.patch` (app *and* daemon targets). Put

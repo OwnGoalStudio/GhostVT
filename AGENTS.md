@@ -36,7 +36,8 @@ which launchd never sized — so a session's buffers cannot jetsam the daemon.
   for exactly this reason.
 - Depends on the **released**
   [libghostty-spm](https://github.com/Lakr233/libghostty-spm) package
-  (`upToNextMajor` from 1.4.12 — below 1.4.9, `TerminalViewState` publishes
+  (`upToNextMajor` from 1.5.0 — below 1.5.0 the XCFramework has no
+  visionOS slice and the wrapper does not compile for xros; below 1.4.9, `TerminalViewState` publishes
   from inside SwiftUI's update pass; below 1.4.10, a hardware Escape drops
   the keyboard on iOS instead of reaching the shell; below 1.4.11 it does
   the same on Catalyst, where it resigns the terminal and every key after
