@@ -16,6 +16,10 @@ import UIKit
 struct LogViewerView: View {
     @StateObject private var model = LogViewerModel()
     @State private var window: UIWindow?
+    /// False until the first rows are scrolled to the end: the list is laid
+    /// out and jumped invisibly, then fades in already at the bottom. A
+    /// visible jump made the page flicker.
+    @State private var revealed = false
 
     var body: some View {
         content
@@ -36,23 +40,26 @@ struct LogViewerView: View {
         if entries.isEmpty {
             emptyState
         } else {
-            ScrollViewReader { proxy in
-                List {
-                    Section {
+            // The header sits above the list, not in a Section: a plain
+            // list pins its section headers, and a pinned header is laid
+            // out again on every jump to the end.
+            VStack(spacing: 0) {
+                header(count: entries.count)
+                ScrollViewReader { proxy in
+                    List {
                         ForEach(entries) { entry in
                             LogEntryRow(entry: entry)
                                 .id(entry.id)
                         }
-                    } header: {
-                        header(count: entries.count)
                     }
-                }
-                .listStyle(.plain)
-                .onAppear {
-                    scrollToEnd(proxy)
-                }
-                .onChange(of: model.document.readAt) { _ in
-                    scrollToEnd(proxy)
+                    .listStyle(.plain)
+                    .opacity(revealed ? 1 : 0)
+                    .onAppear {
+                        scrollToEnd(proxy)
+                    }
+                    .onChange(of: model.document.readAt) { _ in
+                        scrollToEnd(proxy)
+                    }
                 }
             }
         }
@@ -68,10 +75,13 @@ struct LogViewerView: View {
                 count
             ))
             .foregroundColor(Color.secondary.opacity(0.7))
+            Spacer()
         }
         .font(DS.Font.caption)
         .foregroundColor(.secondary)
-        .textCase(nil)
+        .padding(.horizontal, DS.Padding.l)
+        .padding(.vertical, DS.Padding.s)
+        .background(Color(.secondarySystemGroupedBackground))
     }
 
     /// Nothing to show: still reading, an empty log, or no file at all.
@@ -102,10 +112,21 @@ struct LogViewerView: View {
         .padding(DS.Padding.xl)
     }
 
+    /// Jumps to the last row once the rows exist, and only then shows the
+    /// list: the jump happens while it is transparent, so what fades in is
+    /// already at the end. Later reads scroll in the open.
     private func scrollToEnd(_ proxy: ScrollViewProxy) {
-        guard let last = model.visibleEntries.last else { return }
+        guard let last = model.visibleEntries.last else {
+            revealed = true
+            return
+        }
         DispatchQueue.main.async {
             proxy.scrollTo(last.id, anchor: .bottom)
+            DispatchQueue.main.async {
+                withAnimation(DS.Motion.smooth) {
+                    revealed = true
+                }
+            }
         }
     }
 
