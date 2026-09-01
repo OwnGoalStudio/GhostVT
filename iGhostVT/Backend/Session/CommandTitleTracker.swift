@@ -50,16 +50,26 @@ final class CommandTitleTracker: @unchecked Sendable {
                 }
                 // Drop a whole UTF-8 scalar: the shell erases a character,
                 // not a byte, and half a scalar would poison the decode.
+                // The buffer can hold nothing but continuation bytes (the
+                // length cap once cut a paste mid-scalar and the scalar's
+                // tail was appended after the reset), so the lead byte is
+                // popped, never `removeLast` on what may be empty.
                 while let last = buffer.last, last & 0xC0 == 0x80 {
                     buffer.removeLast()
                 }
-                buffer.removeLast()
+                _ = buffer.popLast()
 
             case 0x00 ... 0x1F: // ESC, Tab, ^C, ^U, ^W, ^R, …
                 buffer.removeAll(keepingCapacity: true)
                 abandoned = true
 
             default:
+                // An abandoned line collects nothing more: Return resets it
+                // regardless, and a scalar the cap cut in half would
+                // otherwise leave its continuation bytes behind on their own.
+                if abandoned {
+                    break
+                }
                 buffer.append(byte)
                 if buffer.count > Self.maximumLength {
                     buffer.removeAll(keepingCapacity: true)
