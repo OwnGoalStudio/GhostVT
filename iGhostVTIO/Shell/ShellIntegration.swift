@@ -11,12 +11,18 @@ import Foundation
 /// injection has to happen here.
 ///
 /// Only the environment side is reimplemented, never the scripts: the .deb
-/// ships libghostty's own copies under `/usr/share/ighostvt`, and this file
-/// points the shell at them exactly the way `termio/shell_integration.zig`
-/// does upstream. Every path handed to the shell is spelled in the
-/// bootstrap's vocabulary (`JailbreakRoot.bootstrapPath`), because it is the
-/// bootstrap's `zsh` that has to open it; only the existence checks here
-/// resolve to what a syscall wants.
+/// ships libghostty-spm's bash and zsh integration under
+/// `/usr/share/ighostvt` (`package-deb.sh` copies it out of the app's
+/// resource bundle), and this file points the shell at it exactly the way
+/// `termio/shell_integration.zig` does upstream. Those scripts are the
+/// package's own MIT rewrite — Ghostty's bash and zsh integration is GPLv3
+/// and must never be substituted for them, in the bundle or here. The
+/// package ships nothing for fish, so the fish branch below is inert unless
+/// a user drops their own `fish/vendor_conf.d` into that directory. Every
+/// path handed to the shell is spelled in the bootstrap's vocabulary
+/// (`JailbreakRoot.bootstrapPath`), because it is the bootstrap's `zsh` that
+/// has to open it; only the existence checks here resolve to what a syscall
+/// wants.
 enum ShellIntegration {
     /// Where `package-deb.sh` installs the scripts, in bootstrap spelling.
     private static var resourcesDirectory: String {

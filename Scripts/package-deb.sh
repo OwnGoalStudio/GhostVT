@@ -113,16 +113,24 @@ rm -f "$installed_app/embedded.mobileprovision"
 chmod 0755 "$installed_daemon" "$installed_daemon_io" "$installed_cli"
 chmod 0644 "$installed_plist"
 
-# Ghostty's shell integration, which is what makes a session report its title,
-# its working directory, and its command boundaries. libghostty-spm already
-# ships the scripts inside the app's resource bundle; the package installs a
-# second copy the daemon owns, because the daemon is what points a new shell
-# at them and it should not have to know the app bundle's internal layout to
-# do it. Missing scripts are not fatal: the daemon checks before injecting,
-# and the app falls back to inferring a title from what the user types.
+# The bash and zsh shell integration, which is what makes a session report
+# its title, its working directory, and its command boundaries. libghostty-spm
+# ships it inside the app's resource bundle — its own MIT rewrite, not
+# Ghostty's GPLv3 scripts, and this MIT package must stay that way; the grep
+# below fails the build if a GPL header ever shows up in what was copied. The
+# package installs a second copy the daemon owns, because the daemon is what
+# points a new shell at them and it should not have to know the app bundle's
+# internal layout to do it. Missing scripts are not fatal: the daemon checks
+# before injecting, and the app falls back to inferring a title from what the
+# user types.
 installed_integration="$installed_root/usr/share/ighostvt/shell-integration"
 integration_source="$(/usr/bin/find "$installed_app" -type d -name shell-integration -print -quit)"
 if [[ -n "$integration_source" ]]; then
+    if grep -rqi "General Public License" "$integration_source"; then
+        echo "error: GPL-licensed file in $integration_source; refusing to package it" >&2
+        grep -rli "General Public License" "$integration_source" >&2
+        exit 65
+    fi
     mkdir -p "$(dirname "$installed_integration")"
     /usr/bin/ditto "$integration_source" "$installed_integration"
     # The session runs as mobile, so every script has to be readable by it.
