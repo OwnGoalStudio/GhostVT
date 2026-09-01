@@ -31,7 +31,7 @@ struct LogViewerView: View {
                 }
             }
             .background(WindowReader(window: $window))
-            .onAppear(perform: model.loadAfterPush)
+            .onAppear(perform: model.loadOnce)
     }
 
     @ViewBuilder
@@ -322,18 +322,12 @@ final class LogViewerModel: ObservableObject {
 
     private var hasLoaded = false
 
-    /// The first read, from `onAppear`: the spinner shows through the push
-    /// and the rows land a second later, once the animation is over. A
-    /// list arriving mid-push made the page flicker. Later appearances do
-    /// nothing; the menu's Refresh is the explicit re-read.
-    func loadAfterPush() {
+    /// The first read, from `onAppear`. Later appearances do nothing; the
+    /// menu's Refresh is the explicit re-read.
+    func loadOnce() {
         guard !hasLoaded else { return }
         hasLoaded = true
-        isLoading = true
-        Task { @MainActor [weak self] in
-            try? await Task.sleep(nanoseconds: 1_000_000_000)
-            self?.reload()
-        }
+        reload()
     }
 
     func reload() {
