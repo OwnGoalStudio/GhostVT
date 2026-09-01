@@ -9,9 +9,10 @@ import UIKit
 /// Settings ▸ Advanced ▸ Logs: the app's journal or the helper's file, one
 /// row per entry, newest at the bottom. The ⋯ menu picks the source (and,
 /// for the app, the launch), filters by level and tag, refreshes, shares
-/// the file, and trims the journal; the search field narrows the rows to
-/// the ones containing the text. Reads are `LogReader`'s; nothing here
-/// writes a log line.
+/// the file, and trims the journal. No search field: the one the
+/// navigation bar offers sat badly in the sheet, and the file is a Share
+/// away for anything a filter cannot find. Reads are `LogReader`'s;
+/// nothing here writes a log line.
 struct LogViewerView: View {
     @StateObject private var model = LogViewerModel()
     @State private var window: UIWindow?
@@ -20,9 +21,6 @@ struct LogViewerView: View {
         content
             .navigationTitle("Logs")
             .navigationBarTitleDisplayMode(.inline)
-            // Placement left to the platform: the drawer variant sat under
-            // the title at half again the field's height on the iPad.
-            .searchable(text: $model.searchText, prompt: Text("Search Logs"))
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     menu
@@ -280,7 +278,6 @@ final class LogViewerModel: ObservableObject {
     @Published var levels: Set<LogEntry.Level> = Set(LogEntry.Level.allCases)
     /// Empty means every tag.
     @Published var categories: Set<String> = []
-    @Published var searchText = ""
     @Published private(set) var document = LogDocument()
     @Published private(set) var launches: [LogLaunch] = []
     @Published private(set) var isLoading = false
@@ -296,11 +293,9 @@ final class LogViewerModel: ObservableObject {
     }
 
     var visibleEntries: [LogEntry] {
-        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-        return document.entries.filter { entry in
+        document.entries.filter { entry in
             (source == .daemon || levels.contains(entry.level))
                 && (categories.isEmpty || categories.contains(entry.category))
-                && (query.isEmpty || entry.text.localizedCaseInsensitiveContains(query))
         }
     }
 
