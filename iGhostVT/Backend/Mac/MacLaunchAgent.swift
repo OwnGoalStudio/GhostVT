@@ -247,10 +247,7 @@ final class MacLaunchAgent: ObservableObject {
         /// The relocation alert's other answer. Through AppKit, so
         /// `applicationWillTerminate` runs as it would for ⌘Q.
         func quit() {
-            guard let appClass = NSClassFromString("NSApplication") as? NSObject.Type,
-                  let app = appClass.perform(NSSelectorFromString("sharedApplication"))?.takeUnretainedValue() as? NSObject
-            else { exit(0) }
-            _ = app.perform(NSSelectorFromString("terminate:"), with: nil)
+            AppTermination.terminate()
         }
 
         private static func relaunch(from url: URL) {

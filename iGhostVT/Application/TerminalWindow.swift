@@ -81,7 +81,7 @@ final class TerminalWindow: UIWindow, AppCommandResponder {
 
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         switch action {
-        case #selector(newTab(_:)), #selector(showSettings(_:)):
+        case #selector(newTab(_:)), #selector(showSettings(_:)), #selector(closeTab(_:)):
             return !isShowingModal
         case #selector(toggleTabSwitcher(_:)):
             return !isShowingModal || interface.showsSwitcher
@@ -92,8 +92,7 @@ final class TerminalWindow: UIWindow, AppCommandResponder {
         case #selector(selectTab(_:)):
             guard hasActiveTab, let index = Self.tabIndex(of: sender) else { return false }
             return index == AppMenus.lastTabIndex || index < tabManager.tabs.count
-        case #selector(closeTab(_:)),
-             #selector(exportTabText(_:)),
+        case #selector(exportTabText(_:)),
              #selector(increaseFontSize(_:)),
              #selector(decreaseFontSize(_:)),
              #selector(resetFontSize(_:)),
@@ -127,6 +126,11 @@ final class TerminalWindow: UIWindow, AppCommandResponder {
             command.title = interface.showsSwitcher
                 ? NSLocalizedString("Exit Tab Overview", comment: "Menu item: closes the tab overview")
                 : NSLocalizedString("Show All Tabs", comment: "Menu item: opens the tab overview")
+        case #selector(closeTab(_:)):
+            // With no tab left ⌘W closes the window, and the menu says so.
+            command.title = activeTab == nil
+                ? NSLocalizedString("Close Window", comment: "Menu item: closes the window")
+                : NSLocalizedString("Close Tab", comment: "Menu item: closes the active terminal tab")
         case #selector(toggleTabLock(_:)):
             command.state = activeTab?.isLocked == true ? .on : .off
         case #selector(toggleKeyboardLock(_:)):
@@ -150,9 +154,42 @@ final class TerminalWindow: UIWindow, AppCommandResponder {
         Self.requestNewWindow()
     }
 
+    /// ⌘W closes the tab; on a window with no tab left it closes the window,
+    /// the way Terminal.app's ⌘W closes a window with its last tab — and
+    /// with the last window, the app.
     func closeTab(_: Any?) {
-        guard let tab = activeTab else { return }
+        guard let tab = activeTab else { return closeEmptyWindow() }
         tabManager.requestClose(tab)
+    }
+
+    /// Whether another window of this app is on screen, so closing this one
+    /// leaves the app running.
+    private var hasOtherWindows: Bool {
+        UIApplication.shared.connectedScenes.contains { scene in
+            scene !== windowScene && scene.activationState != .unattached
+        }
+    }
+
+    /// The Mac quits through AppKit's `terminate:` when this was the last
+    /// window, so `applicationWillTerminate` runs as it does for ⌘Q — the
+    /// system's own window close would leave an app with no window and no
+    /// way back but the Dock. iOS destroys the scene — the system's window
+    /// close, which ends the app when no window is left — and a phone, which
+    /// has only the one scene, is sent home.
+    private func closeEmptyWindow() {
+        #if targetEnvironment(macCatalyst)
+            if hasOtherWindows {
+                closeWindow(nil)
+            } else {
+                AppTermination.terminate()
+            }
+        #else
+            if UIApplication.shared.supportsMultipleScenes {
+                closeWindow(nil)
+            } else {
+                _ = UIApplication.shared.perform(NSSelectorFromString("suspend"))
+            }
+        #endif
     }
 
     /// The same path as the window's close button: the scene disconnects

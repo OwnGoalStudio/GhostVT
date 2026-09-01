@@ -294,7 +294,12 @@ Bindings follow Terminal.app and Safari for tabs (⌃Tab, ⇧⌘\, ⌘1–9, ⌃
 the sidebar) and Ghostty for the terminal (⌘+ ⌘− ⌘0, ⌘K); where two
 conventions coexist the second key is a hidden alias of the same action.
 Close Tab is ⌘W alone — ⌘⌫ was tried as an alias and taken back, because in
-a terminal it is delete-to-line-start (readline's ⌘⌫ on the Mac). The
+a terminal it is delete-to-line-start (readline's ⌘⌫ on the Mac). On a
+window with no tab left, ⌘W closes the window (the item retitles to Close
+Window), and with the last window the app: the Mac goes through AppKit's
+`terminate:` (`AppTermination`, the same call the relocation alert's Quit
+makes) so `applicationWillTerminate` runs as for ⌘Q, iPad destroys the
+scene, and a phone is sent home. The
 font commands run ghostty's own `increase_font_size` actions on the active
 surface and step `TerminalFontSize` alongside — they pre-empt the ⌘+/⌘−
 press the library would otherwise have forwarded to ghostty itself. Menu
