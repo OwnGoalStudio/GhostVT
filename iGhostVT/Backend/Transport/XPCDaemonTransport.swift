@@ -542,7 +542,7 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             if let data = Self.data(iGhostVTWireKey.data, in: event), !data.isEmpty {
                 if !hasLoggedFirstOutput {
                     hasLoggedFirstOutput = true
-                    TerminalDebugFileLog.write("[xpc] first output event bytes=\(data.count) session=\(eventSessionID)")
+                    AppLog.info(.transport, "first output event bytes=\(data.count) session=\(eventSessionID)")
                 }
                 emit(.received(data))
             }

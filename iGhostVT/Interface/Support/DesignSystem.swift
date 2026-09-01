@@ -69,6 +69,10 @@ enum DS {
         case heroSymbol
         /// The mock prompt of an empty terminal: oversized and monospaced.
         case heroPrompt
+        /// A line of a file drawn as code: a log entry, a configuration.
+        case code
+        /// The metadata under a line of code: a timestamp, a tag.
+        case codeCaption
 
         /// The text style whose platform size is the base.
         var style: UIFont.TextStyle {
@@ -76,8 +80,9 @@ enum DS {
             case .title: .headline
             case .control, .controlEmphasis, .body: .body
             case .label, .labelEmphasis: .subheadline
-            case .detail: .footnote
+            case .detail, .code: .footnote
             case .caption, .captionEmphasis: .caption1
+            case .codeCaption: .caption2
             case .symbol: .title3
             case .heroSymbol, .heroPrompt: .largeTitle
             }
@@ -93,7 +98,10 @@ enum DS {
         }
 
         var design: SwiftUI.Font.Design {
-            self == .heroPrompt ? .monospaced : .default
+            switch self {
+            case .heroPrompt, .code, .codeCaption: .monospaced
+            default: .default
+            }
         }
 
         /// The role at `scale`, sized for `category` — the system's Dynamic

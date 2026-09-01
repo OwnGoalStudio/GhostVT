@@ -1,6 +1,15 @@
 {
-  "originHash" : "c36ffd41764fc134a87f975e3ca84df00ba641c5909b0baf10eacb6e8983d35f",
+  "originHash" : "15c62fa80e1f9c1a3d14f2e96a1e9bf50f9b89c4a4dcd0ca93e56b98c0562b2b",
   "pins" : [
+    {
+      "identity" : "dog",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Lakr233/Dog",
+      "state" : {
+        "revision" : "3697b6b0e3df29f85e1194a49f67144a0dcd7ec9",
+        "version" : "0.1.1"
+      }
+    },
     {
       "identity" : "libghostty-spm",
       "kind" : "remoteSourceControl",

@@ -632,9 +632,26 @@ Gotchas that bit us:
   Console.app, `pymobiledevice3 syslog`) drops most of the app's lines
   while the device is that busy, and a userspace reboot kills the tunnel
   anyway — turn on Settings ▸ Advanced ▸ Detailed Terminal Log and read
-  `Documents/ighostvt-debug.log` from the app's container instead, beside
-  the daemon's own `/var/mobile/Library/Logs/ighostvtd.log`, which now
-  stamps each session's first output.
+  the app's journal instead (Settings ▸ Advanced ▸ Logs, or
+  `Documents/Journal/Dog_*.log` in the app's container), beside the
+  daemon's own `/var/mobile/Library/Logs/ighostvtd.log`, which now stamps
+  each session's first output.
+- **Every line the app logs goes through `AppLog`** (`Backend/Logging/`):
+  Dog's journal on disk — one `Journal/Dog_<date>_<id>.log` per launch
+  under the container's Documents on the device and under
+  `~/Library/Logs/iGhostVT` on the Mac (the Catalyst app is unsandboxed,
+  so its Documents is the user's own), the last 32 kept, opened first
+  thing in `didFinishLaunching` —
+  and the unified log (`wiki.qaq.iGhostVT`, one category per
+  `AppLog.Category`). No `os.Logger` of its own anywhere else, no `print`:
+  the file is what survives a busy device, and the viewer reads only it.
+  Settings ▸ Advanced ▸ Logs (`LogViewerView`, `LogReader`) shows that
+  journal or the daemon's file, switched from its ⋯ menu; the daemon's
+  path is `iGhostVTProtocol.daemonLogPath` because the app reads what
+  `DaemonFileLog` writes, and `LogReader.parseDaemonLine` mirrors that
+  line format — change one, change the other. The Detailed Terminal Log
+  switch only widens what libghostty's `TerminalDebugLog` emits; its
+  lines land in the same journal under the `ghostty` tag at verbose.
 - A GUI app ad-hoc signed with ldid MUST carry
   `com.apple.security.iokit-user-client-class` (with `IOUserClient` / the
   AGX + IOGPU + IOSurface + IOAccel leaves, see

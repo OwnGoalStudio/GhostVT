@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		AA0000000000000000000101 /* GhosttyTerminal in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000201 /* GhosttyTerminal */; };
 		AA0000000000000000000102 /* GhosttyTheme in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000202 /* GhosttyTheme */; };
+		AA0000000000000000000103 /* Dog in Frameworks */ = {isa = PBXBuildFile; productRef = AA0000000000000000000203 /* Dog */; };
 		AA0000000000000000000104 /* iGhostVTWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = AA0000000000000000000307 /* iGhostVTWidgets.appex */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -141,6 +142,7 @@
 			files = (
 				AA0000000000000000000101 /* GhosttyTerminal in Frameworks */,
 				AA0000000000000000000102 /* GhosttyTheme in Frameworks */,
+				AA0000000000000000000103 /* Dog in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -204,6 +206,7 @@
 			packageProductDependencies = (
 				AA0000000000000000000201 /* GhosttyTerminal */,
 				AA0000000000000000000202 /* GhosttyTheme */,
+				AA0000000000000000000203 /* Dog */,
 			);
 			productName = iGhostVT;
 			productReference = AA0000000000000000000301 /* iGhostVT.app */;
@@ -346,6 +349,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				AA0000000000000000000A01 /* XCRemoteSwiftPackageReference "libghostty-spm" */,
+				AA0000000000000000000A02 /* XCRemoteSwiftPackageReference "Dog" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = AA0000000000000000000802 /* Products */;
@@ -818,6 +822,14 @@
 				minimumVersion = 1.5.0;
 			};
 		};
+		AA0000000000000000000A02 /* XCRemoteSwiftPackageReference "Dog" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Lakr233/Dog";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -828,6 +840,11 @@
 		AA0000000000000000000202 /* GhosttyTheme */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = GhosttyTheme;
+		};
+		AA0000000000000000000203 /* Dog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA0000000000000000000A02 /* XCRemoteSwiftPackageReference "Dog" */;
+			productName = Dog;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

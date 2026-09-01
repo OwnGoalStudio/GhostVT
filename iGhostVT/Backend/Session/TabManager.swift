@@ -124,7 +124,7 @@ final class TabManager: ObservableObject {
                     tab.capturePreview()
                 }
                 tab.terminal.isSurfaceVisible = visible
-                TerminalDebugFileLog.write("[tabs] tab \(tab.id) isSurfaceVisible=\(visible)")
+                AppLog.verbose(.tabs, "tab \(tab.id) isSurfaceVisible=\(visible)")
             }
         }
     }
@@ -148,7 +148,7 @@ final class TabManager: ObservableObject {
     /// scene came up (the cold-launch resume batch).
     func noteSceneActive() {
         isSceneActive = true
-        TerminalDebugFileLog.write("[tabs] scene active, \(tabs.count) tab(s)")
+        AppLog.info(.tabs, "scene active, \(tabs.count) tab(s)")
         for tab in tabs {
             tab.store.noteSceneActive()
         }

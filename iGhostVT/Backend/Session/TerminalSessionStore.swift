@@ -11,12 +11,10 @@ import os
 /// surface doubles as the connection log.
 @MainActor
 final class TerminalSessionStore: ObservableObject {
-    /// The whole session pipeline logs here (`log stream --process iGhostVT`)
-    /// because a black surface has no other way to say where it stopped:
-    /// no viewport line means the surface never attached, no connect line
-    /// means the transport was never asked. Nonisolated because the viewport
-    /// line is written from the thread that measured the grid.
-    nonisolated static let logger = Logger(subsystem: "wiki.qaq.iGhostVT", category: "session")
+    // The whole session pipeline logs to `AppLog` (`.session`) because a
+    // black surface has no other way to say where it stopped: no viewport
+    // line means the surface never attached, no connect line means the
+    // transport was never asked.
 
     enum Status: Equatable {
         case idle
@@ -140,10 +138,7 @@ final class TerminalSessionStore: ObservableObject {
                 // Logged here, on the reporting thread, rather than from a
                 // main-actor hop: only the grid is consumed, and the relay
                 // needs no help from the main actor to forward it.
-                Self.logger.info(
-                    "surface reported viewport \(viewport.columns)x\(viewport.rows)"
-                )
-                TerminalDebugFileLog.write("[session] surface reported viewport \(viewport.columns)x\(viewport.rows)")
+                AppLog.info(.session, "surface reported viewport \(viewport.columns)x\(viewport.rows)")
                 relay.updateViewport(
                     columns: Int(viewport.columns),
                     rows: Int(viewport.rows)
@@ -189,7 +184,7 @@ final class TerminalSessionStore: ObservableObject {
     func noteSceneActive() {
         guard !isSceneActive else { return }
         isSceneActive = true
-        TerminalDebugFileLog.write("[session] scene active; hasViewport=\(relay.hasViewport) autoConnected=\(hasAutoConnected)")
+        AppLog.info(.session, "scene active; hasViewport=\(relay.hasViewport) autoConnected=\(hasAutoConnected)")
         connectWhenReady()
     }
 
@@ -218,8 +213,7 @@ final class TerminalSessionStore: ObservableObject {
         // editor never saw the bytes that the dropped link ate.
         titleTracker.reset()
         let transport = makeTransport()
-        Self.logger.info("connecting via \(transport.endpointDescription)")
-        TerminalDebugFileLog.write("[session] connecting via \(transport.endpointDescription) sceneActive=\(isSceneActive) hasViewport=\(relay.hasViewport)")
+        AppLog.info(.session, "connecting via \(transport.endpointDescription) sceneActive=\(isSceneActive) hasViewport=\(relay.hasViewport)")
         // `relay` weak as well: the relay retains the transport, which
         // retains this closure. A strong capture would close that cycle and
         // defeat the transport's deinit, whose job is to cancel an XPC
@@ -264,7 +258,7 @@ final class TerminalSessionStore: ObservableObject {
         case let .received(data):
             receivedChunks += 1
             if receivedChunks <= 5 || receivedChunks % 50 == 0 {
-                TerminalDebugFileLog.write("[session] received chunk #\(receivedChunks) bytes=\(data.count) status=\(status)")
+                AppLog.verbose(.session, "received chunk #\(receivedChunks) bytes=\(data.count) status=\(status)")
             }
             noteOutput()
             notePageChanged()
@@ -288,21 +282,18 @@ final class TerminalSessionStore: ObservableObject {
             // terminal.
             status = .connecting
         case .connected:
-            Self.logger.info("connected to \(self.endpointDescription)")
-            TerminalDebugFileLog.write("[session] connected to \(endpointDescription)")
+            AppLog.info(.session, "connected to \(endpointDescription)")
             status = .connected
             reconnectAttempt = 0
             awaitFirstOutput()
         case let .interrupted(reason):
             clearFirstOutputWait()
-            Self.logger.error("link lost: \(reason ?? "no reason")")
-            TerminalDebugFileLog.write("[session] link lost: \(reason ?? "no reason")")
+            AppLog.error(.session, "link lost: \(reason ?? "no reason")")
             printStatusLine(String(localized: "Connection lost. Reconnecting…"))
             scheduleReconnect(lastReason: reason)
         case let .disconnected(reason):
             clearFirstOutputWait()
-            Self.logger.error("disconnected: \(reason ?? "no reason")")
-            TerminalDebugFileLog.write("[session] disconnected: \(reason ?? "no reason")")
+            AppLog.error(.session, "disconnected: \(reason ?? "no reason")")
             // Mid-cycle this is a reconnect attempt that could not even
             // establish; keep trying until the attempts run out.
             if reconnectAttempt > 0 {
@@ -331,8 +322,7 @@ final class TerminalSessionStore: ObservableObject {
         status = .connecting
         reconnectGeneration &+= 1
         let generation = reconnectGeneration
-        Self.logger.info("reconnect attempt \(self.reconnectAttempt) scheduled")
-        TerminalDebugFileLog.write("[session] reconnect attempt \(reconnectAttempt) scheduled")
+        AppLog.info(.session, "reconnect attempt \(reconnectAttempt) scheduled")
         Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: Self.reconnectDelay)
             guard let self, reconnectGeneration == generation else { return }
@@ -354,7 +344,7 @@ final class TerminalSessionStore: ObservableObject {
             guard let self, firstOutputGeneration == generation,
                   status == .connected, !hasReceivedOutput else { return }
             isAwaitingFirstOutput = true
-            TerminalDebugFileLog.write("[session] no output \(Self.firstOutputGrace / 1_000_000) ms after connect; showing the shell pill")
+            AppLog.info(.session, "no output \(Self.firstOutputGrace / 1_000_000) ms after connect; showing the shell pill")
         }
     }
 

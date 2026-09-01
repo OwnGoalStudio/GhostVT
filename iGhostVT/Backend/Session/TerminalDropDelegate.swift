@@ -5,7 +5,6 @@
 
 import GhosttyTerminal
 import ImageIO
-import os
 import UIKit
 import UniformTypeIdentifiers
 
@@ -77,12 +76,12 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
                 return results.compactMap(\.self)
             }
             guard let terminal = self?.terminal, !resolved.isEmpty else {
-                logger.info("drop skipped: nothing resolved from \(payloads.count) item(s)")
+                AppLog.info(.drop, "drop skipped: nothing resolved from \(payloads.count) item(s)")
                 return
             }
             let text = resolved.map(\.pasted).joined(separator: " ")
             let trailer = resolved.last?.isPath == true ? " " : ""
-            logger.info("drop pasting \(resolved.count) of \(payloads.count) item(s)")
+            AppLog.info(.drop, "drop pasting \(resolved.count) of \(payloads.count) item(s)")
             terminal.paste(text: text + trailer)
         }
     }
@@ -180,7 +179,7 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
                 let inPlace: URL? = await withCheckedContinuation { continuation in
                     _ = provider.loadInPlaceFileRepresentation(forTypeIdentifier: fileType.identifier) { url, isInPlace, error in
                         if let error {
-                            logger.info("in-place load failed for \(fileType.identifier, privacy: .public): \(error)")
+                            AppLog.warning(.drop, "in-place load failed for \(fileType.identifier): \(error)")
                         }
                         continuation.resume(returning: isInPlace ? url : nil)
                     }
@@ -193,7 +192,7 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
             let url: URL? = await withCheckedContinuation { continuation in
                 _ = provider.loadDataRepresentation(forTypeIdentifier: UTType.fileURL.identifier) { data, error in
                     if let error {
-                        logger.info("file-url load failed: \(error)")
+                        AppLog.warning(.drop, "file-url load failed: \(error)")
                     }
                     continuation.resume(returning: data.flatMap { URL(dataRepresentation: $0, relativeTo: nil) })
                 }
@@ -212,7 +211,7 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
             return await withCheckedContinuation { continuation in
                 _ = provider.loadFileRepresentation(forTypeIdentifier: type.identifier) { url, error in
                     guard let url else {
-                        logger.info("file load failed for \(type.identifier, privacy: .public): \(String(describing: error))")
+                        AppLog.warning(.drop, "file load failed for \(type.identifier): \(String(describing: error))")
                         continuation.resume(returning: nil)
                         return
                     }
@@ -237,7 +236,7 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
             return await withCheckedContinuation { continuation in
                 _ = provider.loadDataRepresentation(forTypeIdentifier: type.identifier) { data, error in
                     guard let data else {
-                        logger.info("data load failed for \(type.identifier, privacy: .public): \(String(describing: error))")
+                        AppLog.warning(.drop, "data load failed for \(type.identifier): \(String(describing: error))")
                         continuation.resume(returning: nil)
                         return
                     }
@@ -262,7 +261,7 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
                 return await withCheckedContinuation { continuation in
                     _ = provider.loadDataRepresentation(forTypeIdentifier: type.identifier) { data, error in
                         guard let data, !data.isEmpty else {
-                            logger.info("image load failed for \(type.identifier, privacy: .public): \(String(describing: error))")
+                            AppLog.warning(.drop, "image load failed for \(type.identifier): \(String(describing: error))")
                             continuation.resume(returning: nil)
                             return
                         }
@@ -275,11 +274,11 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
                             return
                         }
                         guard let image = UIImage(data: data), let png = Self.upright(image).pngData() else {
-                            logger.info("image decode failed for \(actual.identifier, privacy: .public); storing the bytes as they are")
+                            AppLog.warning(.drop, "image decode failed for \(actual.identifier); storing the bytes as they are")
                             continuation.resume(returning: nil)
                             return
                         }
-                        logger.info("re-encoding \(actual.identifier, privacy: .public) as PNG")
+                        AppLog.info(.drop, "re-encoding \(actual.identifier) as PNG")
                         let name = Self.fileName(suggested: Self.strippingImageExtension(suggested), type: .png)
                         continuation.resume(returning: Self.store(name: name, in: directory) {
                             try png.write(to: $0, options: .atomic)
@@ -394,7 +393,7 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
                 )
                 return destination.path
             } catch {
-                logger.info("staged write failed for \(name, privacy: .public): \(error)")
+                AppLog.error(.drop, "staged write failed for \(name): \(error)")
                 return nil
             }
         }
@@ -435,5 +434,3 @@ final class TerminalDropDelegate: NSObject, UIDropInteractionDelegate {
         return result
     }
 }
-
-private let logger = Logger(subsystem: "wiki.qaq.iGhostVT", category: "drop")

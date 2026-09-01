@@ -1,0 +1,305 @@
+//
+//  LogReader.swift
+//  iGhostVT
+//
+
+import Foundation
+
+/// One entry of a log as the viewer shows it: a line, or a line with the
+/// continuation lines that followed it.
+struct LogEntry: Identifiable, Hashable {
+    enum Level: String, CaseIterable, Hashable {
+        case verbose
+        case info
+        case warning
+        case error
+        case critical
+    }
+
+    let id: Int
+    let timestamp: String
+    let level: Level
+    let category: String
+    var message: String
+    /// The entry as it is in the file, for Copy.
+    var text: String
+}
+
+/// Which log the viewer reads.
+enum LogSource: Hashable {
+    /// The app's own journal (`AppLog`, Dog's files under `Documents/Journal`).
+    case app
+    /// `ighostvtd` and `ighostvtd-io`, which share one file
+    /// (`iGhostVTProtocol.daemonLogPath`) and a rotated predecessor.
+    case daemon
+}
+
+/// One launch of the app: one journal file, named by Dog for the moment it
+/// was opened.
+struct LogLaunch: Identifiable, Hashable {
+    let url: URL
+    let date: Date?
+
+    var id: URL { url }
+}
+
+/// A log as read: the entries, every tag seen before filtering, and where
+/// it came from — or why it could not be read.
+struct LogDocument {
+    var entries: [LogEntry] = []
+    var categories: [String] = []
+    /// The file's path, shown under the title.
+    var location = ""
+    /// Set when there is no file to read; `entries` is then empty.
+    var unreadable = false
+    /// Distinguishes one read from the next for the same source, so the
+    /// viewer scrolls to the end on a refresh that changed nothing.
+    var readAt = Date()
+}
+
+/// Reads the two logs back. Dog's format and `DaemonFileLog`'s are both
+/// line-oriented and neither is negotiable here: a line that fits neither
+/// shape continues the entry before it (a message with a newline in it, or
+/// the fragment at the head of a rotated file).
+enum LogReader {
+    /// The most of a file the viewer takes, from the end. Dog never rotates
+    /// within a launch, and a launch with the keystroke log on writes
+    /// plenty; the daemon's file is capped at half a megabyte twice over.
+    static let maximumByteCount = 2 << 20
+
+    // MARK: - Launches
+
+    /// Every journal file, newest first.
+    static func launches() -> [LogLaunch] {
+        let directory = AppLog.journalDirectory
+        guard let names = try? FileManager.default.contentsOfDirectory(atPath: directory.path) else {
+            return []
+        }
+        return names
+            .filter { $0.hasPrefix("Dog_") && $0.hasSuffix(".log") }
+            .map { LogLaunch(url: directory.appendingPathComponent($0), date: launchDate(of: $0)) }
+            .sorted { a, b in
+                switch (a.date, b.date) {
+                case let (x?, y?): x > y
+                case (_?, nil): true
+                case (nil, _?): false
+                case (nil, nil): a.url.lastPathComponent > b.url.lastPathComponent
+                }
+            }
+    }
+
+    /// `Dog_2026-09-01_22-10-43_ACAF51D1.log` → the date in the name. Dog
+    /// formats it in the current locale, so this reads it back the same way.
+    private static func launchDate(of name: String) -> Date? {
+        let parts = name.dropFirst("Dog_".count).split(separator: "_")
+        guard parts.count >= 3 else { return nil }
+        return launchFormatter.date(from: "\(parts[0])_\(parts[1])")
+    }
+
+    private static let launchFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        return formatter
+    }()
+
+    /// Removes every journal file but this launch's.
+    static func deleteOlderLaunches() {
+        let current = AppLog.currentFile?.standardizedFileURL
+        for launch in launches() where launch.url.standardizedFileURL != current {
+            try? FileManager.default.removeItem(at: launch.url)
+        }
+    }
+
+    // MARK: - Reading
+
+    /// The log for `source`; for the app, `launch` picks a file (nil is this
+    /// launch's).
+    static func read(_ source: LogSource, launch: URL? = nil) -> LogDocument {
+        switch source {
+        case .app:
+            let url = launch ?? AppLog.currentFile
+            var document = LogDocument()
+            document.location = url?.path ?? AppLog.journalDirectory.path
+            guard let url, let text = tail(of: [url]) else {
+                document.unreadable = true
+                return document
+            }
+            document.entries = parseJournal(text)
+            document.categories = categories(in: document.entries)
+            return document
+        case .daemon:
+            var document = LogDocument()
+            document.location = iGhostVTProtocol.daemonLogPath
+            let urls = [iGhostVTProtocol.rotatedDaemonLogPath, iGhostVTProtocol.daemonLogPath]
+                .map { URL(fileURLWithPath: $0) }
+            guard let text = tail(of: urls) else {
+                document.unreadable = true
+                return document
+            }
+            document.entries = parseDaemon(text)
+            document.categories = categories(in: document.entries)
+            return document
+        }
+    }
+
+    /// The whole log as one file, for Share: the journal file itself, or
+    /// the daemon's rotated file followed by its current one. Written to
+    /// the temporary directory under a name that says what it is.
+    static func exportFile(_ source: LogSource, launch: URL? = nil) -> URL? {
+        let name: String
+        let urls: [URL]
+        switch source {
+        case .app:
+            guard let url = launch ?? AppLog.currentFile else { return nil }
+            urls = [url]
+            let stamp = url.deletingPathExtension().lastPathComponent.dropFirst("Dog_".count)
+            name = "iGhostVT-\(stamp).log"
+        case .daemon:
+            urls = [iGhostVTProtocol.rotatedDaemonLogPath, iGhostVTProtocol.daemonLogPath]
+                .map { URL(fileURLWithPath: $0) }
+            name = "ighostvtd.log"
+        }
+        var data = Data()
+        for url in urls {
+            if let part = try? Data(contentsOf: url) {
+                data.append(part)
+            }
+        }
+        guard !data.isEmpty else { return nil }
+        let destination = FileManager.default.temporaryDirectory.appendingPathComponent(name)
+        do {
+            try data.write(to: destination, options: .atomic)
+        } catch {
+            return nil
+        }
+        return destination
+    }
+
+    /// The last `maximumByteCount` of the files concatenated in order, as
+    /// text; nil when none of them could be read. A cut lands mid-line, so
+    /// the fragment before the first newline goes.
+    private static func tail(of urls: [URL]) -> String? {
+        var data = Data()
+        var read = false
+        for url in urls {
+            if let part = try? Data(contentsOf: url) {
+                data.append(part)
+                read = true
+            }
+        }
+        guard read else { return nil }
+        var trimmed = false
+        if data.count > maximumByteCount {
+            data = data.suffix(maximumByteCount)
+            trimmed = true
+        }
+        var text = String(decoding: data, as: UTF8.self)
+        if trimmed, let newline = text.firstIndex(of: "\n") {
+            text = String(text[text.index(after: newline)...])
+        }
+        return text
+    }
+
+    private static func categories(in entries: [LogEntry]) -> [String] {
+        Array(Set(entries.map(\.category))).sorted()
+    }
+
+    // MARK: - Dog's format
+
+    /// Dog writes a `[tag]` line whenever the tag changes, then one line per
+    /// message: `* |level| yyyy-MM-dd_HH-mm-ss| message`.
+    static func parseJournal(_ text: String) -> [LogEntry] {
+        var entries: [LogEntry] = []
+        var tag = "?"
+        for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
+            if line.isEmpty { continue }
+            if line.hasPrefix("["), line.hasSuffix("]"), line.count > 2 {
+                tag = String(line.dropFirst().dropLast())
+                continue
+            }
+            if let entry = parseJournalLine(line, tag: tag, id: entries.count) {
+                entries.append(entry)
+            } else {
+                append(continuation: line, to: &entries, tag: tag)
+            }
+        }
+        return entries
+    }
+
+    private static func parseJournalLine(_ line: Substring, tag: String, id: Int) -> LogEntry? {
+        guard line.hasPrefix("* |") else { return nil }
+        let afterMarker = line.dropFirst(3)
+        guard let levelEnd = afterMarker.firstIndex(of: "|") else { return nil }
+        let level = LogEntry.Level(rawValue: String(afterMarker[..<levelEnd])) ?? .info
+        let afterLevel = afterMarker[afterMarker.index(after: levelEnd)...].drop(while: { $0 == " " })
+        guard let stampEnd = afterLevel.firstIndex(of: "|") else { return nil }
+        let stamp = String(afterLevel[..<stampEnd]).replacingOccurrences(of: "_", with: " ")
+        let message = afterLevel[afterLevel.index(after: stampEnd)...].drop(while: { $0 == " " })
+        return LogEntry(
+            id: id,
+            timestamp: stamp,
+            level: level,
+            category: tag,
+            message: String(message),
+            text: String(line)
+        )
+    }
+
+    // MARK: - The daemon's format
+
+    /// `DaemonFileLog.log`: `MM-dd HH:mm:ss.SSS [pid process] message`. The
+    /// process name is the tag; the daemon's lines carry no level.
+    static func parseDaemon(_ text: String) -> [LogEntry] {
+        var entries: [LogEntry] = []
+        for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
+            if line.isEmpty { continue }
+            if let entry = parseDaemonLine(line, id: entries.count) {
+                entries.append(entry)
+            } else {
+                append(continuation: line, to: &entries, tag: "ighostvtd")
+            }
+        }
+        return entries
+    }
+
+    private static let daemonStampLength = "MM-dd HH:mm:ss.SSS".count
+
+    private static func parseDaemonLine(_ line: Substring, id: Int) -> LogEntry? {
+        guard line.count > daemonStampLength + 2 else { return nil }
+        let stampEnd = line.index(line.startIndex, offsetBy: daemonStampLength)
+        let stamp = line[..<stampEnd]
+        guard stamp.allSatisfy({ $0.isNumber || $0 == "-" || $0 == " " || $0 == ":" || $0 == "." }),
+              line[stampEnd] == " ", line[line.index(after: stampEnd)] == "[",
+              let bracketEnd = line[stampEnd...].firstIndex(of: "]")
+        else { return nil }
+        let inside = line[line.index(stampEnd, offsetBy: 2) ..< bracketEnd]
+        let process = inside.split(separator: " ", maxSplits: 1).last.map(String.init) ?? String(inside)
+        let message = line[line.index(after: bracketEnd)...].drop(while: { $0 == " " })
+        return LogEntry(
+            id: id,
+            timestamp: String(stamp),
+            level: .info,
+            category: process,
+            message: String(message),
+            text: String(line)
+        )
+    }
+
+    // MARK: - Continuations
+
+    private static func append(continuation line: Substring, to entries: inout [LogEntry], tag: String) {
+        if entries.isEmpty {
+            entries.append(LogEntry(
+                id: 0,
+                timestamp: "",
+                level: .info,
+                category: tag,
+                message: String(line),
+                text: String(line)
+            ))
+        } else {
+            entries[entries.count - 1].message += "\n" + line
+            entries[entries.count - 1].text += "\n" + line
+        }
+    }
+}

@@ -12,18 +12,14 @@ import Dispatch
 /// Both `ighostvtd` and `ighostvtd-io` write here; each line names its
 /// process. No Foundation on purpose: the proxy lives under a 6 MB jetsam
 /// limit and a `DateFormatter` alone drags ICU in.
+///
+/// The location is the protocol's (`iGhostVTProtocol.daemonLogPath`): the
+/// app's log viewer reads this file, so the two must agree on where it is.
+/// The line format is likewise read back by the app — keep
+/// `LogReader.parseDaemonLine` in step with `log(_:)`.
 enum DaemonFileLog {
-    #if os(macOS)
-        /// The Mac Catalyst harness runs the daemon as the user; mobile's
-        /// home does not exist there.
-        private static let path: String = {
-            let home = getenv("HOME").map { String(cString: $0) } ?? "/tmp"
-            return home + "/Library/Logs/ighostvtd.log"
-        }()
-    #else
-        private static let path = "/var/mobile/Library/Logs/ighostvtd.log"
-    #endif
-    private static let rotatedPath = path + ".1"
+    private static let path = iGhostVTProtocol.daemonLogPath
+    private static let rotatedPath = iGhostVTProtocol.rotatedDaemonLogPath
     private static let rotateAtBytes = 512 * 1024
     private static let queue = DispatchQueue(
         label: "wiki.qaq.ighostvt.daemon.filelog",

@@ -39,35 +39,6 @@ enum TabPageExport {
         } catch {
             return
         }
-        // After a menu's dismissal animation: presenting into it leaves a
-        // dead sheet (the switcher's settings entry hit the same race). A
-        // key command pays the same wait; it is too short to notice.
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
-            presentShareSheet(for: url, in: window)
-        }
-    }
-
-    private static func presentShareSheet(for url: URL, in window: UIWindow?) {
-        guard let window, var top = window.rootViewController else { return }
-        while let presented = top.presentedViewController {
-            top = presented
-        }
-        let controller = UIActivityViewController(
-            activityItems: [url],
-            applicationActivities: nil
-        )
-        // iPad and the Mac require an anchor or the presentation crashes;
-        // the menu that triggered this is gone, so anchor to the window.
-        if let popover = controller.popoverPresentationController {
-            popover.sourceView = window
-            popover.sourceRect = CGRect(
-                x: window.bounds.midX,
-                y: window.bounds.midY,
-                width: 1,
-                height: 1
-            )
-            popover.permittedArrowDirections = []
-        }
-        top.present(controller, animated: true)
+        ShareSheet.present(url, in: window)
     }
 }

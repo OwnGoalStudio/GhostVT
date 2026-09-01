@@ -1,3 +1,5 @@
+import Darwin
+
 /// Wire contract shared by the app and `ighostvtd`.
 ///
 /// The daemon owns every terminal session: it is the only component allowed
@@ -74,6 +76,27 @@ enum iGhostVTProtocol {
     static let defaultRows: UInt16 = 24
     static let maximumColumns: UInt16 = 2000
     static let maximumRows: UInt16 = 2000
+
+    /// The file `ighostvtd` and `ighostvtd-io` keep their log in
+    /// (`DaemonFileLog`), and where the app's log viewer reads it from — a
+    /// contract between the two like the service name, which is why it is
+    /// here and not in either program. Mobile's Logs on the device: writable
+    /// whether the daemon runs as root or as mobile, readable by the app and
+    /// over ssh without elevation. The user's Logs on the Mac, where the
+    /// daemon is a per-user launch agent and the app is unsandboxed. The
+    /// daemon rotates it once (`.1` appended) at half a megabyte.
+    static var daemonLogPath: String {
+        #if os(macOS) || targetEnvironment(macCatalyst)
+            let home = getenv("HOME").map { String(cString: $0) } ?? "/tmp"
+            return home + "/Library/Logs/ighostvtd.log"
+        #else
+            return "/var/mobile/Library/Logs/ighostvtd.log"
+        #endif
+    }
+
+    static var rotatedDaemonLogPath: String {
+        daemonLogPath + ".1"
+    }
 }
 
 /// Client-initiated requests. Each one gets exactly one reply.

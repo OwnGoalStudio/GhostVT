@@ -126,24 +126,27 @@ struct AdvancedSettingsView: View {
         }
     }
 
+    /// The keystroke log's switch and the way into the logs themselves —
+    /// what the switch writes lands there, beside everything else the app
+    /// and its helper record.
     private var debugSection: some View {
         Section {
             Toggle("Detailed Terminal Log", isOn: $verboseTerminalLog)
                 .onChange(of: verboseTerminalLog) { enabled in
-                    if enabled {
-                        TerminalDebugFileLog.open()
-                        TerminalDebugLog.enable(.standard)
-                    } else {
-                        TerminalDebugLog.enable([.lifecycle, .metrics])
-                    }
+                    TerminalDebugLog.enable(enabled ? .standard : [.lifecycle, .metrics])
                 }
+            NavigationLink {
+                LogViewerView()
+            } label: {
+                Text("Logs")
+            }
         } header: {
             Text("Debugging")
                 .font(DS.Font.caption)
         } footer: {
             Text(
                 """
-                Writes detailed terminal activity to the system log, \
+                Writes detailed terminal activity to the log, \
                 including every keystroke, while this is on.
                 """
             )
