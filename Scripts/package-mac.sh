@@ -149,8 +149,10 @@ echo "==> verifying"
 codesign --verify --deep --strict --verbose=2 "$staged_app"
 codesign --display --entitlements - "$staged_app/Contents/MacOS/ighostvtd" >/dev/null
 codesign --display --entitlements - "$staged_app/Contents/MacOS/ighostvtd-io" >/dev/null
+# Not `grep -q`: under pipefail it exits on the match, codesign takes SIGPIPE
+# on the lines after, and the pipeline reads as a failed check.
 codesign --display --verbose=2 "$staged_app/Contents/MacOS/ighostvt-cli" 2>&1 \
-    | grep -qx "Identifier=$cli_identifier" || {
+    | grep -x "Identifier=$cli_identifier" >/dev/null || {
     echo "error: ighostvt-cli was not signed as $cli_identifier; the daemon will refuse it" >&2
     exit 65
 }
