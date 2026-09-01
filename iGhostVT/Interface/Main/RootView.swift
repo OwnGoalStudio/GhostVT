@@ -48,9 +48,9 @@ struct RootView: View {
 
     var body: some View {
         ZStack {
-            // The theme's background under everything: on the Mac this is
-            // what the sidebar shows, the same colour as the terminal beside
-            // it (the sidebar paints nothing of its own there).
+            // The theme's background under everything: this is what the
+            // sidebar shows, the same colour as the terminal beside it (the
+            // sidebar paints nothing of its own, on the Mac or the iPad).
             theme.background(for: colorScheme)
                 .ignoresSafeArea()
 

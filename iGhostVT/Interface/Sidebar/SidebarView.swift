@@ -82,18 +82,10 @@ struct SidebarView: View {
 
             footer
         }
-        // One standard blur spans the complete sidebar. Keeping it in a
-        // single layer avoids the different tints produced when separate
-        // materials sample the header, list, and footer independently. On
-        // the Mac there is no blur: the sidebar is the terminal's own
-        // background colour, painted once by `RootView`.
-        .background {
-            #if !targetEnvironment(macCatalyst)
-                Rectangle()
-                    .fill(.regularMaterial)
-                    .ignoresSafeArea()
-            #endif
-        }
+        // The sidebar paints no background of its own: it is the terminal's
+        // own background colour, painted once by `RootView` under the whole
+        // window, so the two columns read as one surface. (A material here
+        // tinted the theme's colour into something neither column had.)
         // For the context menu's share sheet, which presents via UIKit.
         .background(WindowReader(window: $window))
         .overlay(alignment: .trailing) {

@@ -490,7 +490,9 @@ Gotchas that bit us:
   was tried and taken out (glass under the bar's glass controls, and the
   toggle transitions across it rendered as black discs): `RootView` paints
   the theme's background under the whole window, so the sidebar is the
-  terminal's own colour. The title bar is hidden and `RootView` ignores the top safe area,
+  terminal's own colour — and the iPad's sidebar is the same, its
+  `.regularMaterial` gone (it tinted the theme into a third colour neither
+  column had). The title bar is hidden and `RootView` ignores the top safe area,
   so the top bar rides the window's edge and is the title bar now: the
   traffic lights are moved to its vertical centre (`standardWindowButton:`,
   re-done on every `NSWindowDidResizeNotification`, since AppKit re-tiles
