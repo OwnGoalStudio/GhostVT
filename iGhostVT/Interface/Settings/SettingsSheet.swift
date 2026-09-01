@@ -21,7 +21,6 @@ struct SettingsSheet: View {
                 AppearanceSettingsSection()
                 TextSizeSettingsSection()
                 KeyboardSettingsSection()
-                SessionsSettingsSection()
                 AboutSettingsSection()
                 // Breathing room under the last section, drawn as nothing:
                 // a row in a Form gets a cell background and separator.

@@ -147,7 +147,7 @@ extension View {
         @Published var isShown = false
     }
 
-    /// The dimmed pane with the settings card centered on it: a 500-point
+    /// The dimmed pane with the settings card centered on it: a 555-point
     /// square. The Form's own grouped background is hidden so the glass
     /// shows through; its cells keep theirs.
     private struct SettingsPanel: View {
@@ -164,7 +164,7 @@ extension View {
 
                 SettingsSheet(onDone: onClose)
                     .formBackgroundHidden()
-                    .frame(width: 500, height: 500)
+                    .frame(width: 555, height: 555)
                     .cardGlass(in: shape)
                     .scaleEffect(motion.isShown ? 1 : 0.95)
                     .blur(radius: motion.isShown ? 0 : 12)

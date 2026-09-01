@@ -7,8 +7,9 @@ import GhosttyTerminal
 import SwiftUI
 
 /// The settings a regular user never needs, off the main sheet so they
-/// don't read as things to fill in: the shell every terminal runs, the
-/// Mac's background helper, and the keystroke-level log.
+/// don't read as things to fill in: the shell every terminal runs, what
+/// happens to sessions at quit, the Mac's background helper, and the
+/// keystroke-level log.
 struct AdvancedSettingsView: View {
     @ObservedObject private var agent = MacLaunchAgent.shared
 
@@ -28,6 +29,7 @@ struct AdvancedSettingsView: View {
     var body: some View {
         Form {
             shellSection
+            SessionsSettingsSection()
             terminalHelperSection
             debugSection
             configurationSection

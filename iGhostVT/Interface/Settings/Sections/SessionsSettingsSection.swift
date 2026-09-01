@@ -5,7 +5,9 @@
 
 import SwiftUI
 
-/// What happens to running sessions when the app quits.
+/// What happens to running sessions when the app quits. Under Advanced,
+/// below the default shell: it changes what quitting means, which is not
+/// an everyday choice.
 struct SessionsSettingsSection: View {
     /// Read by AppDelegate when the app quits; see `SessionKeepAlive`.
     @AppStorage(SessionKeepAlive.key) private var keepAlive = true
