@@ -31,15 +31,20 @@ final class CommandTitleTracker: @unchecked Sendable {
     private static let maximumLength = 256
 
     func consume(_ data: Data) {
-        var completed: [String] = []
+        // Only the last plausible line a chunk completes is offered: every
+        // offer overwrites the one before, and each costs the store a
+        // viewport read on the main thread — a paste of thousands of short
+        // lines arrives as one chunk and used to queue one read per line.
+        var completed: String?
         lock.lock()
         for byte in data {
             switch byte {
             case 0x0D, 0x0A: // Return / Enter
                 if !abandoned, !buffer.isEmpty,
-                   let line = String(bytes: buffer, encoding: .utf8)
+                   let line = String(bytes: buffer, encoding: .utf8),
+                   Self.isPlausibleCommand(line)
                 {
-                    completed.append(line)
+                    completed = line
                 }
                 buffer.removeAll(keepingCapacity: true)
                 abandoned = false
@@ -79,9 +84,8 @@ final class CommandTitleTracker: @unchecked Sendable {
         }
         lock.unlock()
 
-        guard let onCommand else { return }
-        for line in completed {
-            onCommand(line)
+        if let completed, let onCommand {
+            onCommand(completed)
         }
     }
 

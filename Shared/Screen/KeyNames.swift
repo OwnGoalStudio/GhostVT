@@ -15,16 +15,32 @@ enum KeyNames {
 
     /// Bytes for one key name, `nil` when the name is not one.
     static func bytes(for name: String) -> [UInt8]? {
+        if let plain = plainBytes(for: name) {
+            return plain
+        }
+        // Each Meta prefix is one ESC ahead of the key, peeled in a loop:
+        // the name comes off the CLI's argv, and a run of `M-`s long enough
+        // to fit under ARG_MAX once took a stack frame per prefix — and
+        // re-lowercased the rest of the name at each — until the process
+        // died of it.
+        var rest = Substring(name)
+        var escapes = 0
+        while rest.count > 2, rest.hasPrefix("M-") || rest.hasPrefix("m-") {
+            rest = rest.dropFirst(2)
+            escapes += 1
+        }
+        guard escapes > 0 else { return nil }
+        let key = String(rest)
+        return [UInt8](repeating: 0x1B, count: escapes) + (plainBytes(for: key) ?? Array(key.utf8))
+    }
+
+    /// A name with no Meta prefix: a named key, or a `C-` combination.
+    private static func plainBytes(for name: String) -> [UInt8]? {
         if let simple = simpleKeys[name.lowercased()] {
             return Array(simple.utf8)
         }
         if name.count > 2, name.hasPrefix("C-") || name.hasPrefix("c-") {
             return controlBytes(for: String(name.dropFirst(2)))
-        }
-        if name.count > 2, name.hasPrefix("M-") || name.hasPrefix("m-") {
-            guard let rest = bytes(for: String(name.dropFirst(2)))
-                ?? Optional(Array(name.dropFirst(2).utf8)) else { return nil }
-            return [0x1B] + rest
         }
         return nil
     }

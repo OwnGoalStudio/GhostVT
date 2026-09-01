@@ -159,40 +159,64 @@ enum LogReader {
                 .map { URL(fileURLWithPath: $0) }
             name = "ighostvtd.log"
         }
-        var data = Data()
+        // Copied a megabyte at a time: the journal is the one file here
+        // with no size bound short of the launch's cap, and it is exported
+        // whole, so reading it into memory first was the jetsam `tail`
+        // avoids, one tap away on the same screen.
+        let destination = FileManager.default.temporaryDirectory.appendingPathComponent(name)
+        let manager = FileManager.default
+        guard manager.createFile(atPath: destination.path, contents: nil),
+              let output = try? FileHandle(forWritingTo: destination)
+        else { return nil }
+        defer { try? output.close() }
+        var copied = 0
         for url in urls {
-            if let part = try? Data(contentsOf: url) {
-                data.append(part)
+            guard let input = try? FileHandle(forReadingFrom: url) else { continue }
+            defer { try? input.close() }
+            while let chunk = try? input.read(upToCount: 1 << 20), !chunk.isEmpty {
+                guard (try? output.write(contentsOf: chunk)) != nil else { break }
+                copied += chunk.count
             }
         }
-        guard !data.isEmpty else { return nil }
-        let destination = FileManager.default.temporaryDirectory.appendingPathComponent(name)
-        do {
-            try data.write(to: destination, options: .atomic)
-        } catch {
+        guard copied > 0 else {
+            try? manager.removeItem(at: destination)
             return nil
         }
         return destination
     }
 
     /// The last `maximumByteCount` of the files concatenated in order, as
-    /// text; nil when none of them could be read. A cut lands mid-line, so
-    /// the fragment before the first newline goes.
+    /// text; nil when none of them could be read. Only that much is ever
+    /// read: the last file first, seeking to where the budget starts, and
+    /// an earlier one only for what budget is left. A journal written with
+    /// the terminal log on runs to gigabytes within one launch, and reading
+    /// it whole to keep its last two megabytes was the app jetsammed instead
+    /// of the viewer shown. A cut lands mid-line, so the fragment before the
+    /// first newline goes.
     private static func tail(of urls: [URL]) -> String? {
         var data = Data()
         var read = false
-        for url in urls {
-            if let part = try? Data(contentsOf: url) {
-                data.append(part)
-                read = true
+        var trimmed = false
+        var remaining = maximumByteCount
+        for url in urls.reversed() {
+            guard let handle = try? FileHandle(forReadingFrom: url) else { continue }
+            defer { try? handle.close() }
+            guard let size = try? handle.seekToEnd() else { continue }
+            if size > UInt64(remaining) {
+                trimmed = true
+                try? handle.seek(toOffset: size - UInt64(remaining))
+            } else {
+                try? handle.seek(toOffset: 0)
             }
+            // `readToEnd` answers nil for an empty file, which is a file
+            // that was read, so only a throw counts against it.
+            let part: Data
+            do { part = try handle.readToEnd() ?? Data() } catch { continue }
+            read = true
+            data.insert(contentsOf: part, at: 0)
+            remaining = max(0, remaining - part.count)
         }
         guard read else { return nil }
-        var trimmed = false
-        if data.count > maximumByteCount {
-            data = data.suffix(maximumByteCount)
-            trimmed = true
-        }
         var text = String(decoding: data, as: UTF8.self)
         if trimmed, let newline = text.firstIndex(of: "\n") {
             text = String(text[text.index(after: newline)...])

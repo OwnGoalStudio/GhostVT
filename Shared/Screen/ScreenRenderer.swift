@@ -235,11 +235,14 @@ final class ScreenRenderer {
             body.removeFirst()
         }
         // Intermediates are not used by anything here; drop them so a
-        // parameter list still parses.
+        // parameter list still parses. Every parameter is clamped as it
+        // is read: the sequence cap admits the nineteen digits of Int.max,
+        // and adding that to a cursor position traps, while a grid of
+        // UInt16 cells never needs more than this.
         body.removeAll { $0 >= 0x20 && $0 <= 0x2F }
         let parameters = String(decoding: body, as: UTF8.self)
             .split(separator: ";", omittingEmptySubsequences: false)
-            .map { Int($0) ?? 0 }
+            .map { min(Int($0) ?? 0, 65535) }
         func parameter(_ index: Int, default fallback: Int = 1) -> Int {
             guard index < parameters.count else { return fallback }
             let value = parameters[index]
@@ -417,7 +420,13 @@ final class ScreenRenderer {
         if !wrapPending { column -= 1 }
         while column >= 0, screen[cursorRow][column] == Self.spacer { column -= 1 }
         guard column >= 0 else { return }
-        screen[cursorRow][column] = Character(String(screen[cursorRow][column]) + String(mark))
+        // Not every pair joins: a format scalar such as U+200B breaks the
+        // cluster, and so does a C1 control or U+00AD sitting in the cell.
+        // `Character` traps on two clusters in Debug and stores them both in
+        // Release, so a mark that will not attach is dropped instead.
+        let joined = String(screen[cursorRow][column]) + String(mark)
+        guard joined.count == 1 else { return }
+        screen[cursorRow][column] = Character(joined)
     }
 
     private func index() {
@@ -439,7 +448,12 @@ final class ScreenRenderer {
     }
 
     private func scrollUp(_ count: Int) {
-        for _ in 0 ..< max(1, count) {
+        // Scrolling by more than the region's height leaves the same blank
+        // region as scrolling by exactly its height, and xterm clamps the
+        // count the same way; without the clamp each step is a remove and
+        // an insert across the grid, and a large CSI S parameter is a
+        // hang for `capture` and the Shortcuts snapshot alike.
+        for _ in 0 ..< min(max(1, count), scrollBottom - scrollTop + 1) {
             let departing = screen[scrollTop]
             // Only the primary screen's top line becomes history: a line
             // scrolled out of a region, or off the alternate screen, is
@@ -456,7 +470,9 @@ final class ScreenRenderer {
     }
 
     private func scrollDown(_ count: Int) {
-        for _ in 0 ..< max(1, count) {
+        // The same clamp as scrollUp, for the same reason: CSI T past the
+        // region's height blanks it just as fully.
+        for _ in 0 ..< min(max(1, count), scrollBottom - scrollTop + 1) {
             screen.remove(at: scrollBottom)
             screen.insert(blankRow(), at: scrollTop)
         }
@@ -495,7 +511,10 @@ final class ScreenRenderer {
 
     private func insertLines(_ count: Int) {
         guard cursorRow >= scrollTop, cursorRow <= scrollBottom else { return }
-        for _ in 0 ..< count {
+        // Once every row from the cursor to the region's bottom is blank,
+        // another pass changes nothing, so the loop stops there however
+        // large the parameter was.
+        for _ in 0 ..< min(count, scrollBottom - cursorRow + 1) {
             screen.remove(at: scrollBottom)
             screen.insert(blankRow(), at: cursorRow)
         }
@@ -505,7 +524,7 @@ final class ScreenRenderer {
 
     private func deleteLines(_ count: Int) {
         guard cursorRow >= scrollTop, cursorRow <= scrollBottom else { return }
-        for _ in 0 ..< count {
+        for _ in 0 ..< min(count, scrollBottom - cursorRow + 1) {
             screen.remove(at: cursorRow)
             screen.insert(blankRow(), at: scrollBottom)
         }
@@ -514,7 +533,10 @@ final class ScreenRenderer {
     }
 
     private func insertCharacters(_ count: Int) {
-        for _ in 0 ..< count {
+        // Once every cell from the cursor to the row's end is blank, another
+        // pass changes nothing, so the loop stops there however large the
+        // parameter was.
+        for _ in 0 ..< min(count, columns - cursorColumn) {
             screen[cursorRow].insert(" ", at: cursorColumn)
             screen[cursorRow].removeLast()
         }
@@ -522,8 +544,10 @@ final class ScreenRenderer {
     }
 
     private func deleteCharacters(_ count: Int) {
-        for _ in 0 ..< count {
-            guard cursorColumn < screen[cursorRow].count else { break }
+        // The remove and the append keep the row at `columns`, so a guard on
+        // the row's length never fires; the loop is bounded by the cells
+        // left in the row instead, as the insert above is.
+        for _ in 0 ..< min(count, columns - cursorColumn) {
             screen[cursorRow].remove(at: cursorColumn)
             screen[cursorRow].append(" ")
         }

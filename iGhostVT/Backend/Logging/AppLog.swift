@@ -86,6 +86,20 @@ enum AppLog {
         Dog.shared.currentLogFileLocation
     }
 
+    /// Bytes one launch may journal. Within a launch the file is otherwise
+    /// unbounded, and with Detailed Terminal Log on it records every chunk
+    /// a program prints, so a shell left flooding (`yes | base64`) fills the
+    /// data volume through the app — and Dog writes the line with the
+    /// legacy `FileHandle.write(_:)`, which raises an ObjC exception Swift
+    /// cannot catch when the write fails, so the next line from any thread
+    /// took the app down. Past the limit the file gets one closing line and
+    /// the rest of the launch reaches the unified log only.
+    private static let journalByteLimit = 256 << 20
+
+    /// Bytes journaled so far this launch. Touched only on `queue`, which
+    /// is what makes the plain counter safe.
+    private nonisolated(unsafe) static var journalBytesWritten = 0
+
     private static let queue = DispatchQueue(label: "wiki.qaq.iGhostVT.log", qos: .utility)
     private static let loggers: [Category: Logger] = Dictionary(
         uniqueKeysWithValues: Category.allCases.map {
@@ -130,6 +144,16 @@ enum AppLog {
         // the on-device debugging this exists for.
         loggers[category]?.log(level: level.osLogType, "\(message, privacy: .public)")
         queue.async {
+            guard journalBytesWritten <= journalByteLimit else { return }
+            journalBytesWritten += message.utf8.count
+            if journalBytesWritten > journalByteLimit {
+                Dog.shared.join(
+                    Category.app.rawValue,
+                    "journal capped at \(journalByteLimit >> 20) MiB for this launch; the rest reaches the unified log only",
+                    level: .warning
+                )
+                return
+            }
             Dog.shared.join(category.rawValue, message, level: level.dogLevel)
         }
     }
