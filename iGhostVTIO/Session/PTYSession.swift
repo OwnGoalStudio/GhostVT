@@ -127,32 +127,6 @@ final class PTYSession {
         return total == wanted
     }
 
-    /// How long the parent waits for the child to exec or give up. A child
-    /// reaches `execve` in well under this — generous, because the first
-    /// exec after a userspace reboot pays trustcache work under a load
-    /// average in the hundreds, and a spawn that then fails would lose
-    /// its reason text past the deadline — but the `chdir` into an
-    /// inherited directory can sit in a network filesystem whose server
-    /// has gone away, and that call blocks for as long as the mount stays
-    /// dead. This runs on the io side's one control queue, so waiting that
-    /// out would freeze every session's PTY, the SIGCHLD sweep and the
-    /// proxy link with it.
-    private static let spawnReportWaitMilliseconds: Int32 = 5000
-
-    /// True once the report pipe has something to read — the child's
-    /// failure or the EOF of its exec — false when the child is still
-    /// between fork and exec at the deadline.
-    private static func waitForReport(on descriptor: Int32, milliseconds: Int32) -> Bool {
-        var descriptors = pollfd(fd: descriptor, events: Int16(POLLIN), revents: 0)
-        while true {
-            let ready = poll(&descriptors, 1, milliseconds)
-            if ready < 0, errno == EINTR {
-                continue
-            }
-            return ready > 0
-        }
-    }
-
     private static func describeChildFailure(
         step: Int32,
         code: Int32,
@@ -330,24 +304,8 @@ final class PTYSession {
             close(reportRead)
             throw iGhostVTFailure(.spawnFailed, "Unable to start the terminal. Try again.")
         }
-        // Blocks only until the child execs (EOF) or gives up (8 bytes), and
-        // for at most `spawnReportWaitMilliseconds` either way. A child still
-        // setting up at the deadline is stuck in its `chdir` on a dead mount:
-        // the session is kept and its exec is simply late — the app already
-        // shows "Starting shell…" for a slow first byte — and should that
-        // exec then fail, the child's report meets a closed pipe (EPIPE, not
-        // a signal: SIGPIPE is ignored in this process and the fork inherits
-        // that) and it still `_exit`s 126 or 127, the evidence the exit
-        // path reports. Only the reason text is lost, and only in that case.
-        let reported: Bool
-        if Self.waitForReport(on: reportRead, milliseconds: Self.spawnReportWaitMilliseconds) {
-            reported = Self.readReport(from: reportRead, into: report)
-        } else {
-            DaemonFileLog.log(
-                "session \(id) child \(pid) still setting up \(Self.spawnReportWaitMilliseconds)ms after fork; not waiting for its exec"
-            )
-            reported = false
-        }
+        // Blocks only until the child execs (EOF) or gives up (8 bytes).
+        let reported = Self.readReport(from: reportRead, into: report)
         close(reportRead)
         if reported {
             var status: Int32 = 0

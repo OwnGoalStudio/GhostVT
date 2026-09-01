@@ -41,7 +41,7 @@ final class CommandTitleTracker: @unchecked Sendable {
             switch byte {
             case 0x0D, 0x0A: // Return / Enter
                 if !abandoned, !buffer.isEmpty,
-                   let line = String(bytes: buffer, encoding: .utf8),
+                   let line = String(bytes: buffer, encoding: .utf8)?.trimmingCharacters(in: .whitespaces),
                    Self.isPlausibleCommand(line)
                 {
                     completed = line

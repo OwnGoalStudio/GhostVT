@@ -170,11 +170,7 @@ final class TerminalSessionStore: ObservableObject {
     /// screen at the moment Return was pressed. A prompt reading a password
     /// echoes nothing, so nothing here matches and the old title stands.
     private func offerInferredTitle(_ command: String) {
-        let command = command.trimmingCharacters(in: .whitespaces)
-        guard CommandTitleTracker.isPlausibleCommand(command),
-              let screen = session.readViewportText(),
-              screen.contains(command)
-        else { return }
+        guard let screen = session.readViewportText(), screen.contains(command) else { return }
         inferredTitle = command
     }
 

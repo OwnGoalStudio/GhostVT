@@ -145,7 +145,10 @@ enum AppLog {
         loggers[category]?.log(level: level.osLogType, "\(message, privacy: .public)")
         queue.async {
             guard journalBytesWritten <= journalByteLimit else { return }
-            journalBytesWritten += message.utf8.count
+            // Counted with Dog's framing — the level, the timestamp, a tag
+            // line when the tag changes — or a flood of tiny chunks would
+            // put the file well past the limit the count had reached.
+            journalBytesWritten += message.utf8.count + 64
             if journalBytesWritten > journalByteLimit {
                 Dog.shared.join(
                     Category.app.rawValue,

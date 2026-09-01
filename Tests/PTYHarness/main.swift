@@ -684,11 +684,7 @@ do {
     check(freshDirectory == NSHomeDirectory(), "naming a session that never existed opens in the home (got \(String(describing: freshDirectory)))")
 
     // `proc_pidinfo` keeps answering with the old path after the directory
-    // is removed, and the registry offers it anyway — a `stat` there would
-    // run on the control queue against wherever that shell went, a dead
-    // network mount included. The child's own `chdir` is what refuses it,
-    // so the check is on the outcome: the session that inherits it opens
-    // in the home.
+    // is removed, so the registry's own stat check is what refuses it.
     var template = Array("/private/tmp/ighostvt-harness-cwd.XXXXXX".utf8CString)
     let removable = template.withUnsafeMutableBufferPointer { mkdtemp($0.baseAddress) }.map { String(cString: $0) }
     if let removable {
@@ -705,24 +701,7 @@ do {
         check(registry.inheritableDirectory(from: mover.id) == removable, "a directory that exists is offered")
         check(rmdir(removable) == 0, "the harness can remove the directory under the session")
         check(mover.currentDirectory == removable, "the kernel still names the removed directory")
-        let orphan = try registry.open(
-            command: ["/bin/sleep", "30"],
-            environment: [:],
-            columns: 80,
-            rows: 24,
-            inheritDirectoryFrom: mover.id
-        )
-        var orphanDirectory: String?
-        let orphanDeadline = Date().addingTimeInterval(5)
-        while Date() < orphanDeadline {
-            orphanDirectory = orphan.currentDirectory
-            if orphanDirectory == NSHomeDirectory() {
-                break
-            }
-            usleep(50000)
-        }
-        check(orphanDirectory == NSHomeDirectory(), "inheriting a directory that is gone opens in the home (got \(String(describing: orphanDirectory)))")
-        try? registry.close(orphan.id)
+        check(registry.inheritableDirectory(from: mover.id) == nil, "a directory that is gone is not offered")
         try? registry.close(mover.id)
     } else {
         check(false, "a removable directory is created")

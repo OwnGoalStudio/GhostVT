@@ -199,6 +199,12 @@ enum LogReader {
         var trimmed = false
         var remaining = maximumByteCount
         for url in urls.reversed() {
+            // A budget the newer file spent whole leaves this one unread,
+            // which is a cut like any other.
+            if remaining == 0 {
+                trimmed = true
+                break
+            }
             guard let handle = try? FileHandle(forReadingFrom: url) else { continue }
             defer { try? handle.close() }
             guard let size = try? handle.seekToEnd() else { continue }

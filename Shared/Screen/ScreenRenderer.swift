@@ -387,6 +387,10 @@ final class ScreenRenderer {
     private func clampRow(_ row: Int) -> Int { min(max(0, row), rows - 1) }
     private func clampColumn(_ column: Int) -> Int { min(max(0, column), columns - 1) }
 
+    private func blankRows(_ count: Int) -> [[Character]] {
+        Array(repeating: blankRow(), count: count)
+    }
+
     private func blankRow() -> [Character] {
         Array(repeating: " ", count: columns)
     }
@@ -447,35 +451,33 @@ final class ScreenRenderer {
         wrapPending = false
     }
 
+    // Every scroll, insert and delete below moves its rows or cells once,
+    // as one range operation bounded by what the region can change —
+    // scrolling past the region's height leaves the same blank region as
+    // scrolling by exactly its height, and xterm clamps the count the
+    // same way. Done one line per step, as they once were, a replay full
+    // of large parameters was a hang for `capture` and the Shortcuts
+    // snapshot alike.
+
     private func scrollUp(_ count: Int) {
-        // Scrolling by more than the region's height leaves the same blank
-        // region as scrolling by exactly its height, and xterm clamps the
-        // count the same way; without the clamp each step is a remove and
-        // an insert across the grid, and a large CSI S parameter is a
-        // hang for `capture` and the Shortcuts snapshot alike.
-        for _ in 0 ..< min(max(1, count), scrollBottom - scrollTop + 1) {
-            let departing = screen[scrollTop]
-            // Only the primary screen's top line becomes history: a line
-            // scrolled out of a region, or off the alternate screen, is
-            // gone in a real terminal too.
-            if saved == nil, scrollTop == 0 {
-                scrollback.append(departing)
-                if scrollback.count > Self.scrollbackLineLimit {
-                    scrollback.removeFirst(scrollback.count - Self.scrollbackLineLimit)
-                }
+        let lines = min(max(1, count), scrollBottom - scrollTop + 1)
+        // Only the primary screen's top lines become history: a line
+        // scrolled out of a region, or off the alternate screen, is gone
+        // in a real terminal too.
+        if saved == nil, scrollTop == 0 {
+            scrollback.append(contentsOf: screen[0 ..< lines])
+            if scrollback.count > Self.scrollbackLineLimit {
+                scrollback.removeFirst(scrollback.count - Self.scrollbackLineLimit)
             }
-            screen.remove(at: scrollTop)
-            screen.insert(blankRow(), at: scrollBottom)
         }
+        screen.removeSubrange(scrollTop ..< scrollTop + lines)
+        screen.insert(contentsOf: blankRows(lines), at: scrollBottom + 1 - lines)
     }
 
     private func scrollDown(_ count: Int) {
-        // The same clamp as scrollUp, for the same reason: CSI T past the
-        // region's height blanks it just as fully.
-        for _ in 0 ..< min(max(1, count), scrollBottom - scrollTop + 1) {
-            screen.remove(at: scrollBottom)
-            screen.insert(blankRow(), at: scrollTop)
-        }
+        let lines = min(max(1, count), scrollBottom - scrollTop + 1)
+        screen.removeSubrange(scrollBottom + 1 - lines ..< scrollBottom + 1)
+        screen.insert(contentsOf: blankRows(lines), at: scrollTop)
     }
 
     private func eraseInDisplay(_ mode: Int) {
@@ -511,46 +513,33 @@ final class ScreenRenderer {
 
     private func insertLines(_ count: Int) {
         guard cursorRow >= scrollTop, cursorRow <= scrollBottom else { return }
-        // Once every row from the cursor to the region's bottom is blank,
-        // another pass changes nothing, so the loop stops there however
-        // large the parameter was.
-        for _ in 0 ..< min(count, scrollBottom - cursorRow + 1) {
-            screen.remove(at: scrollBottom)
-            screen.insert(blankRow(), at: cursorRow)
-        }
+        let lines = min(count, scrollBottom - cursorRow + 1)
+        screen.removeSubrange(scrollBottom + 1 - lines ..< scrollBottom + 1)
+        screen.insert(contentsOf: blankRows(lines), at: cursorRow)
         cursorColumn = 0
         wrapPending = false
     }
 
     private func deleteLines(_ count: Int) {
         guard cursorRow >= scrollTop, cursorRow <= scrollBottom else { return }
-        for _ in 0 ..< min(count, scrollBottom - cursorRow + 1) {
-            screen.remove(at: cursorRow)
-            screen.insert(blankRow(), at: scrollBottom)
-        }
+        let lines = min(count, scrollBottom - cursorRow + 1)
+        screen.removeSubrange(cursorRow ..< cursorRow + lines)
+        screen.insert(contentsOf: blankRows(lines), at: scrollBottom + 1 - lines)
         cursorColumn = 0
         wrapPending = false
     }
 
     private func insertCharacters(_ count: Int) {
-        // Once every cell from the cursor to the row's end is blank, another
-        // pass changes nothing, so the loop stops there however large the
-        // parameter was.
-        for _ in 0 ..< min(count, columns - cursorColumn) {
-            screen[cursorRow].insert(" ", at: cursorColumn)
-            screen[cursorRow].removeLast()
-        }
+        let cells = min(count, columns - cursorColumn)
+        screen[cursorRow].removeLast(cells)
+        screen[cursorRow].insert(contentsOf: repeatElement(" ", count: cells), at: cursorColumn)
         wrapPending = false
     }
 
     private func deleteCharacters(_ count: Int) {
-        // The remove and the append keep the row at `columns`, so a guard on
-        // the row's length never fires; the loop is bounded by the cells
-        // left in the row instead, as the insert above is.
-        for _ in 0 ..< min(count, columns - cursorColumn) {
-            screen[cursorRow].remove(at: cursorColumn)
-            screen[cursorRow].append(" ")
-        }
+        let cells = min(count, columns - cursorColumn)
+        screen[cursorRow].removeSubrange(cursorColumn ..< cursorColumn + cells)
+        screen[cursorRow].append(contentsOf: repeatElement(" ", count: cells))
         wrapPending = false
     }
 

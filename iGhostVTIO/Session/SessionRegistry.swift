@@ -51,8 +51,10 @@ final class SessionRegistry {
         var processName: String
         var isForegroundShell: Bool
         /// The shell's current directory as the kernel spells it, `nil`
-        /// once the child is gone. For display the kernel's answer is the
-        /// truth even for a directory that has since been removed.
+        /// once the child is gone. The raw read, not `inheritableDirectory`:
+        /// that one's `stat` exists to refuse a `chdir` target, and for
+        /// display the kernel's answer is the truth even for a directory
+        /// that has since been removed.
         var currentDirectory: String?
     }
 
@@ -226,16 +228,15 @@ final class SessionRegistry {
         sessions.removeValue(forKey: id)?.invalidate()
     }
 
-    /// The directory a new session may inherit from `sourceSessionID`: its
-    /// shell's current one, if the session is still alive. Deliberately not
-    /// checked here: the path is wherever that shell went, and a `stat` on
-    /// it runs on the control queue, so a shell parked on a network mount
-    /// whose server stopped answering would stall every session's input and
-    /// output until the mount timed out. The child is the one that `chdir`s,
-    /// as the session user, and falls back if that is refused or the path
-    /// is no longer a directory — the only check that decides anything.
+    /// The directory a new session may inherit from `sourceSessionID`:
+    /// its shell's current one, if the session is still alive and the path
+    /// is a directory right now. Checked as the daemon; the child re-checks
+    /// as the session user when it `chdir`s, and falls back if refused.
     func inheritableDirectory(from sourceSessionID: UInt64) -> String? {
-        sessions[sourceSessionID]?.currentDirectory
+        guard let path = sessions[sourceSessionID]?.currentDirectory else { return nil }
+        var info = stat()
+        guard stat(path, &info) == 0, info.st_mode & S_IFMT == S_IFDIR else { return nil }
+        return path
     }
 
     /// A client sends either nothing (give me a shell), a single path (give me
