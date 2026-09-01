@@ -5,10 +5,10 @@
 
 import SwiftUI
 
-/// Version, and the way into Advanced. Advanced sits here, at the end, and
-/// not among the everyday sections: the shell path, the Mac helper, and the
-/// keystroke log are settings most people never need, and the ones who do
-/// will look past Version.
+/// Version, the licenses, and the way into Advanced. Advanced sits here, at
+/// the end, and not among the everyday sections: the shell path, the Mac
+/// helper, and the keystroke log are settings most people never need, and
+/// the ones who do will look past Version.
 struct AboutSettingsSection: View {
     var body: some View {
         Section {
@@ -17,6 +17,11 @@ struct AboutSettingsSection: View {
                 Spacer()
                 Text(Self.versionDescription)
                     .foregroundColor(.secondary)
+            }
+            NavigationLink {
+                LicensesView()
+            } label: {
+                Text("Licenses")
             }
             NavigationLink {
                 AdvancedSettingsView()

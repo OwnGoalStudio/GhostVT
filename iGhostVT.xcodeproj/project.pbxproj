@@ -186,6 +186,7 @@
 				AA0000000000000000000702 /* Sources */,
 				AA0000000000000000000701 /* Frameworks */,
 				AA0000000000000000000703 /* Resources */,
+				AA000000000000000000070A /* Collect Licenses */,
 				AA0000000000000000000706 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
@@ -376,6 +377,36 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		AA000000000000000000070A /* Collect Licenses */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Scripts/collect-licenses.py",
+				"$(SRCROOT)/LICENSE",
+				"$(SRCROOT)/Licenses",
+				"$(SRCROOT)/Licenses/ghostty/LICENSE",
+				"$(SRCROOT)/Licenses/ghostty/notice.json",
+				"$(SRCROOT)/manifest.json",
+				"$(SRCROOT)/Configuration/Version.xcconfig",
+				"$(SRCROOT)/iGhostVT.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved",
+			);
+			name = "Collect Licenses";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Licenses.json",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "exec \"$SRCROOT/Scripts/collect-licenses.py\" --project \"$SRCROOT\" --build-dir \"$BUILD_DIR\" --output \"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Licenses.json\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		AA0000000000000000000702 /* Sources */ = {

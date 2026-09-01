@@ -68,6 +68,13 @@ app_version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$
     exit 65
 }
 
+# Settings ▸ About ▸ Licenses reads this; the Collect Licenses build phase
+# writes it, and a bundle without it is a build that skipped the phase.
+[[ -f "$app_bundle/Licenses.json" ]] || {
+    echo "error: $app_bundle has no Licenses.json — the Collect Licenses build phase did not run" >&2
+    exit 65
+}
+
 output_name="$(basename "$output_deb")"
 mkdir -p "$(dirname "$output_deb")"
 output_directory="$(cd "$(dirname "$output_deb")" && pwd -P)"

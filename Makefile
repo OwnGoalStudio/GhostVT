@@ -67,6 +67,7 @@ DEB_OUTPUT          ?= $(ROOT_DIR)/build/Packages/$(PACKAGE_ID)_$(APP_VERSION)_$
 XCODEBUILD_WRAPPER  := $(ROOT_DIR)/Scripts/run-xcodebuild.sh
 DEB_PACKAGER        := $(ROOT_DIR)/Scripts/package-deb.sh
 VERSION_APPLIER     := $(ROOT_DIR)/Scripts/apply-version.sh
+LICENSE_COLLECTOR   := $(ROOT_DIR)/Scripts/collect-licenses.py
 MAC_DAEMON_LOADER   := $(ROOT_DIR)/Scripts/mac-daemon.sh
 MAC_PACKAGER        := $(ROOT_DIR)/Scripts/package-mac.sh
 MAC_UPDATE_FROM_GITHUB := $(ROOT_DIR)/Scripts/mac-update-from-github.sh
@@ -156,6 +157,11 @@ check:
 	@test -x "$(DEB_PACKAGER)" || { echo "error: package-deb.sh is not executable" >&2; exit 66; }
 	@test -x "$(VERSION_APPLIER)" || { echo "error: apply-version.sh is not executable" >&2; exit 66; }
 	@test -x "$(MAC_DAEMON_LOADER)" || { echo "error: mac-daemon.sh is not executable" >&2; exit 66; }
+	@test -x "$(LICENSE_COLLECTOR)" || { echo "error: collect-licenses.py is not executable" >&2; exit 66; }
+	@grep -qF 'collect-licenses.py' "$(PROJECT)/project.pbxproj" \
+		|| { echo "error: the Collect Licenses build phase is missing from the iGhostVT target — Settings ▸ About ▸ Licenses would be empty" >&2; exit 65; }
+	@test -f "$(ROOT_DIR)/Licenses/ghostty/LICENSE" -a -f "$(ROOT_DIR)/Licenses/ghostty/notice.json" \
+		|| { echo "error: Licenses/ghostty must carry Ghostty's LICENSE and notice.json — the XCFramework ships no license file" >&2; exit 66; }
 	@for xcconfig in Version Base Development Release; do \
 		test -f "$(CONFIG_DIR)/$$xcconfig.xcconfig" || { echo "error: Configuration/$$xcconfig.xcconfig is missing" >&2; exit 66; }; \
 	done

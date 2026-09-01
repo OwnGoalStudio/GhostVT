@@ -57,6 +57,9 @@ die() {
 }
 
 test -d "$app_bundle" || die "$app_bundle is not an app bundle"
+# Settings ▸ About ▸ Licenses reads this; a bundle without it skipped the
+# Collect Licenses build phase.
+test -f "$app_bundle/Contents/Resources/Licenses.json" || die "$app_bundle has no Licenses.json — the Collect Licenses build phase did not run"
 test -f "$daemon_binary" || die "$daemon_binary was not built"
 test -f "$daemon_io_binary" || die "$daemon_io_binary was not built"
 test -f "$cli_binary" || die "$cli_binary was not built"

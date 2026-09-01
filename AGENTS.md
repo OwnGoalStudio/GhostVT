@@ -95,6 +95,26 @@ branch folder. Keep the site's `index.html` and `icon.png` at `Site/` root —
 `manifest.json` and the AltStore-style clients fetch
 `https://owngoalstudio.github.io/GhostVT/icon.png`.
 
+Settings ▸ About ▸ Licenses (`LicensesView`) is generated, not written: the
+app target's **Collect Licenses** build phase runs
+`Scripts/collect-licenses.py`, which writes `Licenses.json` into the bundle
+from the repository's `LICENSE`, the vendored notices under `Licenses/`
+(one folder per component, `LICENSE` + `notice.json`), and every package
+pinned in `Package.resolved` — its checkout under DerivedData's
+`SourcePackages` is walked for LICENSE / COPYING / NOTICE files, nested ones
+included (that is how the iTerm2 color schemes and bash-preexec notices
+inside libghostty-spm get in). `Licenses/ghostty/` exists because
+libghostty-spm ships Ghostty as a prebuilt XCFramework and a binary carries
+no license file; its version is read from the checkout's `Ghostty.version`.
+A pin without a checkout, a checkout without a license, or GPL-family text
+anywhere in the set fails the build — the .deb once shipped Ghostty's GPLv3
+shell integration by accident, and this is the last check that it stays out.
+The phase runs under Xcode's script sandbox, so every file it reads under
+`SRCROOT` is a declared input; a new vendored folder must be added to the
+phase's `inputPaths` in the pbxproj or an edit to it will not re-run the
+phase. `make check` requires the phase and the Ghostty notice; both
+packagers refuse a bundle without `Licenses.json`.
+
 The `ighostvtd` target depends on `ighostvtd-io`, so `-scheme ighostvtd`
 builds both and they land side by side (`/usr/libexec` on device,
 `Contents/MacOS` in the Mac bundle); the proxy finds the child beside its own
