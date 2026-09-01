@@ -15,12 +15,12 @@ usage: ighostvt-cli list
 
   list          show the daemon's sessions: id, foreground process, size,
                 whether it is attached, and the shell's directory
-  capture       print the session's screen as text; --full prepends the
-                scrollback the daemon still holds
+  capture       print the session's screen as text; --full also prints the
+                scrollback above it
   send          send input to the session, in order. Key names follow tmux's
                 send-keys: \(KeyNames.vocabulary)
-  new           open a session and print its id (the shell, or the given
-                command); it stays in the daemon for the app to adopt
+  new           start a session and print its id, running the shell or the
+                given command; it stays open for iGhostVT to show
   kill          close a session and wait for it to exit
 """
 
@@ -64,7 +64,7 @@ func parse(_ arguments: [String]) throws -> Command {
         while !remaining.isEmpty {
             let kind = remaining.removeFirst()
             guard let value = remaining.first else {
-                throw CLIError.usage("\(kind) needs a value")
+                throw CLIError.usage("\(kind) needs a value; send takes text <string> or key <name>")
             }
             remaining.removeFirst()
             switch kind {

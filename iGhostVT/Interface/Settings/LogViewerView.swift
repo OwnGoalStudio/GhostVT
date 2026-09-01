@@ -94,7 +94,7 @@ struct LogViewerView: View {
                     .font(DS.Font.heroSymbol)
                     .foregroundColor(.secondary)
                 if model.document.unreadable {
-                    Text("The log file could not be read.")
+                    Text("Unable to read the log file. Refresh to try again.")
                         .font(DS.Font.body)
                         .foregroundColor(.secondary)
                 } else {

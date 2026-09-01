@@ -48,7 +48,7 @@ struct LicensesView: View {
     var body: some View {
         Form {
             if LicenseCatalog.entries.isEmpty {
-                Text("No license information was included in this build.")
+                Text("No license information is available.")
                     .font(DS.Font.detail)
                     .foregroundColor(.secondary)
             } else {

@@ -254,7 +254,7 @@ final class SessionRegistry {
             guard let plan = ShellLaunch.plan(requestedShell: requested[0]) else {
                 throw iGhostVTFailure(
                     .invalidRequest,
-                    "\(requested[0]) is not an executable file. Choose another shell in Settings."
+                    "Unable to run \(requested[0]). Choose another shell in Settings."
                 )
             }
             return plan
@@ -262,7 +262,7 @@ final class SessionRegistry {
             guard let command = ShellLaunch.validate(requested) else {
                 throw iGhostVTFailure(
                     .invalidRequest,
-                    "The requested command is not an executable file. Check the command and try again."
+                    "Unable to run that command. Check the command and try again."
                 )
             }
             return ShellLaunch.verbatimPlan(command: command)

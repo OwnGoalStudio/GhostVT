@@ -6357,77 +6357,6 @@
         }
       }
     },
-    "Foreground Program" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vordergrundprogramm"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Foreground Program"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programa en primer plano"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programme au premier plan"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programma in primo piano"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "フォアグラウンドのプログラム"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "포그라운드 프로그램"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Programa em primeiro plano"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Программа на переднем плане"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "前台程序"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "前景程式"
-          }
-        }
-      }
-    },
     "Forward Delete" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7135,78 +7064,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "iGhostVT 與其終端機助手版本不一致。請重新安裝 iGhostVT 以同時更新兩者。"
-          }
-        }
-      }
-    },
-    "iGhostVT could not be moved to Applications. %@" : {
-      "comment" : "Mac agent error when moving the app bundle fails; the system's reason follows",
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT konnte nicht nach „Programme“ bewegt werden. %@"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT could not be moved to Applications. %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se pudo mover iGhostVT a Aplicaciones. %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible de déplacer iGhostVT vers Applications. %@"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossibile spostare iGhostVT in Applicazioni. %@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT を「アプリケーション」に移動できませんでした。%@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "iGhostVT를 응용 프로그램으로 이동할 수 없습니다. %@"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível mover o iGhostVT para Aplicativos. %@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не удалось переместить iGhostVT в «Программы». %@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法将 iGhostVT 移到“应用程序”。%@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無法將 iGhostVT 移到「應用程式」。%@"
           }
         }
       }
@@ -10537,72 +10394,72 @@
         }
       }
     },
-    "No license information was included in this build." : {
+    "No license information is available." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Dieser Build enthält keine Lizenzinformationen."
+            "value" : "Keine Lizenzinformationen verfügbar."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No license information was included in this build."
+            "value" : "No license information is available."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta compilación no incluye información de licencias."
+            "value" : "No hay información de licencias disponible."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cette version ne contient aucune information de licence."
+            "value" : "Aucune information de licence disponible."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Questa build non include informazioni sulle licenze."
+            "value" : "Nessuna informazione sulle licenze disponibile."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "このビルドにはライセンス情報が含まれていません。"
+            "value" : "ライセンス情報はありません。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이 빌드에는 라이선스 정보가 포함되어 있지 않습니다."
+            "value" : "라이선스 정보가 없습니다."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Esta compilação não inclui informações de licença."
+            "value" : "Nenhuma informação de licença disponível."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "В этой сборке нет сведений о лицензиях."
+            "value" : "Сведения о лицензиях недоступны."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "此构建未包含许可证信息。"
+            "value" : "没有可用的许可证信息。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "此建置未包含授權資訊。"
+            "value" : "沒有可用的授權資訊。"
           }
         }
       }
@@ -13369,73 +13226,73 @@
         }
       }
     },
-    "Returns what a terminal session is showing, as plain text. Can also include the scrollback iGhostVT still keeps." : {
+    "Returns what a terminal session is showing, as plain text. Can also include the session's scrollback." : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Gibt als Text zurück, was eine Terminalsitzung anzeigt. Kann auch den Verlauf einschließen, den iGhostVT noch vorhält."
+            "value" : "Gibt als Text zurück, was eine Terminalsitzung anzeigt. Kann auch den Verlauf der Sitzung einschließen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Returns what a terminal session is showing, as plain text. Can also include the scrollback iGhostVT still keeps."
+            "value" : "Returns what a terminal session is showing, as plain text. Can also include the session's scrollback."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Devuelve lo que muestra una sesión de terminal, como texto sin formato. También puede incluir el historial de desplazamiento que iGhostVT aún conserva."
+            "value" : "Devuelve lo que muestra una sesión de terminal, como texto sin formato. También puede incluir el historial de desplazamiento de la sesión."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Renvoie ce qu’affiche une session de terminal, en texte brut. Peut aussi inclure l’historique de défilement qu’iGhostVT conserve encore."
+            "value" : "Renvoie ce qu’affiche une session de terminal, en texte brut. Peut aussi inclure l’historique de défilement de la session."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Restituisce ciò che mostra una sessione del terminale, come testo semplice. Può includere anche la cronologia di scorrimento che iGhostVT conserva ancora."
+            "value" : "Restituisce ciò che mostra una sessione del terminale, come testo semplice. Può includere anche la cronologia di scorrimento della sessione."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ターミナルセッションの表示内容をプレーンテキストで返します。iGhostVT がまだ保持しているスクロールバックを含めることもできます。"
+            "value" : "ターミナルセッションの表示内容をプレーンテキストで返します。セッションのスクロールバックを含めることもできます。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "터미널 세션의 표시 내용을 일반 텍스트로 반환합니다. iGhostVT가 아직 보관 중인 스크롤백도 포함할 수 있습니다."
+            "value" : "터미널 세션의 표시 내용을 일반 텍스트로 반환합니다. 세션의 스크롤백도 포함할 수 있습니다."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Retorna o que uma sessão de terminal está mostrando, como texto simples. Também pode incluir o histórico de rolagem que o iGhostVT ainda mantém."
+            "value" : "Retorna o que uma sessão de terminal está mostrando, como texto simples. Também pode incluir o histórico de rolagem da sessão."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Возвращает содержимое экрана сеанса терминала как обычный текст. Может также включать историю прокрутки, которую iGhostVT ещё хранит."
+            "value" : "Возвращает содержимое экрана сеанса терминала как обычный текст. Может также включать историю прокрутки сеанса."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "以纯文本返回终端会话正在显示的内容。也可以包含 iGhostVT 仍保留的回滚内容。"
+            "value" : "以纯文本返回终端会话正在显示的内容。也可以包含该会话的回滚内容。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "以純文字回傳終端機工作階段正在顯示的內容。也可以包含 iGhostVT 仍保留的回捲內容。"
+            "value" : "以純文字回傳終端機工作階段正在顯示的內容。也可以包含該工作階段的回捲內容。"
           }
         }
       }
@@ -15717,77 +15574,6 @@
         }
       }
     },
-    "Show Tabs" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tabs anzeigen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Show Tabs"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar pestañas"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher les onglets"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostra schede"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "タブを表示"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "탭 보기"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mostrar abas"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Показать вкладки"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示标签页"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "顯示分頁"
-          }
-        }
-      }
-    },
     "Show Terminal Session" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17632,73 +17418,73 @@
         }
       }
     },
-    "The command did not finish before the time limit." : {
+    "The command did not finish in time. Increase the time limit and try again." : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Befehl wurde nicht innerhalb des Zeitlimits abgeschlossen."
+            "value" : "Der Befehl wurde nicht rechtzeitig abgeschlossen. Erhöhe das Zeitlimit und versuche es erneut."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "The command did not finish before the time limit."
+            "value" : "The command did not finish in time. Increase the time limit and try again."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El comando no ha terminado dentro del tiempo límite."
+            "value" : "El comando no ha terminado a tiempo. Aumenta el tiempo límite e inténtalo de nuevo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La commande ne s’est pas terminée avant la limite de temps."
+            "value" : "La commande ne s’est pas terminée à temps. Augmentez la limite de temps, puis réessayez."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Il comando non è terminato entro il limite di tempo."
+            "value" : "Il comando non è terminato in tempo. Aumenta il limite di tempo e riprova."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "コマンドが制限時間内に完了しませんでした。"
+            "value" : "コマンドが時間内に完了しませんでした。制限時間を延ばしてからもう一度お試しください。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "명령이 제한 시간 내에 완료되지 않았습니다."
+            "value" : "명령이 제때 완료되지 않았습니다. 제한 시간을 늘린 후 다시 시도하십시오."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O comando não terminou dentro do tempo limite."
+            "value" : "O comando não terminou a tempo. Aumente o tempo limite e tente novamente."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Команда не завершилась до истечения лимита времени."
+            "value" : "Команда не завершилась вовремя. Увеличьте лимит времени и повторите попытку."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "命令未在时限内完成。"
+            "value" : "命令未及时完成。请增加时限后重试。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "指令未在時限內完成。"
+            "value" : "指令未及時完成。請增加時限後再試一次。"
           }
         }
       }
@@ -19259,7 +19045,7 @@
         }
       }
     },
-    "This text contains line breaks or hidden characters the program may run as commands: %@" : {
+    "This text contains line breaks or hidden characters that the program may run as commands: %@" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -19270,7 +19056,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This text contains line breaks or hidden characters the program may run as commands: %@"
+            "value" : "This text contains line breaks or hidden characters that the program may run as commands: %@"
           }
         },
         "es" : {
@@ -20106,6 +19892,147 @@
         }
       }
     },
+    "Unable to move iGhostVT to Applications. Move it there in Finder, then open it again." : {
+      "comment" : "Mac agent error when moving the app bundle fails",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT konnte nicht nach „Programme“ bewegt werden. Bewege die App im Finder dorthin und öffne sie dann erneut."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to move iGhostVT to Applications. Move it there in Finder, then open it again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo mover iGhostVT a Aplicaciones. Muévela allí en el Finder y vuelve a abrirla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de déplacer iGhostVT vers Applications. Déplacez l’app dans le Finder, puis rouvrez-la."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossibile spostare iGhostVT in Applicazioni. Spostala lì dal Finder, poi riaprila."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT を「アプリケーション」に移動できませんでした。Finder で移動してから、もう一度開いてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iGhostVT를 응용 프로그램으로 이동할 수 없습니다. Finder에서 직접 이동한 후 다시 여세요."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível mover o iGhostVT para Aplicativos. Mova-o para lá no Finder e abra-o novamente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось переместить iGhostVT в «Программы». Переместите приложение туда в Finder и откройте его снова."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法将 iGhostVT 移到“应用程序”。请在“访达”中将其移到该处，然后重新打开。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法將 iGhostVT 移到「應用程式」。請在 Finder 中將其移到該處，然後重新開啟。"
+          }
+        }
+      }
+    },
+    "Unable to read the log file. Refresh to try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Protokolldatei konnte nicht gelesen werden. Aktualisiere, um es erneut zu versuchen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unable to read the log file. Refresh to try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo leer el archivo de registro. Actualiza para intentarlo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de lire le fichier journal. Actualisez pour réessayer."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non è stato possibile leggere il file di log. Aggiorna per riprovare."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ログファイルを読み込めませんでした。更新してもう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로그 파일을 읽지 못했습니다. 새로 고침하여 다시 시도하세요."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Não foi possível ler o arquivo de registro. Atualize para tentar novamente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не удалось прочитать файл журнала. Обновите, чтобы повторить попытку."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法读取日志文件。请刷新后重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "無法讀取日誌檔案。請重新整理後重試。"
+          }
+        }
+      }
+    },
     "Unable to reconnect to the terminal. Try again or close the tab." : {
       "localizations" : {
         "de" : {
@@ -20176,73 +20103,73 @@
         }
       }
     },
-    "Unable to turn on the background helper. Try again." : {
+    "Unable to turn on Terminal Helper. Try again." : {
       "comment" : "Mac agent error when registering the LaunchAgent fails",
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Hintergrund-Helfer konnte nicht eingeschaltet werden. Versuche es erneut."
+            "value" : "Der Terminal-Helfer konnte nicht eingeschaltet werden. Versuche es erneut."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Unable to turn on the background helper. Try again."
+            "value" : "Unable to turn on Terminal Helper. Try again."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo activar el asistente en segundo plano. Inténtalo de nuevo."
+            "value" : "No se pudo activar el Asistente del terminal. Inténtalo de nuevo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Impossible d’activer l’assistant en arrière-plan. Réessayez."
+            "value" : "Impossible d’activer l’Assistant du terminal. Réessayez."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Non è stato possibile attivare l’assistente in background. Riprova."
+            "value" : "Non è stato possibile attivare l’Assistente del terminale. Riprova."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "バックグラウンドヘルパーをオンにできませんでした。もう一度お試しください。"
+            "value" : "ターミナルヘルパーをオンにできませんでした。もう一度お試しください。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "백그라운드 헬퍼를 켜지 못했습니다. 다시 시도하세요."
+            "value" : "터미널 헬퍼를 켜지 못했습니다. 다시 시도하세요."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Não foi possível ativar o assistente em segundo plano. Tente novamente."
+            "value" : "Não foi possível ativar o Assistente do terminal. Tente novamente."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Не удалось включить фоновый помощник. Повторите попытку."
+            "value" : "Не удалось включить Помощник терминала. Повторите попытку."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无法开启后台助手。请重试。"
+            "value" : "无法开启终端助手。请重试。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "無法開啟背景助手。請重試。"
+            "value" : "無法開啟終端機助手。請重試。"
           }
         }
       }

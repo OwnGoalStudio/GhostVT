@@ -122,7 +122,7 @@ struct SendKeyIntent: AppIntent {
 struct GetScreenTextIntent: AppIntent {
     static let title: LocalizedStringResource = "Get Terminal Screen Text"
     static let description = IntentDescription(
-        "Returns what a terminal session is showing, as plain text. Can also include the scrollback iGhostVT still keeps.",
+        "Returns what a terminal session is showing, as plain text. Can also include the session's scrollback.",
         categoryName: "Output"
     )
     static let authenticationPolicy: IntentAuthenticationPolicy = .requiresAuthentication

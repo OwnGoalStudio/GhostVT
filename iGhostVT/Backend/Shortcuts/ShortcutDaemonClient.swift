@@ -57,7 +57,7 @@ extension ShortcutError: CustomLocalizedStringResourceConvertible {
         case .sessionLingered:
             "The terminal session did not end in time. Try again."
         case .commandTimedOut:
-            "The command did not finish before the time limit."
+            "The command did not finish in time. Increase the time limit and try again."
         case .noWindow:
             "iGhostVT could not open a window. Try again."
         }

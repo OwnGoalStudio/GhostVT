@@ -49,7 +49,7 @@ enum ClipboardConfirmation {
         case .osc52Write:
             return "A program in this terminal wants to replace the clipboard with: \(preview)"
         case .paste:
-            return "This text contains line breaks or hidden characters the program may run as commands: \(preview)"
+            return "This text contains line breaks or hidden characters that the program may run as commands: \(preview)"
         }
     }
 

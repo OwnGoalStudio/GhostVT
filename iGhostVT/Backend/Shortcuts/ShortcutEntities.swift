@@ -23,7 +23,7 @@ struct SessionEntity: AppEntity, Identifiable {
     @Property(title: "Session ID")
     var sessionID: Int
 
-    @Property(title: "Foreground Program")
+    @Property(title: "Program")
     var program: String
 
     @Property(title: "Title")

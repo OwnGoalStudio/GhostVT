@@ -200,8 +200,8 @@ final class MacLaunchAgent: ObservableObject {
             } catch {
                 status = .failed(
                     String(
-                        localized: "iGhostVT could not be moved to Applications. \(error.localizedDescription)",
-                        comment: "Mac agent error when moving the app bundle fails; the system's reason follows"
+                        localized: "Unable to move iGhostVT to Applications. Move it there in Finder, then open it again.",
+                        comment: "Mac agent error when moving the app bundle fails"
                     )
                 )
                 return
@@ -308,7 +308,7 @@ final class MacLaunchAgent: ObservableObject {
                 if service.status != .requiresApproval, service.status != .enabled {
                     status = .failed(
                         String(
-                            localized: "Unable to turn on the background helper. Try again.",
+                            localized: "Unable to turn on Terminal Helper. Try again.",
                             comment: "Mac agent error when registering the LaunchAgent fails"
                         )
                     )

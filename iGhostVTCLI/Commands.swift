@@ -13,7 +13,7 @@ enum Commands {
         let sessions = DaemonClient.sessions(in: try client.request(.listSessions))
         guard !sessions.isEmpty else { return 0 }
 
-        var table: [[String]] = [["SID", "PROC", "SIZE", "ATT", "CWD"]]
+        var table: [[String]] = [["SID", "PROCESS", "SIZE", "ATTACHED", "CWD"]]
         for session in sessions {
             table.append([
                 String(session.id),

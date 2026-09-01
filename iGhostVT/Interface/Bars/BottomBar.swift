@@ -77,7 +77,7 @@ struct BottomBar: View {
                 .contentShape(Circle())
         }
         .barGlass(in: Circle())
-        .accessibilityLabel("Show Tabs")
+        .accessibilityLabel("Show All Tabs")
     }
 
     private var switchTabGesture: some Gesture {
