@@ -217,26 +217,6 @@ private struct AlertFirstResponder: UIViewRepresentable {
     }
 }
 
-private extension View {
-    /// Liquid Glass on iOS 26+; the material card it replaces below.
-    @ViewBuilder
-    func cardGlass(in shape: some Shape) -> some View {
-        #if os(visionOS)
-            background(.regularMaterial)
-                .background(Color(UIColor.systemBackground).opacity(0.5))
-                .clipShape(shape)
-        #else
-            if #available(iOS 26.0, *) {
-                glassEffect(.regular, in: shape)
-            } else {
-                background(.regularMaterial)
-                    .background(Color(UIColor.systemBackground).opacity(0.5))
-                    .clipShape(shape)
-            }
-        #endif
-    }
-}
-
 /// AlertController's button, translated: full-width rounded rectangle with a
 /// 1pt border; the emphasized kinds fill with their tint and speak semibold,
 /// the normal one stays clear with accent-colored text. Destructive is the

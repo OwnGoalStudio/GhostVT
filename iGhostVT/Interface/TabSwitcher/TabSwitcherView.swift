@@ -47,12 +47,10 @@ struct TabSwitcherView: View {
         .safeAreaInset(edge: .bottom, spacing: 0) {
             bottomBar
         }
-        // Settings stays a sheet ON the switcher: dismissing the switcher
-        // first and then presenting would race the dismissal animation, the
-        // same dead-entry bug the title capsule's context menu had.
-        .sheet(isPresented: $showsSettings) {
-            SettingsSheet()
-        }
+        // Settings presents ON the switcher: dismissing the switcher first
+        // and then presenting would race the dismissal animation, the same
+        // dead-entry bug the title capsule's context menu had.
+        .settingsPresentation(isPresented: $showsSettings)
         // Close-tab confirmations need no copy here: the root's presents on
         // the front-most context, which is this cover while it is up.
         .background(WindowReader(window: $window))

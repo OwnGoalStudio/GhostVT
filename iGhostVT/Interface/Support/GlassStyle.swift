@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 extension View {
     /// Liquid Glass on iOS 26+, material capsule/shape fallback below.
@@ -25,6 +26,32 @@ extension View {
                     .geometryGroup()
             } else {
                 background(.ultraThinMaterial, in: shape)
+            }
+        #endif
+    }
+}
+
+extension View {
+    /// The card treatment — the alert, the Mac's settings panel: Liquid
+    /// Glass on iOS 26+, the material card it replaces below. The content is
+    /// clipped to the shape either way, so a scrolling pane inside stays
+    /// within the corners.
+    @ViewBuilder
+    func cardGlass(in shape: some Shape) -> some View {
+        #if os(visionOS)
+            clipShape(shape)
+                .background(.regularMaterial)
+                .background(Color(UIColor.systemBackground).opacity(0.5))
+                .clipShape(shape)
+        #else
+            if #available(iOS 26.0, *) {
+                clipShape(shape)
+                    .glassEffect(.regular, in: shape)
+            } else {
+                clipShape(shape)
+                    .background(.regularMaterial)
+                    .background(Color(UIColor.systemBackground).opacity(0.5))
+                    .clipShape(shape)
             }
         #endif
     }

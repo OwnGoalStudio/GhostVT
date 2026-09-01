@@ -121,9 +121,7 @@ struct RootView: View {
         }) {
             TabSwitcherView(tabManager: tabManager)
         }
-        .sheet(isPresented: $interface.showsSettingsSheet, onDismiss: refocus) {
-            SettingsSheet()
-        }
+        .settingsPresentation(isPresented: $interface.showsSettingsSheet, onDismiss: refocus)
         .sheet(item: $tabManager.selectionRequest, onDismiss: refocus) { box in
             TerminalSelectionSheet(
                 text: box.request.text,
