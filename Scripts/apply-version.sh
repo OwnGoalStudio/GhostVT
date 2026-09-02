@@ -53,7 +53,9 @@ awk -v version="$version" -v build="$build_number" '
     exit 65
 }
 
-/usr/bin/ditto "$updated" "$version_config"
+# A content copy, not ditto: ditto would carry mktemp's 0600 onto the
+# checked-in file, and the destination's own mode must survive.
+cat "$updated" >"$version_config"
 
 echo "MARKETING_VERSION = $version"
 echo "CURRENT_PROJECT_VERSION = $build_number"

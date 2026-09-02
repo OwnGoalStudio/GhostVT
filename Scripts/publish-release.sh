@@ -39,10 +39,12 @@ fi
 
 echo "==> publishing ${#assets[@]} asset(s) to $tag"
 for attempt in 1 2 3 4 5; do
-    if gh release view "${repo_flag[@]}" "$tag" >/dev/null 2>&1; then
-        gh release upload "${repo_flag[@]}" "$tag" "${assets[@]}" --clobber && exit 0
+    # `${arr[@]+"${arr[@]}"}`: an empty array is an unbound variable under
+    # bash 3.2's `set -u`, which is what /bin/bash is on a Mac.
+    if gh release view ${repo_flag[@]+"${repo_flag[@]}"} "$tag" >/dev/null 2>&1; then
+        gh release upload ${repo_flag[@]+"${repo_flag[@]}"} "$tag" "${assets[@]}" --clobber && exit 0
     else
-        gh release create "${repo_flag[@]}" "$tag" \
+        gh release create ${repo_flag[@]+"${repo_flag[@]}"} "$tag" \
             --title "iGhostVT $tag" \
             --generate-notes \
             "${assets[@]}" && exit 0

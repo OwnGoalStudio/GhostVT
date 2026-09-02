@@ -81,11 +81,14 @@ output_directory="$(cd "$(dirname "$output_deb")" && pwd -P)"
 output_deb="$output_directory/$output_name"
 staging="$(mktemp -d "${TMPDIR:-/tmp}/ighostvt-deb.XXXXXX")"
 temporary_deb="$output_directory/.$output_name.tmp.$$"
-app_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-app-entitlements.XXXXXX.plist")"
-daemon_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-daemon-entitlements.XXXXXX.plist")"
-appex_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-appex-entitlements.XXXXXX.plist")"
-cli_signed_entitlements="$(mktemp "${TMPDIR:-/tmp}/ighostvt-cli-entitlements.XXXXXX.plist")"
-trap 'rm -rf "$staging"; rm -f "$temporary_deb" "$app_signed_entitlements" "$daemon_signed_entitlements" "$appex_signed_entitlements" "$cli_signed_entitlements"' EXIT
+# Scratch files live in their own per-run directory: macOS mktemp only
+# substitutes trailing Xs, so a file template with a suffix is a fixed path.
+scratch="$(mktemp -d "${TMPDIR:-/tmp}/ighostvt-deb-scratch.XXXXXX")"
+trap 'rm -rf "$staging" "$scratch"; rm -f "$temporary_deb"' EXIT
+app_signed_entitlements="$scratch/app-entitlements.plist"
+daemon_signed_entitlements="$scratch/daemon-entitlements.plist"
+appex_signed_entitlements="$scratch/appex-entitlements.plist"
+cli_signed_entitlements="$scratch/cli-entitlements.plist"
 chmod 0755 "$staging"
 
 debian="$staging/DEBIAN"

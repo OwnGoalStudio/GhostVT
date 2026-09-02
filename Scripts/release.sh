@@ -57,9 +57,11 @@ git push origin main "v$version"
 echo "==> waiting for the Release workflow"
 run_id=""
 for _ in $(seq 1 30); do
+    # `|| true`: under `set -e` a failing substitution ends the script, and a
+    # transient API error must fall through to the next poll instead.
     run_id="$(gh run list --workflow Release --limit 5 \
         --json databaseId,displayTitle \
-        --jq ".[] | select(.displayTitle == \"$version\") | .databaseId" | head -n 1)"
+        --jq ".[] | select(.displayTitle == \"$version\") | .databaseId" 2>/dev/null | head -n 1 || true)"
     [[ -n "$run_id" ]] && break
     sleep 5
 done
@@ -93,9 +95,11 @@ fi
 echo "==> verifying $apt_index serves $version"
 served=""
 for _ in $(seq 1 30); do
+    # Same `|| true`: one 404/5xx from the CDN is the race this poll exists
+    # for, not a reason to abandon a release that has already been served.
     served="$(curl -fsSL "$apt_index" 2>/dev/null \
         | awk '/^Package: wiki.qaq.ighostvt$/{p=1} p&&/^Version:/{print $2; p=0}' \
-        | sort -u)"
+        | sort -u || true)"
     [[ "$served" == "$version" ]] && break
     sleep 10
 done
