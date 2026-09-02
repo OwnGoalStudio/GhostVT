@@ -41,7 +41,11 @@ which launchd never sized — so a session's buffers cannot jetsam the daemon.
   for exactly this reason.
 - Depends on the **released**
   [libghostty-spm](https://github.com/Lakr233/libghostty-spm) package
-  (`upToNextMajor` from 1.5.0 — below 1.5.0 the XCFramework has no
+  (`upToNextMajor` from 1.5.2 — below 1.5.2 the UIKit view's resize
+  throttle is armed before any size was sent and a surface keeps the
+  session it was built with past teardown, the host-managed backend
+  ignores LNM, and the shipped shell-integration scripts put the OSC 133;B
+  mark before the user's `PROMPT_COMMAND`; below 1.5.0 the XCFramework has no
   visionOS slice and the wrapper does not compile for xros; below 1.4.9, `TerminalViewState` publishes
   from inside SwiftUI's update pass; below 1.4.10, a hardware Escape drops
   the keyboard on iOS instead of reaching the shell; below 1.4.11 it does
