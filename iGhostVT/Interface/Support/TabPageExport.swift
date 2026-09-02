@@ -14,7 +14,7 @@ enum TabPageExport {
     /// The viewport's rows, each stripped of the trailing padding a grid
     /// carries, without the blank region under the last printed row.
     static func pageText(of tab: TerminalTab) -> String {
-        tab.snapshotPreview()
+        var rows = tab.snapshotPreview()
             .split(separator: "\n", omittingEmptySubsequences: false)
             .map { row in
                 var row = row
@@ -23,8 +23,12 @@ enum TabPageExport {
                 }
                 return String(row)
             }
-            .joined(separator: "\n")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        // Only the rows under the last printed one go: trimming the joined
+        // page would take the first row's indentation with it.
+        while rows.last?.isEmpty == true {
+            rows.removeLast()
+        }
+        return rows.joined(separator: "\n")
     }
 
     static func exportText(of tab: TerminalTab, in window: UIWindow?) {

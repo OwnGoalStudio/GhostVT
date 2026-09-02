@@ -160,18 +160,35 @@ private struct AlertFirstResponder: UIViewRepresentable {
         }
 
         func claimIfNeeded() {
-            guard wantsFirstResponder, window != nil, !isFirstResponder else { return }
+            guard wantsFirstResponder, !isFirstResponder, isInFrontmostPresentation else { return }
             DispatchQueue.main.async { [weak self] in
-                guard let self, self.wantsFirstResponder, self.window != nil else { return }
+                guard let self, self.wantsFirstResponder, self.isInFrontmostPresentation else { return }
                 _ = self.becomeFirstResponder()
             }
+        }
+
+        /// Whether nothing is presented above this card. An inline card stays
+        /// mounted under a modal — the close confirmation its own button
+        /// raises, the Mac's settings panel, the iOS settings sheet — and
+        /// only the card in the front-most presentation may hold first
+        /// responder: two cards reclaiming from each other trade it every
+        /// main-queue turn, and one under a panel takes it from the panel's
+        /// text field or Escape handler. The walk is `present(in:)`'s, so a
+        /// presentation on its way out already counts as gone.
+        private var isInFrontmostPresentation: Bool {
+            guard let window, var top = window.rootViewController else { return false }
+            while let presented = top.presentedViewController, !presented.isBeingDismissed {
+                top = presented
+            }
+            guard let topView = top.viewIfLoaded else { return false }
+            return isDescendant(of: topView)
         }
 
         /// `requestFocus` on the terminal hops the same way; if it wins a
         /// round, reclaim on the next turn while the card is still up.
         override func resignFirstResponder() -> Bool {
             let resigned = super.resignFirstResponder()
-            if resigned, wantsFirstResponder, window != nil {
+            if resigned, wantsFirstResponder {
                 claimIfNeeded()
             }
             return resigned

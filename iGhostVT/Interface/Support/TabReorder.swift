@@ -35,7 +35,12 @@ enum TabReorder {
     /// The token a drag carries. Reordering reads the tab from
     /// `DraggedTab` instead — `dropEntered` is synchronous and an item
     /// provider only loads asynchronously — so the payload is an id for
-    /// form's sake, and the drag's identity is what it registers as.
+    /// form's sake, and the drag's identity is what it registers as. The
+    /// `suggestedName` is the one field a drop delegate can read
+    /// synchronously, so it names the tab too: `DraggedTab` is per window
+    /// and keeps a cancelled drag's tab, and a drag from another window of
+    /// the app passes `validateDrop` all the same — the name is what tells
+    /// the slot whether the pointer is carrying the tab it holds.
     static func itemProvider(for tab: TerminalTab) -> NSItemProvider {
         let provider = NSItemProvider()
         let payload = Data(tab.id.uuidString.utf8)
@@ -46,7 +51,13 @@ enum TabReorder {
             completion(payload, nil)
             return nil
         }
+        provider.suggestedName = tab.id.uuidString
         return provider
+    }
+
+    /// Whether the drag under the pointer is the one that lifted `tab`.
+    static func drag(_ info: DropInfo, carries tab: TerminalTab) -> Bool {
+        info.itemProviders(for: [itemType]).first?.suggestedName == tab.id.uuidString
     }
 }
 
@@ -248,16 +259,16 @@ private struct TabReorderSlotDelegate: DropDelegate {
         info.hasItemsConforming(to: [TabReorder.itemType])
     }
 
-    func dropEntered(info _: DropInfo) {
-        moveDraggedTabHere(force: true)
+    func dropEntered(info: DropInfo) {
+        moveDraggedTabHere(info, force: true)
     }
 
-    func dropUpdated(info _: DropInfo) -> DropProposal? {
+    func dropUpdated(info: DropInfo) -> DropProposal? {
         // The catch-up path: when a move slides this slot under a pointer
         // that never crossed its edge, no `dropEntered` fires — the update
         // stream is what still arrives, so the reorder keeps following the
         // finger instead of stopping after its first move.
-        moveDraggedTabHere(force: false)
+        moveDraggedTabHere(info, force: false)
         return DropProposal(operation: .move)
     }
 
@@ -270,8 +281,8 @@ private struct TabReorderSlotDelegate: DropDelegate {
     /// the update stream only re-moves after the last move has had a beat
     /// to settle, so a pointer sitting on a mid-animation boundary does
     /// not bounce the two tabs back and forth.
-    private func moveDraggedTabHere(force: Bool) {
-        guard let moving = dragged.tab, moving.id != tab.id else { return }
+    private func moveDraggedTabHere(_ info: DropInfo, force: Bool) {
+        guard let moving = dragged.tab, moving.id != tab.id, TabReorder.drag(info, carries: moving) else { return }
         let now = Date()
         guard force || now.timeIntervalSince(dragged.lastSlotChange) > 0.25 else { return }
         dragged.lastSlotChange = now

@@ -185,6 +185,16 @@ final class MacLaunchAgent: ObservableObject {
             let folder = Self.applicationsFolder
             let destination = folder.appendingPathComponent(source.lastPathComponent)
             let fileManager = FileManager.default
+            // A bundle a shell `mv` put in Applications keeps the quarantine's
+            // translocate bit, so it still runs from the mount and reads as
+            // relocatable while the original already sits at the destination.
+            // Trashing "what is there" would then delete the app itself; the
+            // quarantine flag is all that needs to go.
+            if source.resolvingSymlinksInPath().path == destination.resolvingSymlinksInPath().path {
+                Self.removeQuarantine(at: source)
+                Self.relaunch(from: source)
+                return
+            }
             do {
                 try fileManager.createDirectory(at: folder, withIntermediateDirectories: true)
                 if fileManager.fileExists(atPath: destination.path) {

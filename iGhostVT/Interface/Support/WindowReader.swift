@@ -28,9 +28,13 @@ struct WindowReader: UIViewRepresentable {
 
         override func didMoveToWindow() {
             super.didMoveToWindow()
+            // The last real window is kept: a full-screen cover takes the
+            // presenter's view out of the window, and a request raised under
+            // the cover still has to present — `present(in:)` walks from the
+            // root to the cover itself. The window outlives the detachment.
+            guard let window else { return }
             // Deferred: didMoveToWindow can fire inside a SwiftUI update, and
             // the binding write must not land in the same transaction.
-            let window = window
             DispatchQueue.main.async { [self] in
                 onWindow(window)
             }

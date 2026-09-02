@@ -21,6 +21,15 @@ final class AlertViewController: OverlayPanelController {
     private let actions: [AlertAction]
     private var hasAnswered = false
 
+    /// Runs when something other than a button takes the alert down — the
+    /// cover it was presented on dismissed under it (⇧⌘\ under a
+    /// confirmation), or its window closed. Without it no action runs and
+    /// the presenter's slot stays busy for the window's life. The plain
+    /// action by default, which is the cancel in every confirmation; an
+    /// alert whose plain answer does something (the relocation prompt's
+    /// Quit) sets its own.
+    var onDismissUnanswered: (() -> Void)?
+
     init(
         title: String.LocalizationValue,
         message: String.LocalizationValue,
@@ -29,6 +38,7 @@ final class AlertViewController: OverlayPanelController {
         alertTitle = String(localized: title)
         alertMessage = String(localized: message)
         self.actions = actions
+        onDismissUnanswered = actions.first { $0.kind == .normal }?.handler
         super.init()
     }
 
@@ -40,6 +50,13 @@ final class AlertViewController: OverlayPanelController {
             }
         }
         install(AlertPane(title: alertTitle, message: alertMessage, actions: dismissing))
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        guard !hasAnswered, isBeingDismissed || presentingViewController == nil else { return }
+        hasAnswered = true
+        onDismissUnanswered?()
     }
 
     private func answer(_ action: AlertAction) {

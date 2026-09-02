@@ -14,7 +14,7 @@ extension View {
                 .map { $0 == .needsRelocation ? RelocationRequest() : nil },
             onFinish: {},
             makeAlert: { _, finish in
-                AlertViewController(
+                let alert = AlertViewController(
                     title: "Move iGhostVT to Applications?",
                     message: """
                     iGhostVT works from your Applications folder, so your \
@@ -32,6 +32,10 @@ extension View {
                         },
                     ]
                 )
+                // Taken down with its window, this alert's plain answer would
+                // quit the app; only the slot has to clear.
+                alert.onDismissUnanswered = finish
+                return alert
             }
         ))
     }

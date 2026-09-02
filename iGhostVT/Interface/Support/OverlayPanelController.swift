@@ -50,11 +50,24 @@ class OverlayPanelController: UIViewController {
     /// Presents on the window's front-most presentation context, so a panel
     /// raised while a sheet or full-screen cover is up lands above it instead
     /// of failing on a covered presenter.
+    ///
+    /// A context on its way out is waited for, and the walk re-run once it
+    /// has gone — or stayed: UIKit defers a presentation made under a
+    /// dismissing sheet, but drops it without a word when the user cancels
+    /// that dismissal (the sheet dragged, then let snap back), and the
+    /// front-most context is then the sheet itself.
     func present(in window: UIWindow?) {
         guard var presenter = window?.rootViewController else { return }
-        while let presented = presenter.presentedViewController,
-              !presented.isBeingDismissed
-        {
+        while let presented = presenter.presentedViewController {
+            guard !presented.isBeingDismissed else {
+                if let coordinator = presented.transitionCoordinator {
+                    coordinator.animate(alongsideTransition: nil) { [weak self] _ in
+                        self?.present(in: window)
+                    }
+                    return
+                }
+                break
+            }
             presenter = presented
         }
         presenter.present(self, animated: true)

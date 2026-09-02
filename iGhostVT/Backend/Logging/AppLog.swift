@@ -116,6 +116,13 @@ enum AppLog {
         } catch {
             loggers[.app]?.error("journal could not be opened at \(journalDirectory.path, privacy: .public)")
         }
+        // Retention is enforced here, not left to `maximumLogCount`: Dog
+        // 0.1.1's sweep skips every deletion outside DEBUG, so a shipped
+        // build kept one file per launch forever. After initialization, so
+        // this launch's file is among the newest kept.
+        for launch in LogReader.launches().dropFirst(journalFileCount) {
+            try? FileManager.default.removeItem(at: launch.url)
+        }
         let info = Bundle.main.infoDictionary
         let version = info?["CFBundleShortVersionString"] as? String ?? "?"
         let build = info?["CFBundleVersion"] as? String ?? "?"

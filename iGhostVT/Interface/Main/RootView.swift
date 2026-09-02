@@ -177,7 +177,8 @@ struct RootView: View {
                     isActive: tab.id == tabManager.activeTabID,
                     focusedTabID: $focusedTabID,
                     onCloseTab: { tabManager.requestClose(tab) },
-                    onLockChange: refocus
+                    onLockChange: refocus,
+                    onStatusChange: refocusForStatus
                 )
                 .transition(.asymmetric(
                     insertion: .opacity,
@@ -230,6 +231,20 @@ struct RootView: View {
         }
     }
 
+    /// The active tab's session changed state. Into `.failed`, focus is
+    /// given up outright (`refocus` sees `isCoveredByStatusAlert`) so the
+    /// card can own first responder. Every other change is treated like a
+    /// tab switch: a new tab's `.connecting` and `.connected` arrive right
+    /// after the switch decided against the software keyboard, and a plain
+    /// `refocus()` there was `becomeFirstResponder` raising it uninvited.
+    private func refocusForStatus(_ status: TerminalSessionStore.Status) {
+        if case .failed = status {
+            refocus()
+        } else {
+            refocusAfterTabSwitch(softwareKeyboardWasVisible: keyboard.isVisible)
+        }
+    }
+
     private func refocus() {
         // A locked tab must not hold keyboard focus: its surface ignores
         // touches, and hardware keys reaching it anyway would defeat the
@@ -266,6 +281,7 @@ private struct TerminalPane: View {
     let focusedTabID: FocusState<UUID?>.Binding
     let onCloseTab: () -> Void
     let onLockChange: () -> Void
+    let onStatusChange: (TerminalSessionStore.Status) -> Void
 
     var body: some View {
         TerminalSurfaceView(context: tab.terminal)
@@ -299,7 +315,12 @@ private struct TerminalPane: View {
             .allowsHitTesting(isActive)
             .accessibilityHidden(!isActive)
             .onChange(of: tab.lock) { _ in onLockChange() }
-            .onReceive(tab.store.$status) { _ in onLockChange() }
+            // The active pane's only: a background tab's shell exiting
+            // would otherwise hand the front tab's terminal first responder
+            // — and the software keyboard with it — for nothing the user did.
+            .onReceive(tab.store.$status) { status in
+                if isActive { onStatusChange(status) }
+            }
     }
 }
 
