@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "%@" : {
+      "shouldTranslate" : false
+    },
     "%@ (Default)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -144,6 +147,7 @@
       "shouldTranslate" : false
     },
     "%lld entries" : {
+      "comment" : "A log entry count",
       "localizations" : {
         "de" : {
           "stringUnit" : {
@@ -2313,6 +2317,77 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "重新檢查"
+          }
+        }
+      }
+    },
+    "Checks whether a program is running in a terminal session. A session waiting at its shell prompt is not busy." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prüft, ob in einer Terminalsitzung ein Programm läuft. Eine Sitzung, die an der Shell-Eingabeaufforderung wartet, ist nicht beschäftigt."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checks whether a program is running in a terminal session. A session waiting at its shell prompt is not busy."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comprueba si se está ejecutando un programa en una sesión de terminal. Una sesión que espera en el prompt del shell no está ocupada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vérifie si un programme s’exécute dans une session de terminal. Une session en attente à l’invite du shell n’est pas occupée."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Controlla se un programma è in esecuzione in una sessione del terminale. Una sessione in attesa al prompt della shell non è occupata."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルセッションでプログラムが実行中かどうかを確認します。シェルのプロンプトで待機中のセッションは使用中ではありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널 세션에서 프로그램이 실행 중인지 확인합니다. 셸 프롬프트에서 대기 중인 세션은 사용 중이 아닙니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verifica se um programa está em execução em uma sessão de terminal. Uma sessão aguardando no prompt do shell não está ocupada."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проверяет, выполняется ли программа в сеансе терминала. Сеанс, ожидающий в приглашении оболочки, не занят."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "检查终端会话中是否有程序在运行。在 shell 提示符处等待的会话不算忙碌。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "檢查終端機工作階段中是否有程式在執行。在 shell 提示字元處等待的工作階段不算忙碌。"
           }
         }
       }
@@ -8767,6 +8842,76 @@
         }
       }
     },
+    "Licenses" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lizenzen"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licenses"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licencias"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licences"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licenze"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライセンス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "라이선스"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Licenças"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Лицензии"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "许可证"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "授權條款"
+          }
+        }
+      }
+    },
     "Light Theme" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9047,76 +9192,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "列出終端機工作階段"
-          }
-        }
-      }
-    },
-    "Licenses" : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lizenzen"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licenses"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licencias"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licences"
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licenze"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライセンス"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "라이선스"
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Licenças"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Лицензии"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "许可证"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "授權條款"
           }
         }
       }
@@ -17559,76 +17634,6 @@
         }
       }
     },
-    "The log file could not be read." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Protokolldatei konnte nicht gelesen werden."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The log file could not be read."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No se pudo leer el archivo de registro."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le fichier journal n'a pas pu être lu."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossibile leggere il file di log."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ログファイルを読み込めませんでした。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "로그 파일을 읽을 수 없습니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Não foi possível ler o arquivo de registro."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Не удалось прочитать файл журнала."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法读取日志文件。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "無法讀取日誌檔案。"
-          }
-        }
-      }
-    },
     "The program every new terminal runs, for example /bin/zsh. Leave this empty to use the default login shell. Use a plain path; one that includes the jailbreak root stops working after the next jailbreak." : {
       "localizations" : {
         "de" : {
@@ -17770,148 +17775,6 @@
         }
       }
     },
-    "The session's program is not reading its input. Wait for it to catch up and try again." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Programm dieser Sitzung liest seine Eingaben nicht. Warte, bis es aufgeholt hat, und versuche es erneut."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The session's program is not reading its input. Wait for it to catch up and try again."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El programa de esta sesión no está leyendo su entrada. Espera a que se ponga al día e inténtalo de nuevo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le programme de cette session ne lit pas son entrée. Attendez qu’il rattrape son retard, puis réessayez."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il programma di questa sessione non sta leggendo il suo input. Attendi che recuperi e riprova."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "このセッションのプログラムが入力を読み取っていません。処理が追いつくまで待ってからもう一度お試しください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이 세션의 프로그램이 입력을 읽고 있지 않습니다. 처리가 따라잡을 때까지 기다린 후 다시 시도하십시오."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O programa desta sessão não está lendo sua entrada. Aguarde até que ele se atualize e tente novamente."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Программа этого сеанса не читает ввод. Дождитесь, пока она справится, и повторите попытку."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "该会话中的程序没有读取输入。请等待它处理完毕后重试。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "該工作階段中的程式沒有讀取輸入。請等待它處理完畢後重試。"
-          }
-        }
-      }
-    },
-    "The terminal session did not end in time. Try again." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Die Terminalsitzung wurde nicht rechtzeitig beendet. Versuche es erneut."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The terminal session did not end in time. Try again."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La sesión de terminal no ha finalizado a tiempo. Inténtalo de nuevo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La session de terminal ne s’est pas terminée à temps. Réessayez."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La sessione del terminale non è terminata in tempo. Riprova."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルセッションが時間内に終了しませんでした。もう一度お試しください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널 세션이 제때 종료되지 않았습니다. 다시 시도하십시오."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A sessão de terminal não encerrou a tempo. Tente novamente."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сеанс терминала не завершился вовремя. Повторите попытку."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "终端会话未及时结束。请重试。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "終端機工作階段未及時結束。請再試一次。"
-          }
-        }
-      }
-    },
     "The session limit has been reached. Close a session and try again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17979,6 +17842,77 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已達到工作階段數量上限。請關閉一個工作階段後再試一次。"
+          }
+        }
+      }
+    },
+    "The session's program is not reading its input. Wait for it to catch up and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Programm dieser Sitzung liest seine Eingaben nicht. Warte, bis es aufgeholt hat, und versuche es erneut."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The session's program is not reading its input. Wait for it to catch up and try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El programa de esta sesión no está leyendo su entrada. Espera a que se ponga al día e inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le programme de cette session ne lit pas son entrée. Attendez qu’il rattrape son retard, puis réessayez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il programma di questa sessione non sta leggendo il suo input. Attendi che recuperi e riprova."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このセッションのプログラムが入力を読み取っていません。処理が追いつくまで待ってからもう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이 세션의 프로그램이 입력을 읽고 있지 않습니다. 처리가 따라잡을 때까지 기다린 후 다시 시도하십시오."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O programa desta sessão não está lendo sua entrada. Aguarde até que ele se atualize e tente novamente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Программа этого сеанса не читает ввод. Дождитесь, пока она справится, и повторите попытку."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该会话中的程序没有读取输入。请等待它处理完毕后重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該工作階段中的程式沒有讀取輸入。請等待它處理完畢後重試。"
           }
         }
       }
@@ -18479,76 +18413,6 @@
         }
       }
     },
-    "The terminal helper is not running. Restart iGhostVT and try again." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Der Terminal-Helfer läuft nicht. Starte iGhostVT neu und versuche es erneut."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The terminal helper is not running. Restart iGhostVT and try again."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El asistente del terminal no está en ejecución. Reinicia iGhostVT e inténtalo de nuevo."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’assistant du terminal n’est pas en cours d’exécution. Redémarrez iGhostVT, puis réessayez."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "L’assistente del terminale non è in esecuzione. Riavvia iGhostVT e riprova."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルヘルパーが実行されていません。iGhostVT を再起動してからもう一度お試しください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널 헬퍼가 실행되고 있지 않습니다. iGhostVT를 다시 실행한 후 시도하세요."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O assistente do terminal não está em execução. Reinicie o iGhostVT e tente novamente."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Помощник терминала не запущен. Перезапустите iGhostVT и повторите попытку."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "终端助手未运行。请重新启动 iGhostVT 后重试。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "終端機助手未執行。請重新啟動 iGhostVT 後重試。"
-          }
-        }
-      }
-    },
     "The terminal helper did not respond in time. Try again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18687,6 +18551,147 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "終端機輔助程式未執行。請開啟 iGhostVT 後再試一次。"
+          }
+        }
+      }
+    },
+    "The terminal helper is not running. Restart iGhostVT and try again." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Terminal-Helfer läuft nicht. Starte iGhostVT neu und versuche es erneut."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The terminal helper is not running. Restart iGhostVT and try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El asistente del terminal no está en ejecución. Reinicia iGhostVT e inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’assistant du terminal n’est pas en cours d’exécution. Redémarrez iGhostVT, puis réessayez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’assistente del terminale non è in esecuzione. Riavvia iGhostVT e riprova."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルヘルパーが実行されていません。iGhostVT を再起動してからもう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널 헬퍼가 실행되고 있지 않습니다. iGhostVT를 다시 실행한 후 시도하세요."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O assistente do terminal não está em execução. Reinicie o iGhostVT e tente novamente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Помощник терминала не запущен. Перезапустите iGhostVT и повторите попытку."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端助手未运行。请重新启动 iGhostVT 后重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終端機助手未執行。請重新啟動 iGhostVT 後重試。"
+          }
+        }
+      }
+    },
+    "The terminal session did not end in time. Try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Terminalsitzung wurde nicht rechtzeitig beendet. Versuche es erneut."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The terminal session did not end in time. Try again."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La sesión de terminal no ha finalizado a tiempo. Inténtalo de nuevo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La session de terminal ne s’est pas terminée à temps. Réessayez."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La sessione del terminale non è terminata in tempo. Riprova."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ターミナルセッションが時間内に終了しませんでした。もう一度お試しください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "터미널 세션이 제때 종료되지 않았습니다. 다시 시도하십시오."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A sessão de terminal não encerrou a tempo. Tente novamente."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сеанс терминала не завершился вовремя. Повторите попытку."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终端会话未及时结束。请重试。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "終端機工作階段未及時結束。請再試一次。"
           }
         }
       }
@@ -21377,77 +21382,6 @@
         }
       }
     },
-    "Checks whether a program is running in a terminal session. A session waiting at its shell prompt is not busy." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prüft, ob in einer Terminalsitzung ein Programm läuft. Eine Sitzung, die an der Shell-Eingabeaufforderung wartet, ist nicht beschäftigt."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Checks whether a program is running in a terminal session. A session waiting at its shell prompt is not busy."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Comprueba si se está ejecutando un programa en una sesión de terminal. Una sesión que espera en el prompt del shell no está ocupada."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vérifie si un programme s’exécute dans une session de terminal. Une session en attente à l’invite du shell n’est pas occupée."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Controlla se un programma è in esecuzione in una sessione del terminale. Una sessione in attesa al prompt della shell non è occupata."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ターミナルセッションでプログラムが実行中かどうかを確認します。シェルのプロンプトで待機中のセッションは使用中ではありません。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "터미널 세션에서 프로그램이 실행 중인지 확인합니다. 셸 프롬프트에서 대기 중인 세션은 사용 중이 아닙니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verifica se um programa está em execução em uma sessão de terminal. Uma sessão aguardando no prompt do shell não está ocupada."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Проверяет, выполняется ли программа в сеансе терминала. Сеанс, ожидающий в приглашении оболочки, не занят."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "检查终端会话中是否有程序在运行。在 shell 提示符处等待的会话不算忙碌。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "檢查終端機工作階段中是否有程式在執行。在 shell 提示字元處等待的工作階段不算忙碌。"
-          }
-        }
-      }
-    },
     "Window" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -21518,6 +21452,9 @@
           }
         }
       }
+    },
+    "Writes detailed terminal activity to the log, including every keystroke, while this is on." : {
+
     },
     "Writes detailed terminal activity to the system log, including every keystroke, while this is on." : {
       "extractionState" : "manual",
