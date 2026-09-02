@@ -21454,7 +21454,68 @@
       }
     },
     "Writes detailed terminal activity to the log, including every keystroke, while this is on." : {
-
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schreibt bei aktivierter Option ausführliche Terminal-Aktivität – einschließlich jedes Tastendrucks – in das Protokoll."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mientras esté activado, escribe en el registro la actividad detallada del terminal, incluida cada pulsación de tecla."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lorsque cette option est activée, l’activité détaillée du terminal, y compris chaque frappe, est écrite dans le journal."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quando è attivo, scrive nel log l’attività dettagliata del terminale, incluso ogni tasto premuto."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オンの間、キー入力を含む詳細なターミナルの動作をログに記録します。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "켜져 있는 동안 모든 키 입력을 포함한 상세한 터미널 활동을 로그에 기록합니다."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enquanto estiver ativado, grava no registro a atividade detalhada do terminal, incluindo cada tecla digitada."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пока включено, подробная активность терминала, включая каждое нажатие клавиши, записывается в журнал."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启后，会将详细的终端活动（包括每次按键）写入日志。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開啟後，會將詳細的終端機活動（包括每次按鍵）寫入日誌。"
+          }
+        }
+      }
     },
     "Writes detailed terminal activity to the system log, including every keystroke, while this is on." : {
       "extractionState" : "manual",
