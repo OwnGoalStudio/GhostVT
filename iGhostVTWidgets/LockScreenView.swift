@@ -275,11 +275,16 @@ extension TerminalSessionAttributes.ContentState {
         )
     }
 
-    #Preview("Lock Screen", as: .content, using: TerminalSessionAttributes.preview) {
-        TerminalSessionActivityWidget()
-    } contentStates: {
-        TerminalSessionAttributes.ContentState.typical
-        TerminalSessionAttributes.ContentState.crowded
+    /// Same iOS 17.0 scope as the island previews — see
+    /// TerminalSessionActivityWidget.swift.
+    @available(iOS 17.0, *)
+    private enum LockScreenPreviews {
+        #Preview("Lock Screen", as: .content, using: TerminalSessionAttributes.preview) {
+            TerminalSessionActivityWidget()
+        } contentStates: {
+            TerminalSessionAttributes.ContentState.typical
+            TerminalSessionAttributes.ContentState.crowded
+        }
     }
 
 #endif
