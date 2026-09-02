@@ -48,12 +48,6 @@ final class HarnessPeer: IOPeer {
         return suspendCount
     }
 
-    var isSuspended: Bool {
-        lock.lock()
-        defer { lock.unlock() }
-        return suspendDepth > 0
-    }
-
     var isBalanced: Bool {
         lock.lock()
         defer { lock.unlock() }

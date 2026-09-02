@@ -130,8 +130,7 @@ final class PTYSession {
     private static func describeChildFailure(
         step: Int32,
         code: Int32,
-        executable: String,
-        credentials _: ShellLaunch.Credentials?
+        executable: String
     ) -> String {
         // The system's reason stays in the sentence (the harness holds this
         // contract): "No such file or directory" versus "Permission denied"
@@ -321,8 +320,7 @@ final class PTYSession {
                 Self.describeChildFailure(
                     step: report[0],
                     code: report[1],
-                    executable: executable,
-                    credentials: credentials
+                    executable: executable
                 )
             )
         }

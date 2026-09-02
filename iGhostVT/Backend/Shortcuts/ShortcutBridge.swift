@@ -78,12 +78,6 @@ enum ShortcutBridge {
         return manager.openTab(attachingTo: sessionID)
     }
 
-    /// The tab showing `sessionID`, for an intent that acts on the tab
-    /// rather than the session (a lock). Nil when no window has it.
-    static func attachedTab(for sessionID: UInt64) -> TerminalTab? {
-        tab(for: sessionID)?.1
-    }
-
     /// The frontmost window's active tab's session — what a new tab opened
     /// from a Shortcut inherits its directory from, as ⌘T would.
     static func activeSessionID() -> UInt64? {

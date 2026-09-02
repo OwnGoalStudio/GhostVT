@@ -17,8 +17,8 @@ private func ighostvtCreateMachServiceConnection(
 enum CLIError: Error {
     case usage(String)
     case daemonUnreachable
-    case timedOut(iGhostVTOperation)
-    case daemonTooOld(iGhostVTOperation)
+    case timedOut
+    case daemonTooOld
     case refused(iGhostVTReplyCode, String?)
     case sessionLingered(UInt64)
 
@@ -67,7 +67,6 @@ struct SessionSummary {
     var isAttached: Bool
     /// Present from daemons that report them; `nil` from an older one.
     var processName: String?
-    var foregroundIsShell: Bool?
     var currentDirectory: String?
 }
 
@@ -133,7 +132,7 @@ final class DaemonClient {
             done.signal()
         }
         guard done.wait(timeout: .now() + Self.requestTimeout) == .success else {
-            throw CLIError.timedOut(operation)
+            throw CLIError.timedOut
         }
         guard let reply = received, xpc_get_type(reply) == XPC_TYPE_DICTIONARY else {
             throw CLIError.daemonUnreachable
@@ -149,7 +148,7 @@ final class DaemonClient {
             if code == .invalidRequest,
                operation == .snapshotSession || operation == .injectInput
             {
-                throw CLIError.daemonTooOld(operation)
+                throw CLIError.daemonTooOld
             }
             throw CLIError.refused(code, Self.string(reply, iGhostVTWireKey.errorMessage))
         }
@@ -176,12 +175,6 @@ final class DaemonClient {
         }
     }
 
-    static func bool(_ object: xpc_object_t, _ key: String) -> Bool? {
-        guard let value = xpc_dictionary_get_value(object, key),
-              xpc_get_type(value) == XPC_TYPE_BOOL else { return nil }
-        return xpc_bool_get_value(value)
-    }
-
     static func sessions(in reply: xpc_object_t) -> [SessionSummary] {
         guard let array = xpc_dictionary_get_value(reply, iGhostVTWireKey.sessions),
               xpc_get_type(array) == XPC_TYPE_ARRAY
@@ -197,7 +190,6 @@ final class DaemonClient {
                     rows: UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(row, iGhostVTWireKey.rows)),
                     isAttached: xpc_dictionary_get_bool(row, iGhostVTWireKey.isAttached),
                     processName: string(row, iGhostVTWireKey.processName),
-                    foregroundIsShell: bool(row, iGhostVTWireKey.foregroundIsShell),
                     currentDirectory: string(row, iGhostVTWireKey.currentDirectory)
                 )
             )

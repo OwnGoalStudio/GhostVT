@@ -283,9 +283,6 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     /// the only book of record — the app deliberately persists nothing.
     struct SessionSummary: Equatable, Sendable {
         let id: UInt64
-        let title: String
-        let columns: UInt16
-        let rows: UInt16
         let isAttached: Bool
     }
 
@@ -341,13 +338,8 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         for index in 0 ..< xpc_array_get_count(array) {
             let entry = xpc_array_get_value(array, index)
             guard xpc_get_type(entry) == XPC_TYPE_DICTIONARY else { continue }
-            let title = xpc_dictionary_get_string(entry, iGhostVTWireKey.title)
-                .map { String(cString: $0) } ?? ""
             rows.append(SessionSummary(
                 id: xpc_dictionary_get_uint64(entry, iGhostVTWireKey.sessionID),
-                title: title,
-                columns: UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(entry, iGhostVTWireKey.columns)),
-                rows: UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(entry, iGhostVTWireKey.rows)),
                 isAttached: xpc_dictionary_get_bool(entry, iGhostVTWireKey.isAttached)
             ))
         }

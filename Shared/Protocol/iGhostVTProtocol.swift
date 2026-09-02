@@ -198,7 +198,6 @@ enum iGhostVTWireKey {
     /// kernel spells it. Absent once the child is gone or when the kernel
     /// refuses to say.
     static let currentDirectory = "cwd"
-    static let reason = "reason"
     /// Why a request failed, in words, when the reply code alone would lose
     /// the detail — the failing step and its `errno`, mainly.
     static let errorMessage = "err"

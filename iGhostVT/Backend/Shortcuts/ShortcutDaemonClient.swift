@@ -314,17 +314,17 @@ final class ShortcutDaemonClient: @unchecked Sendable {
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.operation, operation.rawValue)
         fill(message)
 
-        let outcome = FinishOnce<Result<T, ShortcutError>>()
+        let outcome = FinishOnce()
         return try await withCheckedThrowingContinuation { continuation in
             let queue = self.queue
             queue.asyncAfter(deadline: .now() + Self.requestTimeout) {
-                if outcome.finish(.failure(.timedOut)) {
+                if outcome.finish() {
                     continuation.resume(throwing: ShortcutError.timedOut)
                 }
             }
             xpc_connection_send_message_with_reply(connection, message, queue) { reply in
                 let result = Self.decodeReply(reply, decode: decode)
-                guard outcome.finish(result) else { return }
+                guard outcome.finish() else { return }
                 continuation.resume(with: result)
             }
         }
@@ -413,13 +413,13 @@ final class ShortcutDaemonClient: @unchecked Sendable {
     }
 }
 
-/// A result box that accepts exactly one value — the reply or the timeout,
-/// whichever lands first.
-private final class FinishOnce<Value>: @unchecked Sendable {
+/// A one-shot gate: the reply and the timeout race, and only the first
+/// caller through it resumes the continuation.
+private final class FinishOnce: @unchecked Sendable {
     private let lock = NSLock()
     private var isFinished = false
 
-    func finish(_: Value) -> Bool {
+    func finish() -> Bool {
         lock.locked {
             guard !isFinished else { return false }
             isFinished = true
