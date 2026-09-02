@@ -383,6 +383,23 @@ if let result = run(command: ["/bin/sh", "-c", "sleep 4 & exit 5"], timeout: 6) 
     check(false, "spawning a shell with a background child succeeded")
 }
 
+// `ighostvtd-io` ignores SIGPIPE for itself, and SIG_IGN survives execve: a
+// verbatim command (no interactive shell to reset it) would see EPIPE where
+// a terminal kills the writer silently. The harness takes the io side's
+// disposition here to prove the child does not inherit it.
+print("SIGPIPE is at default in the child")
+signal(SIGPIPE, SIG_IGN)
+if let result = run(command: ["/bin/sh", "-c", "yes | head -c 1 >/dev/null; echo pipe-done"]) {
+    check(result.output.contains("pipe-done"), "the pipeline completes")
+    check(
+        !result.output.contains("Broken pipe"),
+        "and the writer dies of SIGPIPE instead of reporting EPIPE (output: \(result.output.trimmingCharacters(in: .whitespacesAndNewlines)))"
+    )
+    result.session.invalidate()
+} else {
+    check(false, "spawning a pipeline succeeded")
+}
+
 print("rejecting a bad command")
 do {
     _ = try PTYSession(
@@ -559,6 +576,21 @@ if let plan = ShellLaunch.plan(requestedShell: "/bin/sh") {
     check(false, "an explicit shell produces a plan")
 }
 
+// A caller's argv runs in the terminal's environment, not an empty one: a
+// curses program with no TERM exits at initscr(), and the CLI has printed
+// the session id by then. Only the shell integration stays off.
+let verbatim = ShellLaunch.verbatimPlan(command: ["/usr/bin/env"])
+check(verbatim.command == ["/usr/bin/env"], "a verbatim plan runs the argv as given")
+check(verbatim.environment["TERM"] == "xterm-256color", "a verbatim command is given a TERM")
+check(verbatim.environment["LC_CTYPE"]?.hasSuffix("UTF-8") == true, "and a UTF-8 LC_CTYPE")
+check(verbatim.environment["PATH"] != nil, "and a PATH")
+check(verbatim.environment["HOME"] != nil && verbatim.environment["USER"] != nil, "and knows whose session it is")
+check(verbatim.environment["SHELL"]?.hasPrefix("/") == true, "and which shell the user has")
+check(
+    verbatim.environment["ZDOTDIR"] == nil && verbatim.environment["ENV"] == nil && verbatim.environment["GHOSTTY_BASH_INJECT"] == nil,
+    "with no shell integration, which needs an argv of its own"
+)
+
 check(ShellLaunch.plan(requestedShell: "/bin/nope-not-here") == nil, "a missing shell is rejected")
 check(ShellLaunch.plan(requestedShell: "bin/sh") == nil, "a relative shell path is rejected")
 check(ShellLaunch.validate(["/bin/echo", "hi"]) != nil, "an absolute argv is accepted")
@@ -626,14 +658,18 @@ if getuid() == 0 {
 // spelling `chdir` wants.
 print("inherited working directory")
 do {
+    // The registry has no lock of its own — it lives on the io side's one
+    // control queue, where its exit handlers run — so every call hops there.
     let registry = SessionRegistry(queue: harnessQueue)
     // `exec` keeps the pid: the directory read is the spawned child's.
-    let source = try registry.open(
-        command: ["/bin/sh", "-c", "cd /private/tmp && exec /bin/sleep 30"],
-        environment: [:],
-        columns: 80,
-        rows: 24
-    )
+    let source = try harnessQueue.sync {
+        try registry.open(
+            command: ["/bin/sh", "-c", "cd /private/tmp && exec /bin/sleep 30"],
+            environment: [:],
+            columns: 80,
+            rows: 24
+        )
+    }
     var sourceDirectory: String?
     let deadline = Date().addingTimeInterval(5)
     while Date() < deadline {
@@ -644,16 +680,18 @@ do {
         usleep(50000)
     }
     check(sourceDirectory == "/private/tmp", "a live session's current directory is read from the kernel (got \(String(describing: sourceDirectory)))")
-    check(registry.inheritableDirectory(from: source.id) == "/private/tmp", "the registry offers a live session's directory")
-    check(registry.inheritableDirectory(from: source.id &+ 1000) == nil, "an unknown session offers nothing")
+    check(harnessQueue.sync { registry.inheritableDirectory(from: source.id) } == "/private/tmp", "the registry offers a live session's directory")
+    check(harnessQueue.sync { registry.inheritableDirectory(from: source.id &+ 1000) } == nil, "an unknown session offers nothing")
 
-    let inherited = try registry.open(
-        command: ["/bin/sh", "-c", "exec /bin/sleep 30"],
-        environment: [:],
-        columns: 80,
-        rows: 24,
-        inheritDirectoryFrom: source.id
-    )
+    let inherited = try harnessQueue.sync {
+        try registry.open(
+            command: ["/bin/sh", "-c", "exec /bin/sleep 30"],
+            environment: [:],
+            columns: 80,
+            rows: 24,
+            inheritDirectoryFrom: source.id
+        )
+    }
     var inheritedDirectory: String?
     let inheritedDeadline = Date().addingTimeInterval(5)
     while Date() < inheritedDeadline {
@@ -665,13 +703,15 @@ do {
     }
     check(inheritedDirectory == "/private/tmp", "a session opened from another starts in its directory (got \(String(describing: inheritedDirectory)))")
 
-    let fresh = try registry.open(
-        command: ["/bin/sh", "-c", "exec /bin/sleep 30"],
-        environment: [:],
-        columns: 80,
-        rows: 24,
-        inheritDirectoryFrom: source.id &+ 1000
-    )
+    let fresh = try harnessQueue.sync {
+        try registry.open(
+            command: ["/bin/sh", "-c", "exec /bin/sleep 30"],
+            environment: [:],
+            columns: 80,
+            rows: 24,
+            inheritDirectoryFrom: source.id &+ 1000
+        )
+    }
     var freshDirectory: String?
     let freshDeadline = Date().addingTimeInterval(5)
     while Date() < freshDeadline {
@@ -688,41 +728,45 @@ do {
     var template = Array("/private/tmp/ighostvt-harness-cwd.XXXXXX".utf8CString)
     let removable = template.withUnsafeMutableBufferPointer { mkdtemp($0.baseAddress) }.map { String(cString: $0) }
     if let removable {
-        let mover = try registry.open(
-            command: ["/bin/sh", "-c", "cd '\(removable)' && exec /bin/sleep 30"],
-            environment: [:],
-            columns: 80,
-            rows: 24
-        )
+        let mover = try harnessQueue.sync {
+            try registry.open(
+                command: ["/bin/sh", "-c", "cd '\(removable)' && exec /bin/sleep 30"],
+                environment: [:],
+                columns: 80,
+                rows: 24
+            )
+        }
         let moverDeadline = Date().addingTimeInterval(5)
         while Date() < moverDeadline, mover.currentDirectory != removable {
             usleep(50000)
         }
-        check(registry.inheritableDirectory(from: mover.id) == removable, "a directory that exists is offered")
+        check(harnessQueue.sync { registry.inheritableDirectory(from: mover.id) } == removable, "a directory that exists is offered")
         check(rmdir(removable) == 0, "the harness can remove the directory under the session")
         check(mover.currentDirectory == removable, "the kernel still names the removed directory")
-        check(registry.inheritableDirectory(from: mover.id) == nil, "a directory that is gone is not offered")
-        try? registry.close(mover.id)
+        check(harnessQueue.sync { registry.inheritableDirectory(from: mover.id) } == nil, "a directory that is gone is not offered")
+        harnessQueue.sync { _ = try? registry.close(mover.id) }
     } else {
         check(false, "a removable directory is created")
     }
 
     // A source that has exited offers nothing, even before it is reaped.
-    let departed = try registry.open(
-        command: ["/bin/sh", "-c", "cd /private/tmp && exit 0"],
-        environment: [:],
-        columns: 80,
-        rows: 24
-    )
+    let departed = try harnessQueue.sync {
+        try registry.open(
+            command: ["/bin/sh", "-c", "cd /private/tmp && exit 0"],
+            environment: [:],
+            columns: 80,
+            rows: 24
+        )
+    }
     let departedDeadline = Date().addingTimeInterval(5)
-    while Date() < departedDeadline, registry.session(departed.id) != nil {
+    while Date() < departedDeadline, harnessQueue.sync(execute: { registry.session(departed.id) }) != nil {
         usleep(50000)
     }
-    check(registry.session(departed.id) == nil, "an exited source leaves the registry")
-    check(registry.inheritableDirectory(from: departed.id) == nil, "an exited source offers nothing")
+    check(harnessQueue.sync { registry.session(departed.id) } == nil, "an exited source leaves the registry")
+    check(harnessQueue.sync { registry.inheritableDirectory(from: departed.id) } == nil, "an exited source offers nothing")
 
     for session in [source, inherited, fresh] {
-        try? registry.close(session.id)
+        harnessQueue.sync { _ = try? registry.close(session.id) }
     }
 } catch {
     check(false, "inherited-directory sessions spawn (\(error))")
@@ -785,6 +829,29 @@ do {
     namesLock.unlock()
     check(sawPrompt, "the shell is reported back in the foreground once the command ends (saw: \(names))")
     check(session.isForegroundShell, "the session records the shell as foreground again")
+
+    // A pipeline's group is led by its first command, which the shell reaps
+    // the moment it exits while the rest runs on; `proc_name` of that leader
+    // then fails. The flag has to follow the kernel's group all the same, or
+    // the session reads as idle for as long as the pipeline runs.
+    namesLock.lock()
+    reports.removeAll()
+    namesLock.unlock()
+    session.write(Data("/usr/bin/true | sleep 2\n".utf8))
+    let sawPipeline = waitForReport { !$0.isShell }
+    namesLock.lock()
+    let pipelineReports = reports
+    namesLock.unlock()
+    check(
+        sawPipeline,
+        "a pipeline whose leader is gone is still reported as running (saw: \(pipelineReports.map { "\($0.name):\($0.isShell)" }))"
+    )
+    check(!session.isForegroundShell, "and the session records something in front of the shell")
+    check(
+        pipelineReports.first(where: { !$0.isShell })?.name == names.last,
+        "with the last resolved name retained rather than dropped"
+    )
+    check(waitForReport(\.isShell), "the shell is reported back once the pipeline ends")
     session.invalidate()
 } catch {
     check(false, "a process-name session spawns")

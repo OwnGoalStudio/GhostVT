@@ -83,9 +83,12 @@ enum ShellIntegration {
             environment["GHOSTTY_BASH_INJECT"] = "1"
             // POSIX mode moves the history file to ~/.sh_history. The script
             // leaves POSIX mode again, so put history back where an
-            // interactive bash keeps it.
+            // interactive bash keeps it — and tell the script to unexport it
+            // again, or every child (a zsh run from that bash) inherits
+            // bash's history file as its own.
             if environment["HISTFILE"] == nil, let home = environment["HOME"] {
                 environment["HISTFILE"] = home + "/.bash_history"
+                environment["GHOSTTY_BASH_UNEXPORT_HISTFILE"] = "1"
             }
             environment["GHOSTTY_RESOURCES_DIR"] = resources
             environment["GHOSTTY_SHELL_FEATURES"] = features

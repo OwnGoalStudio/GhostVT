@@ -3,10 +3,15 @@ import Dispatch
 import XPC
 
 /// A client of the proxy as the supervisor sees it: a peer id, a place to
-/// deliver events, and a connection that can be cut.
+/// deliver events, and a connection that can be held back or cut.
 protocol IOPeer: AnyObject {
     var peerID: UInt64 { get }
     func deliver(event: xpc_object_t)
+    /// Stops taking the client's messages until `resume`. Balanced: a
+    /// second `suspend` before the `resume` is a no-op, and so is a
+    /// `resume` with nothing suspended.
+    func suspend()
+    func resume()
     func cutConnection(reason: String)
 }
 
@@ -29,7 +34,16 @@ protocol IOPeer: AnyObject {
 ///   `peerCongestionGrace` — the app suspended in the background — is cut
 ///   instead: the app treats that as an interruption and reattaches when
 ///   it returns, and the shell meanwhile writes into the replay buffer
-///   rather than waiting on it.
+///   rather than waiting on it. The pause is one decision for the whole
+///   socket, so every peer holding output when it happens gets the timer:
+///   once paused nothing more is read, and a peer that never crossed its
+///   own threshold would otherwise hold the socket shut for good.
+/// - **Input toward the child** is what the socket has not taken yet
+///   (`IOChannel.pendingByteCount`). A paste arrives as back-to-back
+///   messages at mach speed and leaves at the socket's pace, so past
+///   `inputPauseAboveByteCount` every peer's connection is suspended —
+///   libxpc then holds the messages in the client — and resumed once the
+///   child has drained it below `inputResumeBelowByteCount`.
 /// - **The child dying** fails every pending reply, cuts every peer (their
 ///   sessions died with the child, and a reconnect is how the app finds
 ///   out), and respawns it, paced so a crash loop does not become a spin.
@@ -39,6 +53,8 @@ final class IOSupervisor {
     static let pauseAboveByteCount = 1 << 20
     static let resumeBelowByteCount = 256 * 1024
     static let peerCongestionByteCount = 512 * 1024
+    static let inputPauseAboveByteCount = 1 << 20
+    static let inputResumeBelowByteCount = 256 * 1024
     /// A variable only so the harness can shorten the wait it tests.
     static var peerCongestionGrace: DispatchTimeInterval = .seconds(10)
     static let respawnDelay: DispatchTimeInterval = .seconds(2)
@@ -70,10 +86,14 @@ final class IOSupervisor {
     private var inFlight: [UInt64: Int] = [:]
     private var totalInFlight = 0
     private var congestionTimers: [UInt64: DispatchSourceTimer] = [:]
+    private(set) var isInputPaused = false
 
     /// What follows the child's exit 0 after a `shutdown`: the process's
     /// own exit, which the harness replaces to watch for it.
-    var onShutdownExit: () -> Void = { exit(EXIT_SUCCESS) }
+    var onShutdownExit: () -> Void = {
+        DaemonFileLog.flush()
+        exit(EXIT_SUCCESS)
+    }
 
     init(queue: DispatchQueue, executablePath: String) {
         self.queue = queue
@@ -97,6 +117,9 @@ final class IOSupervisor {
 
     func register(_ peer: IOPeer) {
         peers[peer.peerID] = peer
+        if isInputPaused {
+            peer.suspend()
+        }
     }
 
     /// The peer's connection is gone. Its sessions stay in the child — a
@@ -155,6 +178,9 @@ final class IOSupervisor {
         totalInFlight += byteCount
         if totalInFlight > Self.pauseAboveByteCount {
             channel?.suspendReading()
+            for (id, bytes) in inFlight where bytes > 0 && congestionTimers[id] == nil {
+                startCongestionTimer(for: id)
+            }
         }
         if inFlight[peerID, default: 0] >= Self.peerCongestionByteCount, congestionTimers[peerID] == nil {
             startCongestionTimer(for: peerID)
@@ -168,15 +194,33 @@ final class IOSupervisor {
         let remaining = max(0, current - byteCount)
         inFlight[peerID] = remaining
         totalInFlight = max(0, totalInFlight - byteCount)
-        if remaining < Self.peerCongestionByteCount {
+        reconsiderReading()
+        // While the socket stays paused, a peer still holding output is
+        // part of what holds it; its timer stands until it drains.
+        if remaining == 0 || (remaining < Self.peerCongestionByteCount && channel?.isReadSuspended != true) {
             cancelCongestionTimer(for: peerID)
         }
-        reconsiderReading()
     }
 
     private func reconsiderReading() {
         if totalInFlight < Self.resumeBelowByteCount {
             channel?.resumeReading()
+        }
+    }
+
+    /// The mirror of `IOHost.updateOutputPause`, for the other direction.
+    private func updateInputPause(pending: Int) {
+        if !isInputPaused, pending > Self.inputPauseAboveByteCount {
+            isInputPaused = true
+            for peer in peers.values {
+                peer.suspend()
+            }
+            DaemonFileLog.log("io not draining input (\(pending) bytes queued), peers suspended")
+        } else if isInputPaused, pending < Self.inputResumeBelowByteCount {
+            isInputPaused = false
+            for peer in peers.values {
+                peer.resume()
+            }
         }
     }
 
@@ -202,6 +246,9 @@ final class IOSupervisor {
     // MARK: - The child
 
     private func spawn() throws {
+        // The attempt, not the success: pacing keyed on the last child that
+        // came up lets a spawn that keeps failing retry without a pause.
+        lastSpawn = .now()
         var pair: [Int32] = [-1, -1]
         guard socketpair(AF_UNIX, SOCK_STREAM, 0, &pair) == 0 else {
             throw iGhostVTDaemonError.transportFailure
@@ -240,13 +287,15 @@ final class IOSupervisor {
 
         childPID = pid
         exitStatus = nil
-        lastSpawn = .now()
         let channel = IOChannel(descriptor: parentEnd, queue: queue)
         channel.onFrame = { [weak self] header, payload in
             self?.handleFrame(header, payload: payload)
         }
         channel.onClosed = { [weak self] in
             self?.handleLinkClosed()
+        }
+        channel.onPendingChange = { [weak self] pending in
+            self?.updateInputPause(pending: pending)
         }
         self.channel = channel
         channel.activate()
@@ -298,6 +347,7 @@ final class IOSupervisor {
             peer.cutConnection(reason: "io link closed")
         }
         peers.removeAll()
+        isInputPaused = false
         pollExitStatus()
     }
 

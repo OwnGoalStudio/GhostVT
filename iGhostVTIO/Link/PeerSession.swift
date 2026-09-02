@@ -189,6 +189,7 @@ final class PeerSession {
             return .sessionLimitReached
         }
         let command = stringArray(message, key: iGhostVTWireKey.command)
+        let shell = xpc_dictionary_get_string(message, iGhostVTWireKey.shell).map { String(cString: $0) }
         let environment = stringDictionary(message, key: iGhostVTWireKey.environment)
         let columns = UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(message, iGhostVTWireKey.columns))
         let rows = UInt16(truncatingIfNeeded: xpc_dictionary_get_uint64(message, iGhostVTWireKey.rows))
@@ -198,6 +199,7 @@ final class PeerSession {
         do {
             let session = try registry.open(
                 command: command,
+                shell: shell,
                 environment: environment,
                 columns: columns,
                 rows: rows,
@@ -394,9 +396,10 @@ final class PeerSession {
     private func stringArray(_ message: xpc_object_t, key: String) -> [String] {
         guard let array = xpc_dictionary_get_value(message, key),
               xpc_get_type(array) == XPC_TYPE_ARRAY else { return [] }
+        // Read every element: the length limit is `ShellLaunch.validate`'s to
+        // refuse. Trimming here would run a different command than was asked.
         var values: [String] = []
-        let count = min(xpc_array_get_count(array), iGhostVTProtocol.maximumCommandArgumentCount)
-        for index in 0 ..< count {
+        for index in 0 ..< xpc_array_get_count(array) {
             guard let value = xpc_array_get_string(array, index) else { continue }
             values.append(String(cString: value))
         }

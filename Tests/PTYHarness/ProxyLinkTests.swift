@@ -19,9 +19,45 @@ final class HarnessPeer: IOPeer {
     private let lock = NSLock()
     private var events: [xpc_object_t] = []
     private(set) var cutReason: String?
+    private var suspendDepth = 0
+    private var suspendCount = 0
 
     init(peerID: UInt64) {
         self.peerID = peerID
+    }
+
+    func suspend() {
+        lock.lock()
+        suspendDepth += 1
+        suspendCount += 1
+        lock.unlock()
+    }
+
+    func resume() {
+        lock.lock()
+        suspendDepth -= 1
+        lock.unlock()
+    }
+
+    /// How many times the supervisor held this peer back, and whether every
+    /// suspend has since been balanced — libxpc would abort on one that was
+    /// not.
+    var timesSuspended: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return suspendCount
+    }
+
+    var isSuspended: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return suspendDepth > 0
+    }
+
+    var isBalanced: Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        return suspendDepth == 0
     }
 
     func deliver(event: xpc_object_t) {
@@ -524,6 +560,48 @@ func runProxyLinkTests() {
         "and leaves the list"
     )
 
+    // A one-word `cmd` is the CLI's `new -- /usr/bin/python3`: the program
+    // itself, not a login shell of that name. `env` alone prints what it was
+    // handed, which also shows the verbatim environment at the far end.
+    print("proxy one-word command")
+    let oneWord = request(supervisor, from: second, .openSession) { message in
+        let command = xpc_array_create(nil, 0)
+        xpc_array_append_value(command, xpc_string_create("/usr/bin/env"))
+        xpc_dictionary_set_value(message, iGhostVTWireKey.command, command)
+    }
+    let oneWordID = oneWord.map { xpc_dictionary_get_uint64($0, iGhostVTWireKey.sessionID) } ?? 0
+    check(replyCode(oneWord) == .success && oneWordID > 0, "a one-word command opens")
+    check(waitUntil { second.exitCode(of: oneWordID) != nil }, "and runs to its end")
+    check(second.exitCode(of: oneWordID) == 0, "as itself, not as `env -il` (exit \(String(describing: second.exitCode(of: oneWordID))))")
+    let printed = second.output(of: oneWordID)
+    check(printed.contains("TERM=xterm-256color"), "a verbatim command sees TERM")
+    check(printed.contains("TERM_PROGRAM=iGhostVT"), "and the terminal's identity")
+    check(printed.contains("PATH=/"), "and a PATH")
+    check(printed.contains("HOME=") && printed.contains("LC_CTYPE="), "and HOME and LC_CTYPE")
+    check(!printed.contains("GHOSTTY_"), "and no shell integration")
+
+    // The app's Settings choice travels under `shell` and is a login shell.
+    let chosen = request(supervisor, from: second, .openSession) { message in
+        xpc_dictionary_set_string(message, iGhostVTWireKey.shell, "/bin/sh")
+    }
+    let chosenID = chosen.map { xpc_dictionary_get_uint64($0, iGhostVTWireKey.sessionID) } ?? 0
+    check(replyCode(chosen) == .success && chosenID > 0, "a chosen shell opens")
+    harnessQueue.async {
+        let message = makeRequest(.write) { message in
+            xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, chosenID)
+            setInput(message, "echo \"shell:$0 flags:$-\"\n")
+        }
+        supervisor.forward(from: second, message: message, wantsReply: false) { _ in }
+    }
+    check(waitUntil { second.output(of: chosenID).contains("shell:/bin/sh flags:") }, "the chosen shell answers as itself")
+    let flags = second.output(of: chosenID)
+        .components(separatedBy: "shell:/bin/sh flags:")
+        .dropFirst()
+        .first.map { $0.prefix { !$0.isNewline } } ?? ""
+    check(flags.contains("i"), "and runs interactively, as a login shell does (flags: \(flags))")
+    _ = request(supervisor, from: second, .closeSession) { xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, chosenID) }
+    _ = waitUntil { listedRow(supervisor, from: second, sessionID: chosenID) == nil }
+
     // The first peer's connection drops: its sessions are detached, not
     // killed, and its replay is what the next peer gets.
     harnessQueue.sync { supervisor.peerGone(1) }
@@ -635,6 +713,116 @@ func runProxyLinkTests() {
         return listed.flatMap { xpc_dictionary_get_value($0, iGhostVTWireKey.sessions) }.map { xpc_array_get_count($0) } == 0
     }
 
+    // The pause is one decision for the socket, the timer was one per peer:
+    // three peers each holding less than the per-peer threshold, together
+    // past the pause, once left the socket shut with no timer running and
+    // every session — and the CLI — stalled behind it.
+    print("proxy flow control with several peers")
+    let share = 400_000
+    check(
+        share < IOSupervisor.peerCongestionByteCount && 3 * share > IOSupervisor.pauseAboveByteCount,
+        "three shares cross the pause without any one crossing the peer threshold"
+    )
+    var crowd: [HarnessPeer] = []
+    for peerID: UInt64 in 10 ... 12 {
+        let member = HarnessPeer(peerID: peerID)
+        member.supervisor = supervisor
+        member.acknowledgesOutput = false
+        harnessQueue.sync { supervisor.register(member) }
+        check(replyCode(request(supervisor, from: member, .hello)) == .success, "peer \(peerID) says hello")
+        // No newlines: the PTY would turn each into two bytes and carry a
+        // share past the per-peer threshold.
+        let opened = request(supervisor, from: member, .openSession) { message in
+            let command = xpc_array_create(nil, 0)
+            for argument in ["/bin/sh", "-c", "head -c \(share) /dev/zero | tr '\\0' x; sleep 30"] {
+                xpc_array_append_value(command, xpc_string_create(argument))
+            }
+            xpc_dictionary_set_value(message, iGhostVTWireKey.command, command)
+        }
+        check(replyCode(opened) == .success, "peer \(peerID) opens a session under the threshold")
+        crowd.append(member)
+    }
+    check(
+        waitUntil(5) { crowd.reduce(0) { $0 + $1.outputByteCount() } > IOSupervisor.pauseAboveByteCount },
+        "together the peers pass the pause (\(crowd.map { $0.outputByteCount() }))"
+    )
+    check(
+        crowd.allSatisfy { $0.outputByteCount() < IOSupervisor.peerCongestionByteCount },
+        "while none holds enough for a timer of its own (\(crowd.map { $0.outputByteCount() }))"
+    )
+    check(
+        waitUntil(6) { crowd.allSatisfy(\.wasCut) },
+        "every peer holding the socket shut is cut (\(crowd.map { $0.cutReason ?? "not cut" }))"
+    )
+    let afterCrowd = HarnessPeer(peerID: 13)
+    afterCrowd.supervisor = supervisor
+    harnessQueue.sync { supervisor.register(afterCrowd) }
+    check(
+        replyCode(request(supervisor, from: afterCrowd, .hello)) == .success,
+        "and the socket is read again — a new peer is answered"
+    )
+    if let listed = request(supervisor, from: afterCrowd, .listSessions),
+       let rows = xpc_dictionary_get_value(listed, iGhostVTWireKey.sessions)
+    {
+        for index in 0 ..< xpc_array_get_count(rows) {
+            let id = xpc_dictionary_get_uint64(xpc_array_get_value(rows, index), iGhostVTWireKey.sessionID)
+            _ = request(supervisor, from: afterCrowd, .closeSession) { xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, id) }
+        }
+    }
+    _ = waitUntil {
+        let listed = request(supervisor, from: afterCrowd, .listSessions)
+        return listed.flatMap { xpc_dictionary_get_value($0, iGhostVTWireKey.sessions) }.map { xpc_array_get_count($0) } == 0
+    }
+
+    // The other direction. A paste arrives as back-to-back messages at mach
+    // speed and leaves at the socket's; what the socket has not taken sits
+    // in this process, the one under the jetsam limit. Past the mark every
+    // peer is held back, and let go once the child has drained it.
+    print("proxy input backpressure")
+    let paster = HarnessPeer(peerID: 14)
+    paster.supervisor = supervisor
+    harnessQueue.sync { supervisor.register(paster) }
+    check(replyCode(request(supervisor, from: paster, .hello)) == .success, "a pasting peer says hello")
+    let sink = request(supervisor, from: paster, .openSession) { message in
+        let command = xpc_array_create(nil, 0)
+        for argument in ["/bin/sh", "-c", "stty raw -echo; exec sleep 30"] {
+            xpc_array_append_value(command, xpc_string_create(argument))
+        }
+        xpc_dictionary_set_value(message, iGhostVTWireKey.command, command)
+    }
+    let sinkID = sink.map { xpc_dictionary_get_uint64($0, iGhostVTWireKey.sessionID) } ?? 0
+    check(replyCode(sink) == .success && sinkID > 0, "a session that never reads opens")
+    Thread.sleep(forTimeInterval: 0.5)
+    let burstChunk = Data(repeating: UInt8(ascii: "x"), count: iGhostVTProtocol.inputChunkByteCount)
+    let burstChunkCount = 4
+    check(
+        burstChunkCount * burstChunk.count > IOSupervisor.inputPauseAboveByteCount
+            && burstChunkCount * burstChunk.count < iGhostVTProtocol.sessionPendingInputByteCount,
+        "the burst passes the input pause and stays under the session's own cap"
+    )
+    // One block on the control queue, as libxpc delivers a queued paste: the
+    // socket's write source cannot run between the messages.
+    harnessQueue.sync {
+        for _ in 0 ..< burstChunkCount {
+            let message = makeRequest(.write) { message in
+                xpc_dictionary_set_uint64(message, iGhostVTWireKey.sessionID, sinkID)
+                burstChunk.withUnsafeBytes { xpc_dictionary_set_data(message, iGhostVTWireKey.data, $0.baseAddress!, $0.count) }
+            }
+            supervisor.forward(from: paster, message: message, wantsReply: false) { _ in }
+        }
+    }
+    check(paster.timesSuspended > 0, "the peer is suspended while the socket holds the paste")
+    check(observer.timesSuspended > 0, "and so is every other peer")
+    check(waitUntil(10) { paster.isBalanced && observer.isBalanced }, "and resumed once the child has drained it")
+    check(harnessQueue.sync { !supervisor.isInputPaused }, "the supervisor records the pause as over")
+    check(
+        replyCode(request(supervisor, from: paster, .closeSession) {
+            xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, sinkID)
+        }) == .success,
+        "the sink session closes"
+    )
+    _ = waitUntil { listedRow(supervisor, from: paster, sessionID: sinkID) == nil }
+
     // The child dies: peers are cut, pending replies fail, a new child
     // comes up and serves.
     print("proxy child replacement")
@@ -687,4 +875,57 @@ func runProxyLinkTests() {
     check(replyCode(request(supervisor, from: replacement, .shutdown)) == .success, "shutdown with nothing held succeeds")
     check(waitUntil { shutdownFollowed }, "the proxy follows io's exit after shutdown")
     check(waitUntil { kill(lastChild, 0) != 0 || supervisor.childProcessID == 0 }, "io is gone after shutdown")
+
+    runSpawnPacingTest()
+}
+
+/// A respawn is paced by the last *attempt*. Keyed on the last child that
+/// came up, a spawn that kept failing after a child that had lived past
+/// `respawnDelay` was retried with no delay at all — the control queue
+/// spinning on `posix_spawn` until the path came back.
+func runSpawnPacingTest() {
+    print("proxy respawn pacing")
+    var template = Array("/private/tmp/ighostvt-harness-io.XXXXXX".utf8CString)
+    guard let directory = template.withUnsafeMutableBufferPointer({ mkdtemp($0.baseAddress) }).map({ String(cString: $0) }) else {
+        check(false, "a directory for the stand-in io is created")
+        return
+    }
+    let script = directory + "/ighostvtd-io"
+    defer {
+        unlink(script)
+        rmdir(directory)
+    }
+    func install(_ body: String) {
+        try? ("#!/bin/sh\n" + body + "\n").write(toFile: script, atomically: true, encoding: .utf8)
+        chmod(script, 0o755)
+    }
+    // A stand-in that outlives the pacing window, so its exit reads as a
+    // healthy child's, and that is gone from the path by the time it does.
+    install("sleep 3")
+    let supervisor = IOSupervisor(queue: harnessQueue, executablePath: script)
+    var started = false
+    harnessQueue.sync {
+        started = (try? supervisor.start()) != nil
+    }
+    check(started, "the stand-in io spawns")
+    guard started else { return }
+    unlink(script)
+    check(waitUntil(6) { harnessQueue.sync { !supervisor.isRunning } }, "the stand-in exits")
+    // The link closes before the child is reaped and the respawn attempted;
+    // give that attempt its moment to fail before the path comes back.
+    Thread.sleep(forTimeInterval: 0.5)
+    let restoredAt = Date()
+    install("exec sleep 30")
+    let cameUp = waitUntil(6) { harnessQueue.sync { supervisor.isRunning } }
+    let waited = Date().timeIntervalSince(restoredAt)
+    check(cameUp, "a respawn that failed is tried again")
+    check(
+        waited > 0.5,
+        "a full delay after the failed attempt, not at once (came up \(String(format: "%.2f", waited))s after the path returned)"
+    )
+    guard cameUp else { return }
+    let standIn = supervisor.childProcessID
+    unlink(script)
+    kill(standIn, SIGKILL)
+    _ = waitUntil { harnessQueue.sync { !supervisor.isRunning } }
 }

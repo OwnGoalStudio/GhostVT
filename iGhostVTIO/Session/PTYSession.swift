@@ -296,6 +296,11 @@ final class PTYSession {
             if !movedToDirectory, let fallbackDirectory {
                 _ = chdir(fallbackDirectory)
             }
+            // The one disposition this process changed (main.swift), and
+            // SIG_IGN survives execve: a verbatim command would otherwise
+            // see EPIPE from `yes | head` instead of the exit a terminal
+            // gives it. An interactive shell resets it anyway.
+            signal(SIGPIPE, SIG_DFL)
             execve(executablePath, argv, envp)
             fail(Self.stepExec)
         }
@@ -694,11 +699,13 @@ final class PTYSession {
     /// Re-reads which process group is in the foreground on this terminal
     /// and reports its leader's name, and whether it is the shell, when
     /// either changed. `tcgetpgrp` on the master asks the kernel, so the
-    /// shell's job control is the source of truth; a leader already gone
+    /// shell's job control is the source of truth. A leader already gone
     /// (`proc_name` returns 0) keeps the last name until the next change
-    /// lands. The shell flag is checked before the name: a nested shell
-    /// (`zsh` typed into zsh) keeps the name and still means something is
-    /// running.
+    /// lands — but the shell flag is still updated from it: a pipeline's
+    /// group is led by its first command (`cat file | vim -`), which the
+    /// shell reaps at once while the rest runs, and the flag is what says
+    /// something is running. A nested shell (`zsh` typed into zsh) keeps
+    /// the name the same way.
     private func refreshForegroundProcessName() {
         guard isAlive else { return }
         let processGroup = tcgetpgrp(master)
@@ -709,12 +716,17 @@ final class PTYSession {
             guard let base = raw.baseAddress else { return 0 }
             return ighostvtProcName(processGroup, base, UInt32(raw.count))
         }
-        guard length > 0 else { return }
-        let name = buffer.withUnsafeBufferPointer { pointer -> String in
-            guard let base = pointer.baseAddress else { return "" }
-            return String(cString: base)
+        var name = foregroundProcessName
+        if length > 0 {
+            let resolved = buffer.withUnsafeBufferPointer { pointer -> String in
+                guard let base = pointer.baseAddress else { return "" }
+                return String(cString: base)
+            }
+            if !resolved.isEmpty {
+                name = resolved
+            }
         }
-        guard !name.isEmpty, name != foregroundProcessName || isShell != isForegroundShell else { return }
+        guard name != foregroundProcessName || isShell != isForegroundShell else { return }
         foregroundProcessName = name
         isForegroundShell = isShell
         onProcessName?(id, name, isShell)

@@ -16,6 +16,7 @@ final class PeerRelay: IOPeer {
     private let supervisor: IOSupervisor
     private let onInvalidate: (PeerRelay) -> Void
     private var isValid = true
+    private var isSuspended = false
 
     init(
         peerID: UInt64,
@@ -34,7 +35,6 @@ final class PeerRelay: IOPeer {
     }
 
     func activate() {
-        supervisor.register(self)
         xpc_connection_set_target_queue(connection, queue)
         xpc_connection_set_event_handler(connection) { [weak self] event in
             autoreleasepool {
@@ -42,6 +42,11 @@ final class PeerRelay: IOPeer {
             }
         }
         xpc_connection_activate(connection)
+        // After activation, so a suspend the supervisor applies on
+        // registration lands on an active connection; events reach `handle`
+        // on this queue, which is the one this runs on, so none arrive
+        // before the peer is registered.
+        supervisor.register(self)
     }
 
     private func handle(_ event: xpc_object_t) {
@@ -93,6 +98,18 @@ final class PeerRelay: IOPeer {
         }
     }
 
+    func suspend() {
+        guard isValid, !isSuspended else { return }
+        isSuspended = true
+        xpc_connection_suspend(connection)
+    }
+
+    func resume() {
+        guard isSuspended else { return }
+        isSuspended = false
+        xpc_connection_resume(connection)
+    }
+
     func cutConnection(reason: String) {
         guard isValid else { return }
         DaemonFileLog.log("peer \(peerID) (pid \(clientPID)) cut: \(reason)")
@@ -102,6 +119,9 @@ final class PeerRelay: IOPeer {
     private func invalidate() {
         guard isValid else { return }
         isValid = false
+        // libxpc requires every suspend balanced before the connection's
+        // last release; whatever it delivers meanwhile is dropped above.
+        resume()
         supervisor.peerGone(peerID)
         xpc_connection_cancel(connection)
         onInvalidate(self)

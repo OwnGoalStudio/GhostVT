@@ -89,6 +89,7 @@ final class SessionRegistry {
     /// simply means the plan's own start (the home).
     func open(
         command requestedCommand: [String],
+        shell requestedShell: String? = nil,
         environment requestedEnvironment: [String: String],
         columns: UInt16,
         rows: UInt16,
@@ -100,7 +101,7 @@ final class SessionRegistry {
                 "You already have \(sessions.count) terminals open. Close one and try again."
             )
         }
-        let plan = try resolvePlan(requestedCommand)
+        let plan = try resolvePlan(command: requestedCommand, shell: requestedShell)
         let inheritedDirectory = sourceSessionID.flatMap(inheritableDirectory)
         let id = nextID
         nextID &+= 1
@@ -239,27 +240,13 @@ final class SessionRegistry {
         return path
     }
 
-    /// A client sends either nothing (give me a shell), a single path (give me
-    /// *this* shell), or a full argv it wants run verbatim.
-    private func resolvePlan(_ requested: [String]) throws -> ShellLaunch.Plan {
-        switch requested.count {
-        case 0:
-            guard let plan = ShellLaunch.plan(requestedShell: nil) else {
-                throw iGhostVTFailure(
-                    .spawnFailed,
-                    "No usable shell was found. Check the default shell in Settings."
-                )
-            }
-            return plan
-        case 1:
-            guard let plan = ShellLaunch.plan(requestedShell: requested[0]) else {
-                throw iGhostVTFailure(
-                    .invalidRequest,
-                    "Unable to run \(requested[0]). Choose another shell in Settings."
-                )
-            }
-            return plan
-        default:
+    /// A client sends an argv it wants run verbatim (`cmd`, one word
+    /// included — the CLI and Shortcuts), or none of that and either a shell
+    /// path (`shell`, the app's Settings choice) or nothing (give me a
+    /// shell). The two are different keys because a one-word `cmd` used to
+    /// be read as the shell choice, and `python3 -il` is not a session.
+    private func resolvePlan(command requested: [String], shell requestedShell: String?) throws -> ShellLaunch.Plan {
+        if !requested.isEmpty {
             guard let command = ShellLaunch.validate(requested) else {
                 throw iGhostVTFailure(
                     .invalidRequest,
@@ -268,6 +255,22 @@ final class SessionRegistry {
             }
             return ShellLaunch.verbatimPlan(command: command)
         }
+        if let requestedShell, !requestedShell.isEmpty {
+            guard let plan = ShellLaunch.plan(requestedShell: requestedShell) else {
+                throw iGhostVTFailure(
+                    .invalidRequest,
+                    "Unable to run \(requestedShell). Choose another shell in Settings."
+                )
+            }
+            return plan
+        }
+        guard let plan = ShellLaunch.plan(requestedShell: nil) else {
+            throw iGhostVTFailure(
+                .spawnFailed,
+                "No usable shell was found. Check the default shell in Settings."
+            )
+        }
+        return plan
     }
 
     private func clamp(_ value: UInt16, fallback: UInt16, limit: UInt16) -> UInt16 {

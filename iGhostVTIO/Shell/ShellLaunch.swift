@@ -167,15 +167,23 @@ enum ShellLaunch {
         return Credentials(uid: user.uid, gid: user.gid)
     }
 
-    static func plan(requestedShell: String?) -> Plan? {
-        let environment = [
+    /// What every session's program finds in its environment, shell or
+    /// not: the terminal's identity and the user's, and a `PATH` — the
+    /// daemon's own is launchd's, and the session runs as someone else.
+    private static func baseEnvironment(for user: PasswdEntry?) -> [String: String] {
+        var environment = [
             "TERM": "xterm-256color",
             "COLORTERM": "truecolor",
             "TERM_PROGRAM": "iGhostVT",
             "LC_TERMINAL": "iGhostVT",
             "LC_CTYPE": preferredLocale,
         ]
+        environment.merge(userEnvironment(for: user)) { current, _ in current }
+        environment["PATH"] = fallbackPath
+        return environment
+    }
 
+    static func plan(requestedShell: String?) -> Plan? {
         let user = sessionUser
 
         // An explicit choice from the app's settings wins.
@@ -183,7 +191,7 @@ enum ShellLaunch {
             guard requestedShell.hasPrefix("/"),
                   let shell = locate(requestedShell)
             else { return nil }
-            return directShellPlan(shell: shell, user: user, environment: environment)
+            return directShellPlan(shell: shell, user: user)
         }
 
         // Every session is spawned directly — never through the bootstrap's
@@ -208,20 +216,14 @@ enum ShellLaunch {
         }
         guard let shell else { return nil }
 
-        return directShellPlan(shell: shell, user: user, environment: environment)
+        return directShellPlan(shell: shell, user: user)
     }
 
     /// The daemon spawns the shell itself instead of handing off to `login`,
     /// so it supplies both the environment and the identity `login` would have
     /// established.
-    private static func directShellPlan(
-        shell: String,
-        user: PasswdEntry?,
-        environment: [String: String]
-    ) -> Plan {
-        var environment = environment
-        environment.merge(userEnvironment(for: user)) { current, _ in current }
-        environment["PATH"] = fallbackPath
+    private static func directShellPlan(shell: String, user: PasswdEntry?) -> Plan {
+        var environment = baseEnvironment(for: user)
         environment["SHELL"] = shell
         // After `HOME`: bash's integration moves the history file relative to
         // it, and reads nothing this daemon sets afterwards.
@@ -253,12 +255,18 @@ enum ShellLaunch {
     }
 
     /// A caller-supplied argv is still a session: it runs as `mobile`, from
-    /// mobile's home, with no environment of its own.
+    /// mobile's home, in the terminal's environment — `TERM` is what a curses
+    /// program needs to start at all. Only the shell integration is left
+    /// off: it shapes argv, and this argv is the caller's.
     static func verbatimPlan(command: [String]) -> Plan {
         let user = sessionUser
+        var environment = baseEnvironment(for: user)
+        if let shell = user?.shell, !shell.isEmpty {
+            environment["SHELL"] = shell
+        }
         return Plan(
             command: command,
-            environment: [:],
+            environment: environment,
             credentials: credentials(for: user),
             workingDirectory: workingDirectory(for: user)
         )

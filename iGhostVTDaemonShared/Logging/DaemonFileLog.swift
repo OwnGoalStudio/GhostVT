@@ -34,15 +34,19 @@ enum DaemonFileLog {
         let line = "\(timestamp()) [\(getpid()) \(processName)] \(message)\n"
         queue.async {
             _ = directoryReady
-            rotateIfNeeded()
-            // Off the control queue, so a forkpty can land while this is
-            // open: close-on-exec from the start (AGENTS.md, descriptors).
-            let descriptor = open(path, O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC, 0o644)
+            let descriptor = openForAppend()
             guard descriptor >= 0 else { return }
             defer { close(descriptor) }
             let bytes = Array(line.utf8)
             _ = bytes.withUnsafeBytes { writeFully(descriptor, $0) }
         }
+    }
+
+    /// Waits for every line queued so far to reach the file. For the moment
+    /// before an `exit`: libdispatch does not drain the queue for a dying
+    /// process, and the line saying why it dies is the one worth having.
+    static func flush() {
+        queue.sync {}
     }
 
     private static func timestamp() -> String {
@@ -76,10 +80,31 @@ enum DaemonFileLog {
         return true
     }
 
-    private static func rotateIfNeeded() {
-        var info = stat()
-        guard stat(path, &info) == 0, info.st_size > rotateAtBytes else { return }
-        _ = unlink(rotatedPath)
-        _ = rename(path, rotatedPath)
+    /// The log, open for appending and rotated first when it is over size.
+    ///
+    /// Off the control queue, so a forkpty can land while this is open:
+    /// close-on-exec from the start (AGENTS.md, descriptors). Both
+    /// processes rotate, so the size check runs under the file's lock and
+    /// only for the inode the lock was taken on — a racer that waited out
+    /// another's rename finds the path naming a fresh file and reopens it
+    /// rather than renaming that fresh file over the history.
+    private static func openForAppend() -> Int32 {
+        let flags = O_WRONLY | O_APPEND | O_CREAT | O_CLOEXEC
+        var descriptor = open(path, flags, 0o644)
+        var attempts = 0
+        while descriptor >= 0, attempts < 3 {
+            attempts += 1
+            _ = flock(descriptor, LOCK_EX)
+            var held = stat()
+            var named = stat()
+            guard fstat(descriptor, &held) == 0, stat(path, &named) == 0 else { break }
+            if held.st_ino == named.st_ino {
+                guard held.st_size > rotateAtBytes else { break }
+                _ = rename(path, rotatedPath)
+            }
+            close(descriptor)
+            descriptor = open(path, flags, 0o644)
+        }
+        return descriptor
     }
 }

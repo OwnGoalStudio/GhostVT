@@ -38,6 +38,7 @@ final class IOHost {
             // their SIGHUP. Not a success: that exit is reserved for
             // `shutdown`.
             DaemonFileLog.log("proxy link closed, exiting")
+            DaemonFileLog.flush()
             exit(EXIT_FAILURE)
         }
         channel.onPendingChange = { [weak self] pending in
@@ -65,6 +66,7 @@ final class IOHost {
     func exitAfterShutdown() {
         DaemonFileLog.log("shutdown with nothing held, exiting")
         channel.flushBlocking()
+        DaemonFileLog.flush()
         exit(EXIT_SUCCESS)
     }
 

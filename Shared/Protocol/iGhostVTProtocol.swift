@@ -174,7 +174,14 @@ enum iGhostVTWireKey {
     static let data = "data"
     static let columns = "cols"
     static let rows = "rows"
+    /// On `openSession`: an argv to run verbatim, one word included. Absent
+    /// or empty means a shell — the daemon's choice, or `shell`'s.
     static let command = "cmd"
+    /// On `openSession`: the path of the shell to start as a login shell,
+    /// the app's Settings choice. The daemon decides the argv and the
+    /// environment that go with it. Distinct from a one-word `cmd`, which
+    /// runs that program as itself.
+    static let shell = "shell"
     static let environment = "env"
     /// On `openSession`: a live session whose shell's current directory the
     /// new one should start in. The daemon reads that directory from the

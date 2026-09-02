@@ -485,11 +485,10 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.columns, columns)
         xpc_dictionary_set_uint64(message, iGhostVTWireKey.rows, rows)
         if let shellPath {
-            // Just the path: the daemon decides the argv and the login
-            // environment that goes with it.
-            let command = xpc_array_create(nil, 0)
-            xpc_array_set_string(command, XPC_ARRAY_APPEND, shellPath)
-            xpc_dictionary_set_value(message, iGhostVTWireKey.command, command)
+            // Just the path, under its own key: the daemon decides the argv
+            // and the login environment that goes with it. A one-word `cmd`
+            // would run the program as itself.
+            xpc_dictionary_set_string(message, iGhostVTWireKey.shell, shellPath)
         }
         if let inheritDirectoryFrom {
             xpc_dictionary_set_uint64(message, iGhostVTWireKey.inheritDirectoryFrom, inheritDirectoryFrom)

@@ -29,6 +29,7 @@ autoreleasepool {
     }
     guard started else {
         DaemonFileLog.log("listener bootstrap failed for good, exiting")
+        DaemonFileLog.flush()
         exit(EXIT_FAILURE)
     }
     withExtendedLifetime(server) {

@@ -28,7 +28,7 @@ final class IOChannel {
     private var descriptor: Int32
     private var readSource: DispatchSourceRead?
     private var writeSource: DispatchSourceWrite?
-    private var isReadSuspended = false
+    private(set) var isReadSuspended = false
     private var isWriteArmed = false
     private var isClosed = false
 
