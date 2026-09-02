@@ -152,34 +152,17 @@ fi
 echo "==> launching"
 open "$dest"
 
-# Background Task Management can still hand the fresh registration a stale
-# item: the job comes back with the unresolved relative program
-# `Contents/MacOS/ighostvtd` and dies to EX_CONFIG on every spawn — seen
-# even with the helper re-signed by the same team and the old one quit
-# before the swap. The documented repair (bootout, drop the digest,
-# relaunch) is applied here so an update never leaves it to be done by
-# hand.
+# The app rebinds the registration itself (MacLaunchAgent.rebind): with the
+# digest gone it unregisters and registers, asks the helper, and when
+# Background Task Management re-enabled its stale item instead — the
+# helper then dies to a launch constraint — waits out launchd's repair of
+# that item and goes again. Two rounds take about fifteen seconds; do not
+# bootout or relaunch in that window, it cancels the repair.
 echo "==> waiting for the helper"
-for _ in $(seq 1 10); do
+for _ in $(seq 1 20); do
     pgrep -x ighostvtd >/dev/null && break
     sleep 2
 done
-if ! pgrep -x ighostvtd >/dev/null \
-    && launchctl print "$domain/$label" 2>/dev/null | grep -q 'last exit code = 78'; then
-    echo "==> repairing the launch registration (EX_CONFIG)"
-    launchctl bootout "$domain/$label" 2>/dev/null || true
-    defaults delete "$bundle_id" "$digest_key" 2>/dev/null || true
-    osascript -e "tell application id \"$bundle_id\" to quit" >/dev/null 2>&1 || true
-    for _ in $(seq 1 10); do
-        pgrep -f "$dest/Contents/MacOS/iGhostVT" >/dev/null || break
-        sleep 1
-    done
-    open "$dest"
-    for _ in $(seq 1 15); do
-        pgrep -x ighostvtd >/dev/null && break
-        sleep 2
-    done
-fi
 if pgrep -x ighostvtd >/dev/null; then
     echo "    helper is running"
 else

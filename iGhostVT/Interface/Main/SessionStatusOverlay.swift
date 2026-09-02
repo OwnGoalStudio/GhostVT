@@ -48,6 +48,11 @@ struct SessionStatusOverlay: View {
     private var content: some View {
         if agent.isReady {
             sessionContent
+        } else if agent.status == .rebinding {
+            // An update replaced the helper and its registration is being
+            // redone — seconds, and nothing for a person to do. The
+            // connection comes on its own when the status turns enabled.
+            pill("Updating Terminal Helper…")
         } else {
             ZStack {
                 dim
@@ -131,7 +136,7 @@ struct SessionStatusOverlay: View {
                 ],
                 claimsFirstResponder: isActive
             )
-        case .notApplicable, .unsupported, .enabled:
+        case .notApplicable, .unsupported, .rebinding, .enabled:
             EmptyView()
         }
     }

@@ -115,6 +115,8 @@ struct AdvancedSettingsView: View {
             String(localized: "On")
         case .needsApproval:
             String(localized: "Waiting for Approval")
+        case .rebinding:
+            String(localized: "Updating")
         case .needsRelocation:
             String(localized: "Move to Applications")
         case .notRegistered:

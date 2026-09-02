@@ -45,6 +45,10 @@ final class MacLaunchAgent: ObservableObject {
         case notRegistered
         /// Registered, but a person still has to allow it in Login Items.
         case needsApproval
+        /// The helper in the bundle is not the one Login Items holds — an
+        /// update replaced it — and the registration is being redone. Ends
+        /// in `.enabled` once the new helper has answered, or `.failed`.
+        case rebinding
         case enabled
         /// The bundle has no helper plist to register. A packaging fault —
         /// or a copy someone took apart — that no control in the app can
@@ -63,9 +67,14 @@ final class MacLaunchAgent: ObservableObject {
     var isReady: Bool {
         switch status {
         case .notApplicable, .unsupported, .enabled: true
-        case .needsRelocation, .notRegistered, .needsApproval, .brokenInstallation, .failed: false
+        case .needsRelocation, .notRegistered, .needsApproval, .rebinding, .brokenInstallation, .failed: false
         }
     }
+
+    /// The rebind in flight, if any. While it runs, `refresh()` must not
+    /// overwrite `status` with what `SMAppService` says — a stale item reads
+    /// `.enabled` — and a second `activate()` must not start another.
+    private var rebindTask: Task<Void, Never>?
 
     private init() {
         #if targetEnvironment(macCatalyst)
@@ -100,6 +109,7 @@ final class MacLaunchAgent: ObservableObject {
                 status = .unsupported
                 return
             }
+            guard rebindTask == nil else { return }
             guard Self.isInApplications else {
                 status = .needsRelocation
                 return
@@ -139,10 +149,11 @@ final class MacLaunchAgent: ObservableObject {
         /// seconds later leaves a job whose program is the unresolved relative
         /// `Contents/MacOS/ighostvtd`, retried every ten seconds forever. A
         /// relaunch finds that item and changes nothing. Only unregistering
-        /// discards the item, so that is what happens whenever the helper in
-        /// the bundle is not the one this app registered last time.
+        /// discards the item, so that is what happens (`rebind`) whenever the
+        /// helper in the bundle is not the one this app registered last time.
         func activate() {
             guard #available(macCatalyst 16.0, *) else { return }
+            guard rebindTask == nil else { return }
             guard Self.isInApplications else {
                 status = .needsRelocation
                 return
@@ -150,12 +161,146 @@ final class MacLaunchAgent: ObservableObject {
             let service = SMAppService.agent(plistName: Self.plistName)
             let digest = Self.helperDigest
             if service.status != .notRegistered, digest != Self.registeredHelperDigest {
-                // An unregister that fails leaves the stale item in place and
-                // the register below finds it; the status re-read there is
-                // still the truth, so the error itself has nothing to add.
-                try? service.unregister()
+                status = .rebinding
+                rebindTask = Task { await rebind(service, helperDigest: digest) }
+                return
             }
             register(service, helperDigest: digest)
+        }
+
+        /// How many unregister → register → answer rounds a rebind gets
+        /// before it reports failure. The second round is the one that
+        /// binds the fresh item launchd's repair made after the first.
+        private static let rebindRounds = 3
+
+        /// How long after a `register()` launchd's repair of a failed spawn
+        /// has certainly run. A spawn that dies to a launch constraint is
+        /// pushed out by ten seconds ("Service only ran for 0 seconds"), and
+        /// that deferred spawn is where the item is invalidated. Two seconds
+        /// of margin.
+        private static let repairWindow: TimeInterval = 12
+
+        /// The SDK header says an updated executable must be re-registered,
+        /// "and it is recommended to also call unregister before
+        /// re-registering". What it does not say, read off the unified log
+        /// of a real ad-hoc update (`smd`, `backgroundtaskmanagementd`,
+        /// `launchd`, 2026-09-02):
+        ///
+        /// - `unregister()` does not remove the Background Task Management
+        ///   item. It sets it *disabled*, and the `register()` that follows
+        ///   logs `found existing item` and re-enables that same item — with
+        ///   the launch constraint it recorded for the *old* helper. So an
+        ///   unregister → register on its own can never mend a stale
+        ///   constraint, however long it waits in between.
+        /// - What does produce a fresh item is launchd. The re-enabled job
+        ///   spawns, AMFI kills the new helper, and launchd schedules a
+        ///   "repair LWCR update" spawn ten seconds out; that spawn has BTM
+        ///   `invalidateLaunchItem` the old item and make a new one. For an
+        ///   ad-hoc helper the repair then fails in place ("executable
+        ///   doesn't have a Team ID", `Unable to update LWCR with smd: 22`)
+        ///   and the job is left inactive with the unresolved relative
+        ///   program — but an unregister → register *after* that point binds
+        ///   the fresh item to the helper on disk, and it runs.
+        /// - A second round fired *before* the repair cancels the throttled
+        ///   spawn ("canceling throttled spawn") and re-enables the stale
+        ///   item once more, forever. So a failed round is followed by a
+        ///   wait past `repairWindow` before the next one.
+        /// - The unregister's completion fires after the kill; the status is
+        ///   polled until it stops reading registered; the register is
+        ///   retried through BTM's settling window, in which it is refused.
+        /// - `status` reads `.enabled` throughout, so it proves nothing. The
+        ///   one test that means anything is a round trip to the helper, and
+        ///   the digest is recorded only once that succeeds: a rebind that
+        ///   did not take is retried on the next launch, not remembered as
+        ///   done.
+        @available(macCatalyst 16.0, *)
+        private func rebind(_ service: SMAppService, helperDigest digest: String?) async {
+            defer { rebindTask = nil }
+            var registeredAt: Date?
+            for round in 1 ... Self.rebindRounds {
+                if let registeredAt {
+                    let remaining = Self.repairWindow - Date().timeIntervalSince(registeredAt)
+                    if remaining > 0 {
+                        AppLog.info(.app, "launch agent: waiting \(Int(remaining.rounded(.up))) s for launchd's repair of the item")
+                        try? await Task.sleep(nanoseconds: UInt64(remaining * 1_000_000_000))
+                    }
+                }
+                AppLog.info(.app, "launch agent: rebinding the helper, round \(round), status \(service.status.rawValue)")
+                do {
+                    try await service.unregister()
+                } catch {
+                    // A `.notFound` item — what `launchctl bootout` leaves —
+                    // has nothing to unregister; the register still goes on.
+                    AppLog.info(.app, "launch agent: unregister: \(error.localizedDescription)")
+                }
+                await Self.awaitUnregistered(service)
+                registeredAt = Date()
+                guard await Self.registerThroughSettling(service) else {
+                    AppLog.warning(.app, "launch agent: register refused after unregister")
+                    continue
+                }
+                if service.status == .requiresApproval {
+                    // Nothing can answer until a person allows it; the item
+                    // is this helper's, so the record is right.
+                    Self.registeredHelperDigest = digest
+                    status = .needsApproval
+                    return
+                }
+                if await Self.helperAnswers() {
+                    Self.registeredHelperDigest = digest
+                    status = .enabled
+                    AppLog.info(.app, "launch agent: helper answered after rebind")
+                    return
+                }
+                AppLog.warning(.app, "launch agent: helper did not answer after rebind, status \(service.status.rawValue)")
+            }
+            status = .failed(Self.registrationFailure)
+        }
+
+        /// Waits for BTM to stop reporting the item, up to five seconds.
+        @available(macCatalyst 16.0, *)
+        private static func awaitUnregistered(_ service: SMAppService) async {
+            for _ in 0 ..< 20 {
+                if service.status == .notRegistered || service.status == .notFound { return }
+                try? await Task.sleep(nanoseconds: 250_000_000)
+            }
+        }
+
+        /// Registers, retrying through the settling window in which BTM
+        /// refuses it (500 ms × 12, comfortably past what has been seen).
+        /// True once the item is registered — approval pending counts.
+        @available(macCatalyst 16.0, *)
+        private static func registerThroughSettling(_ service: SMAppService) async -> Bool {
+            for _ in 0 ..< 12 {
+                do {
+                    try service.register()
+                    return true
+                } catch {
+                    if service.status == .enabled || service.status == .requiresApproval { return true }
+                    AppLog.info(.app, "launch agent: register: \(error.localizedDescription)")
+                }
+                try? await Task.sleep(nanoseconds: 500_000_000)
+            }
+            return false
+        }
+
+        /// Whether the registered helper actually runs: a `hello` and a
+        /// `listSessions` over a connection of their own. The connection
+        /// demand-launches the job, so a helper AMFI kills on spawn answers
+        /// with an error, and an item launchd dropped with none at all.
+        private static func helperAnswers() async -> Bool {
+            await withCheckedContinuation { continuation in
+                XPCDaemonTransport.listSessions(timeout: 6) { rows in
+                    continuation.resume(returning: rows != nil)
+                }
+            }
+        }
+
+        private static var registrationFailure: String {
+            String(
+                localized: "Unable to turn on Terminal Helper. Try again.",
+                comment: "Mac agent error when registering the LaunchAgent fails"
+            )
         }
 
         /// Opens System Settings on Login Items, for the approval step.
@@ -296,35 +441,36 @@ final class MacLaunchAgent: ObservableObject {
             return FileManager.default.isReadableFile(atPath: plist.path) && helperDigest != nil
         }
 
-        /// The digest of the helper the last successful `register()` was for.
-        /// Absent on installs older than this check, which reads as "unknown"
-        /// and re-registers once — the state an update from such a version
-        /// leaves behind is exactly the one this exists to repair.
+        /// The digest of the helper whose registration was last seen to hold
+        /// — recorded by a plain `register()`, and by a rebind only once the
+        /// helper answered. Absent on installs older than this check, which
+        /// reads as "unknown" and rebinds once — the state an update from
+        /// such a version leaves behind is exactly the one this exists to
+        /// repair.
         private static let registeredHelperDigestKey = "MacLaunchAgent.registeredHelperDigest"
         private static var registeredHelperDigest: String? {
             get { UserDefaults.standard.string(forKey: registeredHelperDigestKey) }
             set { UserDefaults.standard.set(newValue, forKey: registeredHelperDigestKey) }
         }
 
+        /// The plain register: a first launch, or the helper turned back on.
+        /// No old item stands in the way here, so the digest is recorded as
+        /// soon as the item exists.
         @available(macCatalyst 16.0, *)
         private func register(_ service: SMAppService, helperDigest: String?) {
             do {
                 try service.register()
-                Self.registeredHelperDigest = helperDigest
             } catch {
                 // A registration that fails because approval is pending is not
                 // an error worth showing; the status re-read below tells the
                 // truth either way.
                 if service.status != .requiresApproval, service.status != .enabled {
-                    status = .failed(
-                        String(
-                            localized: "Unable to turn on Terminal Helper. Try again.",
-                            comment: "Mac agent error when registering the LaunchAgent fails"
-                        )
-                    )
+                    AppLog.warning(.app, "launch agent: register: \(error.localizedDescription)")
+                    status = .failed(Self.registrationFailure)
                     return
                 }
             }
+            Self.registeredHelperDigest = helperDigest
             switch service.status {
             case .enabled: status = .enabled
             default: status = .needsApproval

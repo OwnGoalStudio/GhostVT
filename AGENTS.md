@@ -451,23 +451,48 @@ Gotchas that bit us:
   seconds ("Could not find and/or execute program") until something
   discards the item; a relaunch changes nothing. `SMAppService.status`
   reads `.enabled` throughout. `MacLaunchAgent` therefore fingerprints the
-  bundled helper (SHA-256, recorded on each successful `register()`) and
-  does `unregister()` + `register()` whenever the helper in the bundle is
-  not the one it registered — a missing record counts, so an update from a
-  build without the check repairs itself once. Do not replace this with a
-  plain re-register, and do not key it on the version: a locally cut zip
-  can carry the same version as the one it replaces. The repair only holds
-  when the *old helper is no longer running* at the unregister: a bundle
-  swapped under a live `ighostvtd` (the app killed, not quit, so no
-  `shutdown` went out) kept BTM's pin and the new helper died all the same.
-  Quit the app before replacing the bundle; after the fact, `launchctl
-  bootout gui/$UID/wiki.qaq.ighostvtd`, delete the
-  `MacLaunchAgent.registeredHelperDigest` default, and relaunch. The stale
-  item can appear even when everything was done right — helper re-signed
-  by the *same* team, app quit and agent booted out before the swap
-  (seen 2026-08-31 installing 0.6.2) — so `mac-update-from-github.sh`
-  performs exactly that repair itself when the helper is not running and
-  the job reports EX_CONFIG after the install. The whole
+  bundled helper (SHA-256) and *rebinds* whenever the helper in the bundle
+  is not the one whose registration last held — a missing record counts,
+  so an update from a build without the check repairs itself once. Do not
+  replace this with a plain re-register, and do not key it on the version:
+  a locally cut zip can carry the same version as the one it replaces. The
+  rebind (`MacLaunchAgent.rebind`, status `.rebinding`, "Updating Terminal
+  Helper…" pill) is what the SDK header prescribes for a changed executable
+  — unregister, then register — done the way the unified log says it has
+  to be (`smd`, `backgroundtaskmanagementd`, `launchd`, read on
+  2026-09-02 with an ad-hoc build over a Team-signed one). **`unregister()`
+  does not remove the BTM item; it disables it**, and the `register()`
+  after it logs `found existing item` and re-enables that same item with
+  the constraint recorded for the *old* helper — so unregister → register
+  alone can never mend a stale pin, and the old `try? unregister();
+  register()` re-armed the same dead item on every launch. The fresh item
+  comes from launchd: the re-enabled job spawns, AMFI kills the helper,
+  launchd schedules a "repair LWCR update" spawn ten seconds out, and
+  *that* spawn has BTM `invalidateLaunchItem` and create a new item. For
+  an ad-hoc helper the repair itself then fails (`Unable to update LWCR
+  with smd: 22`, "executable doesn't have a Team ID") and the job is left
+  with the unresolved `Contents/MacOS/ighostvtd` — but an unregister →
+  register *after* that point binds the new item to the helper on disk
+  and it runs. So the rebind's rounds are: await the async `unregister`
+  (its completion fires after the kill), poll `status` until BTM stops
+  reporting the item, `register()` retried through BTM's settling window,
+  then *ask the helper* (`XPCDaemonTransport.listSessions` over a one-shot
+  connection, which demand-launches the job — the only test that means
+  anything, since `status` says `.enabled` for a stale item too); no
+  answer means **wait until twelve seconds after that register** and go
+  again, three rounds, then `.failed` with Turn On Helper, which is the
+  same rebind by hand. A round fired earlier "cancel[s] the throttled
+  spawn" and re-enables the stale item once more — the first version of
+  this did exactly that, three times in eighteen seconds, and never
+  recovered. The digest is recorded only when the helper answered, so a
+  rebind that did not take is retried at the next launch, never remembered
+  as done. `refresh()` is a no-op while a rebind runs, so a scene
+  activation cannot flip the status to the stale item's `.enabled` and
+  start tabs connecting mid-sequence. After the fact, `launchctl bootout
+  gui/$UID/wiki.qaq.ighostvtd`, delete the
+  `MacLaunchAgent.registeredHelperDigest` default, and relaunch still
+  works; `mac-update-from-github.sh` only waits for the helper now and
+  must not bootout or relaunch inside the rebind's window. The whole
   class disappears with a Team ID: BTM keys a Developer ID signature's
   constraint on the team, not the cdhash, so
   `Scripts/mac-update-from-github.sh` re-signs the downloaded bundle with a
