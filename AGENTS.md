@@ -31,7 +31,12 @@ which launchd never sized — so a session's buffers cannot jetsam the daemon.
   the operation code, so the protocol grows without it changing; it counts
   output in flight per peer (`xpc_connection_send_barrier`) and stops reading
   the socket — stalling the io side's PTYs — rather than queue without bound,
-  and cuts a peer that will not drain (the app reconnects and replays). Keep
+  and cuts a peer that will not drain (the app reconnects and replays). The
+  other direction is bounded the same way: when the io socket's write
+  backlog passes 1 MiB the proxy `xpc_connection_suspend`s every peer (a
+  peer arriving mid-pause is suspended at registration) and resumes them,
+  balanced, once it drains below 256 KiB — a paste into a program that is
+  not reading stalls the pasters, not the proxy's memory. Keep
   Foundation out of it: `DaemonFileLog` uses `strftime`, not `DateFormatter`,
   for exactly this reason.
 - Depends on the **released**
@@ -195,6 +200,17 @@ guard on that one request. Its plist's `KeepAlive` is `{SuccessfulExit =
 false}` for exactly this: a crash restarts, the asked-for exit stands, and
 `MachServices` demand-launches it the next time the app connects. The device
 LaunchDaemon keeps `KeepAlive = true` and is never asked.
+
+The open request has two shapes and two keys. `cmd` is an argv run
+verbatim — an absolute, executable path plus arguments, up to
+`maximumCommandArgumentCount`, refused (`invalidRequest`) rather than
+trimmed when longer — with the base environment (TERM, PATH, HOME, LC_CTYPE,
+`SHELL` = the passwd shell) and no shell integration; this is what the
+CLI's `new` and the Shortcuts send, and a one-word `cmd` is *that program*,
+not a shell choice (`python3 -il` is not a session). `shell` is a bare path
+naming the login shell to run interactively, with integration injected —
+what the app sends for its Settings choice. Neither key is the default
+shell.
 
 A new tab opens where the current one is, and the directory never crosses
 the wire: `TabManager.newTab` names the active tab's daemon session
