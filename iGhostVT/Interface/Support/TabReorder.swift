@@ -24,6 +24,9 @@ enum TabReorder {
     /// conforms to nothing is what `TerminalDropDelegate` refuses.
     static let itemType = UTType(exportedAs: "wiki.qaq.ighostvt.tab")
 
+    /// Main-actor because `UIDevice.current` is; every reader is a view
+    /// modifier, which already runs there.
+    @MainActor
     static var isSupported: Bool {
         #if targetEnvironment(macCatalyst)
             return true
@@ -35,29 +38,41 @@ enum TabReorder {
     /// The token a drag carries. Reordering reads the tab from
     /// `DraggedTab` instead — `dropEntered` is synchronous and an item
     /// provider only loads asynchronously — so the payload is an id for
-    /// form's sake, and the drag's identity is what it registers as. The
-    /// `suggestedName` is the one field a drop delegate can read
-    /// synchronously, so it names the tab too: `DraggedTab` is per window
-    /// and keeps a cancelled drag's tab, and a drag from another window of
-    /// the app passes `validateDrop` all the same — the name is what tells
-    /// the slot whether the pointer is carrying the tab it holds.
+    /// form's sake, and the drag's identity is what it registers as: the
+    /// item type, and a second type naming the tab (`identityType`).
+    /// `DraggedTab` is per window and keeps a cancelled drag's tab, and a
+    /// drag from another window of the app passes `validateDrop` all the
+    /// same, so a slot has to tell whether the pointer is carrying the tab
+    /// it holds — and the registered types are the one thing a drop
+    /// delegate can read synchronously that reaches it on every platform.
+    /// On the Mac a drag crosses the AppKit pasteboard even within the
+    /// process, and what comes out the other side is a new provider with
+    /// the pasteboard's types and nothing else: `suggestedName` was tried
+    /// for this and arrived nil, so no slot ever moved.
     static func itemProvider(for tab: TerminalTab) -> NSItemProvider {
         let provider = NSItemProvider()
         let payload = Data(tab.id.uuidString.utf8)
-        provider.registerDataRepresentation(
-            forTypeIdentifier: itemType.identifier,
-            visibility: .ownProcess
-        ) { completion in
-            completion(payload, nil)
-            return nil
+        for type in [itemType.identifier, identityType(for: tab)] {
+            provider.registerDataRepresentation(forTypeIdentifier: type, visibility: .ownProcess) { completion in
+                completion(payload, nil)
+                return nil
+            }
         }
-        provider.suggestedName = tab.id.uuidString
         return provider
     }
 
     /// Whether the drag under the pointer is the one that lifted `tab`.
     static func drag(_ info: DropInfo, carries tab: TerminalTab) -> Bool {
-        info.itemProviders(for: [itemType]).first?.suggestedName == tab.id.uuidString
+        info.itemProviders(for: [itemType]).contains { provider in
+            provider.registeredTypeIdentifiers.contains(identityType(for: tab))
+        }
+    }
+
+    /// The type identifier that names one tab's drag: the item type with
+    /// the tab's id appended. Undeclared, like the item type itself — a
+    /// pasteboard carries any string as a type.
+    private static func identityType(for tab: TerminalTab) -> String {
+        "\(itemType.identifier).\(tab.id.uuidString)"
     }
 }
 
