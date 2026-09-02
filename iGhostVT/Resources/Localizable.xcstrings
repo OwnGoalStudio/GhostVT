@@ -10681,72 +10681,72 @@
         }
       }
     },
-    "No log entries." : {
+    "No log entries. Refresh to check again." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keine Protokolleinträge."
+            "value" : "Keine Protokolleinträge. Aktualisiere, um erneut nachzusehen."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No log entries."
+            "value" : "No log entries. Refresh to check again."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay entradas de registro."
+            "value" : "No hay entradas de registro. Actualiza para comprobarlo de nuevo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucune entrée de journal."
+            "value" : "Aucune entrée de journal. Actualisez pour vérifier à nouveau."
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nessuna voce di log."
+            "value" : "Nessuna voce di log. Aggiorna per controllare di nuovo."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "ログはありません。"
+            "value" : "ログはありません。更新してもう一度確認してください。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "로그 항목이 없습니다."
+            "value" : "로그 항목이 없습니다. 새로 고침하여 다시 확인하세요."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Nenhuma entrada de registro."
+            "value" : "Nenhuma entrada de registro. Atualize para verificar novamente."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Записей в журнале нет."
+            "value" : "Записей в журнале нет. Обновите, чтобы проверить снова."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "没有日志条目。"
+            "value" : "没有日志条目。请刷新后再次查看。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "沒有日誌項目。"
+            "value" : "沒有日誌項目。請重新整理後再次查看。"
           }
         }
       }
@@ -11030,6 +11030,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未連線"
+          }
+        }
+      }
+    },
+    "Not in Applications" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht in „Programme“"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not in Applications"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No está en Aplicaciones"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas dans Applications"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non in Applicazioni"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「アプリケーション」にありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "응용 프로그램에 없음"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fora de Aplicativos"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Не в «Программах»"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不在“应用程序”中"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不在「應用程式」中"
           }
         }
       }
@@ -16430,7 +16500,7 @@
         }
       }
     },
-    "Starting shell…" : {
+    "Starting Shell…" : {
       "extractionState" : "manual",
       "localizations" : {
         "de" : {
@@ -16442,7 +16512,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Starting shell…"
+            "value" : "Starting Shell…"
           }
         },
         "es" : {
@@ -19684,6 +19754,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "顯示或隱藏側邊欄"
+          }
+        }
+      }
+    },
+    "Too many arguments. Use at most %lld." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu viele Argumente. Verwende höchstens %lld."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Too many arguments. Use at most %lld."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demasiados argumentos. Usa como máximo %lld."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trop d’arguments. Utilisez-en au plus %lld."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Troppi argomenti. Usane al massimo %lld."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "引数が多すぎます。%lld 個以内にしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "인수가 너무 많습니다. 최대 %lld개까지 사용하세요."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Argumentos demais. Use no máximo %lld."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Слишком много аргументов. Используйте не более %lld."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "参数过多。最多 %lld 个。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "參數過多。最多 %lld 個。"
           }
         }
       }

@@ -35,7 +35,7 @@ enum Command {
 
 func parseSessionID(_ text: String?, _ what: String) throws -> UInt64 {
     guard let text, let id = UInt64(text), id > 0 else {
-        throw CLIError.usage("\(what) takes a session id; run `ighostvt-cli list` to see them")
+        throw CLIError.usage("The \(what) command needs a session id. Run `ighostvt-cli list` to see them.")
     }
     return id
 }
@@ -45,13 +45,13 @@ func parse(_ arguments: [String]) throws -> Command {
     let rest = Array(arguments.dropFirst())
     switch verb {
     case "list", "ls":
-        guard rest.isEmpty else { throw CLIError.usage("list takes no arguments") }
+        guard rest.isEmpty else { throw CLIError.usage("The list command takes no arguments.") }
         return .list
     case "capture":
         let id = try parseSessionID(rest.first, "capture")
         let flags = Array(rest.dropFirst())
         guard flags.allSatisfy({ $0 == "--full" }) else {
-            throw CLIError.usage("capture takes a session id and an optional --full")
+            throw CLIError.usage("The capture command takes a session id and an optional --full.")
         }
         return .capture(sessionID: id, full: flags.contains("--full"))
     case "send":
@@ -59,12 +59,12 @@ func parse(_ arguments: [String]) throws -> Command {
         var input: [UInt8] = []
         var remaining = Array(rest.dropFirst())
         guard !remaining.isEmpty else {
-            throw CLIError.usage("send takes text <string> or key <name>")
+            throw CLIError.usage("The send command takes text <string> or key <name>.")
         }
         while !remaining.isEmpty {
             let kind = remaining.removeFirst()
             guard let value = remaining.first else {
-                throw CLIError.usage("\(kind) needs a value; send takes text <string> or key <name>")
+                throw CLIError.usage("Missing a value. The send command takes text <string> or key <name>.")
             }
             remaining.removeFirst()
             switch kind {
@@ -76,7 +76,7 @@ func parse(_ arguments: [String]) throws -> Command {
                 }
                 input.append(contentsOf: bytes)
             default:
-                throw CLIError.usage("send takes text <string> or key <name>, not \(kind)")
+                throw CLIError.usage("The send command takes text <string> or key <name>, not \(kind).")
             }
         }
         return .send(sessionID: id, input: input)
@@ -86,7 +86,7 @@ func parse(_ arguments: [String]) throws -> Command {
         // Refused whole, never sent shortened: a trimmed argv is a
         // different command, run without a word of complaint.
         guard command.count <= iGhostVTProtocol.maximumCommandArgumentCount else {
-            throw CLIError.usage("new takes at most \(iGhostVTProtocol.maximumCommandArgumentCount) command arguments")
+            throw CLIError.usage("The new command takes at most \(iGhostVTProtocol.maximumCommandArgumentCount) arguments.")
         }
         return .new(command: command)
     case "kill":

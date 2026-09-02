@@ -169,7 +169,7 @@ struct SessionStatusOverlay: View {
             // its rc files. Without this the pane is an empty terminal
             // that looks exactly like a broken one.
             if store.isAwaitingFirstOutput {
-                pill("Starting shell…")
+                pill("Starting Shell…")
             }
         }
     }

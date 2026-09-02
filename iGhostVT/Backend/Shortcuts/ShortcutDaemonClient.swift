@@ -222,7 +222,7 @@ final class ShortcutDaemonClient: @unchecked Sendable {
     func openSession(command: [String], inheritDirectoryFrom: UInt64?) async throws -> UInt64 {
         guard command.count <= iGhostVTProtocol.maximumCommandArgumentCount else {
             throw ShortcutError.refused(
-                "The program has too many arguments; at most \(iGhostVTProtocol.maximumCommandArgumentCount) are allowed."
+                String(localized: "Too many arguments. Use at most \(iGhostVTProtocol.maximumCommandArgumentCount).")
             )
         }
         return try await request(.openSession, fill: { message in

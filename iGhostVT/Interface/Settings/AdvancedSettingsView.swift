@@ -119,7 +119,7 @@ struct AdvancedSettingsView: View {
         case .rebinding:
             String(localized: "Updating")
         case .needsRelocation:
-            String(localized: "Move to Applications")
+            String(localized: "Not in Applications")
         case .notRegistered:
             String(localized: "Off")
         case .brokenInstallation:

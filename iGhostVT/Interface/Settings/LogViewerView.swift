@@ -98,7 +98,7 @@ struct LogViewerView: View {
                         .font(DS.Font.body)
                         .foregroundColor(.secondary)
                 } else {
-                    Text("No log entries.")
+                    Text("No log entries. Refresh to check again.")
                         .font(DS.Font.body)
                         .foregroundColor(.secondary)
                 }
