@@ -71,5 +71,16 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array/>
+			<key>UTTypeDescription</key>
+			<string>iGhostVT tab</string>
+			<key>UTTypeIdentifier</key>
+			<string>wiki.qaq.ighostvt.tab</string>
+		</dict>
+	</array>
 </dict>
 </plist>

@@ -21,7 +21,10 @@ import UniformTypeIdentifiers
 enum TabReorder {
     /// The drag item's own type, visible to this process alone. A tab
     /// dragged over the terminal must not paste as text, and a type that
-    /// conforms to nothing is what `TerminalDropDelegate` refuses.
+    /// conforms to nothing is what `TerminalDropDelegate` refuses. It is
+    /// declared in the app's Info.plist (`UTExportedTypeDeclarations`, with
+    /// an empty conformance list) because `exportedAs` promises exactly
+    /// that, and logs a complaint at first use when the bundle does not.
     static let itemType = UTType(exportedAs: "wiki.qaq.ighostvt.tab")
 
     /// Main-actor because `UIDevice.current` is; every reader is a view
@@ -69,8 +72,10 @@ enum TabReorder {
     }
 
     /// The type identifier that names one tab's drag: the item type with
-    /// the tab's id appended. Undeclared, like the item type itself — a
-    /// pasteboard carries any string as a type.
+    /// the tab's id appended. Undeclared, so it reads back as a dynamic
+    /// type — a pasteboard carries any string as a type, and
+    /// `TerminalDropDelegate` skips dynamic ones — and registered by its
+    /// string, which asks the bundle for nothing.
     private static func identityType(for tab: TerminalTab) -> String {
         "\(itemType.identifier).\(tab.id.uuidString)"
     }
