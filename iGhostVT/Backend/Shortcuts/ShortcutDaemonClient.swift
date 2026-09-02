@@ -83,14 +83,26 @@ struct ShortcutSnapshot: Sendable {
     var rows: UInt16
     var replay: Data
 
+    /// The grid the replay is rendered on: the session's, or the nominal
+    /// one when the daemon reported none.
+    var gridColumns: UInt16 { columns == 0 ? iGhostVTProtocol.defaultColumns : columns }
+    var gridRows: UInt16 { rows == 0 ? iGhostVTProtocol.defaultRows : rows }
+
     /// The replay rendered the way `ighostvt-cli capture` renders it.
     func text(fullTranscript: Bool) -> String {
-        let renderer = ScreenRenderer(
-            columns: columns == 0 ? iGhostVTProtocol.defaultColumns : columns,
-            rows: rows == 0 ? iGhostVTProtocol.defaultRows : rows
-        )
+        fullTranscript ? transcript().text : render().screenText()
+    }
+
+    /// The transcript with the shell's prompt marks, for cutting one
+    /// command's output out of it.
+    func transcript() -> ScreenRenderer.Transcript {
+        render().transcript()
+    }
+
+    private func render() -> ScreenRenderer {
+        let renderer = ScreenRenderer(columns: gridColumns, rows: gridRows)
         renderer.feed(replay)
-        return fullTranscript ? renderer.transcriptText() : renderer.screenText()
+        return renderer
     }
 }
 
@@ -104,7 +116,9 @@ struct ShortcutSnapshot: Sendable {
 /// are the whole vocabulary beside list, open, and close), so an intent
 /// never takes a session from the tab showing it. The one exception is a
 /// session this client *opened*: the daemon attaches a new session to the
-/// peer that opened it, so a tab can attach only after `cancel()`.
+/// peer that opened it, and a tab can take it only once that attachment is
+/// gone — `detachSession` releases it for certain; `cancel()` does too, but
+/// asynchronously, and nothing orders it before the tab's attach.
 final class ShortcutDaemonClient: @unchecked Sendable {
     private static let requestTimeout: TimeInterval = 6
 
@@ -118,8 +132,11 @@ final class ShortcutDaemonClient: @unchecked Sendable {
         _ body: @Sendable (ShortcutDaemonClient) async throws -> T
     ) async throws -> T {
         let client = ShortcutDaemonClient()
-        try await client.connect()
+        // Before `connect()`: a hello that is refused or times out throws
+        // with the connection already activated, and an activated XPC
+        // connection has to be cancelled or it lives on.
         defer { client.cancel() }
+        try await client.connect()
         return try await body(client)
     }
 
@@ -178,8 +195,11 @@ final class ShortcutDaemonClient: @unchecked Sendable {
 
     /// Writes `bytes` to the session's PTY as if typed, in order. Chunked
     /// like every other input path; nothing an intent parameter carries
-    /// comes near one chunk.
+    /// comes near one chunk. Nothing to write is a no-op, as in the app's
+    /// transport — the daemon reads a zero-length `data` as absent and
+    /// refuses the request.
     func inject(_ bytes: [UInt8], into id: UInt64) async throws {
+        guard !bytes.isEmpty else { return }
         var offset = 0
         repeat {
             let end = min(bytes.count, offset + iGhostVTProtocol.inputChunkByteCount)
@@ -196,14 +216,21 @@ final class ShortcutDaemonClient: @unchecked Sendable {
 
     /// Opens a session at a nominal grid — whoever attaches sets the real
     /// one. `command` empty means the daemon's default shell. The session
-    /// stays attached to this client until `cancel()`.
+    /// stays attached to this client until `detachSession` or `cancel()`.
+    /// A command with more arguments than the daemon takes is refused
+    /// whole, never sent shortened: a trimmed argv is a different command.
     func openSession(command: [String], inheritDirectoryFrom: UInt64?) async throws -> UInt64 {
-        try await request(.openSession, fill: { message in
+        guard command.count <= iGhostVTProtocol.maximumCommandArgumentCount else {
+            throw ShortcutError.refused(
+                "The program has too many arguments; at most \(iGhostVTProtocol.maximumCommandArgumentCount) are allowed."
+            )
+        }
+        return try await request(.openSession, fill: { message in
             xpc_dictionary_set_uint64(message, iGhostVTWireKey.columns, UInt64(iGhostVTProtocol.defaultColumns))
             xpc_dictionary_set_uint64(message, iGhostVTWireKey.rows, UInt64(iGhostVTProtocol.defaultRows))
             if !command.isEmpty {
                 let arguments = xpc_array_create(nil, 0)
-                for argument in command.prefix(iGhostVTProtocol.maximumCommandArgumentCount) {
+                for argument in command {
                     xpc_array_append_value(arguments, xpc_string_create(argument))
                 }
                 xpc_dictionary_set_value(message, iGhostVTWireKey.command, arguments)
@@ -214,6 +241,16 @@ final class ShortcutDaemonClient: @unchecked Sendable {
         }, decode: { reply in
             xpc_dictionary_get_uint64(reply, iGhostVTWireKey.sessionID)
         })
+    }
+
+    /// Releases this client's attachment to a session it opened. The daemon
+    /// detaches before it replies, so once this returns a tab's attach
+    /// cannot find the session busy — which `cancel()` alone, asynchronous
+    /// and unordered against that attach, does not promise.
+    func detachSession(_ id: UInt64) async throws {
+        try await request(.detachSession) {
+            xpc_dictionary_set_uint64($0, iGhostVTWireKey.sessionID, id)
+        }
     }
 
     /// Kills the session and waits for the daemon to report it gone: the

@@ -83,6 +83,11 @@ func parse(_ arguments: [String]) throws -> Command {
     case "new":
         var command = rest
         if command.first == "--" { command.removeFirst() }
+        // Refused whole, never sent shortened: a trimmed argv is a
+        // different command, run without a word of complaint.
+        guard command.count <= iGhostVTProtocol.maximumCommandArgumentCount else {
+            throw CLIError.usage("new takes at most \(iGhostVTProtocol.maximumCommandArgumentCount) command arguments")
+        }
         return .new(command: command)
     case "kill":
         return .kill(sessionID: try parseSessionID(rest.first, "kill"))

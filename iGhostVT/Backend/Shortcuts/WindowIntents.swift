@@ -66,10 +66,14 @@ struct OpenNewTabIntent: AppIntent {
         let inherit = ShortcutBridge.activeSessionID()
         let session = try await ShortcutDaemonClient.withConnection { client in
             let id = try await client.openSession(command: arguments, inheritDirectoryFrom: inherit)
+            // The daemon attached the new session to this connection. Let
+            // go of it explicitly and wait for the reply: the connection's
+            // cancel is asynchronous, and a tab whose attach reached the
+            // daemon first would be told the session is busy and open a
+            // plain shell instead.
+            try await client.detachSession(id)
             return try await client.session(id)
         }
-        // The connection above is closed now, so the session is unattached
-        // and the tab can take it.
         try await ShortcutBridge.showSession(session.id)
         return .result(value: SessionEntity(session))
     }

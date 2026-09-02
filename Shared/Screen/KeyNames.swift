@@ -58,7 +58,8 @@ enum KeyNames {
             case "\\": return [0x1C]
             case "]": return [0x1D]
             case "^": return [0x1E]
-            case "_", "?": return [0x1F]
+            case "_": return [0x1F]
+            case "?": return [0x7F]
             default: return nil
             }
         }

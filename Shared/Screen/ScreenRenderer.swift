@@ -10,7 +10,9 @@ import Foundation
 /// This is the subset that decides what text lands where: the cursor, the
 /// scroll region, erasing, insert and delete, the alternate screen, and
 /// character width. Colour and every other attribute is parsed and dropped,
-/// because the output is text.
+/// because the output is text — except the shell-integration prompt marks
+/// (OSC 133), whose *rows* are kept so a caller can cut one command's
+/// output out of the transcript without guessing at the prompt's shape.
 ///
 /// Known limits, all deliberate: no reflow (the buffer is replayed at the
 /// session's current size, so output written when the window was another
@@ -41,6 +43,13 @@ final class ScreenRenderer {
     /// this puts a spurious blank line after every full-width line.
     private var wrapPending = false
     private var saved: (screen: [[Character]], cursor: (row: Int, column: Int), usesCursor: Bool)?
+    /// The rows of the last `133;C` (output start) and `133;A` (prompt
+    /// start) marks, counted from the first line the buffer ever held, so
+    /// they survive the scrollback being trimmed; `scrolledOffRows` is how
+    /// many of those lines are gone.
+    private var outputStartRow: Int?
+    private var promptStartRow: Int?
+    private var scrolledOffRows = 0
 
     private enum State {
         case ground
@@ -58,6 +67,8 @@ final class ScreenRenderer {
 
     private var state: State = .ground
     private var controlSequence: [UInt8] = []
+    /// The head of the OSC being read — enough to recognise `133;X`.
+    private var operatingSystemCommand: [UInt8] = []
     private var pendingScalar: [UInt8] = []
     private var pendingScalarLength = 0
 
@@ -106,8 +117,12 @@ final class ScreenRenderer {
         case .operatingSystemCommand:
             if byte == 0x07 {
                 state = .ground
+                applyOperatingSystemCommand()
             } else if byte == 0x1B {
                 state = .stringEscape
+                applyOperatingSystemCommand()
+            } else if operatingSystemCommand.count < 8 {
+                operatingSystemCommand.append(byte)
             }
         case .ignoredString:
             if byte == 0x1B { state = .stringEscape }
@@ -184,7 +199,10 @@ final class ScreenRenderer {
         pendingScalar = []
         pendingScalarLength = 0
         let text = String(decoding: bytes, as: UTF8.self)
-        guard let scalar = text.unicodeScalars.first, scalar != "\u{FFFD}" else { return }
+        // A lossy decode — an overlong form, a surrogate, a value past
+        // U+10FFFF — substitutes U+FFFD and does not round-trip; a genuine
+        // U+FFFD in the output does, and is a character like any other.
+        guard text.utf8.elementsEqual(bytes), let scalar = text.unicodeScalars.first else { return }
         let width = Self.width(of: scalar)
         if width == 0 {
             attachCombining(Character(scalar))
@@ -200,6 +218,7 @@ final class ScreenRenderer {
             controlSequence = []
             state = .csi
         case 0x5D: // ]
+            operatingSystemCommand = []
             state = .operatingSystemCommand
         case 0x50, 0x58, 0x5E, 0x5F: // P X ^ _
             state = .ignoredString
@@ -230,7 +249,11 @@ final class ScreenRenderer {
     private func applyControlSequence(_ sequence: [UInt8], final: UInt8) {
         var isPrivate = false
         var body = sequence
-        if let first = body.first, first == 0x3F { // ?
+        if let first = body.first, first >= 0x3C, first <= 0x3F { // < = > ?
+            // A private sequence never means what the public final would:
+            // `CSI = 5 u` is the kitty keyboard protocol fish and neovim
+            // speak, not a cursor restore. Only `?` has finals handled here.
+            guard first == 0x3F else { return }
             isPrivate = true
             body.removeFirst()
         }
@@ -347,6 +370,24 @@ final class ScreenRenderer {
         }
     }
 
+    /// Every OSC is dropped — titles, the cwd, hyperlinks — but the prompt
+    /// marks say where the shell's output began (`133;C`) and where its
+    /// prompt begins (`133;A`), and those rows are what lets a command's
+    /// output be cut out of the transcript whatever the prompt looks like.
+    /// A mark on the alternate screen is not on the transcript and is not
+    /// kept.
+    private func applyOperatingSystemCommand() {
+        let body = operatingSystemCommand
+        operatingSystemCommand = []
+        guard saved == nil, body.count >= 5, body.starts(with: [0x31, 0x33, 0x33, 0x3B]) else { return } // 133;
+        let row = scrolledOffRows + scrollback.count + cursorRow
+        switch body[4] {
+        case 0x41: promptStartRow = row // A
+        case 0x43: outputStartRow = row // C
+        default: return
+        }
+    }
+
     /// The alternate screen is what full-screen programs draw on; leaving it
     /// puts back the shell's screen underneath, which is why a `capture`
     /// after `vim` quits shows the prompt again and not vim's last frame.
@@ -405,6 +446,16 @@ final class ScreenRenderer {
             guard autoWrap else { return }
             cursorColumn = 0
             index()
+        }
+        // Writing over half of a wide glyph blanks its other half, as a
+        // terminal does: the spacer at the cursor means its glyph sits to
+        // the left, a spacer just past the new cells means a glyph starts
+        // in the last of them.
+        if screen[cursorRow][cursorColumn] == Self.spacer, cursorColumn > 0 {
+            screen[cursorRow][cursorColumn - 1] = " "
+        }
+        if cursorColumn + width < columns, screen[cursorRow][cursorColumn + width] == Self.spacer {
+            screen[cursorRow][cursorColumn + width] = " "
         }
         screen[cursorRow][cursorColumn] = character
         if width == 2, cursorColumn + 1 < columns {
@@ -467,7 +518,9 @@ final class ScreenRenderer {
         if saved == nil, scrollTop == 0 {
             scrollback.append(contentsOf: screen[0 ..< lines])
             if scrollback.count > Self.scrollbackLineLimit {
-                scrollback.removeFirst(scrollback.count - Self.scrollbackLineLimit)
+                let excess = scrollback.count - Self.scrollbackLineLimit
+                scrollback.removeFirst(excess)
+                scrolledOffRows += excess
             }
         }
         screen.removeSubrange(scrollTop ..< scrollTop + lines)
@@ -490,7 +543,10 @@ final class ScreenRenderer {
             for row in 0 ..< cursorRow { screen[row] = blankRow() }
         case 2, 3:
             for row in 0 ..< rows { screen[row] = blankRow() }
-            if mode == 3 { scrollback.removeAll() }
+            if mode == 3 {
+                scrolledOffRows += scrollback.count
+                scrollback.removeAll()
+            }
         default:
             return
         }
@@ -561,10 +617,45 @@ final class ScreenRenderer {
     /// Everything the buffer covers: the lines that scrolled off the top,
     /// then the screen.
     func transcriptText() -> String {
-        Self.text(of: scrollback + screen)
+        transcript().text
+    }
+
+    /// The transcript as lines, with the rows the shell marked.
+    struct Transcript {
+        var lines: [String]
+        /// Index in `lines` of the last output-start mark (OSC `133;C`);
+        /// `nil` when none was seen or its row has left the buffer. Past
+        /// the last line when the mark sits on a trailing blank row.
+        var outputStart: Int?
+        /// Index in `lines` of the last prompt-start mark (OSC `133;A`),
+        /// likewise.
+        var promptStart: Int?
+
+        var text: String { lines.joined(separator: "\n") }
+    }
+
+    func transcript() -> Transcript {
+        let (lines, leading) = Self.lines(of: scrollback + screen)
+        func index(_ row: Int?) -> Int? {
+            guard let row else { return nil }
+            let index = row - scrolledOffRows - leading
+            return index < 0 ? nil : min(index, lines.count)
+        }
+        return Transcript(
+            lines: lines,
+            outputStart: index(outputStartRow),
+            promptStart: index(promptStartRow)
+        )
     }
 
     private static func text(of grid: [[Character]]) -> String {
+        lines(of: grid).lines.joined(separator: "\n")
+    }
+
+    /// The grid's rows as text, trailing padding removed and the blank rows
+    /// at either end dropped — with how many were dropped at the top, since
+    /// that shifts every row index.
+    private static func lines(of grid: [[Character]]) -> (lines: [String], leadingBlank: Int) {
         var lines = grid.map { row -> String in
             var line = String(row.filter { $0 != spacer })
             while let last = line.last, last == " " || last == "\t" {
@@ -575,10 +666,12 @@ final class ScreenRenderer {
         while let last = lines.last, last.isEmpty {
             lines.removeLast()
         }
+        var leadingBlank = 0
         while let first = lines.first, first.isEmpty {
             lines.removeFirst()
+            leadingBlank += 1
         }
-        return lines.joined(separator: "\n")
+        return (lines, leadingBlank)
     }
 
     // MARK: - Character width

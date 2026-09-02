@@ -322,6 +322,15 @@ struct RunCommandIntent: AppIntent {
         return .result(value: output)
     }
 
+    /// How long a changed transcript must have been seen before the
+    /// daemon's `foregroundIsShell` is believed. The flag is a cached poll
+    /// (`PTYSession.processNamePollInterval`, 500 ms) that nothing on the
+    /// input path refreshes, and a shell echoes the line *before* it forks
+    /// the command — so the first reads after the echo can still say
+    /// "shell" of a command that has since started. One poll period past
+    /// the change, the flag has been recomputed since the fork.
+    private static let foregroundSettleInterval: TimeInterval = 0.6
+
     /// Types the command and polls until the shell is back at its prompt
     /// with something new on the screen.
     private static func run(
@@ -336,11 +345,24 @@ struct RunCommandIntent: AppIntent {
         // even echoed the command would see the old prompt and call that
         // done.
         try await Task.sleep(nanoseconds: 150_000_000)
+        var changeSeen: Date?
         while true {
             let row = try await client.session(sessionID)
-            let after = try await client.snapshot(sessionID).text(fullTranscript: true)
-            if row.foregroundIsShell == true, after != before {
-                return CommandOutput.newLines(before: before, after: after)
+            let snapshot = try await client.snapshot(sessionID)
+            let after = snapshot.transcript()
+            if after.text != before {
+                let seen = changeSeen ?? Date()
+                changeSeen = seen
+                // A fast command is complete by the time the flag is
+                // trusted; its result is still what is returned.
+                if row.foregroundIsShell == true, Date().timeIntervalSince(seen) >= Self.foregroundSettleInterval {
+                    return CommandOutput.newLines(
+                        before: before,
+                        after: after,
+                        command: command,
+                        columns: Int(snapshot.gridColumns)
+                    )
+                }
             }
             if Date() >= deadline {
                 throw ShortcutError.commandTimedOut
@@ -350,29 +372,71 @@ struct RunCommandIntent: AppIntent {
     }
 }
 
-/// What a command printed, as the difference between two transcripts. The
-/// replay buffer is trimmed from the front, so the earlier transcript is
-/// not always a prefix of the later one; when it is not, the whole later
-/// screen is the honest answer.
+/// What a command printed. A shell with shell integration marks where its
+/// output begins (OSC `133;C`) and where its prompt starts (`133;A`), and
+/// the lines between the last of each are the answer whatever shape the
+/// prompt has. Without marks (a session running `sh`) it is the difference
+/// between two transcripts: the lines above the old prompt are found again
+/// in the new transcript and what follows them, less the echoed command's
+/// rows and the new prompt, is the output. When even that fails, the whole
+/// later transcript is the honest answer.
 enum CommandOutput {
-    static func newLines(before: String, after: String) -> String {
-        let old = trimmed(before.split(separator: "\n", omittingEmptySubsequences: false))
-        let new = trimmed(after.split(separator: "\n", omittingEmptySubsequences: false))
+    static func newLines(before: String, after: ScreenRenderer.Transcript, command: String, columns: Int) -> String {
+        let new = Array(trimmed(after.lines))
+        if after.outputStart != nil || after.promptStart != nil {
+            let start = min(after.outputStart ?? 0, new.count)
+            // No prompt after the output yet: everything from the output
+            // on. A prompt mark that has left the buffer, likewise. On the
+            // output's own row, the command printed nothing.
+            let end = after.promptStart.map { $0 >= start ? min($0, new.count) : new.count } ?? new.count
+            return trimmed(new[start ..< end]).joined(separator: "\n")
+        }
+        let old = Array(trimmed(before.split(separator: "\n", omittingEmptySubsequences: false).map(String.init)))
         // The last line of `before` is the prompt the command was typed on;
         // it is rewritten with the command, so everything above it is what
-        // both transcripts share.
+        // both transcripts share. It is found in `new` by its last few
+        // lines, not as a prefix: the replay buffer is trimmed from the
+        // front, so once a session has filled it the head of every later
+        // transcript is a different fragment.
         let shared = old.dropLast()
-        guard new.count > shared.count, new.prefix(shared.count).elementsEqual(shared) else {
-            return new.joined(separator: "\n")
+        let anchor = shared.suffix(3)
+        var start = 0
+        if !anchor.isEmpty {
+            guard let match = position(of: anchor, in: new, atOrBefore: shared.count - anchor.count) else {
+                return new.joined(separator: "\n")
+            }
+            start = match + anchor.count
         }
-        // Past the shared part: the echoed command line, the output, and
-        // the new prompt. The first and the last are not output.
-        var lines = new.dropFirst(shared.count)
-        lines = lines.dropFirst()
+        // Past the shared part: the echoed command line — as many rows as
+        // the prompt's cells plus the command's take on the grid, since the
+        // transcript has no reflow — then the output, then the new prompt.
+        let echoCells = cells(of: old.last ?? "") + cells(of: command)
+        let echoRows = max(1, (echoCells + columns - 1) / max(1, columns))
+        var lines = new.dropFirst(start).dropFirst(echoRows)
         if !lines.isEmpty {
             lines = lines.dropLast()
         }
         return trimmed(lines).joined(separator: "\n")
+    }
+
+    /// Where `anchor` occurs in `lines`, starting at or before `position`
+    /// and as near it as possible. Trimming moves the shared lines toward
+    /// the front, never away from it, and searching downward from where
+    /// `old` had them finds those lines rather than an identical run the
+    /// command itself printed below.
+    private static func position(of anchor: ArraySlice<String>, in lines: [String], atOrBefore position: Int) -> Int? {
+        var index = min(position, lines.count - anchor.count)
+        while index >= 0 {
+            if lines[index ..< index + anchor.count].elementsEqual(anchor) {
+                return index
+            }
+            index -= 1
+        }
+        return nil
+    }
+
+    private static func cells(of text: String) -> Int {
+        text.unicodeScalars.reduce(0) { $0 + ScreenRenderer.width(of: $1) }
     }
 
     private static func trimmed<C: BidirectionalCollection>(_ lines: C) -> ArraySlice<C.Element>

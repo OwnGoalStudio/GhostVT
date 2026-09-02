@@ -77,6 +77,15 @@ check(render("hello\(escape)[1;3H\(escape)[2@") == "he  llo", "insert-character 
 check(render("hello\(escape)[1;3H\(escape)[2X") == "he  o", "erase-character blanks in place")
 check(render("hello\(escape)[s\(escape)[2;1Hthere\(escape)[u!") == "hello!\nthere", "the cursor saves and restores")
 check(render("hello\(escape)7\(escape)[2;1Hthere\(escape)8!") == "hello!\nthere", "and so does the ESC 7 / ESC 8 pair")
+check(
+    render("line1\r\nline2\r\n\(escape)[=5u> prompt") == "line1\nline2\n> prompt",
+    "the kitty keyboard protocol's CSI = 5 u is not a cursor restore"
+)
+check(
+    render("line1\r\nline2\r\n\(escape)[>1u\(escape)[<u\(escape)[=0ux") == "line1\nline2\nx",
+    "nor are the > and < forms"
+)
+check(render("hello\(escape)[?25lx") == "hellox", "a ? private mode with an unhandled final is ignored")
 
 print("screen renderer: lines and regions")
 check(
@@ -126,6 +135,9 @@ check(render("\(escape)[1;2") == "", "a sequence cut off at the end leaves nothi
 check(render("ab\(escape)[3\r\ncd") == "ab\ncd", "a control byte inside a sequence abandons it and acts")
 check(renderBytes([0x63, 0x61, 0x66, 0xC3]) == "caf", "a UTF-8 scalar cut short at the end is dropped")
 check(renderBytes([0xA9, 0x63, 0x61, 0x66]) == "caf", "a stream starting on a continuation byte resyncs")
+check(renderBytes([0x61, 0xEF, 0xBF, 0xBD, 0x62]) == "a\u{FFFD}b", "a genuine U+FFFD is placed and takes its cell")
+check(renderBytes([0x61, 0xC0, 0x80, 0x62]) == "ab", "an overlong encoding is dropped")
+check(renderBytes([0x61, 0xED, 0xA0, 0x80, 0x62]) == "ab", "and so is an encoded surrogate")
 
 print("screen renderer: character width")
 check(render("\u{4F60}\u{597D}", columns: 4, rows: 2) == "\u{4F60}\u{597D}", "CJK text renders")
@@ -134,6 +146,54 @@ check(
     "a wide character occupies two columns"
 )
 check(render("e\u{301}") == "e\u{301}", "a combining mark joins the character before it")
+check(
+    render("\u{4E2D}\(escape)[2Gx", columns: 4, rows: 2) == " x",
+    "writing over a wide glyph's right half blanks its left"
+)
+check(
+    render("\u{4E2D}\(escape)[1Gx", columns: 4, rows: 2) == "x",
+    "writing over its left half blanks its right"
+)
+check(
+    render("\u{4E2D}\u{6587}\(escape)[2G\u{56FD}", columns: 4, rows: 2) == " \u{56FD}",
+    "a wide glyph written across two others blanks both orphaned halves"
+)
+check(
+    render("ab\u{4E2D}\(escape)[3Gxy", columns: 4, rows: 2) == "abxy",
+    "overwriting both halves in turn leaves no gap"
+)
+
+print("screen renderer: prompt marks")
+func marks(_ stream: String, columns: UInt16 = 20, rows: UInt16 = 5) -> ScreenRenderer.Transcript {
+    let renderer = ScreenRenderer(columns: columns, rows: rows)
+    renderer.feed(stream)
+    return renderer.transcript()
+}
+let plain = marks("$ ls\r\na b c\r\n$")
+check(plain.outputStart == nil && plain.promptStart == nil, "a session without shell integration has no marks")
+let marked = marks("\(escape)]133;A\u{7}$ \(escape)]133;B\u{7}ls\r\n\(escape)]133;C\u{7}a b c\r\nd\r\n\(escape)]133;D;0\u{7}\(escape)]133;A\u{7}$ ")
+check(marked.lines == ["$ ls", "a b c", "d", "$"], "the marks leave only the text")
+check(marked.outputStart == 1, "the output-start mark is the row the output begins on")
+check(marked.promptStart == 3, "the prompt-start mark is the row of the last prompt")
+let scrolled = marks(
+    "one\r\ntwo\r\n\(escape)]133;C\u{7}three\r\nfour\r\nfive\r\n\(escape)]133;A\u{7}$ ",
+    columns: 20, rows: 3
+)
+check(scrolled.lines == ["one", "two", "three", "four", "five", "$"], "a scrolled transcript keeps every line")
+check(scrolled.outputStart == 2 && scrolled.promptStart == 5, "and its marks are transcript indices, not screen rows")
+let leading = marks("\r\n\r\n\(escape)]133;C\u{7}out\r\n\(escape)]133;A\u{7}$ ")
+check(leading.lines == ["out", "$"] && leading.outputStart == 0 && leading.promptStart == 1, "blank rows trimmed off the top shift the indices with them")
+let pending = marks("$ sleep\r\n\(escape)]133;C\u{7}")
+check(pending.lines == ["$ sleep"] && pending.outputStart == 1, "a mark on a still-blank row points past the last line")
+let alternate = marks("\(escape)]133;A\u{7}$ \(escape)[?1049h\(escape)]133;C\u{7}x\(escape)[?1049l")
+check(alternate.promptStart == 0 && alternate.outputStart == nil, "a mark on the alternate screen is not on the transcript")
+let erased = marks("\(escape)]133;C\u{7}gone\r\nx\r\n\(escape)[3J\(escape)[H\(escape)]133;A\u{7}$ ", columns: 20, rows: 2)
+check(erased.lines == ["$"] && erased.outputStart == nil && erased.promptStart == 0, "a mark whose row was erased with the scrollback is gone")
+
+print("key names")
+check(KeyNames.bytes(for: "C-?") == [0x7F], "C-? is DEL")
+check(KeyNames.bytes(for: "C-_") == [0x1F], "C-_ is unit separator")
+check(KeyNames.bytes(for: "M-C-?") == [0x1B, 0x7F], "M-C-? is Meta-DEL")
 
 if failures.isEmpty {
     print("cli renderer: all checks passed")

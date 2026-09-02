@@ -27,9 +27,13 @@ enum Commands {
         for row in table {
             var line = ""
             for (column, field) in row.enumerated() {
-                line += column == row.count - 1
-                    ? field
-                    : field.padding(toLength: widths[column] + 2, withPad: " ", startingAt: 0)
+                line += field
+                // Padded by hand: `padding(toLength:)` measures — and cuts —
+                // in UTF-16 units, and a process name outside the BMP would
+                // lose its last character to it.
+                if column < row.count - 1 {
+                    line += String(repeating: " ", count: max(0, widths[column] + 2 - field.count))
+                }
             }
             print(line.trimmedTrailingSpaces())
         }
@@ -66,6 +70,9 @@ enum Commands {
         // One message per chunk, in order — the daemon buffers what the
         // program has not read yet. Nothing a user types on a command line
         // comes near one chunk; a `text` argument read from a file might.
+        // Nothing to send (`text ""`) is a no-op, as in the app: the daemon
+        // reads a zero-length `data` as absent and refuses the request.
+        guard !input.isEmpty else { return 0 }
         var offset = 0
         repeat {
             let end = min(input.count, offset + iGhostVTProtocol.inputChunkByteCount)
@@ -94,7 +101,7 @@ enum Commands {
             xpc_dictionary_set_uint64(message, iGhostVTWireKey.rows, UInt64(iGhostVTProtocol.defaultRows))
             guard !command.isEmpty else { return }
             let arguments = xpc_array_create(nil, 0)
-            for argument in command.prefix(iGhostVTProtocol.maximumCommandArgumentCount) {
+            for argument in command {
                 xpc_array_append_value(arguments, xpc_string_create(argument))
             }
             xpc_dictionary_set_value(message, iGhostVTWireKey.command, arguments)
