@@ -3,6 +3,7 @@
 //  iGhostVT
 //
 
+import GameController
 import GhosttyTerminal
 import UIKit
 
@@ -71,13 +72,83 @@ final class LockableTerminalView: TerminalView {
     #if !os(visionOS)
     override var inputAccessoryView: UIView? {
         // The bar belongs to the keyboard; leaving it floating over a
-        // keyboard that is not there reads as a half-open keyboard.
-        isSoftwareKeyboardLocked ? nil : super.inputAccessoryView
+        // keyboard that is not there reads as a half-open keyboard. With a
+        // hardware keyboard connected the user may not want it at all.
+        if isSoftwareKeyboardLocked { return nil }
+        if KeyboardBarStore.hidesWithHardwareKeyboard, GCKeyboard.coalesced != nil { return nil }
+        return super.inputAccessoryView
     }
     #endif
 
+    /// A keyboard connecting or going away, or the setting flipping,
+    /// changes the answer above; UIKit only asks again on reload.
+    private var observesHardwareKeyboard = false
+
+    private func observeHardwareKeyboard() {
+        observesHardwareKeyboard = true
+        let center = NotificationCenter.default
+        for name in [.GCKeyboardDidConnect, .GCKeyboardDidDisconnect, UserDefaults.didChangeNotification] {
+            center.addObserver(self, selector: #selector(hardwareKeyboardChanged), name: name, object: nil)
+        }
+    }
+
+    /// Nonisolated: `UserDefaults.didChangeNotification` is posted on
+    /// whatever thread wrote the default (PencilKit's `registerDefaults`
+    /// from a background queue was the first), and a main-actor method
+    /// called there traps before it can hop.
+    @objc nonisolated private func hardwareKeyboardChanged() {
+        Task { @MainActor [weak self] in
+            guard let self, isFirstResponder else { return }
+            reloadInputViews()
+        }
+    }
+
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         isInteractionLocked ? nil : super.hitTest(point, with: event)
+    }
+
+    // MARK: - The app's shortcuts
+
+    /// Presses taken by the app; their release must not reach the surface
+    /// either, or ghostty sees a key go up that never came down.
+    private var interceptedPresses: Set<UIPress> = []
+
+    /// The app's chords (`KeyShortcuts`) go to the responder chain — the
+    /// window answers, through `canPerformAction`, so a chord a menu item
+    /// would grey out does nothing rather than reaching the shell. Every
+    /// other press is the library's: the terminal's `pressesBegan` never
+    /// calls `super`, so UIKit sees each key as handled and the menu's key
+    /// commands never fire while a terminal has focus — which is why the
+    /// claim has to be made here, before the library. Escape is never in
+    /// the list: it always reaches the terminal.
+    override func pressesBegan(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        var remaining = presses
+        for press in presses {
+            guard let key = press.key, let shortcut = KeyShortcuts.shortcut(for: key) else { continue }
+            remaining.remove(press)
+            interceptedPresses.insert(press)
+            let sender = UICommand(title: "", action: shortcut.action, propertyList: shortcut.propertyList)
+            UIApplication.shared.sendAction(shortcut.action, to: nil, from: sender, for: nil)
+        }
+        if !remaining.isEmpty {
+            super.pressesBegan(remaining, with: event)
+        }
+    }
+
+    override func pressesEnded(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        let remaining = presses.subtracting(interceptedPresses)
+        interceptedPresses.subtract(presses)
+        if !remaining.isEmpty {
+            super.pressesEnded(remaining, with: event)
+        }
+    }
+
+    override func pressesCancelled(_ presses: Set<UIPress>, with event: UIPressesEvent?) {
+        let remaining = presses.subtracting(interceptedPresses)
+        interceptedPresses.subtract(presses)
+        if !remaining.isEmpty {
+            super.pressesCancelled(remaining, with: event)
+        }
     }
 
     #if !targetEnvironment(macCatalyst)
@@ -106,6 +177,9 @@ final class LockableTerminalView: TerminalView {
     /// there is a window it is there to remove.
     override func didMoveToWindow() {
         super.didMoveToWindow()
+        if !observesHardwareKeyboard {
+            observeHardwareKeyboard()
+        }
         guard window != nil, dropDelegate == nil else { return }
         for interaction in interactions where interaction is UIDropInteraction {
             removeInteraction(interaction)

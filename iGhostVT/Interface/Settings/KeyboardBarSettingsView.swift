@@ -16,6 +16,7 @@ import SwiftUI
     struct KeyboardBarSettingsView: View {
         @ObservedObject private var store = KeyboardBarStore.shared
         @State private var showsCustomKeySheet = false
+        @AppStorage(KeyboardBarStore.hidesWithHardwareKeyboardKey) private var hidesWithHardwareKeyboard = false
 
         var body: some View {
             List {
@@ -23,6 +24,8 @@ import SwiftUI
                 includedSection
                 moreKeysSection
                 resetSection
+                hardwareKeyboardSection
+                SettingsFormSpacer()
             }
             // Permanently in edit mode, the way the old Control Center editor
             // was: reorder handles always visible, no Edit button to find first.
@@ -138,6 +141,15 @@ import SwiftUI
                     withAnimation { store.reset() }
                 }
                 .disabled(store.isDefaultArrangement)
+            }
+        }
+
+        private var hardwareKeyboardSection: some View {
+            Section {
+                Toggle("Hide with Hardware Keyboard", isOn: $hidesWithHardwareKeyboard)
+            } footer: {
+                Text("The bar stays down while a hardware keyboard is connected.")
+                    .font(DS.Font.detail)
             }
         }
 

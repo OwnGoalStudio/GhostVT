@@ -33,6 +33,7 @@ struct AdvancedSettingsView: View {
             terminalHelperSection
             debugSection
             configurationSection
+            SettingsFormSpacer()
         }
         .navigationTitle("Advanced")
         .navigationBarTitleDisplayMode(.inline)

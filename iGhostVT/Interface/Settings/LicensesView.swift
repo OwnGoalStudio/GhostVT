@@ -60,6 +60,7 @@ struct LicensesView: View {
                     }
                 }
             }
+            SettingsFormSpacer()
         }
         .navigationTitle("Licenses")
         .navigationBarTitleDisplayMode(.inline)

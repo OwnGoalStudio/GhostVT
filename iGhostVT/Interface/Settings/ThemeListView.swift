@@ -29,23 +29,26 @@ struct ThemeListView: View {
     }
 
     var body: some View {
-        List(themes) { definition in
-            Button(action: { select(definition) }) {
-                HStack(spacing: DS.Padding.m) {
-                    swatch(for: definition)
-                    Text(definition.name)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                    Spacer(minLength: DS.Padding.s)
-                    paletteStrip(for: definition)
-                    // Every row keeps the checkmark's slot, so the strips
-                    // stay in one column whichever row is selected.
-                    Image(systemName: "checkmark")
-                        .foregroundColor(.accentColor)
-                        .opacity(definition.name == selectedName ? 1 : 0)
-                        .accessibilityHidden(definition.name != selectedName)
+        List {
+            ForEach(themes) { definition in
+                Button(action: { select(definition) }) {
+                    HStack(spacing: DS.Padding.m) {
+                        swatch(for: definition)
+                        Text(definition.name)
+                            .foregroundColor(.primary)
+                            .lineLimit(1)
+                        Spacer(minLength: DS.Padding.s)
+                        paletteStrip(for: definition)
+                        // Every row keeps the checkmark's slot, so the strips
+                        // stay in one column whichever row is selected.
+                        Image(systemName: "checkmark")
+                            .foregroundColor(.accentColor)
+                            .opacity(definition.name == selectedName ? 1 : 0)
+                            .accessibilityHidden(definition.name != selectedName)
+                    }
                 }
             }
+            SettingsFormSpacer()
         }
         .searchable(text: $searchText)
         .navigationTitle(slot == .light ? "Light Theme" : "Dark Theme")

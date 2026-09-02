@@ -25,7 +25,7 @@ import UIKit
     func clearScreen(_ sender: Any?)
     func showNextTab(_ sender: Any?)
     func showPreviousTab(_ sender: Any?)
-    /// `sender` is a `UIKeyCommand` whose `propertyList` is the tab index;
+    /// `sender` is a `UICommand` whose `propertyList` is the tab index;
     /// `AppMenus.lastTabIndex` means the last tab, whatever the count.
     func selectTab(_ sender: Any?)
     func toggleTabLock(_ sender: Any?)
@@ -41,6 +41,12 @@ import UIKit
 /// Safari's ⇧⌘L hidden. A hidden command still fires; it is only kept out of
 /// the menu and the overlay so each action reads with a single key. Close
 /// Tab has no ⌘⌫ alias: in a terminal that key deletes to the line start.
+///
+/// The titles and chords live in `KeyShortcuts`, the one list this menu,
+/// the terminal view's interception, and Settings ▸ Shortcuts all read. A
+/// command the user switched off is built as a plain `UICommand`: still
+/// in the menu, no key beside it, so the menu bar and the hold-⌘ overlay
+/// claim nothing the terminal now gets.
 ///
 /// Main-actor isolated, as `UIMenuBuilder` and every element it takes are;
 /// the one entry point is `buildMenu(with:)`, which already runs there.
@@ -71,34 +77,18 @@ enum AppMenus {
             identifier: UIMenu.Identifier("wiki.qaq.iGhostVT.file.new"),
             options: .displayInline,
             children: [
-                command(
-                    L("New Tab", "Menu item: opens a new terminal tab"),
-                    #selector(AppCommandResponder.newTab(_:)),
-                    "t", .command
-                ),
-                hidden(#selector(AppCommandResponder.newTab(_:)), "n", .command),
-                command(
-                    L("New Window", "Menu item: opens a new window"),
-                    #selector(AppCommandResponder.newWindow(_:)),
-                    "n", [.command, .shift]
-                ),
-            ]
+                command(#selector(AppCommandResponder.newTab(_:))),
+                hidden(#selector(AppCommandResponder.newTab(_:))),
+                command(#selector(AppCommandResponder.newWindow(_:))),
+            ].compactMap { $0 }
         )
         let closeGroup = UIMenu(
             title: "",
             identifier: UIMenu.Identifier("wiki.qaq.iGhostVT.file.close"),
             options: .displayInline,
             children: [
-                command(
-                    L("Close Tab", "Menu item: closes the active terminal tab"),
-                    #selector(AppCommandResponder.closeTab(_:)),
-                    "w", .command
-                ),
-                command(
-                    L("Close Window", "Menu item: closes the window"),
-                    #selector(AppCommandResponder.closeWindow(_:)),
-                    "w", [.command, .shift]
-                ),
+                command(#selector(AppCommandResponder.closeTab(_:))),
+                command(#selector(AppCommandResponder.closeWindow(_:))),
             ]
         )
         let exportGroup = UIMenu(
@@ -106,11 +96,7 @@ enum AppMenus {
             identifier: UIMenu.Identifier("wiki.qaq.iGhostVT.file.export"),
             options: .displayInline,
             children: [
-                command(
-                    L("Export Text…", "Menu item: shares the visible terminal text as a file"),
-                    #selector(AppCommandResponder.exportTabText(_:)),
-                    "s", [.command, .shift]
-                ),
+                command(#selector(AppCommandResponder.exportTabText(_:))),
             ]
         )
         builder.insertChild(newGroup, atStartOfMenu: .file)
@@ -127,13 +113,7 @@ enum AppMenus {
             identifier: UIMenu.Identifier("wiki.qaq.iGhostVT.settings"),
             options: .displayInline,
             children: [
-                // Keyed apart from the "Settings" title: two keys with the
-                // same words collide in the catalog's generated symbols.
-                command(
-                    L("Settings… (menu)", "Menu item: opens the app's settings; the English text is “Settings…”"),
-                    #selector(AppCommandResponder.showSettings(_:)),
-                    ",", .command
-                ),
+                command(#selector(AppCommandResponder.showSettings(_:))),
             ]
         )
         if builder.menu(for: .preferences) != nil {
@@ -159,52 +139,28 @@ enum AppMenus {
             options: .displayInline,
             children: [
                 // The title is rewritten by `validate(_:)` to say Show or Hide.
-                command(
-                    L("Show Sidebar", "Menu item: shows the tab sidebar"),
-                    #selector(AppCommandResponder.toggleTabSidebar(_:)),
-                    "s", [.command, .control]
-                ),
-                hidden(#selector(AppCommandResponder.toggleTabSidebar(_:)), "l", [.command, .shift]),
-                command(
-                    L("Show All Tabs", "Menu item: opens the tab overview"),
-                    #selector(AppCommandResponder.toggleTabSwitcher(_:)),
-                    "\\", [.command, .shift]
-                ),
-            ]
+                command(#selector(AppCommandResponder.toggleTabSidebar(_:))),
+                hidden(#selector(AppCommandResponder.toggleTabSidebar(_:))),
+                command(#selector(AppCommandResponder.toggleTabSwitcher(_:))),
+            ].compactMap { $0 }
         )
         let text = UIMenu(
             title: "",
             identifier: UIMenu.Identifier("wiki.qaq.iGhostVT.view.text"),
             options: .displayInline,
             children: [
-                command(
-                    L("Bigger", "Menu item: increases the terminal font size"),
-                    #selector(AppCommandResponder.increaseFontSize(_:)),
-                    "+", .command
-                ),
-                hidden(#selector(AppCommandResponder.increaseFontSize(_:)), "=", .command),
-                command(
-                    L("Smaller", "Menu item: decreases the terminal font size"),
-                    #selector(AppCommandResponder.decreaseFontSize(_:)),
-                    "-", .command
-                ),
-                command(
-                    L("Actual Size", "Menu item: resets the terminal font size"),
-                    #selector(AppCommandResponder.resetFontSize(_:)),
-                    "0", .command
-                ),
-            ]
+                command(#selector(AppCommandResponder.increaseFontSize(_:))),
+                hidden(#selector(AppCommandResponder.increaseFontSize(_:))),
+                command(#selector(AppCommandResponder.decreaseFontSize(_:))),
+                command(#selector(AppCommandResponder.resetFontSize(_:))),
+            ].compactMap { $0 }
         )
         let screen = UIMenu(
             title: "",
             identifier: UIMenu.Identifier("wiki.qaq.iGhostVT.view.screen"),
             options: .displayInline,
             children: [
-                command(
-                    L("Clear Screen", "Menu item: clears the terminal screen and scrollback"),
-                    #selector(AppCommandResponder.clearScreen(_:)),
-                    "k", .command
-                ),
+                command(#selector(AppCommandResponder.clearScreen(_:))),
             ]
         )
         builder.insertChild(chrome, atStartOfMenu: .view)
@@ -216,61 +172,32 @@ enum AppMenus {
 
     private static func installWindowMenu(into builder: UIMenuBuilder) {
         var gotoChildren: [UIMenuElement] = (1 ... 8).map { number in
-            command(
-                String.localizedStringWithFormat(
-                    L("Tab %d", "Menu item: switches to the tab at this position; %d is the position"),
-                    number
-                ),
-                #selector(AppCommandResponder.selectTab(_:)),
-                String(number), .command,
-                propertyList: number - 1
-            )
+            command(#selector(AppCommandResponder.selectTab(_:)), propertyList: number - 1)
         }
-        gotoChildren.append(command(
-            L("Last Tab", "Menu item: switches to the last tab"),
-            #selector(AppCommandResponder.selectTab(_:)),
-            "9", .command,
-            propertyList: lastTabIndex
-        ))
+        gotoChildren.append(command(#selector(AppCommandResponder.selectTab(_:)), propertyList: lastTabIndex))
         let navigation = UIMenu(
             title: "",
             identifier: UIMenu.Identifier("wiki.qaq.iGhostVT.window.tabs"),
             options: .displayInline,
             children: [
-                command(
-                    L("Show Previous Tab", "Menu item: activates the tab before the current one"),
-                    #selector(AppCommandResponder.showPreviousTab(_:)),
-                    "\t", [.control, .shift]
-                ),
-                hidden(#selector(AppCommandResponder.showPreviousTab(_:)), "[", [.command, .shift]),
-                command(
-                    L("Show Next Tab", "Menu item: activates the tab after the current one"),
-                    #selector(AppCommandResponder.showNextTab(_:)),
-                    "\t", .control
-                ),
-                hidden(#selector(AppCommandResponder.showNextTab(_:)), "]", [.command, .shift]),
+                command(#selector(AppCommandResponder.showPreviousTab(_:))),
+                hidden(#selector(AppCommandResponder.showPreviousTab(_:))),
+                command(#selector(AppCommandResponder.showNextTab(_:))),
+                hidden(#selector(AppCommandResponder.showNextTab(_:))),
                 UIMenu(
-                    title: L("Go to Tab", "Menu: submenu listing tab positions"),
+                    title: NSLocalizedString("Go to Tab", comment: "Menu: submenu listing tab positions"),
                     identifier: UIMenu.Identifier("wiki.qaq.iGhostVT.window.goto"),
                     children: gotoChildren
                 ),
-            ]
+            ].compactMap { $0 }
         )
         var lockChildren: [UIMenuElement] = [
-            command(
-                L("Lock Tab", "Menu item: toggles the tab's input lock"),
-                #selector(AppCommandResponder.toggleTabLock(_:)),
-                "l", [.command, .alternate]
-            ),
+            command(#selector(AppCommandResponder.toggleTabLock(_:))),
         ]
         // The keyboard lock is not offered on the Mac (`TabContextMenu`
         // has the reasoning); the menu item and its ⌥⌘K go with it.
         #if !targetEnvironment(macCatalyst)
-            lockChildren.append(command(
-                L("Lock Keyboard", "Menu item: toggles the tab's keyboard lock"),
-                #selector(AppCommandResponder.toggleKeyboardLock(_:)),
-                "k", [.command, .alternate]
-            ))
+            lockChildren.append(command(#selector(AppCommandResponder.toggleKeyboardLock(_:))))
         #endif
         let locks = UIMenu(
             title: "",
@@ -284,27 +211,24 @@ enum AppMenus {
 
     // MARK: - Helpers
 
-    private static func L(_ key: String, _ comment: String) -> String {
-        NSLocalizedString(key, comment: comment)
-    }
-
-    private static func command(
-        _ title: String,
-        _ action: Selector,
-        _ input: String,
-        _ modifiers: UIKeyModifierFlags,
-        propertyList: Int? = nil
-    ) -> UIKeyCommand {
-        UIKeyCommand(
-            title: title,
+    /// The listed item for an action: its key command while its switch is
+    /// on, a keyless `UICommand` while it is off.
+    private static func command(_ action: Selector, propertyList: Int? = nil) -> UICommand {
+        let shortcut = KeyShortcuts.shortcut(action, propertyList: propertyList)
+        guard shortcut.isEnabled else {
+            return UICommand(title: shortcut.title, action: action, propertyList: propertyList)
+        }
+        return UIKeyCommand(
+            title: shortcut.title,
             action: action,
-            input: input,
-            modifierFlags: modifiers,
+            input: shortcut.input,
+            modifierFlags: shortcut.modifiers,
             propertyList: propertyList
         )
     }
 
-    /// An alias key: fires the same action, never listed.
+    /// An alias key: fires the same action, never listed — and nothing at
+    /// all while its twin's switch is off.
     ///
     /// `UIMenuBuilder` rejects two commands with the same action unless a
     /// `propertyList` tells them apart — inserting the alias next to its
@@ -312,17 +236,15 @@ enum AppMenus {
     /// duplicates"). The value only has to differ from the twin's `nil`;
     /// `TerminalWindow` reads a `propertyList` as an `Int` tab index and
     /// ignores this string.
-    private static func hidden(
-        _ action: Selector,
-        _ input: String,
-        _ modifiers: UIKeyModifierFlags
-    ) -> UIKeyCommand {
-        UIKeyCommand(
+    private static func hidden(_ action: Selector) -> UIKeyCommand? {
+        let shortcut = KeyShortcuts.alias(action)
+        guard shortcut.isEnabled else { return nil }
+        return UIKeyCommand(
             title: "",
             action: action,
-            input: input,
-            modifierFlags: modifiers,
-            propertyList: "alias",
+            input: shortcut.input,
+            modifierFlags: shortcut.modifiers,
+            propertyList: shortcut.propertyList,
             attributes: .hidden
         )
     }

@@ -118,6 +118,15 @@ enum KeyboardBarKey: Hashable {
 final class KeyboardBarStore: ObservableObject {
     static let shared = KeyboardBarStore()
 
+    /// Settings ▸ Accessory Keys ▸ Hide with Hardware Keyboard: the bar
+    /// stays down while a hardware keyboard is connected
+    /// (`LockableTerminalView.inputAccessoryView`).
+    static let hidesWithHardwareKeyboardKey = "KeyboardBar.hidesWithHardwareKeyboard"
+
+    static var hidesWithHardwareKeyboard: Bool {
+        UserDefaults.standard.bool(forKey: hidesWithHardwareKeyboardKey)
+    }
+
     /// One row of the arrangement. The identity is per instance, not per key,
     /// so repeated dividers reorder independently.
     struct Entry: Identifiable, Equatable {

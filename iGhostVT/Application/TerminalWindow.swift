@@ -141,7 +141,7 @@ final class TerminalWindow: UIWindow, AppCommandResponder {
     }
 
     private static func tabIndex(of sender: Any?) -> Int? {
-        (sender as? UIKeyCommand)?.propertyList as? Int
+        (sender as? UICommand)?.propertyList as? Int
     }
 
     // MARK: - File

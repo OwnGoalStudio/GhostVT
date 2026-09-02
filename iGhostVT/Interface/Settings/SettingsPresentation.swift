@@ -11,8 +11,9 @@ extension View {
     /// system sheet. The Mac gets `SettingsPanelController`: a Catalyst
     /// sheet flashes the window on its way in and out (the presenter's view
     /// re-lays out under the form sheet's dim), so settings there uses the
-    /// alert's presentation instead — a centered glass card over a dimmed
-    /// pane, cross-dissolved, closed by Done, Escape, or a click outside.
+    /// alert's presentation instead — a centered card in the terminal's own
+    /// background colour over a dimmed pane, cross-dissolved, closed by
+    /// Done, Escape, or a click outside.
     func settingsPresentation(
         isPresented: Binding<Bool>,
         onDismiss: @escaping () -> Void = {}
@@ -84,8 +85,21 @@ extension View {
 
         override func viewDidLoad() {
             super.viewDidLoad()
+            Self.stripNavigationBarGlass
             install(SettingsPanel(motion: motion, onClose: { [weak self] in self?.close() }))
         }
+
+        /// Every navigation bar inside the panel — the page and whatever it
+        /// pushes — draws nothing: no bar material, no scroll-edge blur, so
+        /// the card stays the one flat colour top to bottom.
+        private static let stripNavigationBarGlass: Void = {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithTransparentBackground()
+            let bar = UINavigationBar.appearance(whenContainedInInstancesOf: [SettingsPanelController.self])
+            bar.standardAppearance = appearance
+            bar.compactAppearance = appearance
+            bar.scrollEdgeAppearance = appearance
+        }()
 
         override func viewDidAppear(_ animated: Bool) {
             super.viewDidAppear(animated)
@@ -148,34 +162,51 @@ extension View {
     }
 
     /// The dimmed pane with the settings card centered on it: a 555-point
-    /// square. The Form's own grouped background is hidden so the glass
-    /// shows through; its cells keep theirs.
+    /// square, scaled down as one piece when the window cannot hold it —
+    /// the layout stays the one it was designed at, only smaller. The
+    /// Form's own grouped background is hidden and the card is painted the
+    /// terminal's own background — glass over a busy terminal bled every
+    /// colour on screen into the page; its cells keep theirs.
     private struct SettingsPanel: View {
         @ObservedObject var motion: PanelMotion
         let onClose: () -> Void
+        @ObservedObject private var theme = AppTheme.shared
+        @Environment(\.colorScheme) private var colorScheme
 
         private let shape = RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous)
+        private let side: CGFloat = 555
 
         var body: some View {
-            ZStack {
-                Color.black.opacity(0.25)
-                    .ignoresSafeArea()
-                    .onTapGesture(perform: onClose)
+            GeometryReader { pane in
+                ZStack {
+                    Color.black.opacity(0.25)
+                        .ignoresSafeArea()
+                        .onTapGesture(perform: onClose)
 
-                SettingsSheet(onDone: onClose)
-                    .formBackgroundHidden()
-                    .frame(width: 555, height: 555)
-                    .cardGlass(in: shape)
-                    .scaleEffect(motion.isShown ? 1 : 0.95)
-                    .blur(radius: motion.isShown ? 0 : 12)
-                    .opacity(motion.isShown ? 1 : 0)
-                    .padding(DS.Padding.xl)
+                    SettingsSheet(onDone: onClose)
+                        .formBackgroundHidden()
+                        .frame(width: side, height: side)
+                        .background(theme.background(for: colorScheme))
+                        .clipShape(shape)
+                        .overlay(shape.strokeBorder(Color.primary.opacity(0.1), lineWidth: 1))
+                        .scaleEffect(fit(in: pane.size) * (motion.isShown ? 1 : 0.95))
+                        .blur(radius: motion.isShown ? 0 : 12)
+                        .opacity(motion.isShown ? 1 : 0)
+                }
+                .frame(width: pane.size.width, height: pane.size.height)
             }
             .onAppear {
                 withAnimation(DS.Motion.smooth) {
                     motion.isShown = true
                 }
             }
+        }
+
+        /// 1 while the pane holds the card with its margin; the fraction
+        /// that makes it fit otherwise.
+        private func fit(in pane: CGSize) -> CGFloat {
+            let room = min(pane.width, pane.height) - 2 * DS.Padding.xl
+            return min(1, max(room, 1) / side)
         }
     }
 

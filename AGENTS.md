@@ -303,6 +303,29 @@ keyboard.
 
 Every keyboard shortcut is a `UIKeyCommand` in the main menu — `AppMenus`,
 installed from `AppDelegate.buildMenu` — never a SwiftUI `keyboardShortcut`.
+The chords themselves are `KeyShortcuts.all`, one list read by three
+places: the menu, `LockableTerminalView`, and Settings ▸ Keyboard ▸
+Shortcuts. The terminal view is where the app's keys are actually won:
+libghostty's `pressesBegan` swallows every hardware key without calling
+`super`, so with a terminal focused UIKit (iOS 15+: responder chain first,
+key commands only for an unhandled press) never fires the menu's commands
+— ⌘1, ⌘T, ⌘W all went to the shell. `LockableTerminalView.pressesBegan`
+matches a press against the enabled shortcuts before the library sees it
+and sends the action down the responder chain (`sendAction(to: nil)`, so
+`TerminalWindow.canPerformAction` still greys it), swallowing the release
+too. Escape is never in the list; the library claims it under every
+non-⌘ modifier and it always reaches the terminal. The settings page has
+one switch per shortcut (`Shortcut.<id>` in UserDefaults; a hidden alias
+follows its listed twin), sectioned by `ShortcutGroup`: off, the
+interceptor lets the key through to the program and `AppMenus` builds
+the item as a keyless `UICommand` (the alias is dropped), rebuilt on
+every flip; nothing is rebound. The menu titles live in the catalog too,
+so a new command is one `listed(...)` line there and one `command(...)`
+in the menu. ghostty's own bindings on the same chords (`goto_tab`,
+`new_tab`, `close_surface`…) are actions the library does not surface, so
+a key that is off is a dead key, not a ghostty feature — except font
+size and clear screen, which ghostty performs itself either way (the app
+fronts them so the size preference follows).
 One list feeds both the Mac's menu bar and the iPad's hold-⌘ overlay, and it
 is where the system's own File ▸ New (⌘N, a window) and Close (⌘W, the
 window) are replaced: in a tabbed terminal both keys belong to the tab.

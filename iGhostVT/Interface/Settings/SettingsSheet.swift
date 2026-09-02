@@ -8,7 +8,7 @@ import SwiftUI
 /// The settings page: one section per file under `Sections/`, stacked in a
 /// Form. The sheet itself only owns navigation and the Done control.
 ///
-/// Presented through `settingsPresentation` — a sheet on iOS, the glass
+/// Presented through `settingsPresentation` — a sheet on iOS, the flat
 /// panel on the Mac. The panel is a UIKit presentation, so it hands in its
 /// own `onDone`; a sheet leaves it nil and Done is the environment's dismiss.
 struct SettingsSheet: View {
@@ -22,13 +22,7 @@ struct SettingsSheet: View {
                 TextSizeSettingsSection()
                 KeyboardSettingsSection()
                 AboutSettingsSection()
-                // Breathing room under the last section, drawn as nothing:
-                // a row in a Form gets a cell background and separator.
-                Color.clear
-                    .frame(height: 128)
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets())
+                SettingsFormSpacer()
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
