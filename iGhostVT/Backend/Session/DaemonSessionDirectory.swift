@@ -31,9 +31,11 @@ final class DaemonSessionDirectory {
     private init() {}
 
     /// The daemon sessions no peer is attached to, for the first window of a
-    /// cold launch to adopt. Exactly one caller per process gets them; every
+    /// cold launch to adopt. One caller holds the claim at a time; every
     /// later window starts fresh, mirroring the old ledger's claim semantics
-    /// without the ledger.
+    /// without the ledger — until the holder's tabs detach
+    /// (`releaseResumableClaim`), when its shells are unattached again and
+    /// the next window to ask adopts them.
     func claimResumable(completion: @escaping @MainActor @Sendable ([UInt64]) -> Void) {
         guard !hasClaimedResumable else {
             completion([])
@@ -47,6 +49,14 @@ final class DaemonSessionDirectory {
                 completion(rows.filter { !$0.isAttached }.map(\.id))
             }
         }
+    }
+
+    /// The window that held the claim detached its tabs. Without this the
+    /// shells it left in the daemon are unreachable from any tab until the
+    /// process dies: iOS disconnects a backgrounded scene and builds a new
+    /// one — with a new `TabManager` — on return, in the same process.
+    func releaseResumableClaim() {
+        hasClaimedResumable = false
     }
 
     /// The tab just told the daemon to kill this session: drop it from the

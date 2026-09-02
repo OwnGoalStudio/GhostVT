@@ -46,6 +46,23 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     /// Session to reattach to, if this transport is resuming a known one.
     private var resumeSessionID: UInt64?
 
+    /// An end the host asked for while the connection was still negotiating
+    /// — between `establish` and the open or attach reply. The request is
+    /// with the daemon by then and a cancel cannot recall it: the daemon
+    /// would spawn the shell (or attach the resumed one) under a peer that
+    /// is gone, and peer loss is a detach, never a kill, so the tab the user
+    /// closed lived on as an unattached session. The reply handler carries
+    /// the end out instead. A close outranks a detach. Confined to `queue`.
+    private enum DeferredEnd { case detach, close }
+    private var deferredEnd: DeferredEnd?
+    /// This transport, held by itself while an end is deferred: the owner
+    /// drops its reference the moment it asks (see the note above
+    /// `connect`), and the reply handlers hold `self` weakly so an abandoned
+    /// transport can still deinit — the deferred end has to outlive both
+    /// until the reply lands. Released by `dropConnection`, which every
+    /// ending passes through.
+    private var retainedForDeferredEnd: XPCDaemonTransport?
+
     /// Absolute path of the shell to run, or `nil` to let the daemon pick.
     /// The daemon validates it (absolute, existing, executable) and rejects
     /// anything else — the app cannot talk it into running arbitrary bytes.
@@ -199,6 +216,7 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
     /// Detach without killing: the shell keeps running in the daemon.
     func disconnect() {
         queue.async {
+            if self.deferEnd(.detach) { return }
             if let link = self.attachedLink() {
                 let message = Self.makeMessage(.detachSession, sessionID: link.sessionID)
                 xpc_connection_send_message(link.connection, message)
@@ -207,14 +225,58 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         }
     }
 
-    /// End the session for good — the daemon terminates the shell.
+    /// End the session for good — the daemon terminates the shell. Over
+    /// the link when there is one; when the connection is gone but the
+    /// session may not be (a failed connect, a daemon restart mid-reconnect),
+    /// over a connection of its own, so the kill reaches the daemon either
+    /// way. The decision is made here, on `queue`, behind the `establish`
+    /// that a `connect()` queued just before — the caller cannot tell the
+    /// two apart from outside.
     func closeSession() {
         queue.async {
-            guard let link = self.attachedLink() else { return }
-            let message = Self.makeMessage(.closeSession, sessionID: link.sessionID)
-            xpc_connection_send_message(link.connection, message)
-            self.lock.locked { self.resumeSessionID = nil }
+            if self.deferEnd(.close) { return }
+            let sessionID = self.lock.locked { () -> UInt64? in
+                defer { self.resumeSessionID = nil }
+                return self.resumeSessionID
+            }
+            if let link = self.attachedLink() {
+                let message = Self.makeMessage(.closeSession, sessionID: link.sessionID)
+                xpc_connection_send_message(link.connection, message)
+            } else if let sessionID {
+                Self.killSession(sessionID)
+            }
         }
+    }
+
+    /// Runs on `queue`. Records `end` for the reply handler while the open
+    /// or attach is still out, and says whether it did. The tab's close asks
+    /// for a close and then a detach; the close stands.
+    private func deferEnd(_ end: DeferredEnd) -> Bool {
+        let isNegotiating = lock.locked { connection != nil && sessionID == nil }
+        guard isNegotiating else { return false }
+        if deferredEnd != .close {
+            deferredEnd = end
+        }
+        retainedForDeferredEnd = self
+        return true
+    }
+
+    /// Runs on `queue`, from the reply that ends the negotiation. Carries
+    /// out the end asked for meanwhile — on `sessionID`, the session the
+    /// reply named, or on nothing when it named none — and drops the
+    /// connection. False when no end was deferred and the reply is to be
+    /// used.
+    private func settleDeferredEnd(sessionID: UInt64?) -> Bool {
+        guard let end = deferredEnd else { return false }
+        if let sessionID, let connection = lock.locked({ self.connection }) {
+            let operation: iGhostVTOperation = end == .close ? .closeSession : .detachSession
+            xpc_connection_send_message(connection, Self.makeMessage(operation, sessionID: sessionID))
+        }
+        if end == .close {
+            lock.locked { resumeSessionID = nil }
+        }
+        teardown(reason: nil)
+        return true
     }
 
     /// One daemon-held session, as `listSessions` reports it. The daemon is
@@ -292,8 +354,9 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         return rows
     }
 
-    /// Kill a session over a connection of its own, for when the tab's
-    /// transport has none — a failed connect, a detach, a daemon restart.
+    /// Kill a session over a connection of its own, for when there is no
+    /// link to carry it — a tab that never connected, or a transport whose
+    /// connection is gone (a failed connect, a detach, a daemon restart).
     /// Without this the kill silently goes nowhere, the shell outlives its
     /// tab forever, and each one counts against the daemon's session
     /// ceiling. `closeSession` is valid on any session the daemon knows,
@@ -438,6 +501,7 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             xpc_connection_send_message_with_reply(connection, message, queue) { [weak self] reply in
                 guard let self else { return }
                 if replyCode(reply) == .success {
+                    if settleDeferredEnd(sessionID: resumeSessionID) { return }
                     lock.locked { self.sessionID = resumeSessionID }
                     // The attach carried no size; the reply says which one
                     // the session kept, so the host's re-send on
@@ -460,12 +524,13 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                         emit(.received(payload))
                     }
                 } else {
-                    // The session is gone: scrub the dead ID everywhere
-                    // before falling back to a fresh shell. Leaving it in
-                    // the ledger means the Live Activity forever counts a
-                    // detached shell the daemon no longer has.
+                    // The session is gone, or another peer holds it: forget
+                    // the id and open a fresh shell in this same tab. Not
+                    // reported as an exit — the host closes a tab on one,
+                    // which would discard the shell about to be opened; it
+                    // learns the new id from `.connected` instead.
                     lock.locked { self.resumeSessionID = nil }
-                    onSessionExit?(resumeSessionID, -1)
+                    if settleDeferredEnd(sessionID: nil) { return }
                     openSession()
                 }
             }
@@ -501,6 +566,7 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                 return
             }
             let sessionID = xpc_dictionary_get_uint64(reply, iGhostVTWireKey.sessionID)
+            if settleDeferredEnd(sessionID: sessionID) { return }
             lock.locked {
                 self.sessionID = sessionID
                 self.resumeSessionID = sessionID
@@ -519,8 +585,15 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             // reattach to the still-running shell. A cancel this transport
             // performed itself also surfaces here as one last error event;
             // the connection is already forgotten then, and it must not be
-            // reported as an interruption.
+            // reported as an interruption. Nor is a link that dies with an
+            // end deferred on it: the host has already asked for the end,
+            // and an interruption would have it reconnect a tab it closed.
+            let wasEnding = deferredEnd != nil
             guard dropConnection() else { return }
+            if wasEnding {
+                emit(.state(.disconnected(reason: nil)))
+                return
+            }
             emit(.state(.interrupted(
                 reason: String(localized: "The terminal connection was interrupted. Try again.")
             )))
@@ -587,6 +660,8 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         // and every reply arrive there, and each other caller is a block on
         // it.
         appliedViewport = nil
+        deferredEnd = nil
+        retainedForDeferredEnd = nil
         guard let connection else { return false }
         xpc_connection_cancel(connection)
         return true

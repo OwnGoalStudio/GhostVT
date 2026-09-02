@@ -53,8 +53,14 @@ final class TabManager: ObservableObject {
         // previous run and reattaches to it; every other window (and a launch
         // with nothing to resume) starts with one fresh tab. The daemon is
         // the only record — nothing about sessions is persisted app-side.
+        // A session a tab already holds is skipped: a Shortcut or URL that
+        // launched the app opens its tab before the daemon has answered,
+        // and that tab has not attached yet, so the answer still lists the
+        // session as free.
         DaemonSessionDirectory.shared.claimResumable { [weak self] resumable in
             guard let self else { return }
+            let held = Set(tabs.compactMap { $0.daemonSessionID })
+            let resumable = resumable.filter { !held.contains($0) }
             guard !resumable.isEmpty else {
                 if tabs.isEmpty {
                     newTab()
@@ -255,13 +261,16 @@ final class TabManager: ObservableObject {
     /// Scene teardown: the window is gone, but its shells belong to the
     /// daemon — detach so they survive for the next launch. Named apart from
     /// `closeAll()` because the difference is the whole point: this one keeps
-    /// the shells running, that one kills them.
+    /// the shells running, that one kills them. The resume claim goes back
+    /// with them: the process may live on with no window, and the next one
+    /// to open must find these shells, not start fresh beside them.
     func detachAllTabs() {
         for tab in tabs {
             tab.detach()
         }
         tabs.removeAll()
         activeTabID = nil
+        DaemonSessionDirectory.shared.releaseResumableClaim()
         SessionActivityController.shared.refresh()
     }
 

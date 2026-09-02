@@ -367,15 +367,21 @@ final class TerminalTab: ObservableObject, Identifiable {
     /// The kill must reach the daemon even when the transport has no live
     /// link (failed connect, detached, daemon restart) — otherwise the
     /// shell runs forever against the daemon's session ceiling with its
-    /// ledger entry already gone, so nothing could ever kill it.
+    /// ledger entry already gone, so nothing could ever kill it. The
+    /// transport, when there is one, knows better than the box which of
+    /// those it is in: a transport still in its open or attach round trip
+    /// has no id to give yet, but it will — it carries the close out on the
+    /// reply, the only way to reach a session the daemon is creating right
+    /// now — and one whose connection is gone kills over a side connection
+    /// itself. The box is for a tab that never connected at all.
     func close() {
-        if let transport = store.activeTransport as? XPCDaemonTransport,
-           let id = transport.currentSessionID
-        {
+        let transport = store.activeTransport as? XPCDaemonTransport
+        if let transport {
             transport.closeSession()
-            DaemonSessionDirectory.shared.evict(id)
         } else if let id = daemonSession.id {
             XPCDaemonTransport.killSession(id)
+        }
+        if let id = transport?.currentSessionID ?? daemonSession.id {
             DaemonSessionDirectory.shared.evict(id)
         }
         store.disconnect()

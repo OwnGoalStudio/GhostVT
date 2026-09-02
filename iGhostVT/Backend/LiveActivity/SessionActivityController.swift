@@ -61,8 +61,14 @@ final class SessionActivityController {
                 continue
             }
             for tab in window.tabs {
-                let number = (tab.store.activeTransport as? XPCDaemonTransport)?
-                    .currentSessionID
+                // The tab's own record first: a resuming or reconnecting
+                // tab knows its session long before its transport does (the
+                // transport learns it from the attach reply, and a resumed
+                // tab has none until its surface reports a grid), and the
+                // daemon's row for it must not be counted as detached
+                // meanwhile.
+                let number = tab.daemonSessionID
+                    ?? (tab.store.activeTransport as? XPCDaemonTransport)?.currentSessionID
                 if let number {
                     attachedIDs.insert(number)
                 }
