@@ -558,7 +558,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Eine eigene Taste tippt die von dir eingegebenen Zeichen, zusammen mit allen aktivierten Modifikatortasten."
+            "value" : "Eine eigene Taste gibt die eingegebenen Zeichen ein, zusammen mit allen aktivierten Modifikatortasten."
           }
         },
         "en" : {
@@ -570,7 +570,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Una tecla personalizada escribe los caracteres que introduzcas, junto con las teclas modificadoras que estén activadas."
+            "value" : "Una tecla personalizada escribe los caracteres que introduzca, junto con las teclas modificadoras que estén activadas."
           }
         },
         "fr" : {
@@ -783,7 +783,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Un programa con sus argumentos que se ejecutará en lugar del shell. Déjalo vacío para usar el shell por omisión."
+            "value" : "Un programa con sus argumentos que se ejecutará en lugar del shell. Déjelo vacío para usar el shell predeterminado."
           }
         },
         "fr" : {
@@ -2469,7 +2469,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wähle und ordne die Tasten der Leiste über der Tastatur."
+            "value" : "Wählen Sie die Tasten der Leiste über der Tastatur aus und ordnen Sie sie an."
           }
         },
         "en" : {
@@ -2481,7 +2481,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Elige y ordena las teclas de la barra sobre el teclado."
+            "value" : "Elija y ordene las teclas de la barra sobre el teclado."
           }
         },
         "fr" : {
@@ -5740,7 +5740,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Arrastra para reordenar. Al quitar una tecla estándar, vuelve a Más teclas; los separadores y las teclas personalizadas se eliminan."
+            "value" : "Arrastre para reordenar. Al quitar una tecla estándar, vuelve a Más teclas; los separadores y las teclas personalizadas se eliminan."
           }
         },
         "fr" : {
@@ -7220,7 +7220,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT und sein Terminal-Helfer haben unterschiedliche Versionen. Installiere iGhostVT neu, um beide zu aktualisieren."
+            "value" : "iGhostVT und sein Terminal-Helfer haben unterschiedliche Versionen. Installieren Sie iGhostVT neu, um beide zu aktualisieren."
           }
         },
         "en" : {
@@ -7232,7 +7232,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT y su asistente del terminal tienen versiones distintas. Reinstala iGhostVT para actualizar ambos."
+            "value" : "iGhostVT y su asistente del terminal tienen versiones distintas. Reinstale iGhostVT para actualizar ambos."
           }
         },
         "fr" : {
@@ -7256,7 +7256,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT와 터미널 헬퍼의 버전이 다릅니다. iGhostVT를 다시 설치하여 둘 다 업데이트하세요."
+            "value" : "iGhostVT와 터미널 헬퍼의 버전이 다릅니다. iGhostVT를 다시 설치하여 둘 다 업데이트하십시오."
           }
         },
         "pt-BR" : {
@@ -7291,7 +7291,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT konnte kein Fenster öffnen. Versuche es erneut."
+            "value" : "iGhostVT konnte kein Fenster öffnen. Versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -7303,7 +7303,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT no ha podido abrir una ventana. Inténtalo de nuevo."
+            "value" : "iGhostVT no ha podido abrir una ventana. Inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -7361,7 +7361,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT benötigt seinen Hintergrund-Helfer, um ein Terminal zu öffnen. Aktiviere iGhostVT in den Systemeinstellungen unter „Anmeldeobjekte“."
+            "value" : "iGhostVT benötigt seinen Hintergrund-Helfer, um ein Terminal zu öffnen. Aktivieren Sie iGhostVT in den Systemeinstellungen unter „Anmeldeobjekte“."
           }
         },
         "en" : {
@@ -7373,7 +7373,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT necesita su asistente en segundo plano para abrir un terminal. Activa iGhostVT en Ítems de inicio, en Ajustes del Sistema."
+            "value" : "iGhostVT necesita su asistente en segundo plano para abrir un terminal. Active iGhostVT en Ítems de inicio, en Ajustes del Sistema."
           }
         },
         "fr" : {
@@ -7397,7 +7397,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "터미널을 열려면 iGhostVT의 백그라운드 헬퍼가 필요합니다. 시스템 설정의 로그인 항목에서 iGhostVT를 켜세요."
+            "value" : "터미널을 열려면 iGhostVT의 백그라운드 헬퍼가 필요합니다. 시스템 설정의 로그인 항목에서 iGhostVT를 켜십시오."
           }
         },
         "pt-BR" : {
@@ -7431,7 +7431,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT öffnet Terminals über einen Helfer, der im Hintergrund läuft, damit Sitzungen auch bei geschlossener App weiterlaufen. Er wird automatisch eingerichtet. Um ihn zu entfernen, schalte iGhostVT unter Anmeldeobjekte in den Systemeinstellungen aus."
+            "value" : "iGhostVT öffnet Terminals über einen Helfer, der im Hintergrund läuft, damit Sitzungen auch bei geschlossener App weiterlaufen. Er wird automatisch eingerichtet. Um ihn zu entfernen, schalten Sie iGhostVT unter Anmeldeobjekte in den Systemeinstellungen aus."
           }
         },
         "en" : {
@@ -7443,7 +7443,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT abre los terminales mediante un asistente que se ejecuta en segundo plano, para que las sesiones continúen con la app cerrada. Se configura automáticamente. Para eliminarlo, desactiva iGhostVT en Ítems de inicio en Ajustes del Sistema."
+            "value" : "iGhostVT abre los terminales mediante un asistente que se ejecuta en segundo plano, para que las sesiones continúen con la app cerrada. Se configura automáticamente. Para eliminarlo, desactive iGhostVT en Ítems de inicio, en Ajustes del Sistema."
           }
         },
         "fr" : {
@@ -7455,7 +7455,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT apre i terminali tramite un assistente che gira in background, così le sessioni continuano anche con l’app chiusa. Viene configurato automaticamente. Per rimuoverlo, disattiva iGhostVT negli Elementi login in Impostazioni di Sistema."
+            "value" : "iGhostVT apre i terminali tramite un assistente in esecuzione in background, così le sessioni continuano anche con l’app chiusa. Viene configurato automaticamente. Per rimuoverlo, disattiva iGhostVT negli Elementi login in Impostazioni di Sistema."
           }
         },
         "ja" : {
@@ -7467,13 +7467,13 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT는 백그라운드에서 실행되는 헬퍼를 통해 터미널을 열기 때문에 앱을 닫아도 세션이 계속됩니다. 자동으로 설정됩니다. 제거하려면 시스템 설정의 로그인 항목에서 iGhostVT를 끄세요."
+            "value" : "iGhostVT는 백그라운드에서 실행되는 헬퍼를 통해 터미널을 열기 때문에 앱을 닫아도 세션이 계속됩니다. 자동으로 설정됩니다. 제거하려면 시스템 설정의 로그인 항목에서 iGhostVT를 끄십시오."
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O iGhostVT abre terminais por meio de um assistente que roda em segundo plano, para que as sessões continuem com o app fechado. Ele é configurado automaticamente. Para removê-lo, desative o iGhostVT nos Itens de Início nos Ajustes do Sistema."
+            "value" : "O iGhostVT abre terminais por meio de um assistente executado em segundo plano, para que as sessões continuem com o app fechado. Ele é configurado automaticamente. Para removê-lo, desative o iGhostVT nos Itens de Início, nos Ajustes do Sistema."
           }
         },
         "ru" : {
@@ -7501,7 +7501,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT läuft aus deinem Programme-Ordner, damit deine Terminals nach dem Schließen dieses Fensters weiterlaufen. Die App kann sich selbst dorthin bewegen und neu öffnen."
+            "value" : "iGhostVT läuft aus Ihrem Programme-Ordner, damit Ihre Terminals nach dem Schließen dieses Fensters weiterlaufen. Die App kann sich selbst dorthin bewegen und neu öffnen."
           }
         },
         "en" : {
@@ -7513,7 +7513,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT funciona desde tu carpeta Aplicaciones para que tus terminales sigan funcionando después de cerrar esta ventana. Puede trasladarse allí por sí misma y volver a abrirse."
+            "value" : "iGhostVT funciona desde la carpeta Aplicaciones para que los terminales sigan funcionando después de cerrar esta ventana. Puede trasladarse allí por sí misma y volver a abrirse."
           }
         },
         "fr" : {
@@ -7525,7 +7525,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT funziona dalla cartella Applicazioni, così i tuoi terminali continuano a funzionare dopo aver chiuso questa finestra. Può spostarsi lì da sola e riaprirsi."
+            "value" : "iGhostVT funziona dalla cartella Applicazioni, così i terminali continuano a funzionare dopo la chiusura di questa finestra. Può spostarsi lì da solo e riaprirsi."
           }
         },
         "ja" : {
@@ -7537,7 +7537,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT는 응용 프로그램 폴더에서 작동하므로 이 창을 닫아도 터미널이 계속 실행됩니다. 자동으로 그곳으로 이동한 후 다시 열 수 있습니다."
+            "value" : "iGhostVT는 응용 프로그램 폴더에서 작동하므로 이 윈도우를 닫아도 터미널이 계속 실행됩니다. iGhostVT가 직접 그곳으로 이동한 후 다시 열 수 있습니다."
           }
         },
         "pt-BR" : {
@@ -7561,7 +7561,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT 在「應用程式」檔案夾中執行，這樣關閉此視窗後終端機仍會繼續執行。它可以自動移至該處並重新開啟。"
+            "value" : "iGhostVT 在「應用程式」資料夾中執行，關閉此視窗後終端機仍會繼續執行。它可以自動移至該處並重新開啟。"
           }
         }
       }
@@ -8583,7 +8583,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tuer une session de terminal dans ${applicationName}"
+            "value" : "Forcer l’arrêt d’une session de terminal dans ${applicationName}"
           }
         },
         "it" : {
@@ -8790,7 +8790,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Déjalo vacío para ejecutar en un shell nuevo."
+            "value" : "Déjelo vacío para ejecutar en un shell nuevo."
           }
         },
         "fr" : {
@@ -9699,7 +9699,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sperrt oder entsperrt den Tab, der eine Sitzung anzeigt. Ein gesperrter Tab ignoriert deine Eingaben, das Programm läuft weiter."
+            "value" : "Sperrt oder entsperrt den Tab, der eine Sitzung anzeigt. Ein gesperrter Tab ignoriert Ihre Eingaben, das Programm läuft weiter."
           }
         },
         "en" : {
@@ -9711,7 +9711,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bloquea o desbloquea la pestaña que muestra una sesión. Una pestaña bloqueada ignora lo que escribes y el programa sigue ejecutándose."
+            "value" : "Bloquea o desbloquea la pestaña que muestra una sesión. Una pestaña bloqueada ignora la entrada de teclado y el programa sigue ejecutándose."
           }
         },
         "fr" : {
@@ -9723,7 +9723,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Blocca o sblocca la scheda che mostra una sessione. Una scheda bloccata ignora il tuo input e il programma continua a funzionare."
+            "value" : "Blocca o sblocca la scheda che mostra una sessione. Una scheda bloccata ignora l’input e il programma resta in esecuzione."
           }
         },
         "ja" : {
@@ -10016,7 +10016,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT를 응용 프로그램으로 이동하겠습니까?"
+            "value" : "iGhostVT를 응용 프로그램으로 이동하시겠습니까?"
           }
         },
         "pt-BR" : {
@@ -10169,7 +10169,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Можно несколько"
+            "value" : "Допускается несколько значений"
           }
         },
         "zh-Hans" : {
@@ -10517,7 +10517,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Novos terminais abrem no tamanho do terminal; uma aba já aberta mantém o tamanho para o qual foi ampliada. O tamanho da interface redimensiona todos os rótulos e controles."
+            "value" : "Novos terminais são abertos no tamanho do terminal; uma aba já aberta mantém o tamanho para o qual foi ampliada. O tamanho da interface redimensiona todos os rótulos e controles."
           }
         },
         "ru" : {
@@ -10686,7 +10686,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Keine Protokolleinträge. Aktualisiere, um erneut nachzusehen."
+            "value" : "Keine Protokolleinträge. Aktualisieren Sie, um erneut nachzusehen."
           }
         },
         "en" : {
@@ -10698,7 +10698,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No hay entradas de registro. Actualiza para comprobarlo de nuevo."
+            "value" : "No hay entradas de registro. Actualice para comprobarlo de nuevo."
           }
         },
         "fr" : {
@@ -10722,7 +10722,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "로그 항목이 없습니다. 새로 고침하여 다시 확인하세요."
+            "value" : "로그 항목이 없습니다. 새로 고침하여 다시 확인하십시오."
           }
         },
         "pt-BR" : {
@@ -10828,7 +10828,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Es wurde keine verwendbare Shell gefunden. Prüfe die Standard-Shell in den Einstellungen."
+            "value" : "Es wurde keine verwendbare Shell gefunden. Prüfen Sie die Standard-Shell in den Einstellungen."
           }
         },
         "en" : {
@@ -10840,7 +10840,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se encontró ningún shell utilizable. Revisa el shell predeterminado en Ajustes."
+            "value" : "No se encontró ningún shell utilizable. Revise el shell predeterminado en Ajustes."
           }
         },
         "fr" : {
@@ -10864,7 +10864,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "사용할 수 있는 셸을 찾지 못했습니다. 설정에서 기본 셸을 확인하세요."
+            "value" : "사용할 수 있는 셸을 찾지 못했습니다. 설정에서 기본 셸을 확인하십시오."
           }
         },
         "pt-BR" : {
@@ -11664,7 +11664,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "打開「登入項目」"
+            "value" : "開啟「登入項目」"
           }
         }
       }
@@ -11829,7 +11829,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Abre iGhostVT con una pestaña nueva. La pestaña ejecuta el programa que indiques o un shell en el directorio de la pestaña actual."
+            "value" : "Abre iGhostVT con una pestaña nueva. La pestaña ejecuta el programa que se indique o un shell en el directorio de la pestaña actual."
           }
         },
         "fr" : {
@@ -12315,7 +12315,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ein Teil von iGhostVT fehlt, daher kann kein Terminal geöffnet werden. Lade iGhostVT erneut herunter und ersetze diese Kopie."
+            "value" : "Ein Teil von iGhostVT fehlt, daher kann kein Terminal geöffnet werden. Laden Sie iGhostVT erneut herunter und ersetzen Sie diese Kopie."
           }
         },
         "en" : {
@@ -12327,7 +12327,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Falta una parte de iGhostVT, por lo que no puede abrir un terminal. Descarga iGhostVT de nuevo y reemplaza esta copia."
+            "value" : "Falta una parte de iGhostVT, por lo que no puede abrir un terminal. Descargue iGhostVT de nuevo y reemplace esta copia."
           }
         },
         "fr" : {
@@ -12351,7 +12351,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT의 일부가 누락되어 터미널을 열 수 없습니다. iGhostVT를 다시 다운로드하여 이 복사본을 교체해 주세요."
+            "value" : "iGhostVT의 일부가 누락되어 터미널을 열 수 없습니다. iGhostVT를 다시 다운로드하여 이 복사본을 교체하십시오."
           }
         },
         "pt-BR" : {
@@ -13141,7 +13141,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Сбросить до стандартных"
+            "value" : "Сбросить настройки"
           }
         },
         "zh-Hans" : {
@@ -15011,7 +15011,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sitzungen mit einem laufenden Programm laufen nach dem Beenden der App weiter und kehren beim nächsten Start zurück; eine Shell, die an ihrer Eingabeaufforderung wartet, wird geschlossen. Deaktiviere dies, um beim Beenden alle Sitzungen zu schließen."
+            "value" : "Sitzungen mit einem laufenden Programm laufen nach dem Beenden der App weiter und kehren beim nächsten Start zurück; eine Shell, die an ihrer Eingabeaufforderung wartet, wird geschlossen. Deaktivieren Sie diese Option, um beim Beenden alle Sitzungen zu schließen."
           }
         },
         "en" : {
@@ -15023,7 +15023,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Las sesiones con un programa en ejecución siguen activas después de salir de la app y vuelven al abrirla de nuevo; una shell que espera en su prompt se cierra. Desactiva esto para cerrar todas las sesiones al salir."
+            "value" : "Las sesiones con un programa en ejecución siguen activas después de salir de la app y vuelven al abrirla de nuevo; un shell que espera en su prompt se cierra. Desactive esta opción para cerrar todas las sesiones al salir."
           }
         },
         "fr" : {
@@ -15035,7 +15035,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Le sessioni con un programma in esecuzione restano attive dopo la chiusura dell’app e tornano al lancio successivo; una shell ferma al prompt viene chiusa. Disattiva questa opzione per chiudere tutte le sessioni quando esci dall’app."
+            "value" : "Le sessioni con un programma in esecuzione restano attive dopo la chiusura dell’app e tornano al lancio successivo; una shell ferma al prompt viene chiusa. Disattiva questa opzione per chiudere tutte le sessioni alla chiusura dell’app."
           }
         },
         "ja" : {
@@ -15053,7 +15053,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "As sessões com um programa em execução continuam depois que o app é encerrado e voltam na próxima abertura; um shell parado no prompt é fechado. Desative isto para fechar todas as sessões ao sair."
+            "value" : "As sessões com um programa em execução continuam depois que o app é encerrado e voltam na próxima abertura; um shell parado no prompt é fechado. Desative esta opção para fechar todas as sessões ao sair."
           }
         },
         "ru" : {
@@ -16648,7 +16648,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Startet eine Shell im Hintergrund und gibt die Sitzung zurück. Zeige sie später in einem Tab an oder sende Text an sie."
+            "value" : "Startet eine Shell im Hintergrund und gibt die Sitzung zurück. Zeigen Sie sie später in einem Tab an oder senden Sie Text an sie."
           }
         },
         "en" : {
@@ -16660,7 +16660,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Inicia un shell en segundo plano y devuelve la sesión. Muéstrala después en una pestaña o envíale texto."
+            "value" : "Inicia un shell en segundo plano y devuelve la sesión. Muéstrela después en una pestaña o envíele texto."
           }
         },
         "fr" : {
@@ -16993,7 +16993,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "標籤頁選單"
+            "value" : "分頁選單"
           }
         }
       }
@@ -17028,7 +17028,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Pannelli"
+            "value" : "Schede"
           }
         },
         "ja" : {
@@ -17064,7 +17064,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "標籤頁"
+            "value" : "分頁"
           }
         }
       }
@@ -17711,7 +17711,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Hintergrund-Helfer, der deine Terminals ausführt, ist ausgeschaltet. Schalte ihn wieder ein, um ein Terminal zu öffnen."
+            "value" : "Der Hintergrund-Helfer, der Ihre Terminals ausführt, ist ausgeschaltet. Schalten Sie ihn wieder ein, um ein Terminal zu öffnen."
           }
         },
         "en" : {
@@ -17723,7 +17723,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El asistente en segundo plano que ejecuta tus terminales está desactivado. Vuelve a activarlo para abrir un terminal."
+            "value" : "El asistente en segundo plano que ejecuta sus terminales está desactivado. Vuelva a activarlo para abrir un terminal."
           }
         },
         "fr" : {
@@ -17735,7 +17735,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L’assistente in background che esegue i tuoi terminali è disattivato. Riattivalo per aprire un terminale."
+            "value" : "L’assistente in background che esegue i terminali è disattivato. Riattivalo per aprire un terminale."
           }
         },
         "ja" : {
@@ -17782,7 +17782,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Leiste über der Tastatur zeigt diese Tasten in dieser Reihenfolge. Scrolle seitwärts, wenn nicht alle hineinpassen."
+            "value" : "Die Leiste über der Tastatur zeigt diese Tasten in dieser Reihenfolge. Scrollen Sie horizontal, wenn nicht alle hineinpassen."
           }
         },
         "en" : {
@@ -17794,7 +17794,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La barra sobre el teclado muestra estas teclas en este orden. Desplázate lateralmente si no caben todas."
+            "value" : "La barra sobre el teclado muestra estas teclas en este orden. Desplácese lateralmente si no caben todas."
           }
         },
         "fr" : {
@@ -17818,7 +17818,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "키보드 위 막대에 이 키들이 이 순서로 표시됩니다. 전부 들어가지 않으면 옆으로 스크롤하세요."
+            "value" : "키보드 위 막대에 이 키들이 이 순서로 표시됩니다. 전부 들어가지 않으면 옆으로 스크롤하십시오."
           }
         },
         "pt-BR" : {
@@ -17830,7 +17830,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "На панели над клавиатурой эти клавиши показаны в таком порядке. Прокрутите вбок, если они не помещаются."
+            "value" : "На панели над клавиатурой эти клавиши показаны в таком порядке. Прокрутите её по горизонтали, если они не помещаются."
           }
         },
         "zh-Hans" : {
@@ -17871,7 +17871,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La barre reste masquée tant qu'un clavier physique est connecté."
+            "value" : "La barre reste masquée tant qu’un clavier physique est connecté."
           }
         },
         "it" : {
@@ -17889,7 +17889,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "하드웨어 키보드가 연결된 동안 바를 표시하지 않습니다."
+            "value" : "하드웨어 키보드가 연결된 동안에는 막대를 표시하지 않습니다."
           }
         },
         "pt-BR" : {
@@ -17924,7 +17924,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Befehl wurde nicht rechtzeitig abgeschlossen. Erhöhe das Zeitlimit und versuche es erneut."
+            "value" : "Der Befehl wurde nicht rechtzeitig abgeschlossen. Erhöhen Sie das Zeitlimit und versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -17936,7 +17936,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El comando no ha terminado a tiempo. Aumenta el tiempo límite e inténtalo de nuevo."
+            "value" : "El comando no ha terminado a tiempo. Aumente el tiempo límite e inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -18054,7 +18054,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "每個新終端機開啟時使用的 Ghostty 設定，由上方的設定產生。已開啟的標籤頁保留開啟時的設定。"
+            "value" : "每個新終端機開啟時使用的 Ghostty 設定，由上方的設定產生。已開啟的分頁保留開啟時的設定。"
           }
         }
       }
@@ -18064,7 +18064,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Leer lassen, um die Standard-Login-Shell zu verwenden. Verwende einen einfachen Pfad; ein Pfad mit dem Jailbreak-Root funktioniert nach dem nächsten Jailbreak nicht mehr."
+            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Leer lassen, um die Standard-Login-Shell zu verwenden. Verwenden Sie einen einfachen Pfad; ein Pfad mit dem Jailbreak-Root funktioniert nach dem nächsten Jailbreak nicht mehr."
           }
         },
         "en" : {
@@ -18076,7 +18076,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Déjalo vacío para usar el shell de inicio de sesión predeterminado. Usa una ruta simple; una que incluya la raíz del jailbreak deja de funcionar tras el siguiente jailbreak."
+            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Déjelo vacío para usar el shell de inicio de sesión predeterminado. Use una ruta simple; una que incluya la raíz del jailbreak deja de funcionar tras el siguiente jailbreak."
           }
         },
         "fr" : {
@@ -18100,7 +18100,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "새 터미널이 실행하는 프로그램입니다(예: /bin/zsh). 비워 두면 기본 로그인 셸을 사용합니다. 일반 경로를 사용하세요. 탈옥 루트가 포함된 경로는 다음 탈옥 이후 작동하지 않습니다."
+            "value" : "새 터미널이 실행하는 프로그램입니다(예: /bin/zsh). 비워 두면 기본 로그인 셸을 사용합니다. 일반 경로를 사용하십시오. 탈옥 루트가 포함된 경로는 다음 탈옥 이후 작동하지 않습니다."
           }
         },
         "pt-BR" : {
@@ -18135,7 +18135,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Leer lassen, um deine Login-Shell zu verwenden."
+            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Leer lassen, um Ihre Login-Shell zu verwenden."
           }
         },
         "en" : {
@@ -18147,7 +18147,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Déjalo vacío para usar tu shell de inicio de sesión."
+            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Déjelo vacío para usar su shell de inicio de sesión."
           }
         },
         "fr" : {
@@ -18159,7 +18159,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Il programma che ogni nuovo terminale esegue, ad esempio /bin/zsh. Lascia vuoto per usare la tua shell di login."
+            "value" : "Il programma che ogni nuovo terminale esegue, ad esempio /bin/zsh. Lascia vuoto per usare la shell di login."
           }
         },
         "ja" : {
@@ -18206,7 +18206,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die maximale Anzahl an Sitzungen ist erreicht. Schließe eine Sitzung und versuche es erneut."
+            "value" : "Die maximale Anzahl an Sitzungen ist erreicht. Schließen Sie eine Sitzung und versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -18218,7 +18218,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se ha alcanzado el límite de sesiones. Cierra una sesión e inténtalo de nuevo."
+            "value" : "Se ha alcanzado el límite de sesiones. Cierre una sesión e inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -18277,7 +18277,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Programm dieser Sitzung liest seine Eingaben nicht. Warte, bis es aufgeholt hat, und versuche es erneut."
+            "value" : "Das Programm dieser Sitzung liest seine Eingaben nicht. Warten Sie, bis es aufgeholt hat, und versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -18289,7 +18289,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El programa de esta sesión no está leyendo su entrada. Espera a que se ponga al día e inténtalo de nuevo."
+            "value" : "El programa de esta sesión no está leyendo su entrada. Espere a que termine de procesarla e inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -18319,13 +18319,13 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "O programa desta sessão não está lendo sua entrada. Aguarde até que ele se atualize e tente novamente."
+            "value" : "O programa desta sessão não está lendo sua entrada. Aguarde até que ele termine de processá-la e tente novamente."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Программа этого сеанса не читает ввод. Дождитесь, пока она справится, и повторите попытку."
+            "value" : "Программа этого сеанса не читает ввод. Дождитесь, пока она обработает ввод, и повторите попытку."
           }
         },
         "zh-Hans" : {
@@ -18348,7 +18348,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Shell konnte nicht gestartet werden. Prüfe die Standard-Shell in den iGhostVT-Einstellungen."
+            "value" : "Die Shell konnte nicht gestartet werden. Prüfen Sie die Standard-Shell in den iGhostVT-Einstellungen."
           }
         },
         "en" : {
@@ -18360,7 +18360,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se ha podido iniciar el shell. Comprueba el shell por omisión en los ajustes de iGhostVT."
+            "value" : "No se ha podido iniciar el shell. Compruebe el shell predeterminado en los ajustes de iGhostVT."
           }
         },
         "fr" : {
@@ -18561,7 +18561,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Terminalverbindung ist noch nicht bereit. Versuche es erneut."
+            "value" : "Die Terminalverbindung ist noch nicht bereit. Versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -18573,7 +18573,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La conexión con el terminal aún no está lista. Inténtalo de nuevo."
+            "value" : "La conexión con el terminal aún no está lista. Inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -18597,7 +18597,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "터미널 연결이 아직 준비되지 않았습니다. 다시 시도하세요."
+            "value" : "터미널 연결이 아직 준비되지 않았습니다. 다시 시도하십시오."
           }
         },
         "pt-BR" : {
@@ -18631,7 +18631,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Terminalverbindung wurde unterbrochen. Versuche es erneut."
+            "value" : "Die Terminalverbindung wurde unterbrochen. Versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -18643,7 +18643,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Se interrumpió la conexión con el terminal. Inténtalo de nuevo."
+            "value" : "Se interrumpió la conexión con el terminal. Inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -18667,7 +18667,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "터미널 연결이 중단되었습니다. 다시 시도하세요."
+            "value" : "터미널 연결이 중단되었습니다. 다시 시도하십시오."
           }
         },
         "pt-BR" : {
@@ -18844,7 +18844,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Terminal-Hilfsprogramm hat nicht rechtzeitig geantwortet. Versuche es erneut."
+            "value" : "Das Terminal-Hilfsprogramm hat nicht rechtzeitig geantwortet. Versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -18856,7 +18856,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El asistente del terminal no ha respondido a tiempo. Inténtalo de nuevo."
+            "value" : "El asistente del terminal no ha respondido a tiempo. Inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -18868,7 +18868,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L’helper del terminale non ha risposto in tempo. Riprova."
+            "value" : "L’assistente del terminale non ha risposto in tempo. Riprova."
           }
         },
         "ja" : {
@@ -18880,7 +18880,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "터미널 도우미가 제때 응답하지 않았습니다. 다시 시도하십시오."
+            "value" : "터미널 헬퍼가 제때 응답하지 않았습니다. 다시 시도하십시오."
           }
         },
         "pt-BR" : {
@@ -18898,13 +18898,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "终端助手程序未及时响应。请重试。"
+            "value" : "终端助手未及时响应。请重试。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "終端機輔助程式未及時回應。請再試一次。"
+            "value" : "終端機助手未及時回應。請再試一次。"
           }
         }
       }
@@ -18915,7 +18915,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Das Terminal-Hilfsprogramm läuft nicht. Öffne iGhostVT und versuche es erneut."
+            "value" : "Das Terminal-Hilfsprogramm läuft nicht. Öffnen Sie iGhostVT und versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -18927,7 +18927,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El asistente del terminal no se está ejecutando. Abre iGhostVT e inténtalo de nuevo."
+            "value" : "El asistente del terminal no se está ejecutando. Abra iGhostVT e inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -18939,7 +18939,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "L’helper del terminale non è in esecuzione. Apri iGhostVT e riprova."
+            "value" : "L’assistente del terminale non è in esecuzione. Apri iGhostVT e riprova."
           }
         },
         "ja" : {
@@ -18951,7 +18951,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "터미널 도우미가 실행 중이 아닙니다. iGhostVT를 열고 다시 시도하십시오."
+            "value" : "터미널 헬퍼가 실행 중이 아닙니다. iGhostVT를 열고 다시 시도하십시오."
           }
         },
         "pt-BR" : {
@@ -18969,13 +18969,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "终端助手程序未运行。请打开 iGhostVT 后重试。"
+            "value" : "终端助手未运行。请打开 iGhostVT 后重试。"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "終端機輔助程式未執行。請開啟 iGhostVT 後再試一次。"
+            "value" : "終端機助手未執行。請開啟 iGhostVT 後再試一次。"
           }
         }
       }
@@ -18985,7 +18985,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Terminal-Helfer läuft nicht. Starte iGhostVT neu und versuche es erneut."
+            "value" : "Der Terminal-Helfer läuft nicht. Starten Sie iGhostVT neu und versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -18997,7 +18997,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "El asistente del terminal no está en ejecución. Reinicia iGhostVT e inténtalo de nuevo."
+            "value" : "El asistente del terminal no está en ejecución. Reinicie iGhostVT e inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -19021,7 +19021,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "터미널 헬퍼가 실행되고 있지 않습니다. iGhostVT를 다시 실행한 후 시도하세요."
+            "value" : "터미널 헬퍼가 실행되고 있지 않습니다. iGhostVT를 다시 실행한 후 다시 시도하십시오."
           }
         },
         "pt-BR" : {
@@ -19056,7 +19056,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Terminalsitzung wurde nicht rechtzeitig beendet. Versuche es erneut."
+            "value" : "Die Terminalsitzung wurde nicht rechtzeitig beendet. Versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -19068,7 +19068,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La sesión de terminal no ha finalizado a tiempo. Inténtalo de nuevo."
+            "value" : "La sesión de terminal no ha finalizado a tiempo. Inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -19098,7 +19098,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "A sessão de terminal não encerrou a tempo. Tente novamente."
+            "value" : "A sessão de terminal não foi encerrada a tempo. Tente novamente."
           }
         },
         "ru" : {
@@ -19763,7 +19763,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Zu viele Argumente. Verwende höchstens %lld."
+            "value" : "Zu viele Argumente. Verwenden Sie höchstens %lld."
           }
         },
         "en" : {
@@ -19775,7 +19775,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Demasiados argumentos. Usa como máximo %lld."
+            "value" : "Demasiados argumentos. Use como máximo %lld."
           }
         },
         "fr" : {
@@ -19799,7 +19799,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "인수가 너무 많습니다. 최대 %lld개까지 사용하세요."
+            "value" : "인수가 너무 많습니다. 최대 %lld개까지 사용하십시오."
           }
         },
         "pt-BR" : {
@@ -19834,7 +19834,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Es sind zu viele Terminals geöffnet. Schließe eines und versuche es erneut."
+            "value" : "Es sind zu viele Terminals geöffnet. Schließen Sie eines und versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -19846,7 +19846,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hay demasiados terminales abiertos. Cierra uno e inténtalo de nuevo."
+            "value" : "Hay demasiados terminales abiertos. Cierre uno e inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -19870,7 +19870,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "열려 있는 터미널이 너무 많습니다. 하나를 닫고 다시 시도하세요."
+            "value" : "열려 있는 터미널이 너무 많습니다. 하나를 닫고 다시 시도하십시오."
           }
         },
         "pt-BR" : {
@@ -20257,7 +20257,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Diese Aktion konnte nicht abgeschlossen werden. Versuche es erneut."
+            "value" : "Diese Aktion konnte nicht abgeschlossen werden. Versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -20269,7 +20269,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo completar esta acción. Inténtalo de nuevo."
+            "value" : "No se pudo completar esta acción. Inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -20293,7 +20293,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "이 작업을 완료하지 못했습니다. 다시 시도하세요."
+            "value" : "이 작업을 완료하지 못했습니다. 다시 시도하십시오."
           }
         },
         "pt-BR" : {
@@ -20327,7 +20327,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Es konnte keine Verbindung zum Terminal-Helfer hergestellt werden. Starte iGhostVT neu und versuche es erneut."
+            "value" : "Es konnte keine Verbindung zum Terminal-Helfer hergestellt werden. Starten Sie iGhostVT neu und versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -20339,7 +20339,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo conectar con el asistente del terminal. Reinicia iGhostVT e inténtalo de nuevo."
+            "value" : "No se pudo conectar con el asistente del terminal. Reinicie iGhostVT e inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -20363,7 +20363,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "터미널 헬퍼에 연결하지 못했습니다. iGhostVT를 다시 실행한 후 시도하세요."
+            "value" : "터미널 헬퍼에 연결하지 못했습니다. iGhostVT를 다시 실행한 후 다시 시도하십시오."
           }
         },
         "pt-BR" : {
@@ -20398,7 +20398,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT konnte nicht nach „Programme“ bewegt werden. Bewege die App im Finder dorthin und öffne sie dann erneut."
+            "value" : "iGhostVT konnte nicht nach „Programme“ bewegt werden. Bewegen Sie die App im Finder dorthin und öffnen Sie sie dann erneut."
           }
         },
         "en" : {
@@ -20410,7 +20410,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo mover iGhostVT a Aplicaciones. Muévela allí en el Finder y vuelve a abrirla."
+            "value" : "No se pudo mover iGhostVT a Aplicaciones. Muévala allí en el Finder y vuelva a abrirla."
           }
         },
         "fr" : {
@@ -20434,7 +20434,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "iGhostVT를 응용 프로그램으로 이동할 수 없습니다. Finder에서 직접 이동한 후 다시 여세요."
+            "value" : "iGhostVT를 응용 프로그램으로 이동할 수 없습니다. Finder에서 직접 이동한 후 다시 여십시오."
           }
         },
         "pt-BR" : {
@@ -20468,7 +20468,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Protokolldatei konnte nicht gelesen werden. Aktualisiere, um es erneut zu versuchen."
+            "value" : "Die Protokolldatei konnte nicht gelesen werden. Aktualisieren Sie, um es erneut zu versuchen."
           }
         },
         "en" : {
@@ -20480,7 +20480,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo leer el archivo de registro. Actualiza para intentarlo de nuevo."
+            "value" : "No se pudo leer el archivo de registro. Actualice para intentarlo de nuevo."
           }
         },
         "fr" : {
@@ -20504,7 +20504,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "로그 파일을 읽지 못했습니다. 새로 고침하여 다시 시도하세요."
+            "value" : "로그 파일을 읽지 못했습니다. 새로 고침하여 다시 시도하십시오."
           }
         },
         "pt-BR" : {
@@ -20538,7 +20538,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Die Verbindung zum Terminal konnte nicht wiederhergestellt werden. Versuche es erneut oder schließe den Tab."
+            "value" : "Die Verbindung zum Terminal konnte nicht wiederhergestellt werden. Versuchen Sie es erneut oder schließen Sie den Tab."
           }
         },
         "en" : {
@@ -20550,7 +20550,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo volver a conectar con el terminal. Inténtalo de nuevo o cierra la pestaña."
+            "value" : "No se pudo volver a conectar con el terminal. Inténtelo de nuevo o cierre la pestaña."
           }
         },
         "fr" : {
@@ -20574,7 +20574,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "터미널에 다시 연결하지 못했습니다. 다시 시도하거나 탭을 닫으세요."
+            "value" : "터미널에 다시 연결하지 못했습니다. 다시 시도하거나 탭을 닫으십시오."
           }
         },
         "pt-BR" : {
@@ -20609,7 +20609,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Der Terminal-Helfer konnte nicht eingeschaltet werden. Versuche es erneut."
+            "value" : "Der Terminal-Helfer konnte nicht eingeschaltet werden. Versuchen Sie es erneut."
           }
         },
         "en" : {
@@ -20621,7 +20621,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "No se pudo activar el Asistente del terminal. Inténtalo de nuevo."
+            "value" : "No se pudo activar el Asistente del terminal. Inténtelo de nuevo."
           }
         },
         "fr" : {
@@ -20645,7 +20645,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "터미널 헬퍼를 켜지 못했습니다. 다시 시도하세요."
+            "value" : "터미널 헬퍼를 켜지 못했습니다. 다시 시도하십시오."
           }
         },
         "pt-BR" : {
@@ -20964,7 +20964,7 @@
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Bis zu drei Zeichen, genau so gesendet, wie du sie eingibst. Ein einzelner Buchstabe funktioniert auch mit Control."
+            "value" : "Bis zu drei Zeichen, genau so gesendet, wie sie eingegeben werden. Ein einzelner Buchstabe funktioniert auch mit Control."
           }
         },
         "en" : {
@@ -20976,7 +20976,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Hasta tres caracteres, enviados tal como los escribes. Una sola letra también funciona con Control."
+            "value" : "Hasta tres caracteres, enviados tal como se escriben. Una sola letra también funciona con Control."
           }
         },
         "fr" : {
@@ -20988,7 +20988,7 @@
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fino a tre caratteri, inviati esattamente come li digiti. Una sola lettera funziona anche con Control."
+            "value" : "Fino a tre caratteri, inviati esattamente come vengono digitati. Una sola lettera funziona anche con Control."
           }
         },
         "ja" : {
@@ -21012,7 +21012,7 @@
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "До трёх символов, отправляются в точности как введены. Одна буква работает и с Control."
+            "value" : "До трёх символов; они отправляются в том виде, в каком были введены. Одна буква работает и с Control."
           }
         },
         "zh-Hans" : {
@@ -21165,7 +21165,7 @@
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在更新終端助手…"
+            "value" : "正在更新終端機助手…"
           }
         }
       }
@@ -21824,7 +21824,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Si el comando se ejecutó en un shell nuevo, deja ese shell en ejecución en lugar de finalizarlo."
+            "value" : "Si el comando se ejecutó en un shell nuevo, deje ese shell en ejecución en lugar de finalizarlo."
           }
         },
         "fr" : {
