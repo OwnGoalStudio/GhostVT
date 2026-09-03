@@ -41,7 +41,10 @@ which launchd never sized — so a session's buffers cannot jetsam the daemon.
   for exactly this reason.
 - Depends on the **released**
   [libghostty-spm](https://github.com/Lakr233/libghostty-spm) package
-  (`upToNextMajor` from 1.5.2 — below 1.5.2 the UIKit view's resize
+  (`upToNextMajor` from 1.5.20260903 — the first release on the
+  `<major.minor>.<YYYYMMDD>` track, Ghostty c4e16970a on Zig 0.16, with
+  precision scroll, pointer style via `UIPointerInteraction`, and clipboard
+  reads through the shared pasteboard reader; below 1.5.2 the UIKit view's resize
   throttle is armed before any size was sent and a surface keeps the
   session it was built with past teardown, the host-managed backend
   ignores LNM, and the shipped shell-integration scripts put the OSC 133;B
@@ -114,7 +117,9 @@ pinned in `Package.resolved` — its checkout under DerivedData's
 included (that is how the iTerm2 color schemes and bash-preexec notices
 inside libghostty-spm get in). `Licenses/ghostty/` exists because
 libghostty-spm ships Ghostty as a prebuilt XCFramework and a binary carries
-no license file; its version is read from the checkout's `Ghostty.version`.
+no license file; its version is read from the checkout's `Ghostty.ref` (the
+pinned Ghostty commit — the package dropped `Ghostty.version` when it moved
+to commit-only pins in 1.5.20260903).
 A pin without a checkout, a checkout without a license, or GPL-family text
 anywhere in the set fails the build — the .deb once shipped Ghostty's GPLv3
 shell integration by accident, and this is the last check that it stays out.

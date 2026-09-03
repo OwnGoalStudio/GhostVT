@@ -1,5 +1,5 @@
 {
   "name": "Ghostty",
   "url": "https://github.com/ghostty-org/ghostty",
-  "version_file": "libghostty-spm/Ghostty.version"
+  "version_file": "libghostty-spm/Ghostty.ref"
 }
