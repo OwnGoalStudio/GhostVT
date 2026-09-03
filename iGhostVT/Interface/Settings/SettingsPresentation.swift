@@ -163,11 +163,13 @@ extension View {
 
     /// The dimmed pane with the settings card centered on it: a 555-point
     /// square, or the largest square the window holds with its margin — the
-    /// card gets smaller, its contents lay out at their real size. The
-    /// Form's own grouped background is hidden and the card is painted the
-    /// system's grouped background — glass over a busy terminal bled every
-    /// colour on screen into the page, and the terminal's own theme colour
-    /// swallowed the rows on a light theme (Ayu Light is white on white).
+    /// card gets smaller, its contents lay out at their real size. The card
+    /// is the Form's own list: grouped background behind rows that keep
+    /// their own colour. `scrollContentBackground(.hidden)` was tried and
+    /// taken back — it clears the *rows* along with the list, which left
+    /// the page one flat colour and every row invisible on it. The opaque
+    /// grouped background under the Form is what the list's material has
+    /// to sample, so a busy terminal no longer bleeds through the page.
     private struct SettingsPanel: View {
         @ObservedObject var motion: PanelMotion
         let onClose: () -> Void
@@ -183,7 +185,6 @@ extension View {
                         .onTapGesture(perform: onClose)
 
                     SettingsSheet(onDone: onClose)
-                        .formBackgroundHidden()
                         .frame(width: side(in: pane.size), height: side(in: pane.size))
                         .background(Color(.systemGroupedBackground))
                         .clipShape(shape)
@@ -206,17 +207,6 @@ extension View {
         private func side(in pane: CGSize) -> CGFloat {
             let room = min(pane.width, pane.height) - 2 * DS.Padding.xl
             return min(side, max(room, 1))
-        }
-    }
-
-    private extension View {
-        @ViewBuilder
-        func formBackgroundHidden() -> some View {
-            if #available(iOS 16.0, *) {
-                scrollContentBackground(.hidden)
-            } else {
-                self
-            }
         }
     }
 
