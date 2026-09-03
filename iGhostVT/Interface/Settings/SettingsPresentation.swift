@@ -11,7 +11,7 @@ extension View {
     /// system sheet. The Mac gets `SettingsPanelController`: a Catalyst
     /// sheet flashes the window on its way in and out (the presenter's view
     /// re-lays out under the form sheet's dim), so settings there uses the
-    /// alert's presentation instead — a centered card in the terminal's own
+    /// alert's presentation instead — a centered card in the system's grouped
     /// background colour over a dimmed pane, cross-dissolved, closed by
     /// Done, Escape, or a click outside.
     func settingsPresentation(
@@ -162,16 +162,15 @@ extension View {
     }
 
     /// The dimmed pane with the settings card centered on it: a 555-point
-    /// square, scaled down as one piece when the window cannot hold it —
-    /// the layout stays the one it was designed at, only smaller. The
+    /// square, or the largest square the window holds with its margin — the
+    /// card gets smaller, its contents lay out at their real size. The
     /// Form's own grouped background is hidden and the card is painted the
-    /// terminal's own background — glass over a busy terminal bled every
-    /// colour on screen into the page; its cells keep theirs.
+    /// system's grouped background — glass over a busy terminal bled every
+    /// colour on screen into the page, and the terminal's own theme colour
+    /// swallowed the rows on a light theme (Ayu Light is white on white).
     private struct SettingsPanel: View {
         @ObservedObject var motion: PanelMotion
         let onClose: () -> Void
-        @ObservedObject private var theme = AppTheme.shared
-        @Environment(\.colorScheme) private var colorScheme
 
         private let shape = RoundedRectangle(cornerRadius: DS.Radius.l, style: .continuous)
         private let side: CGFloat = 555
@@ -185,11 +184,11 @@ extension View {
 
                     SettingsSheet(onDone: onClose)
                         .formBackgroundHidden()
-                        .frame(width: side, height: side)
-                        .background(theme.background(for: colorScheme))
+                        .frame(width: side(in: pane.size), height: side(in: pane.size))
+                        .background(Color(.systemGroupedBackground))
                         .clipShape(shape)
                         .overlay(shape.strokeBorder(Color.primary.opacity(0.1), lineWidth: 1))
-                        .scaleEffect(fit(in: pane.size) * (motion.isShown ? 1 : 0.95))
+                        .scaleEffect(motion.isShown ? 1 : 0.95)
                         .blur(radius: motion.isShown ? 0 : 12)
                         .opacity(motion.isShown ? 1 : 0)
                 }
@@ -202,11 +201,11 @@ extension View {
             }
         }
 
-        /// 1 while the pane holds the card with its margin; the fraction
-        /// that makes it fit otherwise.
-        private func fit(in pane: CGSize) -> CGFloat {
+        /// The design size while the pane holds it with its margin; the
+        /// largest square that fits otherwise.
+        private func side(in pane: CGSize) -> CGFloat {
             let room = min(pane.width, pane.height) - 2 * DS.Padding.xl
-            return min(1, max(room, 1) / side)
+            return min(side, max(room, 1))
         }
     }
 
