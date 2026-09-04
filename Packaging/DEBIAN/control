@@ -2,7 +2,7 @@ Package: @PACKAGE_ID@
 Name: iGhostVT
 Version: @VERSION@
 Architecture: @ARCHITECTURE@
-Description: Ghostty-powered terminal for jailbroken iOS and visionOS
+Description: Ghostty-powered terminal for iOS and visionOS
  Terminal emulator built on libghostty's terminal core with a host-managed
  I/O backend. Packaged for both roothide and rootless bootstraps, for iOS
  (iphoneos-*) and for Apple Vision Pro (xros-*); the architecture field says

@@ -322,6 +322,15 @@ func runProxyLinkTests() {
     )
     check(replyCode(request(supervisor, from: peer, .hello)) == .success, "hello is forwarded and answered")
 
+    let listedShells = request(supervisor, from: peer, .listShells)
+        .flatMap { xpc_dictionary_get_value($0, iGhostVTWireKey.shells) }
+    let shellPaths = listedShells.map { array in
+        (0 ..< xpc_array_get_count(array)).compactMap {
+            xpc_array_get_string(array, $0).map { String(cString: $0) }
+        }
+    }
+    check(shellPaths?.contains("/bin/sh") == true, "the daemon lists executable common shells")
+
     let opened = request(supervisor, from: peer, .openSession) { message in
         let command = xpc_array_create(nil, 0)
         for argument in ["/bin/sh", "-c", "echo hello-from-io; exec cat"] {

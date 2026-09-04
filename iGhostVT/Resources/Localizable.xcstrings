@@ -2040,6 +2040,77 @@
         }
       }
     },
+    "Automatic" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisch"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatic"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automático"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatique"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatico"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자동"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automático"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Автоматически"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自動"
+          }
+        }
+      }
+    },
     "Bigger" : {
       "comment" : "Menu item: increases the terminal font size",
       "extractionState" : "manual",
@@ -2530,6 +2601,147 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "選擇並排列鍵盤上方快捷列中的按鍵。"
+          }
+        }
+      }
+    },
+    "Choose Automatic to use the default login shell. Custom paths must not include the bootstrap root, which can change when the environment is recreated." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wählen Sie „Automatisch“, um Ihre Standard-Login-Shell zu verwenden. Benutzerdefinierte Pfade dürfen nicht das Bootstrap-Stammverzeichnis enthalten, das sich ändern kann, wenn die Umgebung neu erstellt wird."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose Automatic to use the default login shell. Custom paths must not include the bootstrap root, which can change when the environment is recreated."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige Automático para usar el shell de inicio de sesión predeterminado. Las rutas personalizadas no deben incluir la raíz del entorno de arranque, que puede cambiar al recrear el entorno."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez Automatique pour utiliser le shell de connexion par défaut. Les chemins personnalisés ne doivent pas inclure la racine de l’environnement d’amorçage, qui peut changer lorsque l’environnement est recréé."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli Automatico per usare la shell di login predefinita. I percorsi personalizzati non devono includere la radice dell’ambiente bootstrap, che può cambiare quando l’ambiente viene ricreato."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「自動」を選ぶと、デフォルトのログインシェルを使用します。カスタムパスには、環境の再作成時に変わる可能性があるブートストラップルートを含めないでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자동을 선택하면 기본 로그인 셸을 사용합니다. 사용자 지정 경로에는 환경을 다시 만들 때 변경될 수 있는 부트스트랩 루트를 포함하지 마십시오."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha Automático para usar o shell de login padrão. Caminhos personalizados não devem incluir a raiz do bootstrap, que pode mudar quando o ambiente for recriado."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите «Автоматически», чтобы использовать оболочку входа по умолчанию. Пользовательские пути не должны включать корень загрузочного окружения, который может измениться при пересоздании среды."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择“自动”以使用默认登录命令行解释器。自定义路径不得包含环境根目录，因为重新创建环境时该目录可能发生变化。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇「自動」以使用預設登入命令列直譯器。自訂路徑不得包含環境根目錄，因為重新建立環境時該目錄可能會變更。"
+          }
+        }
+      }
+    },
+    "Choose Automatic to use your login shell. Enter a custom executable path when it is not listed above." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wählen Sie „Automatisch“, um Ihre Login-Shell zu verwenden. Geben Sie einen benutzerdefinierten Pfad zu einer ausführbaren Datei ein, wenn sie oben nicht aufgeführt ist."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose Automatic to use your login shell. Enter a custom executable path when it is not listed above."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elige Automático para usar tu shell de inicio de sesión. Introduce una ruta personalizada a un ejecutable si no aparece arriba."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez Automatique pour utiliser votre shell de connexion. Saisissez le chemin personnalisé d’un exécutable s’il ne figure pas ci-dessus."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scegli Automatico per usare la shell di login. Inserisci il percorso personalizzato di un eseguibile se non è elencato sopra."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「自動」を選ぶと、ログインシェルを使用します。一覧にない場合は、実行可能ファイルのカスタムパスを入力してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "자동을 선택하면 로그인 셸을 사용합니다. 위 목록에 없으면 실행 파일의 사용자 지정 경로를 입력하십시오."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Escolha Automático para usar seu shell de login. Informe um caminho personalizado para um executável se ele não estiver listado acima."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выберите «Автоматически», чтобы использовать оболочку входа. Если нужного исполняемого файла нет в списке выше, укажите путь к нему."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择“自动”以使用登录命令行解释器。若未列于上方，请输入可执行文件的自定义路径。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇「自動」以使用登入命令列直譯器。若未列於上方，請輸入可執行檔的自訂路徑。"
           }
         }
       }
@@ -4873,6 +5085,148 @@
         }
       }
     },
+    "Custom Path" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benutzerdefinierter Pfad"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom Path"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruta personalizada"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chemin personnalisé"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Percorso personalizzato"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カスタムパス"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용자 지정 경로"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caminho personalizado"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пользовательский путь"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义路径"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自訂路徑"
+          }
+        }
+      }
+    },
+    "Custom…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benutzerdefiniert…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Custom…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personalizado…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personnalisé…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personalizzato…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カスタム…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사용자 지정…"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personalizado…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Другой…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自訂…"
+          }
+        }
+      }
+    },
     "Dark Theme" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5075,13 +5429,13 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "默认 Shell"
+            "value" : "默认命令行解释器"
           }
         },
         "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "預設 Shell"
+            "value" : "預設命令列直譯器"
           }
         }
       }
@@ -15360,6 +15714,77 @@
         }
       }
     },
+    "Shell" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "シェル"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "셸"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shell"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Оболочка"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "命令行解释器"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "命令列直譯器"
+          }
+        }
+      }
+    },
     "Shortcuts" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18055,147 +18480,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每個新終端機開啟時使用的 Ghostty 設定，由上方的設定產生。已開啟的分頁保留開啟時的設定。"
-          }
-        }
-      }
-    },
-    "The program every new terminal runs, for example /bin/zsh. Leave this empty to use the default login shell. Use a plain path; one that includes the jailbreak root stops working after the next jailbreak." : {
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Leer lassen, um die Standard-Login-Shell zu verwenden. Verwenden Sie einen einfachen Pfad; ein Pfad mit dem Jailbreak-Root funktioniert nach dem nächsten Jailbreak nicht mehr."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The program every new terminal runs, for example /bin/zsh. Leave this empty to use the default login shell. Use a plain path; one that includes the jailbreak root stops working after the next jailbreak."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Déjelo vacío para usar el shell de inicio de sesión predeterminado. Use una ruta simple; una que incluya la raíz del jailbreak deja de funcionar tras el siguiente jailbreak."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le programme que lance chaque nouveau terminal, par exemple /bin/zsh. Laissez vide pour utiliser le shell de connexion par défaut. Utilisez un chemin simple ; un chemin contenant la racine du jailbreak cessera de fonctionner après le prochain jailbreak."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il programma che ogni nuovo terminale esegue, ad esempio /bin/zsh. Lascia vuoto per usare la shell di login predefinita. Usa un percorso semplice; uno che include la radice del jailbreak smette di funzionare dopo il prossimo jailbreak."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "新しいターミナルが実行するプログラム（例：/bin/zsh）。空欄にすると、デフォルトのログインシェルを使用します。通常のパスを指定してください。ジェイルブレイクのルートを含むパスは、次回のジェイルブレイク後に使えなくなります。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "새 터미널이 실행하는 프로그램입니다(예: /bin/zsh). 비워 두면 기본 로그인 셸을 사용합니다. 일반 경로를 사용하십시오. 탈옥 루트가 포함된 경로는 다음 탈옥 이후 작동하지 않습니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O programa que cada novo terminal executa, por exemplo /bin/zsh. Deixe vazio para usar o shell de login padrão. Use um caminho simples; um que inclua a raiz do jailbreak deixa de funcionar após o próximo jailbreak."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Программа, которую запускает каждый новый терминал, например /bin/zsh. Оставьте поле пустым, чтобы использовать оболочку входа по умолчанию. Указывайте обычный путь: путь с корнем джейлбрейка перестанет работать после следующего джейлбрейка."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每个新终端运行的程序，例如 /bin/zsh。留空则使用默认登录 Shell。请使用常规路径；包含越狱根目录的路径在下次越狱后将失效。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每個新終端機執行的程式，例如 /bin/zsh。留空則使用預設登入 Shell。請使用一般路徑；包含越獄根目錄的路徑在下次越獄後將失效。"
-          }
-        }
-      }
-    },
-    "The program every new terminal runs, for example /bin/zsh. Leave this empty to use your login shell." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Das Programm, das jedes neue Terminal ausführt, zum Beispiel /bin/zsh. Leer lassen, um Ihre Login-Shell zu verwenden."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The program every new terminal runs, for example /bin/zsh. Leave this empty to use your login shell."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "El programa que ejecuta cada terminal nuevo, por ejemplo /bin/zsh. Déjelo vacío para usar su shell de inicio de sesión."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le programme que lance chaque nouveau terminal, par exemple /bin/zsh. Laissez vide pour utiliser votre shell de connexion."
-          }
-        },
-        "it" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Il programma che ogni nuovo terminale esegue, ad esempio /bin/zsh. Lascia vuoto per usare la shell di login."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "新しいターミナルごとに実行するプログラム（例: /bin/zsh）。空のままにするとログインシェルを使用します。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "새 터미널마다 실행하는 프로그램입니다(예: /bin/zsh). 비워 두면 로그인 셸을 사용합니다."
-          }
-        },
-        "pt-BR" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "O programa que cada novo terminal executa, por exemplo /bin/zsh. Deixe vazio para usar seu shell de login."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Программа, которую запускает каждый новый терминал, например /bin/zsh. Оставьте пустым, чтобы использовать вашу оболочку входа."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每个新终端运行的程序，例如 /bin/zsh。留空则使用你的登录 shell。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每個新終端機執行的程式，例如 /bin/zsh。留空則使用你的登入 shell。"
           }
         }
       }

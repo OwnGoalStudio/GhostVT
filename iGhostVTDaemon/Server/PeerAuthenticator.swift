@@ -13,7 +13,7 @@ import XPC
 /// kernel's audit token rather than anything the caller sends. There are two
 /// policies, and they never mix — a peer is judged by exactly one of them:
 ///
-/// - **On the device** the daemon is root under a jailbreak's launchd. A peer
+/// - **On the device** the daemon is root under the bootstrap's launchd. A peer
 ///   must carry the client entitlement, run as root or mobile, and *be* one of
 ///   the installed, root-owned client binaries — the app, or the
 ///   `ighostvt-cli` beside it in the bundle; a copied or rewritten client
@@ -57,7 +57,7 @@ final class PeerAuthenticator {
                 deny(pid, "uid \(uid) is not the agent's own user")
                 return nil
             }
-            guard let clientPath = JailbreakRoot.executablePath(pid: pid) else {
+            guard let clientPath = RuntimeEnvironment.executablePath(pid: pid) else {
                 deny(pid, "executable path unreadable")
                 return nil
             }
@@ -71,7 +71,7 @@ final class PeerAuthenticator {
                 deny(pid, "uid \(uid)")
                 return nil
             }
-            guard let clientPath = JailbreakRoot.executablePath(pid: pid) else {
+            guard let clientPath = RuntimeEnvironment.executablePath(pid: pid) else {
                 deny(pid, "executable path unreadable")
                 return nil
             }
@@ -108,7 +108,7 @@ final class PeerAuthenticator {
     /// through the layout the daemon recovered from its own location.
     private func resolveInstalledClientPaths() -> [String] {
         iGhostVTProtocol.clientPaths.compactMap {
-            JailbreakRoot.canonicalPath(JailbreakRoot.resolve(JailbreakRoot.bootstrapPath($0)))
+            RuntimeEnvironment.canonicalPath(RuntimeEnvironment.resolve(RuntimeEnvironment.bootstrapPath($0)))
         }
     }
 
@@ -241,7 +241,7 @@ final class PeerAuthenticator {
                 // `make mac-run` builds the CLI into the same DerivedData
                 // products directory as this daemon, under no app bundle at
                 // all, so no suffix would ever name it.
-                if let own = JailbreakRoot.currentExecutablePath(),
+                if let own = RuntimeEnvironment.currentExecutablePath(),
                    let slash = own.lastIndex(of: "/"),
                    clientPath == String(own[...slash]) + "ighostvt-cli"
                 {
@@ -268,7 +268,7 @@ final class PeerAuthenticator {
                 }
                 // The signature named this client; it has to be where that
                 // client lives, not merely somewhere in the bundle.
-                guard JailbreakRoot.canonicalPath(clientPath) == siblingPath else {
+                guard RuntimeEnvironment.canonicalPath(clientPath) == siblingPath else {
                     return "\(clientPath) is ad-hoc signed and is not \(siblingPath)"
                 }
                 return nil
@@ -308,10 +308,10 @@ final class PeerAuthenticator {
         /// `<bundle>/Contents/MacOS/ighostvtd`. `nil` for the harness build,
         /// which lives in DerivedData beside nothing.
         private static func ownSiblingPath(named name: String) -> String? {
-            guard let own = JailbreakRoot.currentExecutablePath() else { return nil }
+            guard let own = RuntimeEnvironment.currentExecutablePath() else { return nil }
             let directory = (own as NSString).deletingLastPathComponent
             guard directory.hasSuffix("/Contents/MacOS") else { return nil }
-            return JailbreakRoot.canonicalPath(directory + "/" + name)
+            return RuntimeEnvironment.canonicalPath(directory + "/" + name)
         }
     }
 

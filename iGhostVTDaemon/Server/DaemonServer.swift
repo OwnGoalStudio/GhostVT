@@ -52,7 +52,7 @@ final class DaemonServer {
     /// `Contents/MacOS` in the Mac bundle, the same DerivedData products
     /// directory for the harness.
     private static func ioExecutablePath() -> String {
-        guard let own = JailbreakRoot.currentExecutablePath(),
+        guard let own = RuntimeEnvironment.currentExecutablePath(),
               let slash = own.lastIndex(of: "/")
         else { return IOWire.executableName }
         return String(own[...slash]) + IOWire.executableName

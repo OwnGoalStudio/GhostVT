@@ -14,8 +14,11 @@ struct AdvancedSettingsView: View {
     @ObservedObject private var agent = MacLaunchAgent.shared
 
     /// Read by the daemon when spawning shells. Empty means "let the daemon
-    /// pick", which hands the session to `login`.
+    /// pick", using the session user's configured shell or its fallback.
     @AppStorage("Shell.path") private var shellPath = ""
+    @State private var availableShellPaths: [String]?
+    @State private var isEditingCustomShell = false
+    @FocusState private var shellPathIsFocused: Bool
 
     /// Mirrored by AppDelegate at launch; toggling applies immediately.
     @AppStorage("Debug.verboseTerminalLog") private var verboseTerminalLog = false
@@ -37,37 +40,74 @@ struct AdvancedSettingsView: View {
         }
         .navigationTitle("Advanced")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear(perform: loadAvailableShellPaths)
     }
 
     private var shellSection: some View {
         Section {
-            // A literal example, not copy: the StringProtocol overload keeps
-            // it out of the string catalog.
-            TextField(Self.shellPlaceholder, text: $shellPath)
-                .keyboardType(.asciiCapable)
-                .textInputAutocapitalization(.never)
-                .disableAutocorrection(true)
+            HStack {
+                Label("Shell", systemImage: "terminal")
+                    .layoutPriority(1)
+                Spacer()
+                Menu {
+                    Picker("Default Shell", selection: shellSelection) {
+                        Text("Automatic")
+                            .tag("")
+                    }
+                    Divider()
+                    Picker("Default Shell", selection: shellSelection) {
+                        ForEach(availableShellPaths ?? [], id: \.self) { path in
+                            Text(verbatim: path)
+                                .tag(path)
+                        }
+                    }
+                    Divider()
+                    Button("Custom…") {
+                        isEditingCustomShell = true
+                        DispatchQueue.main.async {
+                            shellPathIsFocused = true
+                        }
+                    }
+                } label: {
+                    HStack(spacing: DS.Padding.xs) {
+                        Text(shellPath.isEmpty ? String(localized: "Automatic") : shellPath)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                        Image(systemName: "chevron.up.chevron.down")
+                            .imageScale(.small)
+                    }
+                }
+                .accessibilityLabel("Default Shell")
+                .accessibilityValue(shellPath.isEmpty ? String(localized: "Automatic") : shellPath)
+            }
+
+            if showsCustomShellPath {
+                TextField("Custom Path", text: $shellPath)
+                    .focused($shellPathIsFocused)
+                    .keyboardType(.asciiCapable)
+                    .textInputAutocapitalization(.never)
+                    .disableAutocorrection(true)
+            }
         } header: {
             Text("Default Shell")
                 .font(DS.Font.caption)
         } footer: {
-            // The jailbreak-root caveat is a device matter; a Mac has no
+            // The bootstrap-root caveat is a device matter; a Mac has no
             // bootstrap to prefix a path with.
             #if targetEnvironment(macCatalyst)
                 Text(
                     """
-                    The program every new terminal runs, for example /bin/zsh. \
-                    Leave this empty to use your login shell.
+                    Choose Automatic to use your login shell. Enter a custom \
+                    executable path when it is not listed above.
                     """
                 )
                 .font(DS.Font.detail)
             #else
                 Text(
                     """
-                    The program every new terminal runs, for example /bin/zsh. \
-                    Leave this empty to use the default login shell. Use a plain \
-                    path; one that includes the jailbreak root stops working after \
-                    the next jailbreak.
+                    Choose Automatic to use the default login shell. Custom paths \
+                    must not include the bootstrap root, which can change when the \
+                    environment is recreated.
                     """
                 )
                 .font(DS.Font.detail)
@@ -75,7 +115,31 @@ struct AdvancedSettingsView: View {
         }
     }
 
-    private static let shellPlaceholder = "/bin/zsh"
+    private var shellSelection: Binding<String> {
+        Binding(
+            get: { shellPath },
+            set: { path in
+                shellPath = path
+                isEditingCustomShell = false
+                shellPathIsFocused = false
+            }
+        )
+    }
+
+    private var showsCustomShellPath: Bool {
+        isEditingCustomShell || availableShellPaths.map {
+            !shellPath.isEmpty && !$0.contains(shellPath)
+        } == true
+    }
+
+    private func loadAvailableShellPaths() {
+        XPCDaemonTransport.listShells { paths in
+            guard let paths else { return }
+            Task { @MainActor in
+                availableShellPaths = paths
+            }
+        }
+    }
 
     /// Read-only: the helper registers itself on every launch, and the one
     /// control that removes it is the system's — Login Items in System

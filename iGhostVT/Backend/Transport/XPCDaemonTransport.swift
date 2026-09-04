@@ -294,8 +294,25 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
         timeout: TimeInterval = 6,
         completion: @escaping @Sendable ([SessionSummary]?) -> Void
     ) {
+        oneShotRequest(.listSessions, timeout: timeout, decode: sessions(in:), completion: completion)
+    }
+
+    /// Shell paths the daemon proved executable inside the active bootstrap.
+    static func listShells(
+        timeout: TimeInterval = 6,
+        completion: @escaping @Sendable ([String]?) -> Void
+    ) {
+        oneShotRequest(.listShells, timeout: timeout, decode: shells(in:), completion: completion)
+    }
+
+    private static func oneShotRequest<Value: Sendable>(
+        _ operation: iGhostVTOperation,
+        timeout: TimeInterval,
+        decode: @escaping @Sendable (xpc_object_t) -> Value?,
+        completion: @escaping @Sendable (Value?) -> Void
+    ) {
         let queue = DispatchQueue(label: "wiki.qaq.ighostvt.client.list", qos: .userInitiated)
-        let finished = FinishOnce(completion)
+        let finished = FinishOnce<Value?>(completion)
         guard let rawConnection = iGhostVTProtocol.serviceName.withCString({
             ighostvtCreateMachServiceConnection($0, queue, 0)
         }) else {
@@ -320,10 +337,10 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
                 return
             }
             xpc_connection_send_message_with_reply(
-                link.connection, makeMessage(.listSessions), queue
+                link.connection, makeMessage(operation), queue
             ) { reply in
                 xpc_connection_cancel(link.connection)
-                finished.finish(Self.sessions(in: reply))
+                finished.finish(decode(reply))
             }
         }
     }
@@ -344,6 +361,26 @@ final class XPCDaemonTransport: TerminalTransport, @unchecked Sendable {
             ))
         }
         return rows
+    }
+
+    private static func shells(in reply: xpc_object_t) -> [String]? {
+        guard replyCode(of: reply) == .success,
+              let array = xpc_dictionary_get_value(reply, iGhostVTWireKey.shells),
+              xpc_get_type(array) == XPC_TYPE_ARRAY,
+              xpc_array_get_count(array) <= iGhostVTProtocol.maximumListedShellCount
+        else { return nil }
+        var paths: [String] = []
+        for index in 0 ..< xpc_array_get_count(array) {
+            let value = xpc_array_get_value(array, index)
+            guard xpc_get_type(value) == XPC_TYPE_STRING,
+                  xpc_string_get_length(value) < MAXPATHLEN,
+                  let pointer = xpc_string_get_string_ptr(value)
+            else { return nil }
+            let path = String(cString: pointer)
+            guard path.hasPrefix("/") else { return nil }
+            paths.append(path)
+        }
+        return paths
     }
 
     /// Kill a session over a connection of its own, for when there is no

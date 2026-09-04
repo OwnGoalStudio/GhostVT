@@ -35,7 +35,7 @@
 		otherwise leaves the terminal dead until the user thinks to retry.
 
 		An idle ighostvtd is a few MB holding no sessions. That is the normal
-		shape for a jailbreak daemon, and it is worth far more than the memory.
+		shape for a bootstrap daemon, and it is worth far more than the memory.
 	-->
 	<key>RunAtLoad</key>
 	<true/>

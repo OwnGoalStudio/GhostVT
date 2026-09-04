@@ -55,6 +55,7 @@ enum iGhostVTProtocol {
 
     static let maximumSessionsPerPeer = 32
     static let maximumCommandArgumentCount = 64
+    static let maximumListedShellCount = 4
 
     /// Live sessions across every peer.
     ///
@@ -133,6 +134,10 @@ enum iGhostVTOperation: UInt64, Sendable {
     /// way. The CLI's `send`; the app never sends it. No new trust: any
     /// admitted peer can already `closeSession` anything it can list.
     case injectInput = 12
+
+    /// The installed common login shells the daemon can execute. The app is
+    /// sandboxed, so only the daemon can answer this against the bootstrap.
+    case listShells = 13
 }
 
 /// Daemon-initiated pushes on an attached connection. These carry no reply.
@@ -171,6 +176,7 @@ enum iGhostVTWireKey {
     static let code = "code"
     static let sessionID = "sid"
     static let sessions = "sessions"
+    static let shells = "shells"
     static let data = "data"
     static let columns = "cols"
     static let rows = "rows"

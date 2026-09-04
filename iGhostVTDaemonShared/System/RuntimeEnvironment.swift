@@ -5,8 +5,8 @@ import Darwin
 ///
 /// Three environments ship this daemon and they disagree about what `/` means:
 ///
-/// - **roothide** reinstalls the jailbreak into a randomly named directory (the
-///   jbroot) on every jailbreak, so nothing may hardcode a bootstrap path —
+/// - **roothide** installs the bootstrap into a randomly named directory (the
+///   jbroot) whenever the environment is recreated, so no path may hardcode it —
 ///   there is no fixed prefix. Its binaries are linked against **libvroot**, a
 ///   compile-time shim that rewrites their path syscalls so they already treat
 ///   the jbroot as `/`. Their own paths are therefore written unprefixed, and
@@ -22,7 +22,7 @@ import Darwin
 /// `ighostvtd` and `ighostvtd-io` are installed side by side, so the same
 /// rule serves both.
 ///
-/// Mixing the vocabularies up is *the* classic jailbreak-path bug, so each
+/// Mixing the vocabularies up is the classic bootstrap-path bug, so each
 /// direction has its own function and every call site names the one it means:
 ///
 /// - `bootstrapPath(_:)` — a file the bootstrap installed, as its programs
@@ -30,7 +30,7 @@ import Darwin
 /// - `systemPath(_:)` — a file on the untouched iOS filesystem, as those same
 ///   programs spell it.
 /// - `resolve(_:)` — either of those, converted to what a syscall wants.
-enum JailbreakRoot {
+enum RuntimeEnvironment {
     /// Where both daemon programs are installed, relative to the
     /// bootstrap's root.
     private static let installDirectory = "/usr/libexec"
@@ -40,11 +40,11 @@ enum JailbreakRoot {
     /// goes back into paths.
     private static let rootlessPrefix = "/var/jb"
 
-    /// The jailbreak layout the daemon is running under.
+    /// The filesystem layout the daemon is running under.
     enum Bootstrap: Equatable {
-        /// No prefix: a rootful jailbreak, or the harness on macOS. Every
+        /// No prefix: a rootful bootstrap, or the harness on macOS. Every
         /// mapping degrades to identity, matching the stub behaviour
-        /// roothide's own API has off-jailbreak.
+        /// roothide's own API has outside its managed environment.
         case none
         /// A fixed-prefix bootstrap whose programs speak real paths.
         case rootless(prefix: String)

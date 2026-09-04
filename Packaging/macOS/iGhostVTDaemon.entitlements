@@ -8,7 +8,7 @@
 
 	The device daemon's entitlements live in
 	Packaging/iGhostVTDaemon.entitlements and are a different set entirely —
-	that binary runs as root under a jailbreak's launchd and needs the
+	that binary runs as root under a bootstrap's launchd and needs the
 	platform's permissions. This one runs as the logged-in user in the gui
 	domain and needs none.
 -->

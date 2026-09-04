@@ -131,6 +131,8 @@ final class PeerSession {
             return Outcome(.success)
         case .listSessions:
             return Outcome(listSessions(into: reply))
+        case .listShells:
+            return Outcome(listShells(into: reply))
         case .openSession:
             return Outcome(openSession(message, reply: reply))
         case .attachSession:
@@ -181,6 +183,16 @@ final class PeerSession {
             xpc_array_append_value(array, entry)
         }
         xpc_dictionary_set_value(reply, iGhostVTWireKey.sessions, array)
+        return .success
+    }
+
+    private func listShells(into reply: xpc_object_t?) -> iGhostVTReplyCode {
+        guard let reply else { return .success }
+        let array = xpc_array_create(nil, 0)
+        for path in ShellLaunch.availableShellPaths {
+            xpc_array_append_value(array, xpc_string_create(path))
+        }
+        xpc_dictionary_set_value(reply, iGhostVTWireKey.shells, array)
         return .success
     }
 

@@ -5,17 +5,17 @@ import Foundation
 /// roothide's own terminal (<https://github.com/roothide/NewTerm>).
 ///
 /// Two rules govern every path here, and mixing them up is the classic
-/// jailbreak-path bug:
+/// bootstrap-path bug:
 ///
 /// - The **executable handed to `execve`** must be what the kernel wants,
 ///   because neither the kernel nor this daemon is linked against libvroot.
-///   Resolve it with `JailbreakRoot.resolve`.
+///   Resolve it with `RuntimeEnvironment.resolve`.
 /// - Every path **inside the environment** must stay in the bootstrap's own
 ///   vocabulary, because the programs that read it — the bootstrap's `login`,
 ///   `zsh`, and the coreutils they exec — read it their way: unprefixed under
 ///   roothide, where vroot resolves `/` against the jbroot on their behalf,
 ///   and `/var/jb`-prefixed under rootless, where that prefix is compiled in.
-///   `JailbreakRoot.bootstrapPath` and `.systemPath` spell both; never
+///   `RuntimeEnvironment.bootstrapPath` and `.systemPath` spell both; never
 ///   hardcode either form.
 enum ShellLaunch {
     struct Plan {
@@ -50,12 +50,23 @@ enum ShellLaunch {
 
     /// Shells to try when the bootstrap's passwd database has nothing usable.
     /// Written relative to the bootstrap's own root; `firstExecutable` adds
-    /// whatever prefix the jailbreak in use needs.
+    /// whatever prefix the active bootstrap needs.
     private static let fallbackShells = [
         "/bin/zsh",
         "/bin/bash",
         "/bin/sh",
     ]
+
+    /// Stable paths offered by Settings. Only executable entries are sent to
+    /// the sandboxed app; custom paths remain available for every other shell.
+    static var availableShellPaths: [String] {
+        [
+            "/usr/bin/fish",
+            "/bin/zsh",
+            "/bin/bash",
+            "/bin/sh",
+        ].filter { locate($0) != nil }
+    }
 
     /// Where the bootstrap keeps its tools, and where iOS keeps its own.
     private static let bootstrapBinaryDirectories = [
@@ -78,16 +89,16 @@ enum ShellLaunch {
     /// spawns the shell itself (see `plan` for why `login` is off the table).
     ///
     /// The bootstrap's tools come first, iOS's own after: without the second
-    /// half a shell reaches everything the jailbreak installed and nothing the
-    /// system ships. How each half is spelled is the jailbreak's business —
+    /// half a shell reaches everything the bootstrap installed and nothing the
+    /// system ships. How each half is spelled is the runtime environment's business —
     /// roothide bridges the untouched filesystem in at `/rootfs`, rootless
-    /// prefixes its own half instead — so both go through `JailbreakRoot`, and
+    /// prefixes its own half instead — so both go through `RuntimeEnvironment`, and
     /// the duplicates the two halves collapse into without a prefix are
     /// dropped.
     private static var fallbackPath: String {
         var directories: [String] = []
-        let candidates = bootstrapBinaryDirectories.map(JailbreakRoot.bootstrapPath)
-            + systemBinaryDirectories.map(JailbreakRoot.systemPath)
+        let candidates = bootstrapBinaryDirectories.map(RuntimeEnvironment.bootstrapPath)
+            + systemBinaryDirectories.map(RuntimeEnvironment.systemPath)
         for directory in candidates where !directories.contains(directory) {
             directories.append(directory)
         }
@@ -211,7 +222,7 @@ enum ShellLaunch {
         // Run the passwd shell, and supply both the environment and the
         // identity that `login` would have established.
         var shell = firstExecutable(fallbackShells)
-        if let passwdShell = user?.shell, JailbreakRoot.isExecutable(passwdShell) {
+        if let passwdShell = user?.shell, RuntimeEnvironment.isExecutable(passwdShell) {
             shell = passwdShell
         }
         guard let shell else { return nil }
@@ -233,7 +244,7 @@ enum ShellLaunch {
             canModifyArguments: true
         )
         return Plan(
-            command: [JailbreakRoot.resolve(shell)] + integrationArguments + ["-il"],
+            command: [RuntimeEnvironment.resolve(shell)] + integrationArguments + ["-il"],
             environment: environment,
             credentials: credentials(for: user),
             workingDirectory: workingDirectory(for: user)
@@ -246,7 +257,7 @@ enum ShellLaunch {
     /// `/var/mobile`, so the first spelling that is a directory wins.
     static func workingDirectory(for user: PasswdEntry?) -> String? {
         guard let user, !user.home.isEmpty else { return nil }
-        return [JailbreakRoot.resolve(user.home), user.home].first(where: isDirectory)
+        return [RuntimeEnvironment.resolve(user.home), user.home].first(where: isDirectory)
     }
 
     private static func isDirectory(_ path: String) -> Bool {
@@ -289,26 +300,26 @@ enum ShellLaunch {
         guard command.count <= iGhostVTProtocol.maximumCommandArgumentCount,
               let executable = command.first,
               executable.hasPrefix("/"),
-              JailbreakRoot.isExecutable(executable)
+              RuntimeEnvironment.isExecutable(executable)
         else { return nil }
         var resolved = command
-        resolved[0] = JailbreakRoot.resolve(executable)
+        resolved[0] = RuntimeEnvironment.resolve(executable)
         return resolved
     }
 
     /// The first of a set of paths inside the bootstrap's root that is there
     /// and executable, in the bootstrap's own spelling.
     private static func firstExecutable(_ candidates: [String]) -> String? {
-        candidates.map(JailbreakRoot.bootstrapPath).first(where: JailbreakRoot.isExecutable)
+        candidates.map(RuntimeEnvironment.bootstrapPath).first(where: RuntimeEnvironment.isExecutable)
     }
 
     /// A shell the user named in the app's settings, in whichever spelling
     /// they used. Under rootless `/var/jb/bin/zsh` and the bare `/bin/zsh` a
-    /// user carries over from another jailbreak name the same file, and there
+    /// user carries over from another environment name the same file, and there
     /// is no reason to reject one of them; under roothide and without a prefix
     /// the two spellings are identical and this is a single check.
     private static func locate(_ shell: String) -> String? {
-        [shell, JailbreakRoot.bootstrapPath(shell)].first(where: JailbreakRoot.isExecutable)
+        [shell, RuntimeEnvironment.bootstrapPath(shell)].first(where: RuntimeEnvironment.isExecutable)
     }
 }
 
@@ -341,7 +352,7 @@ struct PasswdEntry {
 
     private static func first(where matches: (PasswdEntry) -> Bool) -> PasswdEntry? {
         guard let contents = try? String(
-            contentsOfFile: JailbreakRoot.resolve(JailbreakRoot.bootstrapPath("/etc/passwd")),
+            contentsOfFile: RuntimeEnvironment.resolve(RuntimeEnvironment.bootstrapPath("/etc/passwd")),
             encoding: .utf8
         ) else { return nil }
 

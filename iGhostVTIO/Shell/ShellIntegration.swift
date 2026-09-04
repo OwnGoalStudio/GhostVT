@@ -20,13 +20,13 @@ import Foundation
 /// package ships nothing for fish, so the fish branch below is inert unless
 /// a user drops their own `fish/vendor_conf.d` into that directory. Every
 /// path handed to the shell is spelled in the bootstrap's vocabulary
-/// (`JailbreakRoot.bootstrapPath`), because it is the bootstrap's `zsh` that
+/// (`RuntimeEnvironment.bootstrapPath`), because it is the bootstrap's `zsh` that
 /// has to open it; only the existence checks here resolve to what a syscall
 /// wants.
 enum ShellIntegration {
     /// Where `package-deb.sh` installs the scripts, in bootstrap spelling.
     private static var resourcesDirectory: String {
-        JailbreakRoot.bootstrapPath("/usr/share/ighostvt")
+        RuntimeEnvironment.bootstrapPath("/usr/share/ighostvt")
     }
 
     /// Which parts of the integration to turn on.
@@ -98,8 +98,8 @@ enum ShellIntegration {
             // fish autoloads vendor config from XDG_DATA_DIRS.
             let directory = resources + "/shell-integration"
             let existing = environment["XDG_DATA_DIRS"]
-                ?? JailbreakRoot.bootstrapPath("/usr/local/share")
-                + ":" + JailbreakRoot.bootstrapPath("/usr/share")
+                ?? RuntimeEnvironment.bootstrapPath("/usr/local/share")
+                + ":" + RuntimeEnvironment.bootstrapPath("/usr/share")
             environment["XDG_DATA_DIRS"] = directory + ":" + existing
 
         default:
@@ -129,13 +129,13 @@ enum ShellIntegration {
     private static func directoryExists(_ bootstrapPath: String) -> Bool {
         var isDirectory: ObjCBool = false
         let exists = FileManager.default.fileExists(
-            atPath: JailbreakRoot.resolve(bootstrapPath),
+            atPath: RuntimeEnvironment.resolve(bootstrapPath),
             isDirectory: &isDirectory
         )
         return exists && isDirectory.boolValue
     }
 
     private static func fileExists(_ bootstrapPath: String) -> Bool {
-        FileManager.default.fileExists(atPath: JailbreakRoot.resolve(bootstrapPath))
+        FileManager.default.fileExists(atPath: RuntimeEnvironment.resolve(bootstrapPath))
     }
 }

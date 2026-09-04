@@ -77,7 +77,7 @@ FlowDown-style: `iGhostVT/main.swift` (manual `UIApplicationMain`) +
   `Link/` (`IOHost`, and `PeerSession` — the old connection handler, now
   reached over the socket) + `Session/` (registry, PTY) + `Shell/`.
 - `iGhostVTDaemonShared/` is compiled into **both**: `System/`
-  (`JailbreakRoot` bootstrap paths, `PrivateSystem` C shims, `DescriptorIO`,
+  (`RuntimeEnvironment` bootstrap paths, `PrivateSystem` C shims, `DescriptorIO`,
   `DaemonError`), `Logging/`, and `Link/` — `IOWire` (the frame format and
   the XPC ⇄ bytes codec) and `IOChannel` (the framed non-blocking socket with
   the read-pause / write-backpressure hooks flow control needs).
@@ -671,7 +671,7 @@ Gotchas that bit us:
 - Never redeclare C-variadic functions (e.g. `ioctl`) via `@_silgen_name`
   with fixed arity — arm64 puts variadic args on the stack and the call
   silently misbehaves. Use the Darwin overlay.
-- **Never hardcode a bootstrap path.** `JailbreakRoot` detects the layout
+- **Never hardcode a bootstrap path.** `RuntimeEnvironment` detects the layout
   from the daemon's own executable path and exposes the three vocabularies:
   `bootstrapPath()` (a file the bootstrap installed), `systemPath()` (a file
   on the untouched iOS filesystem), `resolve()` (either one, as a syscall
@@ -679,6 +679,10 @@ Gotchas that bit us:
   unprefixed and iOS's are reached via `/rootfs`; rootless programs have
   `/var/jb` compiled in and speak real paths. Prefixing the wrong one is
   *the* bug this type exists to prevent.
+- When the sandboxed app offers bootstrap executables, let the daemon test a
+  small fixed candidate list through `RuntimeEnvironment` and return stable,
+  unprefixed paths. Do not enumerate binary directories or persist a resolved
+  install root; the custom path covers tools outside the common list.
 - **A connected terminal with nothing on it is not necessarily broken —
   the first shell after a userspace reboot takes ~30 s to print a byte.**
   Measured on the iPad (0.5.0, load average 300–500 in the minute after

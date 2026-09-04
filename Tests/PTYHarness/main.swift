@@ -444,29 +444,29 @@ for (command, expected) in [
     }
 }
 
-print("jailbreak path resolution")
+print("bootstrap path resolution")
 // The harness does not run from /usr/libexec/ighostvtd, so no bootstrap is
 // found and every mapping degrades to identity — the same stub behaviour
 // roothide's own API has on a rootful system.
-check(JailbreakRoot.bootstrap == .none, "no bootstrap is detected off-device")
-check(JailbreakRoot.path == nil, "so there is no install prefix")
+check(RuntimeEnvironment.bootstrap == .none, "no bootstrap is detected off-device")
+check(RuntimeEnvironment.path == nil, "so there is no install prefix")
 check(
-    JailbreakRoot.resolve("/bin/sh") == "/bin/sh",
+    RuntimeEnvironment.resolve("/bin/sh") == "/bin/sh",
     "resolution is identity without a bootstrap"
 )
 check(
-    JailbreakRoot.bootstrapPath("/bin/sh") == "/bin/sh",
+    RuntimeEnvironment.bootstrapPath("/bin/sh") == "/bin/sh",
     "and so is the bootstrap's own spelling"
 )
 check(
-    JailbreakRoot.systemPath("/bin/sh") == "/bin/sh",
+    RuntimeEnvironment.systemPath("/bin/sh") == "/bin/sh",
     "and so is the system's"
 )
 
 // Only one layout is ever live on a given device, so exercise each one's three
 // vocabularies directly. Mixing them up is the bug this type exists to prevent.
 let jbroot = "/var/containers/Bundle/Application/.jbroot-0123456789ABCDEF"
-let roothide = JailbreakRoot.Bootstrap.roothide(jbroot: jbroot)
+let roothide = RuntimeEnvironment.Bootstrap.roothide(jbroot: jbroot)
 check(
     roothide.bootstrapPath("/bin/zsh") == "/bin/zsh",
     "roothide leaves the bootstrap's own paths unprefixed — vroot resolves them"
@@ -480,7 +480,7 @@ check(
     "and iOS's own filesystem is reached through the jbroot's /rootfs bridge"
 )
 
-let rootless = JailbreakRoot.Bootstrap.rootless(prefix: "/var/jb")
+let rootless = RuntimeEnvironment.Bootstrap.rootless(prefix: "/var/jb")
 check(
     rootless.bootstrapPath("/bin/zsh") == "/var/jb/bin/zsh",
     "rootless prefixes the bootstrap's own paths — its binaries have /var/jb compiled in"
@@ -493,9 +493,9 @@ check(
     rootless.systemPath("/usr/bin") == "/usr/bin",
     "and iOS's own filesystem is just itself"
 )
-check(JailbreakRoot.isExecutable("/bin/sh"), "an existing shell is seen as executable")
-check(!JailbreakRoot.isExecutable("/bin/nope-not-here"), "a missing shell is not")
-check(!JailbreakRoot.isExecutable("/etc"), "a directory is not executable")
+check(RuntimeEnvironment.isExecutable("/bin/sh"), "an existing shell is seen as executable")
+check(!RuntimeEnvironment.isExecutable("/bin/nope-not-here"), "a missing shell is not")
+check(!RuntimeEnvironment.isExecutable("/etc"), "a directory is not executable")
 
 print("shell launch planning")
 if let plan = ShellLaunch.plan(requestedShell: nil) {
@@ -566,7 +566,7 @@ if let plan = ShellLaunch.plan(requestedShell: "/bin/sh") {
     check(directories.contains("/usr/bin"), "PATH reaches the system's own tools")
     check(
         directories.allSatisfy { !$0.hasPrefix("/var/jb") && !$0.hasPrefix("/rootfs") },
-        "with no bootstrap, PATH assumes no jailbreak layout"
+        "with no bootstrap, PATH assumes no prefixed layout"
     )
     check(
         Set(directories).count == directories.count,
