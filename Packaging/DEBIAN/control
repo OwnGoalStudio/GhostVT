@@ -10,7 +10,7 @@ Description: Ghostty-powered terminal for iOS and visionOS
  .
  Shells are spawned by the bundled ighostvtd daemon and survive app
  relaunches; SSH transport is planned on the same transport interface.
-Icon: https://owngoalstudio.github.io/GhostVT/icon.png
+Icon: https://owngoal-dev.github.io/iGhostVT/icon.png
 Maintainer: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Author: OwnGoal Studio <not-gonna-reply@owngoal.dev>
 Section: Utilities

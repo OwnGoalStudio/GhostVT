@@ -105,7 +105,7 @@ GitHub Pages source: `.github/workflows/pages.yml` publishes that folder, so
 the repo's Pages setting is **GitHub Actions**, not the legacy `/docs`
 branch folder. Keep the site's `index.html` and `icon.png` at `Site/` root —
 `manifest.json` and the AltStore-style clients fetch
-`https://owngoalstudio.github.io/GhostVT/icon.png`.
+`https://owngoal-dev.github.io/iGhostVT/icon.png`.
 
 Settings ▸ About ▸ Licenses (`LicensesView`) is generated, not written: the
 app target's **Collect Licenses** build phase runs

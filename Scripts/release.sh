@@ -14,7 +14,7 @@
 set -euo pipefail
 
 root="$(cd "$(dirname "$0")/.." && pwd)"
-apt_repo="OwnGoalStudio/OwnGoalPackages"
+apt_repo="owngoal-dev/OwnGoalPackages"
 apt_workflow="Build and Deploy APT Repository"
 apt_index="https://apt.owngoal.dev/Packages"
 

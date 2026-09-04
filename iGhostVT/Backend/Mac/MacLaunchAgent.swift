@@ -60,7 +60,7 @@ final class MacLaunchAgent: ObservableObject {
     @Published private(set) var status: Status
 
     /// Where a whole copy of the app comes from, for the broken-install card.
-    static let downloadPageURL = URL(string: "https://github.com/OwnGoalStudio/GhostVT/releases")!
+    static let downloadPageURL = URL(string: "https://github.com/owngoal-dev/iGhostVT/releases")!
 
     /// Whether sessions may be opened. `unsupported` counts: it means this
     /// type has no opinion, not that the daemon is missing.

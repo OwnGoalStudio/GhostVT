@@ -19,7 +19,7 @@
 # on this machine is Touch ID. Unprivileged: download, xattr, quit, bootout.
 set -euo pipefail
 
-repo="${GITHUB_REPOSITORY:-OwnGoalStudio/GhostVT}"
+repo="${GITHUB_REPOSITORY:-owngoal-dev/iGhostVT}"
 dest="/Applications/iGhostVT.app"
 label="wiki.qaq.ighostvtd"
 bundle_id="wiki.qaq.iGhostVT"
