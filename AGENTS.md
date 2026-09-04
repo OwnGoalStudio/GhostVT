@@ -734,4 +734,7 @@ Gotchas that bit us:
   this — Metal can't create a device, and the symptom is a silent black
   terminal: no crash, ghostty logs `error.MetalFailed` / "surface rebuild
   failed", the kernel logs `deny(1) iokit-open-user-client
-  AGXDeviceUserClient`.
+  AGXDeviceUserClient`. A vphone guest uses the same gate with the exact
+  class `AppleParavirtDeviceUserClient`; keep it in that allowlist or the
+  daemon and CLI will work while the app never creates a surface or sends an
+  `openSession` request.

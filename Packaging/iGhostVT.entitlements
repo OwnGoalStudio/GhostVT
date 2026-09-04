@@ -22,9 +22,12 @@
 	  com.apple.security.iokit-user-client-class entitlement`. Without it
 	  Metal cannot create a device (`Failed to create an IOAccelDevice…
 	  IOServiceOpen returned kIOReturn(0xE00002E2)`) and the terminal is a
-	  black square that never reports a viewport. The list is the render path
-	  only: Apple's GPU (AGX), its older IOAccel vocabulary, IOSurface, the
-	  framebuffer, JPEG decode, and the HID clients UIKit opens for input.
+	  black square that never reports a viewport. vphone's paravirtual GPU
+	  reports the same denial for `AppleParavirtDeviceUserClient`, so that
+	  exact class belongs beside the physical-device AGX classes. The list is
+	  the render path only: Apple's GPU, its older IOAccel vocabulary,
+	  IOSurface, the framebuffer, JPEG decode, and the HID clients UIKit opens
+	  for input.
 
 	- `com.apple.private.security.no-sandbox` — on this bootstrap the sandbox
 	  denies the app every write inside its OWN container: `deny(1)
@@ -79,6 +82,7 @@
 		<string>AGXDeviceUserClient</string>
 		<string>AGXSharedUserClient</string>
 		<string>AGXGLContext</string>
+		<string>AppleParavirtDeviceUserClient</string>
 		<string>IOAccelContext</string>
 		<string>IOAccelContext2</string>
 		<string>IOAccelDevice</string>
