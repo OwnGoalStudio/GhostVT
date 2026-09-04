@@ -49,17 +49,14 @@ struct AdvancedSettingsView: View {
                 Label("Shell", systemImage: "terminal")
                     .layoutPriority(1)
                 Spacer()
+                // Buttons, not a Picker: Catalyst draws a Picker inside a
+                // Menu as a submenu titled with the picker's label, so the
+                // two sections came out as two identically named submenus.
                 Menu {
-                    Picker("Default Shell", selection: shellSelection) {
-                        Text("Automatic")
-                            .tag("")
-                    }
+                    shellChoice(String(localized: "Automatic"), path: "")
                     Divider()
-                    Picker("Default Shell", selection: shellSelection) {
-                        ForEach(availableShellPaths ?? [], id: \.self) { path in
-                            Text(verbatim: path)
-                                .tag(path)
-                        }
+                    ForEach(availableShellPaths ?? [], id: \.self) { path in
+                        shellChoice(path, path: path)
                     }
                     Divider()
                     Button("Custom…") {
@@ -115,15 +112,20 @@ struct AdvancedSettingsView: View {
         }
     }
 
-    private var shellSelection: Binding<String> {
-        Binding(
-            get: { shellPath },
-            set: { path in
-                shellPath = path
-                isEditingCustomShell = false
-                shellPathIsFocused = false
+    /// One row of the shell menu, checked when it is the current choice.
+    @ViewBuilder
+    private func shellChoice(_ title: String, path: String) -> some View {
+        Button {
+            shellPath = path
+            isEditingCustomShell = false
+            shellPathIsFocused = false
+        } label: {
+            if shellPath == path {
+                Label(title, systemImage: "checkmark")
+            } else {
+                Text(verbatim: title)
             }
-        )
+        }
     }
 
     private var showsCustomShellPath: Bool {
