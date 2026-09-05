@@ -26,6 +26,14 @@ enum GhosttyAppConfiguration {
             // is alive, and a blinking one reads as waiting where a still
             // one reads as dead. A program that sets DECSCUSR still wins.
             builder.withCursorStyleBlink(true)
+            // The grid rarely divides the pane exactly, and the remainder is
+            // painted as padding. A program that paints its own background
+            // (a TUI on the primary screen, vim) then sits in a box of the
+            // theme's colour with a lip of a different one along two edges.
+            // `extend` paints that lip with the nearest cell's background;
+            // ghostty's own heuristic keeps it off a row with any
+            // default-background cell, a prompt row, or a powerline row.
+            builder.withCustom("window-padding-color", "extend")
             #if targetEnvironment(macCatalyst)
                 builder.withCustom("font-codepoint-map", "U+4E00-U+9FFF=PingFang SC")
                 builder.withCustom("font-codepoint-map", "U+3400-U+4DBF=PingFang SC")
