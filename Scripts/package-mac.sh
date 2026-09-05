@@ -25,6 +25,8 @@
 # Hardened Runtime (--options runtime) is applied to both instead.
 set -euo pipefail
 
+repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+
 app_bundle="${1:?usage: $0 <app-bundle> <daemon> <daemon-io> <cli> <agent-plist> <app-ents> <daemon-ents> <output-zip> <version> <identity> [notary-profile]}"
 daemon_binary="${2:?missing daemon binary}"
 daemon_io_binary="${3:?missing daemon io binary}"
@@ -95,6 +97,22 @@ install -m 0755 "$cli_binary" "$staged_app/Contents/MacOS/ighostvt-cli"
 install -d -m 0755 "$staged_app/Contents/Library/LaunchAgents"
 install -m 0644 "$agent_plist" "$staged_app/Contents/Library/LaunchAgents/$agent_plist_name"
 plutil -lint "$staged_app/Contents/Library/LaunchAgents/$agent_plist_name" >/dev/null
+
+# Xcode and static libraries leave source and object-file breadcrumbs outside
+# the sections that its normal release build strips. Remove those sections
+# from every staged Mach-O before the inside-out signing pass.
+while IFS= read -r -d '' candidate; do
+    if file "$candidate" | grep -F 'Mach-O' >/dev/null; then
+        /usr/bin/strip -xS "$candidate"
+        for private_path in "$repository_root" "${GITHUB_WORKSPACE:-}" \
+            "${RUNNER_TEMP:-}" /Users/runner/work /home/runner/work; do
+            [[ -z "$private_path" || "$private_path" == / ]] && continue
+            if LC_ALL=C grep -aF "$private_path" "$candidate" >/dev/null; then
+                die "${candidate#"$staged_app"/} embeds a private build path"
+            fi
+        done
+    fi
+done < <(find "$staged_app/Contents" -type f -print0)
 
 info_plist="$staged_app/Contents/Info.plist"
 /usr/libexec/PlistBuddy -c "Set :LSMinimumSystemVersion $minimum_system_version" "$info_plist" 2>/dev/null \

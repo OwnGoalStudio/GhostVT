@@ -2,6 +2,8 @@
 
 set -Eeuo pipefail
 
+repository_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
+
 if [[ "$#" -ne 16 ]]; then
     echo "usage: $0 <app> <daemon> <daemon-io> <cli> <control> <app-entitlements> <daemon-entitlements> <cli-entitlements> <appex-entitlements> <launch-plist> <output-deb> <package-id> <version> <architecture> <install-prefix> <depends>" >&2
     exit 64
@@ -136,6 +138,24 @@ rm -f "$installed_app/embedded.mobileprovision"
 chmod 0755 "$installed_daemon" "$installed_daemon_io" "$installed_cli"
 chmod 0644 "$installed_plist"
 
+strip_and_check_private_paths() {
+    local binary="$1"
+    local private_path
+    /usr/bin/strip -xS "$binary"
+    for private_path in "$repository_root" "${GITHUB_WORKSPACE:-}" "${RUNNER_TEMP:-}"; do
+        [[ -z "$private_path" || "$private_path" == / ]] && continue
+        if LC_ALL=C grep -aF "$private_path" "$binary" >/dev/null; then
+            echo "error: $(basename "$binary") embeds a private build path" >&2
+            exit 65
+        fi
+    done
+}
+
+strip_and_check_private_paths "$installed_app/$app_executable"
+strip_and_check_private_paths "$installed_daemon"
+strip_and_check_private_paths "$installed_daemon_io"
+strip_and_check_private_paths "$installed_cli"
+
 # The bash and zsh shell integration, which is what makes a session report
 # its title, its working directory, and its command boundaries. libghostty-spm
 # ships it inside the app's resource bundle — its own MIT rewrite, not
@@ -186,6 +206,7 @@ for appex in ${appexes[@]+"${appexes[@]}"}; do
         exit 65
     }
     rm -rf "$appex/_CodeSignature"
+    strip_and_check_private_paths "$appex/$appex_executable"
     ldid -S"$appex_entitlements" -Cadhoc "$appex/$appex_executable"
 done
 
