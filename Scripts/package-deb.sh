@@ -50,8 +50,21 @@ done
 [[ "$version" =~ ^[0-9A-Za-z.+:~_-]+$ ]] || { echo "error: invalid version" >&2; exit 64; }
 [[ "$architecture" =~ ^[A-Za-z0-9][A-Za-z0-9-]+$ ]] || { echo "error: invalid architecture" >&2; exit 64; }
 [[ "$install_prefix" =~ ^(/[A-Za-z0-9][A-Za-z0-9._-]*)*$ ]] || { echo "error: invalid install prefix" >&2; exit 64; }
+case "$architecture:$install_prefix" in
+iphoneos-arm64:/var/jb | iphoneos-arm64e: | xros-arm64:/var/jb | xros-arm64e:) ;;
+*) echo "error: architecture and install prefix name different bootstrap layouts" >&2; exit 64 ;;
+esac
+
 depends_pattern='^[A-Za-z0-9][-A-Za-z0-9+.,()~<>= _]*$'
 [[ "$depends" =~ $depends_pattern ]] || { echo "error: invalid Depends: $depends" >&2; exit 64; }
+
+for native_binary in "$daemon_binary" "$daemon_io_binary" "$cli_binary"; do
+    native_dependencies="$(otool -L "$native_binary")"
+    if grep -q 'libvroot' <<<"$native_dependencies"; then
+        echo "error: native daemon/client already resolves physical paths; unexpected vroot dependency" >&2
+        exit 65
+    fi
+done
 
 app_executable="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$app_bundle/Info.plist")"
 bundle_identifier="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$app_bundle/Info.plist")"
@@ -253,12 +266,14 @@ done
     exit 65
 }
 
-for entitlement in platform-application com.apple.private.security.no-sandbox; do
+for entitlement in platform-application com.apple.private.security.no-sandbox \
+    com.apple.private.security.storage.AppBundles com.apple.private.security.storage.AppDataContainers; do
     require_true "$daemon_signed_entitlements" "$entitlement"
 done
 require_false "$daemon_signed_entitlements" com.apple.private.security.container-required
 ldid -e "$installed_daemon_io" >"$daemon_signed_entitlements"
-for entitlement in platform-application com.apple.private.security.no-sandbox; do
+for entitlement in platform-application com.apple.private.security.no-sandbox \
+    com.apple.private.security.storage.AppBundles com.apple.private.security.storage.AppDataContainers; do
     require_true "$daemon_signed_entitlements" "$entitlement"
 done
 require_false "$daemon_signed_entitlements" com.apple.private.security.container-required
